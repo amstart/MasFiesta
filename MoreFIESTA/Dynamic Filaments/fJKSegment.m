@@ -115,11 +115,12 @@ for n = 1:length(Objects)
         Tracks(trackN).end_first_subsegment = 0;
         Tracks(trackN).start_last_subsegment = 0;
         istype(m)=floor(segtagauto(m,3))==tagnum;
+        [~, Tracks(trackN).minindex] = min(segvel);
         if Options.eSubStart.val && istype(m)
-            Tracks(trackN).end_first_subsegment = FindSubsegments(segvel, 1, Options.eSubStart.val);
+            Tracks(trackN).end_first_subsegment = FindSubsegments(segvel, 1, Options.eSubStart.val, Tracks(trackN).minindex);
         end
         if Options.eSubEnd.val && istype(m)
-            Tracks(trackN).start_last_subsegment = FindSubsegments(segvel, -1, Options.eSubEnd.val);
+            Tracks(trackN).start_last_subsegment = FindSubsegments(segvel, -1, Options.eSubEnd.val, Tracks(trackN).minindex);
         end
         Tracks(trackN).DistanceEventEnd=d(endi);
         Tracks(trackN).Data=[t(starti:endi) d(starti:endi) segvel intensity(starti:endi) autotags(starti:endi)];
@@ -211,15 +212,14 @@ else
     vel=nan(size(track,1),1);
 end
 
-function [borderindex] = FindSubsegments(velocity, step, bordervalue)
-[~, endi] = min(velocity);
+function [borderindex] = FindSubsegments(velocity, step, bordervalue, minindex)
 if step > 0
     starti = 1;
 else
     starti = length(velocity)-1;
 end
-for i = starti:step:endi
-    if velocity(i)/velocity(endi) > bordervalue && velocity(i) < 0
+for i = starti:step:minindex
+    if velocity(i)/velocity(minindex) > bordervalue/100 && velocity(i) < 0
         if step > 0 %Due to how velocity is calculated, see Calcvelocity()
             borderindex = i;
         else
@@ -230,10 +230,10 @@ for i = starti:step:endi
 end
 if isempty(i) || i == starti
     borderindex = 0;
-elseif i == endi
+elseif i == minindex
     if step > 0 %Due to how velocity is calculated, see Calcvelocity()
-        borderindex = endi;
+        borderindex = minindex;
     else
-        borderindex = endi-step;
+        borderindex = minindex-step;
     end
 end

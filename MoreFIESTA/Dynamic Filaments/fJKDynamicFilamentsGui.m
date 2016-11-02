@@ -187,14 +187,14 @@ hDynamicFilamentsGui.eDisregard = uicontrol('Parent',hDynamicFilamentsGui.pOptio
 hDynamicFilamentsGui.tSubsegments = uicontrol('Parent',hDynamicFilamentsGui.pOptions,'Units','normalized','BackgroundColor',c,...
                              'Position',[0.05 0.625 0.225 0.125],'String','Subsegmenting:','Style','text','Tag','tIntensity','HorizontalAlignment','left');
                          
-tooltipstr = 'Border of the first subsegment. The first point with a velocity higher than x% of the maximum velocity is part of the middle segment.\n Set to 0 to save computation time.';
+tooltipstr = sprintf('Border of the first subsegment. The first point with a velocity higher than x%% of the maximum velocity is part of the middle segment.\n Set to 0 to save computation time.');
 hDynamicFilamentsGui.eSubStart = uicontrol('Parent',hDynamicFilamentsGui.pOptions,'TooltipString', tooltipstr, 'Units','normalized','Callback',@UpdateOptions,...
                                 'Position',[.3 .7 .1 .05],'String','0','Style','edit',...
                                 'UserData', '1','Fontsize',10,'BackgroundColor','white','Tag','eSubStart','Value',0,'Enable','on');            
 % tooltipstr = '.';
 % hDynamicFilamentsGui.eSubMiddle = uicontrol('Parent',hDynamicFilamentsGui.pOptions,'TooltipString', tooltipstr, 'Units','normalized','Callback',@UpdateOptions,...
 %                                 'Position',[.4 .7 .1 .05],'String','10','Style','edit','Fontsize',10,'BackgroundColor','white','Tag','eIevalLength','Value',0,'Enable','on');            
-tooltipstr = 'Border of the last subsegment. The first point (backwards) with a velocity higher than x% of the maximum velocity is part of the middle segment.\n Set to 0 to save computation time.';
+tooltipstr = sprintf('Border of the last subsegment. The first point (backwards) with a velocity higher than x%% of the maximum velocity is part of the middle segment.\n Set to 0 to save computation time.');
 hDynamicFilamentsGui.eSubEnd = uicontrol('Parent',hDynamicFilamentsGui.pOptions,'TooltipString', tooltipstr, 'Units','normalized','Callback',@UpdateOptions,...
                                 'Position',[.5 .7 .1 .05],'String','0','Style','edit','Fontsize',10,...
                                 'UserData', '1','BackgroundColor','white','Tag','eSubEnd','Value',0,'Enable','on');            
@@ -277,7 +277,7 @@ hDynamicFilamentsGui.tSubsegment = uicontrol('Parent',hDynamicFilamentsGui.pOpti
                              'Position',[0.05 0.275 0.225 0.125],'String','Select segment(s):','Style','text','Tag','tChoosePlot','HorizontalAlignment','left');    
                          
 hDynamicFilamentsGui.lSubsegment = uicontrol('Parent',hDynamicFilamentsGui.pOptions,'Units','normalized',...
-                            'Position',[0.3 0.29 0.3 0.125],'BackgroundColor','white','String',{'All','Beginning','Middle','End', 'Beginning and Middle', 'Middle and End'}, ...
+                            'Position',[0.3 0.29 0.3 0.125],'BackgroundColor','white','String',{'All','Beginning','Middle','End', 'Beginning and Middle', 'Middle and End', 'Middle to End'}, ...
                             'Style','popupmenu','Enable','on', 'Value', 1, 'Tag', 'lSubsegment');   
 
          
@@ -285,7 +285,7 @@ hDynamicFilamentsGui.tPlotRef = uicontrol('Parent',hDynamicFilamentsGui.pOptions
                              'Position',[0.05 0.225 0.225 0.125],'String','x axis reference:','Style','text','Tag','tChoosePlot','HorizontalAlignment','left');    
                          
 hDynamicFilamentsGui.mXReference = uicontrol('Parent',hDynamicFilamentsGui.pOptions,'Units','normalized',...
-                            'Position',[0.3 0.24 0.3 0.125],'BackgroundColor','white','String',{'No reference','To start','To end','To median', 'To track velocity (velocity only)'}, ...
+                            'Position',[0.3 0.24 0.3 0.125],'BackgroundColor','white','String',{'No reference','To start (with events only)','To end (with events only)','To median', 'To track velocity (velocity only)','To start (all tracks)','To end (all tracks)'}, ...
                             'Style','popupmenu','Tag','mXReference','Enable','on', 'Value', 1);                     
 
 tooltipstr=sprintf('Plots data from untagged (growing) tracks.');
@@ -300,7 +300,7 @@ hDynamicFilamentsGui.tGroup = uicontrol('Parent',hDynamicFilamentsGui.pOptions,'
 tooltipstr=sprintf(['Type&Day&Experiment is only necessary if there are experiments with the same movie number on different days.\n Month/Year only considered for Type&Day.']);
 
 hDynamicFilamentsGui.lGroup = uicontrol('Parent',hDynamicFilamentsGui.pOptions,'Units','normalized','Style','popupmenu','Tag','lGroup','TooltipString', tooltipstr,...
-                             'Position',[0.3 0.19 0.3 0.125],'BackgroundColor','white','String',{'Type','Type&Day','Type&Day&Experiment','Type&Experiment'}, 'Value',2);
+                             'Position',[0.3 0.19 0.3 0.125],'BackgroundColor','white','String',{'Type','Type&Day','Type&Day&Experiment', 'Pool everything'}, 'Value',2);
                         
 tooltipstr=sprintf(['Distinguishes between tracks (marked with *) with and without event in the end.']);
                                                     
@@ -513,8 +513,8 @@ if strcmp(get(gcf, 'CurrentCharacter'),'s')
 %     export_fig([QuicksaveDir filesep strrep(get(gcf, 'Name'), ' | ', '_')], '-png', '-nocrop');
     filename = strrep(get(gcf, 'Name'), ' | ', '_');
     optionsstart = strfind(filename, '- ');
-    filename = inputdlg('Filename?', filename(1:optionsstart));
-    saveas(gcf,[QuicksaveDir filesep filename '.png'], 'png');
+    filename = inputdlg('Filename?', 'Filename?', 1, filename(1:optionsstart));
+    saveas(gcf,[QuicksaveDir filesep filename{1} '.png'], 'png');
 %     savefig(gcf,[QuicksaveDir filesep strrep(get(gcf, 'Name'), ' | ', '_') '.fig']);
 end
 
@@ -561,7 +561,7 @@ end
 setappdata(hDynamicFilamentsGui.fig,'Objects',Objects);
 setappdata(0,'hDynamicFilamentsGui',hDynamicFilamentsGui);
 try
-Segment(hDynamicFilamentsGui);
+SetTable();
 catch
 end
 
@@ -994,7 +994,7 @@ elseif gcbo == hDynamicFilamentsGui.bTXT
         end
     end
 elseif gcbo == hDynamicFilamentsGui.bLOCATION
-    OpenFile = [Object.LoadedFromPath 'maximum' '.jpg'];
+    OpenFile = [Object.LoadedFromPath 'maximum' '.tif'];
 end
 if isunix
     system(['open ' OpenFile]);
@@ -1174,6 +1174,15 @@ switch Options.lSubsegment.val
                 DelObjects(i) = 1;
             end
         end
+    case 7
+        for i=1:length(Tracks)
+            if Tracks(i).minindex > 1 && Tracks(i).minindex < length(Tracks(i).X)
+                Tracks(i).X = Tracks(i).X(Tracks(i).minindex:end);
+                Tracks(i).Y = Tracks(i).Y(Tracks(i).minindex:end);
+            else
+                DelObjects(i) = 1;
+            end
+        end
 end
 
 function IntensityVsDistWeightedVel(hDynamicFilamentsGui)
@@ -1271,6 +1280,9 @@ for i=1:length(type)
             else
                 prepend=[splitstr{2} ' \_ ' splitstr{1} ' \_ '];
             end
+        case 4
+            prepend = '';
+            type{i} = 'everything';
     end
     type{i}=[prepend type{i}];
     if (distance_event_end(i)>cutoff||floor(event(i))~=4)&&abs(mod(event(i),1)-0.85)<0.1
@@ -1324,7 +1336,11 @@ if ~isempty(Objects)
                     day = ['0' day(1)];
                 end
                 month = strfind(months, datestr(3:5));
-                orderstr{i} = [datestr(6:7) int2str(month{1}) day];
+                monthstr = int2str(month{1});
+                if length(monthstr) == 1
+                    monthstr = ['0' monthstr];
+                end
+                orderstr{i} = [datestr(6:7) monthstr day];
             end
             [~, order] = sort(orderstr);
         case 2

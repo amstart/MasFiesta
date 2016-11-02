@@ -96,7 +96,7 @@ if isfrequencyplot
                 ploteventends(k)=PlotObjects(k).X(end);
             end
         end
-        case 2
+        case {2, 6}
         for k=1:pr
             cellx{k}=PlotObjects(k).X-PlotObjects(k).X(1);
             diffy=diff(PlotObjects(k).Y);
@@ -105,7 +105,7 @@ if isfrequencyplot
                 ploteventends(k)=PlotObjects(k).X(end)-PlotObjects(k).X(1);
             end
         end
-        case 3
+        case {3, 7}
         for k=1:pr
             cellx{k}=PlotObjects(k).X-PlotObjects(k).X(end);
             diffy=diff(PlotObjects(k).Y);
@@ -117,7 +117,7 @@ if isfrequencyplot
         case 4
         for k=1:pr
             cellx{k}=PlotObjects(k).X-median(PlotObjects(k).X);
-            diffy=diff(PlotObjects(k).X);
+            diffy=diff(PlotObjects(k).Y);
             celly{k}=[diffy(1)/2; (diffy(1:end-1)+diffy(2:end))/2; diffy(end)/2];
             if plotevents(k)
                 ploteventends(k)=PlotObjects(k).X(1)-median(PlotObjects(k).X);
@@ -131,12 +131,12 @@ else
             cellx{k}=PlotObjects(k).X(1+exclude:end-exclude);
             celly{k}=PlotObjects(k).Y(1+exclude:end-exclude);
         end
-        case 2
+        case {2, 6}
         for k=1:pr
             cellx{k}=PlotObjects(k).X(1+exclude:end-exclude)-PlotObjects(k).X(1);
             celly{k}=PlotObjects(k).Y(1+exclude:end-exclude);
         end
-        case 3
+        case {3, 7}
         for k=1:pr
             cellx{k}=PlotObjects(k).X(1+exclude:end-exclude)-PlotObjects(k).X(end);
             celly{k}=PlotObjects(k).Y(1+exclude:end-exclude);
@@ -157,15 +157,19 @@ switch refmode
     case 1
         labelsuffixx='';
     case 2
-        labelsuffixx='- start';
+        labelsuffixx='- start (with events only)';
         DelObjects = DelObjects | ~previous_event;
     case 3
-        labelsuffixx='- end';
+        labelsuffixx='- end (with events only)';
         DelObjects = DelObjects | ~events';
     case 4
         labelsuffixx='- median';
     case 5
         labelsuffixx='- track velocity';
+    case 6
+        labelsuffixx='- start';
+    case 7
+        labelsuffixx='- end';
 end
 if isfrequencyplot
     labelprefixy='N(events)/';

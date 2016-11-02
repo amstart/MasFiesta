@@ -24,8 +24,8 @@ function Create
 global Molecule;
 global Filament;
 
-h=findobj('Tag','hAmplitudeStatsGui');
-close(h)
+% h=findobj('Tag','hAmplitudeStatsGui');
+% close(h)
 
 MolSelect = [Molecule.Selected];
 FilSelect = [Filament.Selected];
@@ -75,7 +75,7 @@ hAmplitudeStatsGui.tMethod = uicontrol('Parent',hAmplitudeStatsGui.pOptions,'Uni
                              'Position',[0.05 0.8 0.225 0.125],'String','Method:','Style','text','Tag','tMethod','HorizontalAlignment','left');                        
                          
 hAmplitudeStatsGui.mMethod = uicontrol('Parent',hAmplitudeStatsGui.pOptions,'Units','normalized','Callback','fJKAmplitudeStatsGui(''Update'');',...
-                             'Position',[0.3 0.8 0.65 0.125],'BackgroundColor','white','String',{'From Molecule/Filament'},'Style','popupmenu','Tag','mMethod');
+                             'Position',[0.3 0.8 0.65 0.125],'BackgroundColor','white','String',{'Bin Object Medians', 'Bin Frames'},'Style','popupmenu','Tag','mMethod');
 
 hAmplitudeStatsGui.tData = uicontrol('Parent',hAmplitudeStatsGui.pOptions,'Units','normalized','BackgroundColor',c,...
                              'Position',[0.05 0.65 0.225 0.125],'String','Data:','Style','text','Tag','tData','HorizontalAlignment','left');     
@@ -295,54 +295,44 @@ if isempty(Data.amplength{nObject})
     set(hAmplitudeStatsGui.aPlot,'Visible','off');
     legend(hAmplitudeStatsGui.aPlot,'off');
 else
-    switch get(hAmplitudeStatsGui.mMethod,'Value')
-        case 1
-            plot(hAmplitudeStatsGui.aPlot,Data.time{nObject},Data.amplength{nObject},'b-');
-            legend(hAmplitudeStatsGui.aPlot,['Amplitude/Height: ' num2str(mean(Data.amplength{nObject}),Units.fmt) ' ' char(177) ' ' num2str(std(Data.amplength{nObject}),Units.fmt) ' ' Units.str ' (SD)'],'Location','best');
-            xlabel(hAmplitudeStatsGui.aPlot,'time [s]');
-            ylabel(hAmplitudeStatsGui.aPlot,['Amplitude/Height [' Units.str ']']);
-            set(hAmplitudeStatsGui.aPlot,'Visible','on');
-    end
+    plot(hAmplitudeStatsGui.aPlot,Data.time{nObject},Data.amplength{nObject},'b-');
+    legend(hAmplitudeStatsGui.aPlot,['Amplitude/Height: ' num2str(mean(Data.amplength{nObject}),Units.fmt) ' ' char(177) ' ' num2str(std(Data.amplength{nObject}),Units.fmt) ' ' Units.str ' (SD)'],'Location','best');
+    xlabel(hAmplitudeStatsGui.aPlot,'time [s]');
+    ylabel(hAmplitudeStatsGui.aPlot,['Amplitude/Height [' Units.str ']']);
+    set(hAmplitudeStatsGui.aPlot,'Visible','on');
 end
-amplength = cell2mat(Data.amplength);
+switch get(hAmplitudeStatsGui.mMethod,'Value')
+    case 1
+        amplength = zeros(length(Data.amplength), 1);
+        for i = 1:length(Data.amplength)
+            amplength(i) = median(Data.amplength{i});
+        end
+        SelectedValue = median(Data.amplength{nObject});
+    case 2
+        amplength = cell2mat(Data.amplength);
+        SelectedValue = Data.amplength{nObject};
+end
 cla(hAmplitudeStatsGui.aResults);
 % hAmplitudeStatsGui.aResults = axes('Parent',hAmplitudeStatsGui.pResultsPanel,'Units','normalized','OuterPosition',[0 0 1 1],'Tag','Plot','TickDir','in');
-if isempty(amplength)
-    text(0.3,0.5,'No data or path available for any objects','Parent',hAmplitudeStatsGui.aResults,'FontWeight','bold','FontSize',16);
-    set(hAmplitudeStatsGui.aResults,'Visible','off');
-    legend(hAmplitudeStatsGui.aResults,'off');
-else
-    axes(hAmplitudeStatsGui.aResults);
-    hold(hAmplitudeStatsGui.aResults, 'on')
-    barchoice=[0.1 0.2 0.4 0.5 1 2 4 5 10 20 25 50 100 200 250 500 1000 2000 5000];
-    total=(max(amplength)-min(amplength))/15;
-    [~,t]=min(abs(total-barchoice));
-    barwidth=barchoice(t(1));
-    xout=fix(min(amplength)/barwidth)*barwidth+barwidth/2:barwidth:ceil(max(amplength)/barwidth)*barwidth-barwidth/2; 
-    if length(xout)<=1
-       xout=fix(min(amplength)/barwidth)*barwidth-barwidth/2:barwidth:ceil(max(amplength)/barwidth)*barwidth+barwidth/2; 
-       if length(xout)<=1
-           xout=[xout xout+barwidth];
-       end
-    end
-    n = hist(amplength,xout);
-    Data.hist = [xout' n'];
-    Data.xy = {[min(xout)-barwidth/2 max(xout)+barwidth/2],[0 max(n)*1.2]};
-    bar(hAmplitudeStatsGui.aResults, xout,n,'BarWidth',1,'FaceColor',[0 0 0.5]); 
-    set(hAmplitudeStatsGui.aResults,{'xlim','ylim'},Data.xy);
-    n = hist(hAmplitudeStatsGui.aResults, Data.amplength{nObject},xout);
-    bar(hAmplitudeStatsGui.aResults,xout,n,'BarWidth',1,'FaceColor',[179/255 199/255 1]); 
-    if Data.hist(1,1)<0 && Data.hist(end,1)>0
-        ticks = [fliplr(0:-2*barwidth:Data.hist(1,1)-barwidth/2) 2*barwidth:2*barwidth:Data.hist(end,1)+barwidth/2];
-    else
-        ticks = Data.hist(1,1)-barwidth/2:2*barwidth:Data.hist(end,1)+barwidth/2;
-    end
-    set(hAmplitudeStatsGui.aResults,'Visible','on','XTick',ticks);
-    xlabel(hAmplitudeStatsGui.aResults,['Amplitude/Height [' Units.str ']']);
-    ylabel(hAmplitudeStatsGui.aResults,'frequency [counts]');
-    legend(hAmplitudeStatsGui.aResults,{'all objects','current object'},'Location','best');
-end
+axes(hAmplitudeStatsGui.aResults);
+hold(hAmplitudeStatsGui.aResults, 'on')
+h = histogram(amplength);
+barwidth = (h.BinEdges(2)-h.BinEdges(1))/2;
+xout = h.BinEdges(1:end-1)+barwidth;
+n = h.Values;
+Data.hist = [xout' n'];
+Data.xy = {[min(xout)-barwidth/2 max(xout)+barwidth/2],[0 max(n)*1.2]};
+bar(hAmplitudeStatsGui.aResults, xout,n,'BarWidth',1,'FaceColor',[0 0 0.5]); 
+% set(hAmplitudeStatsGui.aResults,{'xlim','ylim'},Data.xy);
+counts = histcounts(SelectedValue, h.BinEdges);
+bar(hAmplitudeStatsGui.aResults,xout,counts,'BarWidth',1,'FaceColor',[179/255 199/255 1]); 
+xlabel(hAmplitudeStatsGui.aResults,['Amplitude/Height [' Units.str ']']);
+ylabel(hAmplitudeStatsGui.aResults,'frequency [counts]');
+legend(hAmplitudeStatsGui.aResults,{'current object', 'all objects'},'Location','best');
 setappdata(hAmplitudeStatsGui.fig,'Data',Data);
+stepsize = ceil(length(xout)/10);
+set(hAmplitudeStatsGui.aResults,'XTick',xout(1:stepsize:end));
+set(hAmplitudeStatsGui.aResults,'XtickLabel',xout(1:stepsize:end));
 
 function FitGauss
 hAmplitudeStatsGui = getappdata(0,'hAmplitudeStatsGui');

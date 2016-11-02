@@ -56,7 +56,7 @@ merged_width= subplot_cols*( width +gap_horz )- gap_horz;
 % merged subplot position:
 merged_bottom=(m-max(subplot_row))*(height+gap_vert) +marg_lower;
 merged_left=(min(subplot_col)-1)*(width+gap_horz) +marg_left;
-pos_vec=[merged_left merged_bottom merged_width merged_height];
+pos_vec=[merged_left merged_bottom max(merged_width,0) max(merged_height,0)];
 
 % h_subplot=subplot(m,n,p,varargin{:},'Position',pos_vec);
 % Above line doesn't work as subplot tends to ignore 'position' when same mnp is utilized
