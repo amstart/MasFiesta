@@ -3,7 +3,7 @@ function [refdata] = fJKGetRefData(Object, mode, reftags, varargin)
 %   Detailed explanation goes here
 global Filament;
 global Molecule;
-refcomment=strfind(Object.Comments,'ref:');
+refcommentstart=strfind(Object.Comments,'ref:');
 found=0;
 Object.Results(:,5) = [];
 if isfield(Object, 'PosCenter');
@@ -11,8 +11,8 @@ if isfield(Object, 'PosCenter');
     Object.PosCenter(:,3) = [];
     Object.PosEnd(:,3) = [];
 end
-if ~isempty(refcomment)
-    restcomment=Object.Comments(refcomment+4:end);
+if ~isempty(refcommentstart)
+    restcomment=Object.Comments(refcommentstart+4:end);
     if isempty(strfind(restcomment,'-'))
         refdata=nan;
         return

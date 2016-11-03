@@ -1078,7 +1078,7 @@ else
         case 3
             EventPlot(group, Options.eRescueCutoff.val);
         case 4
-            VelocityPlot(group, Options.lSegmentVelocityType.val, Options.lSegmentVelocityType.print);
+            VelocityPlot(group, Options);
         case 5
             DataPlot(hDynamicFilamentsGui);
         case 6
@@ -1411,57 +1411,54 @@ for i=1:2
     end
 end
 
-function VelocityPlot(group, velvalue, velstr)
+function VelocityPlot(group, Options)
 % subplot = @(m,n,p) subtightplot (m, n, p, [0.08 0.08], [0.08 0.08], [0.08 0.02]);
-PlotGrowing=[1 0];
-for i=1:2
-    [type, AnalyzedTracks, ~]=SetType(PlotGrowing(i),0);
-    subplot(1,2,i);
-    hold on;
-    velmethod=velstr(1:strfind(velstr,'(')-2);
-    if isempty(velmethod)
-        velmethod=velstr;
-    end
-    if i==1
-        LongTracks=[AnalyzedTracks.Duration]>100;
-        AnalyzedTracks=AnalyzedTracks(LongTracks);
-        type=type(LongTracks);
-        str=['Growth Velocity (' velmethod '). Only tracks > 100s evaluated)'];
-    else
-        str=['Shrink Velocity (' velmethod ')'];
-    end
-    vel=vertcat(AnalyzedTracks.Velocity);
-    vel=vel(:,velvalue);
-    %cla('reset');
-    if isempty(vel)
-        text(0.3,0.5,'No data or path available for any objects','Parent','FontWeight','bold','FontSize',16);
-        set('Visible','off');
-        legend('off');
-    else
-        %try
-            uniquetypes=unique(type, 'stable');
-            b=boxplot(vel, type);
-            for j=1:length(uniquetypes)
-                typevel=vel(cellfun(@(x) strcmp(uniquetypes{j}, x), type));
-                plot(repmat(j, length(typevel),1), typevel, 'o', 'Color', [217;95;2]/255);
-                text(j,mean(typevel),{num2str(median(typevel),3) num2str(length(typevel))}, 'HorizontalAlignment', 'center', 'VerticalAlignment', 'middle');
-            end
-            set(gca,'XTickLabel','');
-            set(gca, 'XTickLabelMode','manual');
-            hxt = get(gca, 'XTick');
-            ypos = min(ylim) - diff(ylim)*0.05;
-            newtext = text(hxt, ones(1, length(uniquetypes))*ypos, uniquetypes, 'HorizontalAlignment', 'center');
-            if (length(uniquetypes)>2&&group>1)||length(uniquetypes)>3
-                set(newtext, 'rotation', 15);
-            end
-            h = findobj(b,'tag','Outliers');
-            set(h,'Visible','off');
-        %catch
-        %end
-        ylabel([str ' [nm/s]']);
-    end
-    hold off
+velstr = Options.lSegmentVelocityType.print;
+[type, AnalyzedTracks, ~]=SetType(Options.cPlotGrowingTracks.val,0);
+hold on;
+velmethod=velstr(1:strfind(velstr,'(')-2);
+if isempty(velmethod)
+    velmethod=velstr;
 end
+if Options.cPlotGrowingTracks.val==1
+    LongTracks=[AnalyzedTracks.Duration]>100;
+    AnalyzedTracks=AnalyzedTracks(LongTracks);
+    type=type(LongTracks);
+    str=['Growth Velocity (' velmethod '). Only tracks > 100s evaluated)'];
+else
+    str=['Shrink Velocity (' velmethod ')'];
+end
+vel=vertcat(AnalyzedTracks.Velocity);
+vel=vel(:,Options.lSegmentVelocityType.val);
+%cla('reset');
+if isempty(vel)
+    text(0.3,0.5,'No data or path available for any objects','Parent','FontWeight','bold','FontSize',16);
+    set('Visible','off');
+    legend('off');
+else
+    %try
+        uniquetypes=unique(type, 'stable');
+        b=boxplot(vel, type);
+        for j=1:length(uniquetypes)
+            typevel=vel(cellfun(@(x) strcmp(uniquetypes{j}, x), type));
+            plot(repmat(j, length(typevel),1), typevel, 'o', 'Color', [217;95;2]/255);
+            text(j,mean(typevel),{num2str(median(typevel),3) num2str(length(typevel))}, 'HorizontalAlignment', 'center', 'VerticalAlignment', 'middle');
+        end
+        set(gca,'XTickLabel','');
+        set(gca, 'XTickLabelMode','manual');
+        hxt = get(gca, 'XTick');
+        ypos = min(ylim) - diff(ylim)*0.05;
+        newtext = text(hxt, ones(1, length(uniquetypes))*ypos, uniquetypes, 'HorizontalAlignment', 'center');
+        if (length(uniquetypes)>2&&group>1)||length(uniquetypes)>3
+            set(newtext, 'rotation', 15);
+        end
+        h = findobj(b,'tag','Outliers');
+        set(h,'Visible','off');
+    %catch
+    %end
+    ylabel([str ' [nm/s]']);
+end
+hold off
 
 function DataPlot(hDynamicFilamentsGui)
 Objects = getappdata(hDynamicFilamentsGui.fig,'Objects');

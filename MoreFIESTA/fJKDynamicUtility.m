@@ -88,6 +88,7 @@ end
 channel=2;
 framesuntilmissingframe=40;
 BlockHalf=3;
+fShared('BackUp',hMainGui);
 JKGetIntensity(channel, framesuntilmissingframe, BlockHalf)
                                  
 function JKGetIntensity(channel, framesuntilmissingframe, BlockHalf)
@@ -202,6 +203,7 @@ end
 
 function FindPlusEnd
 global Filament
+fShared('BackUp',getappdata(0,'hMainGui'));
 if ~isempty(Filament)
     idx=find([Filament.Channel]==1);
     for n=idx
@@ -245,6 +247,7 @@ end
 
 function Match
 global Filament;
+fShared('BackUp',getappdata(0,'hMainGui'));
 if ~isempty(Filament)
     FilOtherChannel=Filament([Filament.Channel]~=1);
     centervec=zeros(length(FilOtherChannel),3);
@@ -252,14 +255,20 @@ if ~isempty(Filament)
         centervec(i,:)=FilOtherChannel(i).PosCenter(1,:);
     end
     for i=1:length(Filament)
-        if Filament(i).Channel==1&&isempty(strfind(Filament(i).Comments, 'ref:'))
+        if Filament(i).Channel==1
+            refcommentstart = strfind(Filament(i).Comments, 'ref:');
+            if ~isempty(refcommentstart)
+                restcomment = Filament(i).Comments(refcommentstart:end);
+                dash=strfind(restcomment,'-');
+                refcomment=restcomment(1:dash(1));
+                Filament(i).Comments = strrep(Filament(i).Comments, refcomment, '');
+                Filament(i).Comments = strrep(Filament(i).Comments, '  ', ' ');
+            end
             disvec = fDis([Filament(i).PosCenter(1,:); centervec]);
             [~, n] = min(disvec(2:end,:));
             Filament(i).Comments = [Filament(i).Comments ' ref:' FilOtherChannel(n).Name '-'];
         end
     end
-    [~, order] = sort({Filament.Name});
-    Filament = Filament(order);
 end
 
 function JKGetIntensityold
