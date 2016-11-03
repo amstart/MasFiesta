@@ -124,13 +124,13 @@ hDynamicFilamentsGui.bRefreshGui = uicontrol('Parent',hDynamicFilamentsGui.pOpti
 tooltipstr = 'Segments the currently loaded MTs according to the given parameters.';       
                                
 hDynamicFilamentsGui.bSegment = uicontrol('Parent',hDynamicFilamentsGui.pOptions,'Units','normalized','Callback',@UpdateOptions, 'FontSize', 15,...
-                                   'Position',[0.65 0.85 0.12 0.05],'String','Segment','Style','pushbutton','Tag','bSegment','TooltipString', tooltipstr);    
+                                   'Position',[0.8 0.85 0.12 0.05],'String','Segment','Style','pushbutton','Tag','bSegment','TooltipString', tooltipstr);    
                              
 tooltipstr=sprintf(['Minimum distance filament has to shrink in order for it to count as a catastrophe. To determine where shrinking segments are to be found.\n' ...
     'Only if the MT monotonously shrinks that distance it can be considered a shrinking segment (other condition see edit box to the right).']);
 
 hDynamicFilamentsGui.tMinDist = uicontrol('Parent',hDynamicFilamentsGui.pOptions,'Units','normalized','BackgroundColor',c,...
-                             'Position',[0.05 0.825 0.3 0.125],'String','Min Shrinkage Distance:','Style','text','Tag','tIntensity','HorizontalAlignment','left');  
+                             'Position',[0.05 0.825 0.65 0.125],'String','Min Shrinkage Distance:','Style','text','Tag','tIntensity','HorizontalAlignment','left');  
                         
 hDynamicFilamentsGui.eMinDist = uicontrol('Parent',hDynamicFilamentsGui.pOptions,'TooltipString', tooltipstr, 'Units','normalized','Callback',@UpdateOptions,...
                                 'Position',[.3 0.9 .1 .05],'String','400','Style','edit','Fontsize',10,'BackgroundColor','white',...
@@ -144,7 +144,7 @@ hDynamicFilamentsGui.eMaxRebound = uicontrol('Parent',hDynamicFilamentsGui.pOpti
                                          'UserData', '1', 'String','0.25','BackgroundColor','white','HorizontalAlignment','center');  
                               
 hDynamicFilamentsGui.tMaxTimeDiff = uicontrol('Parent',hDynamicFilamentsGui.pOptions,'Units','normalized','BackgroundColor',c,...
-                             'Position',[0.05 0.775 0.3 0.125],'String','Max time difference:','Style','text','Tag','tMaxTimeDiff','HorizontalAlignment','left');  
+                             'Position',[0.05 0.775 0.65 0.125],'String','Max time difference:','Style','text','Tag','tMaxTimeDiff','HorizontalAlignment','left');  
 
 tooltipstr=sprintf(['If two points are further apart in time than this value [in seconds] they are not joined into one track but seperated.\n' ...
      'This only works at borders of segments. If a shrinkage segment follows a growth segment, a catastrophe will be assumed in between, but this shrinkage track will not show up in plots with references to start.']);
@@ -712,6 +712,9 @@ if FileName~=0
     setappdata(hDynamicFilamentsGui.fig,'Objects',NewObjects);
     set(hDynamicFilamentsGui.cUsePosEnd, 'Enable', 'off');
     setappdata(0,'hDynamicFilamentsGui',hDynamicFilamentsGui);
+    if ~nargin
+        UpdateOptions();
+    end
 end
 
 function LoadLink(varargin)
@@ -751,6 +754,7 @@ if FileLink~=0
         progressdlg(i);
     end
     LoadIntensities('intensities.txt', folder)
+    UpdateOptions();
 end
 
 function LoadIntensities(FileName, PathName)
@@ -776,6 +780,7 @@ for i = 1:length(table.Value)
 end
 setappdata(hDynamicFilamentsGui.fig,'Objects',Objects);
 setappdata(0,'hDynamicFilamentsGui',hDynamicFilamentsGui);
+UpdateOptions();
 
 function LoadFolder(varargin)
 global CurrentDir
