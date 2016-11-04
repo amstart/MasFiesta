@@ -633,9 +633,7 @@ if FileName~=0
         end
     end
     fieldnames = {'Selected','Channel','TformMat','Color','PathData', 'Visible', 'PlotHandles', 'Data', 'TrackingResults'};
-    for fieldname=fieldnames;
-        NewObjects = rmfield(NewObjects,fieldname);
-    end
+    NewObjects = rmfield(NewObjects,fieldnames);
     ref = get(hDynamicFilamentsGui.cUsePosEnd, 'Value')*2+1;
     str=cell(length(NewObjects),1);
     deleteobjects = false(length(NewObjects), 1);

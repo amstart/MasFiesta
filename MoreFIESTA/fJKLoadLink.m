@@ -1,7 +1,7 @@
-function [ output ] = fJKLoadLink(FileName, PathName, fun)
+function [ output ] = fJKLoadLink(LinkFileName, LinkPathName, fun)
 %FJKLOADLINK Summary of this function goes here
 %   Detailed explanation goes here
-tmpstruc = load([PathName FileName]);
+tmpstruc = load([LinkPathName LinkFileName]);
 LoadedFromFile = tmpstruc.LoadedFromFile;
 LoadedFromPath = tmpstruc.LoadedFromPath;
 numfiles = length(LoadedFromFile);
@@ -20,7 +20,7 @@ for i = 1:numfiles
     FileName = LoadedFromFile{i};
     try
         try
-            PathName = [folder RestPathStr{i}]; %LoadedFromPath{i};
+            PathName = [LinkPathName RestPathStr{i}]; %LoadedFromPath{i};
             fun(FileName, PathName);
         catch
             PathName = [UniqueStrings{idwhichUnique(i)} RestPathStr{i}]; %LoadedFromPath{i};
