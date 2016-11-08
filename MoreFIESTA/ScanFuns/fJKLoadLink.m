@@ -1,6 +1,9 @@
 function [ output ] = fJKLoadLink(LinkFileName, LinkPathName, fun)
-%FJKLOADLINK Summary of this function goes here
-%   Detailed explanation goes here
+%FJKLOADLINK This function takes the path of a file with a list of 
+%file locations. It also takes a function which is applied to each of those
+%files. Parameters are not directly passed nor is anything returned (-> use global variables or appdata)
+global suppress_progressdlg
+suppress_progressdlg = 0;
 tmpstruc = load([LinkPathName LinkFileName]);
 LoadedFromFile = tmpstruc.LoadedFromFile;
 LoadedFromPath = tmpstruc.LoadedFromPath;
@@ -17,6 +20,7 @@ end
 [UniqueStrings, ~, idwhichUnique] = unique(DiskStr);
 progressdlg('String','Loading Files','Min',0,'Max',numfiles);
 for i = 1:numfiles
+    suppress_progressdlg = 1;
     FileName = LoadedFromFile{i};
     try
         try
@@ -31,6 +35,6 @@ for i = 1:numfiles
         PathName = [UniqueStrings{idwhichUnique(i)} RestPathStr{i}]; %LoadedFromPath{i};
         fun(FileName, PathName);
     end
+    suppress_progressdlg = 0;
     progressdlg(i);
 end
-

@@ -58,7 +58,7 @@ if nargin == 0
         set(hDynamicFilamentsGui.fig,'Color',[236 233 216]/255);
     end
     try
-        CurrentDir = fShared('GetSaveDir');
+        CurrentDir = 'Z:\Data\Jochen';
     catch
     end
 else
@@ -102,16 +102,16 @@ hDynamicFilamentsGui.bDeleteAll = uicontrol('Parent',hDynamicFilamentsGui.fig,'S
                               'String','Delete All MTs','Callback','fJKDynamicFilamentsGui(''Delete'');');    
                           
 hDynamicFilamentsGui.bTIF = uicontrol('Parent',hDynamicFilamentsGui.fig,'Units','normalized','Callback','fJKDynamicFilamentsGui(''OpenInfo'');',...
-                                   'Position',[0.9775 0.7 0.02 0.03],'String','.tif','Style','pushbutton','Tag','bTIF');   
+                                   'Position',[0.9775 0.7 0.02 0.03],'String','tif','Style','pushbutton','Tag','bTIF');   
                                
 hDynamicFilamentsGui.bPDF = uicontrol('Parent',hDynamicFilamentsGui.fig,'Units','normalized','Callback','fJKDynamicFilamentsGui(''OpenInfo'');',...
-                                   'Position',[0.9775 0.6 0.02 0.03],'String','.pdf','Style','pushbutton','Tag','bTIF');   
+                                   'Position',[0.9775 0.6 0.02 0.03],'String','pdf','Style','pushbutton','Tag','bTIF');   
                                
 hDynamicFilamentsGui.bTXT = uicontrol('Parent',hDynamicFilamentsGui.fig,'Units','normalized','Callback','fJKDynamicFilamentsGui(''OpenInfo'');',...
-                                   'Position',[0.9775 0.5 0.02 0.03],'String','protocol','Style','pushbutton','Tag','btxt'); 
+                                   'Position',[0.9775 0.5 0.02 0.03],'String','doc','Style','pushbutton','Tag','btxt'); 
                                
 hDynamicFilamentsGui.bLOCATION = uicontrol('Parent',hDynamicFilamentsGui.fig,'Units','normalized','Callback','fJKDynamicFilamentsGui(''OpenInfo'');',...
-                                   'Position',[0.9775 0.4 0.02 0.03],'String','location','Style','pushbutton','Tag','bLOCATION');   
+                                   'Position',[0.9775 0.4 0.02 0.03],'String','max','Style','pushbutton','Tag','bLOCATION');   
      
 hDynamicFilamentsGui.pOptions = uipanel('Parent',hDynamicFilamentsGui.fig,'Units','normalized','Title','Options',...
                              'Position',[0.025 0.07 0.35 0.5],'Tag','pOptions','BackgroundColor',c);
@@ -366,36 +366,43 @@ hDynamicFilamentsGui.cshowTrackN = uicontrol('Parent',hDynamicFilamentsGui.fig,'
                                          'String','','BackgroundColor',c,'HorizontalAlignment','center','Callback','fJKDynamicFilamentsGui(''Draw'',getappdata(0,''hDynamicFilamentsGui''));');
                                      
 hDynamicFilamentsGui.bSave = uicontrol('Parent',hDynamicFilamentsGui.fig,'Style','pushbutton','Units','normalized',...
-                              'Position',[.025 .005 .075 .05],'Tag','bSave','Fontsize',12,...
+                              'Position',[.025 .005 .06 .05],'Tag','bSave','Fontsize',12,...
                               'String','Save Links','Callback','fJKDynamicFilamentsGui(''Save'');');      
                           
 hDynamicFilamentsGui.bLoad = uicontrol('Parent',hDynamicFilamentsGui.fig,'Style','pushbutton','Units','normalized',...
-                              'Position',[.1125 .005 .075 .05],'Tag','bLoad','Fontsize',12,...
+                              'Position',[.1 .005 .06 .05],'Tag','bLoad','Fontsize',12,...
                               'String','Load File','Callback','fJKDynamicFilamentsGui(''Load'');');         
 
 hDynamicFilamentsGui.bLoadFolder = uicontrol('Parent',hDynamicFilamentsGui.fig,'Style','pushbutton','Units','normalized',...
-                              'Position',[.2 .005 .05 .05],'Tag','bLoadFolder','Fontsize',12,...
+                              'Position',[.18 .005 .05 .05],'Tag','bLoadFolder','Fontsize',12,...
                               'String','Load Folder','Callback','fJKDynamicFilamentsGui(''LoadFolder'');');     
                           
 hDynamicFilamentsGui.bLoadOptions = uicontrol('Parent',hDynamicFilamentsGui.fig,'Style','pushbutton','Units','normalized',...
-                              'Position',[.252 .03 .05 .023],'Tag','bLoadOptions','Fontsize',12,...
+                              'Position',[.232 .03 .05 .023],'Tag','bLoadOptions','Fontsize',12,...
                               'String','Load Options','Callback',@LoadOptions);     
                           
 hDynamicFilamentsGui.bSaveOptions = uicontrol('Parent',hDynamicFilamentsGui.fig,'Style','pushbutton','Units','normalized',...
-                              'Position',[.252 .005 .05 .023],'Tag','bSaveOptions','Fontsize',12,...
+                              'Position',[.232 .005 .05 .023],'Tag','bSaveOptions','Fontsize',12,...
                               'String','Save Options','Callback',@UpdateOptions);     
                           
-hDynamicFilamentsGui.pLoadOptions = uipanel('Parent',hDynamicFilamentsGui.fig,'Units','normalized','Title','Load Options',...
-                             'Position',[0.3 0.005 0.1 0.07],'Tag','pLoadOptions','BackgroundColor',c);
+hDynamicFilamentsGui.pLoadOptions = uipanel('Parent',hDynamicFilamentsGui.fig,'Units','normalized','Title','What to load',...
+                             'Position',[0.3 0.005 0.1 0.12],'Tag','pLoadOptions','BackgroundColor',c);
                           
 hDynamicFilamentsGui.cAllowUnknownTypes = uicontrol('Parent',hDynamicFilamentsGui.pLoadOptions,'Units','normalized',...
-                             'Position',[0.01 .6 1 0.2],'BackgroundColor',c,'Style','checkbox','Tag','cAllowUnknownTypes','String','Import tracks with ''unknown'' type');  
+                             'Position',[0.01 .85 1 0.2],'BackgroundColor',c,'Style','checkbox','Tag','cAllowUnknownTypes','String','Import tracks with ''unknown'' type');  
                           
 hDynamicFilamentsGui.cAllowWithoutReference = uicontrol('Parent',hDynamicFilamentsGui.pLoadOptions,'Units','normalized',...
-                             'Position',[0.01 .4 1 0.2],'BackgroundColor',c,'Style','checkbox','Tag','cAllowWithoutReference','String','Allow tracks without reference');  
+                             'Position',[0.01 .7 1 0.2],'BackgroundColor',c,'Style','checkbox','Tag','cAllowWithoutReference','String','Allow tracks without reference');  
 
 hDynamicFilamentsGui.cUsePosEnd = uicontrol('Parent',hDynamicFilamentsGui.pLoadOptions,'Units','normalized',...
-                            'Position',[0.01 .2 1 0.2],'BackgroundColor',c,'String','Use PosEnd instead of PosStart','Style','checkbox','Tag','cUsePosEnd','Enable','on');
+                            'Position',[0.01 .55 1 0.2],'BackgroundColor',c,'String','Use PosEnd instead of PosStart','Style','checkbox','Tag','cUsePosEnd','Enable','on');
+                        
+                                     
+tooltipstr=sprintf(['If you have the intensities in extra files within the same folder as the original file, provide the filename here to load them (without .mat)']);
+                                     
+hDynamicFilamentsGui.eLoadIntensityFile = uicontrol('Parent',hDynamicFilamentsGui.pLoadOptions,'Style','edit','Units','normalized',...
+                                         'Position',[.1 .2 0.8 .2],'Tag','eLoadIntensityFile','Fontsize',10, 'TooltipString', tooltipstr,...
+                                         'UserData', '.mat', 'String','','BackgroundColor','white','HorizontalAlignment','center');    
 
 if nargin == 0                                                                
     set(hDynamicFilamentsGui.fig,'Visible','on');
@@ -496,7 +503,7 @@ elseif gcbo == hDynamicFilamentsGui.bDoPlot
     ChoosePlot(hDynamicFilamentsGui, Options);
 elseif gcbo == hDynamicFilamentsGui.bUpdatePlots
     UpdatePlot(hDynamicFilamentsGui, Options);
-else
+else %when the GUI is initialized
     [Objects, Tracks] = fJKSegment(Options);
     setappdata(hDynamicFilamentsGui.fig,'Tracks', Tracks);
     setappdata(hDynamicFilamentsGui.fig,'Objects',Objects);
@@ -595,7 +602,7 @@ if FileName~=0
     AllObjects = load([PathName FileName], 'Filament');
     if ~isfield(AllObjects, 'Filament')
         fJKLoadLink(FileName, PathName, @Load)
-        LoadIntensities('intensities.txt', PathName)
+        LoadIntensityPerMAP('intensities.txt', PathName)
         return
     end
     AllObjects = AllObjects.Filament;
@@ -637,7 +644,28 @@ if FileName~=0
     ref = get(hDynamicFilamentsGui.cUsePosEnd, 'Value')*2+1;
     str=cell(length(NewObjects),1);
     deleteobjects = false(length(NewObjects), 1);
+    external_intensity = get(hDynamicFilamentsGui.eLoadIntensityFile, 'String');
+    has_external_intensity = 0;
+    if ~strcmp(external_intensity, '')
+        try
+            Custom = load([PathName external_intensity '.mat']);
+            if isfield(Custom, 'intensities')
+                has_external_intensity = 1;
+            end
+        catch
+        end
+    end
     for i=1:length(NewObjects)
+        if has_external_intensity
+            NewObjects(i).Custom.Intensity = Custom.intensities{i};
+            NewObjects(i).Custom.type_intensity = external_intensity;
+        else
+            if isfield(NewObjects(i).Custom, 'Intensity')
+                NewObjects(i).Custom.type_intensity = 'From File';
+            else
+                NewObjects(i).Custom.type_intensity = 'None';
+            end
+        end
         str{i}=NewObjects(i).Name;
         typecomment=strfind(NewObjects(i).Comments,'type:');
         if ~isempty(typecomment)
@@ -711,9 +739,10 @@ if FileName~=0
     setappdata(hDynamicFilamentsGui.fig,'Objects',NewObjects);
     set(hDynamicFilamentsGui.cUsePosEnd, 'Enable', 'off');
     setappdata(0,'hDynamicFilamentsGui',hDynamicFilamentsGui);
+    SetTable()
 end
 
-function LoadIntensities(FileName, PathName)
+function LoadIntensityPerMAP(FileName, PathName)
 hDynamicFilamentsGui = getappdata(0,'hDynamicFilamentsGui');
 Objects = getappdata(hDynamicFilamentsGui.fig,'Objects');
 LoadedFromPath = {Objects.LoadedFromPath};
@@ -817,12 +846,12 @@ for n = 1:length(Objects)
     nResAuto=sum(abs(segtagauto(:,3)-4.85)<0.1&segtagauto(:,4)>cutoff);%to get 4.8 (stops of shrinkages not captured) and 4.9
     nCatAuto=sum(abs(segtagauto(:,3)-1.85)<0.1|abs(segtagauto(:,3)-4.8)<0.1); %to get 1.8 (catastrophes not captured) and 1.9
     str{n}=[num2str(n) ' ' Objects(n).Name hascomments ' ' num2str(Objects(n).CatRes(1)) '|' num2str(nCatAuto) '    ' num2str(Objects(n).CatRes(2)) '|' num2str(nResAuto) ...
-        '    ' num2str(velocity(1), '%2.2f') '    ' num2str(velocity(2), '%2.1f') '    ' Objects(n).Type '    ' Objects(n).File(1:end-4)];
+        '    ' num2str(velocity(1), '%2.2f') '    ' num2str(velocity(2), '%2.1f') '    ' Objects(n).Type '    ' Objects(n).File(1:end-4) '    ' Objects(n).Custom.type_intensity];
 end
-set(hDynamicFilamentsGui.lSelection, 'String', str);
-set(hDynamicFilamentsGui.lSelection, 'Value', max(1,min(get(hDynamicFilamentsGui.lSelection, 'Value'),length(str))));
 setappdata(hDynamicFilamentsGui.fig,'Tracks', Tracks);
 Draw(hDynamicFilamentsGui);
+set(hDynamicFilamentsGui.lSelection, 'String', str);
+set(hDynamicFilamentsGui.lSelection, 'Value', max(1,min(get(hDynamicFilamentsGui.lSelection, 'Value'),length(str))));
 
 function Draw(hDynamicFilamentsGui)
 showTrackN=get(hDynamicFilamentsGui.cshowTrackN,'Value');
@@ -934,6 +963,9 @@ if ~isempty(Objects)&&~isempty(Selected)
         else
             Tracks(i).Selected=0;
         end
+    end
+    if isempty(tracks)
+        text(0.2,0.5,'No data available for current object. You might need to press "Segment".','Parent',hDynamicFilamentsGui.aPlot,'FontWeight','bold','FontSize',16);
     end
 end
 setappdata(hDynamicFilamentsGui.fig,'Tracks', Tracks);

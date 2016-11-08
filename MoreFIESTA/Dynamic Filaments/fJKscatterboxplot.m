@@ -12,7 +12,11 @@ for m=1:2
     clength=length(uniquetracks);
     plotxnew=plotx(selectedpoints);
     plotynew=ploty(selectedpoints);
-    cmap = distinguishable_colors(clength);
+    try
+        cmap = distinguishable_colors(clength);
+    catch
+        cmap = linspecer(clength);
+    end
     plotc=zeros(size(plotNnew,1),3);
     for ci=1:size(plotNnew,1)
         plotc(ci,:)=cmap(find(uniquetracks==plotNnew(ci)),:);

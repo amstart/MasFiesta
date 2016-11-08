@@ -1,4 +1,4 @@
-function [ Stack ] = CorrectStack(Stack, Drift, TformChannel )
+function [ Stack ] = help_CorrectStack(Stack, Drift, TformChannel )
 %CORRECTSTACK Summary of this function goes here
 %   Detailed explanation goes here
 global ScanOptions
