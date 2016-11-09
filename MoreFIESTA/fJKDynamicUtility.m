@@ -73,6 +73,7 @@ end
 function GetIntensities
 global Stack
 global Filament
+global ScanOptions
 hMainGui=getappdata(0,'hMainGui');
 if strcmp(get(hMainGui.Menu.mCorrectStack,'Checked'),'off')
     answer = questdlg('Want to continue and correct the stack?', 'Warning', 'Yes','No','Yes' );
@@ -87,9 +88,14 @@ if strcmp(get(hMainGui.Menu.mCorrectStack,'Checked'),'off')
     end
     fMenuView('CorrectStack');
 end
-channel=2;
+ScanOptions.help_get_tip_intensities.BlockHalf = 3; %only needed for mode "get_highest"
+ScanOptions.help_get_tip_intensities.framesuntilmissingframe = 40; %set to number higher than number of frames if you have the same number of frames for the channels
+ScanOptions.help_get_tip_intensities.MTend = 1; %1 = PosStart, 2 = PosEnd
+ScanOptions.help_get_tip_intensities.method = 'get_highest';
+ScanOptions.help_get_tip_intensities.AllFilaments = 1;
+ScanOptions.Channel = 2;
 fShared('BackUp',hMainGui);
-[Filament] = help_GetIntensities('get_highest_tip_intensities', Stack{channel}, Filament);
+[Filament] = help_get_tip_intensities(Stack{ScanOptions.Channel}, Filament);
                                  
 
 function JKInterpolateTrack(copynumber,idx)

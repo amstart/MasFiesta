@@ -22,19 +22,14 @@ progressdlg('String','Loading Files','Min',0,'Max',numfiles);
 for i = 1:numfiles
     suppress_progressdlg = 1;
     FileName = LoadedFromFile{i};
-    try
-        try
-            PathName = [LinkPathName RestPathStr{i}]; %LoadedFromPath{i};
-            fun(FileName, PathName);
-        catch
-            PathName = [UniqueStrings{idwhichUnique(i)} RestPathStr{i}]; %LoadedFromPath{i};
-            fun(FileName, PathName);
-        end
-    catch
-        UniqueStrings(idwhichUnique(i)) = inputdlg('Edit Pathname to suit your system:', 'Load from', 1, UniqueStrings(idwhichUnique(i)));
+    if ~exist([LinkPathName FileName],'file')
         PathName = [UniqueStrings{idwhichUnique(i)} RestPathStr{i}]; %LoadedFromPath{i};
-        fun(FileName, PathName);
+        if ~exist([PathName FileName],'file')
+            UniqueStrings(idwhichUnique(i)) = inputdlg('Edit Pathname to suit your system:', 'Load from', 1, UniqueStrings(idwhichUnique(i)));
+            PathName = [UniqueStrings{idwhichUnique(i)} RestPathStr{i}]; %LoadedFromPath{i};
+        end
     end
+    fun(FileName, PathName);
     suppress_progressdlg = 0;
     progressdlg(i);
 end
