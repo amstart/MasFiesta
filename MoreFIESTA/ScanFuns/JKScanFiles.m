@@ -10,7 +10,7 @@ ScanOptions.PixSize = 157; %is used as default if nothing else available
 ScanOptions.help_get_tip_intensities.BlockHalf = 3; %only needed for mode "get_highest"
 ScanOptions.help_get_tip_intensities.framesuntilmissingframe = 40; %set to number higher than number of frames if you have the same number of frames for the channels
 ScanOptions.help_get_tip_intensities.MTend = 1; %1 = PosStart, 2 = PosEnd
-ScanOptions.help_get_tip_intensities.method = 'get_highest';
+ScanOptions.help_get_tip_intensities.method = 'get_full_intensities';
 ScanOptions.help_get_tip_intensities.AllFilaments = 1;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 ScanOptions.filename = [ScanOptions.help_get_tip_intensities.method '.mat'];

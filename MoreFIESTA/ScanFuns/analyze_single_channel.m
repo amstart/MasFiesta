@@ -14,6 +14,7 @@ Filament = Filament.Filament;
 Filament = Filament([Filament.Channel]==ScanOptions.ObjectChannel);
 %% Helper Functions
 [Stack, ~, PixSize] = help_GetStack(PathName, Filament(1).File);
+Stack = Stack{1};
 if isempty(PixSize)
     if ~isfield(ScanOptions, 'PixSize')
         input = inputdlg('Pixel Size?','Pixel Size',1,{'157'});
@@ -22,9 +23,9 @@ if isempty(PixSize)
     PixSize = ScanOptions.PixSize;
 end
 if ~isfield(ScanOptions, 'help_CorrectStack') || ScanOptions.help_CorrectStack.CorrectColor || ScanOptions.help_CorrectStack.CorrectDrift
-    [ Stack ] = help_CorrectStack(Stack{1}, PathName, PixSize);
+    [ Stack ] = help_CorrectStack(Stack, PathName, PixSize);
 end
-[Filament] = help_get_tip_intensities(Stack, Filament);
+[Filament] = help_get_full_intensities(Stack, Filament);
 %% save data
 deletefields = setxor(fields(Filament), {'Custom'});
 CroppedFilament = rmfield(Filament, deletefields);
