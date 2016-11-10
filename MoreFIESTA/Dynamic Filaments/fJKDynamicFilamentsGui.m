@@ -402,6 +402,12 @@ tooltipstr=sprintf(['If you have the intensities in extra files within the same 
                                      
 hDynamicFilamentsGui.eLoadIntensityFile = uicontrol('Parent',hDynamicFilamentsGui.pLoadOptions,'Style','edit','Units','normalized',...
                                          'Position',[.1 .2 0.8 .2],'Tag','eLoadIntensityFile','Fontsize',10, 'TooltipString', tooltipstr,...
+                                         'UserData', '.mat', 'String','','BackgroundColor','white','HorizontalAlignment','center');  
+                                            
+tooltipstr=sprintf(['If you have extra data you can provide the filename here (without .mat)']);
+                                     
+hDynamicFilamentsGui.eLoadOtherFile = uicontrol('Parent',hDynamicFilamentsGui.pLoadOptions,'Style','edit','Units','normalized',...
+                                         'Position',[.1 .15 0.8 .2],'Tag','eLoadOtherFile','Fontsize',10, 'TooltipString', tooltipstr,...
                                          'UserData', '.mat', 'String','','BackgroundColor','white','HorizontalAlignment','center');    
 
 if nargin == 0                                                                
@@ -585,8 +591,6 @@ end
 
 function Load(varargin)
 global CurrentDir
-hDynamicFilamentsGui = getappdata(0,'hDynamicFilamentsGui');
-OldObjects = getappdata(hDynamicFilamentsGui.fig,'Objects');
 if nargin > 0
     FileName = varargin{1};
     PathName = varargin{2};
@@ -603,144 +607,149 @@ if FileName~=0
     if ~isfield(AllObjects, 'Filament')
         fJKLoadLink(FileName, PathName, @Load)
         LoadIntensityPerMAP('intensities.txt', PathName)
-        return
-    end
-    AllObjects = AllObjects.Filament;
-    NewObjects = AllObjects([AllObjects.Channel]==1);
-    answer = [];
-    if ~all([NewObjects.Drift])
-        answer = questdlg('Some Filaments had not been drift-corrected. Continue anyway?', 'Warning', 'Yes','No','Yes' );
-        if strcmp(answer, 'No')
-            return
-        end
-    end
-    aligned = 1;
-    driftcorrected = 1;
-    if ~isempty(answer)
-        for RefObject = AllObjects([AllObjects.Channel]~=1);
-            if RefObject.TformMat(3,3)==1;
-                aligned = 0;
-            end
-            if RefObject.Drift==0;
-                driftcorrected = 0;
-            end
-        end
-        if ~aligned
-            answer = questdlg('Some Reference-Filaments had not been color-aligned. Continue anyway?', 'Warning', 'Yes','No','Yes' );
-            if strcmp(answer, 'Yes')
-                if ~driftcorrected
-                    answer = questdlg('Some Reference-Filaments had not been drift-corrected. Continue anyway?', 'Warning', 'Yes','No','Yes' );
-                    if strcmp(answer, 'No')
-                        return
-                    end
-                end
-            else
+    else
+        AllObjects = AllObjects.Filament;
+        NewObjects = AllObjects([AllObjects.Channel]==1);
+        answer = [];
+        if ~all([NewObjects.Drift])
+            answer = questdlg('Some Filaments had not been drift-corrected. Continue anyway?', 'Warning', 'Yes','No','Yes' );
+            if strcmp(answer, 'No')
                 return
             end
         end
-    end
-    fieldnames = {'Selected','Channel','TformMat','Color','PathData', 'Visible', 'PlotHandles', 'Data', 'TrackingResults'};
-    NewObjects = rmfield(NewObjects,fieldnames);
-    ref = get(hDynamicFilamentsGui.cUsePosEnd, 'Value')*2+1;
-    str=cell(length(NewObjects),1);
-    deleteobjects = false(length(NewObjects), 1);
-    external_intensity = get(hDynamicFilamentsGui.eLoadIntensityFile, 'String');
-    has_external_intensity = 0;
-    if ~strcmp(external_intensity, '')
-        try
-            Custom = load([PathName external_intensity '.mat']);
-            if isfield(Custom, 'intensities')
-                has_external_intensity = 1;
+        aligned = 1;
+        driftcorrected = 1;
+        if ~isempty(answer)
+            for RefObject = AllObjects([AllObjects.Channel]~=1);
+                if RefObject.TformMat(3,3)==1;
+                    aligned = 0;
+                end
+                if RefObject.Drift==0;
+                    driftcorrected = 0;
+                end
             end
-        catch
-        end
-    end
-    for i=1:length(NewObjects)
-        if has_external_intensity
-            NewObjects(i).Custom.Intensity = Custom.intensities{i};
-            NewObjects(i).Custom.type_intensity = external_intensity;
-        else
-            if isfield(NewObjects(i).Custom, 'Intensity')
-                NewObjects(i).Custom.type_intensity = 'From File';
-            else
-                NewObjects(i).Custom.type_intensity = 'None';
-            end
-        end
-        str{i}=NewObjects(i).Name;
-        typecomment=strfind(NewObjects(i).Comments,'type:');
-        if ~isempty(typecomment)
-            restcomment=NewObjects(i).Comments(typecomment+5:end);
-            space=strfind(restcomment(1:end),' ');
-            if isempty(space)
-                space=length(restcomment(1:end))+1;
-            end
-            NewObjects(i).Type=restcomment(1:space(1)-1);
-            if strcmp(NewObjects(i).Type, 'unknown')
-                deleteobjects(i) = 1;
-            end
-            if strcmp(NewObjects(i).Type(end), 'A')
-                NewObjects(i).Type = [NewObjects(i).Type(1:end-1) ' +Ase1'];
-            else
-                NewObjects(i).Type = [NewObjects(i).Type ' -Ase1'];
-            end
-        else
-            NewObjects(i).Type='n/a';
-        end
-        NewObjects(i).LoadedFromPath = PathName;
-        NewObjects(i).LoadedFromFile = FileName;
-    end
-    if ~get(hDynamicFilamentsGui.cAllowUnknownTypes, 'Value') % deletes MTs with unknown type
-        NewObjects(deleteobjects) = [];
-    end
-    for i=1:length(NewObjects)
-        tags = fJKfloat2tags(NewObjects(i).Results(:,end));
-        if ref==1
-            tiptags = tags(:,7);
-            tags = tags(:,6);
-        else
-            tiptags = tags(:,10);
-            tags = tags(:,9);
-        end
-        catastrophes = tags==10;
-        rescues = tags==15;
-        if ~get(hDynamicFilamentsGui.cAllowWithoutReference, 'Value')
-            refcomment=strfind(NewObjects(i).Comments,'ref:');
-            if ~isempty(refcomment)
-                RefPos=fJKGetRefData(NewObjects(i), ref, tags==11, AllObjects([AllObjects.Channel]>1));
-            else
-                RefPos=nan;
-            end
-        else
-            RefPos=fJKGetRefData(NewObjects(i), ref, tags==11, AllObjects([AllObjects.Channel]>1));
-        end
-        if isnan(RefPos)
-            DynResults = [nan nan nan 1];
-        else
-            DynResults = [NewObjects(i).Results(:,1:2) RefPos (1:size(RefPos,1))'];
-            for m=length(tags):-1:1
-                if tags(m)==9||isnan(RefPos(m))
-                    DynResults(m,:) = [];
-                    tags(m) = [];
-                    tiptags(m) = [];
+            if ~aligned
+                answer = questdlg('Some Reference-Filaments had not been color-aligned. Continue anyway?', 'Warning', 'Yes','No','Yes' );
+                if strcmp(answer, 'Yes')
+                    if ~driftcorrected
+                        answer = questdlg('Some Reference-Filaments had not been drift-corrected. Continue anyway?', 'Warning', 'Yes','No','Yes' );
+                        if strcmp(answer, 'No')
+                            return
+                        end
+                    end
+                else
+                    return
                 end
             end
         end
-        NewObjects(i).CatRes = [sum(catastrophes) sum(rescues)];
-        NewObjects(i).Tags = [tags tiptags];
-        NewObjects(i).DynResults = DynResults;
-        NewObjects(i).SegTagAuto=[NaN NaN NaN NaN NaN];
-        NewObjects(i).Velocity=nan(2,6);
-        NewObjects(i).Duration = 0;
-        NewObjects(i).Disregard = 0;
+        PrepareFils(NewObjects);
     end
-    if ~isempty(OldObjects)
-        NewObjects = [OldObjects NewObjects];
-    end
-    setappdata(hDynamicFilamentsGui.fig,'Objects',NewObjects);
-    set(hDynamicFilamentsGui.cUsePosEnd, 'Enable', 'off');
-    setappdata(0,'hDynamicFilamentsGui',hDynamicFilamentsGui);
-    SetTable()
 end
+
+function PrepareFils(NewObjects)
+fieldnames = {'Selected','Channel','TformMat','Color','PathData', 'Visible', 'PlotHandles', 'Data', 'TrackingResults'};
+NewObjects = rmfield(NewObjects,fieldnames);
+ref = get(hDynamicFilamentsGui.cUsePosEnd, 'Value')*2+1;
+str=cell(length(NewObjects),1);
+deleteobjects = false(length(NewObjects), 1);
+external_intensity = get(hDynamicFilamentsGui.eLoadIntensityFile, 'String');
+has_external_intensity = 0;
+if ~strcmp(external_intensity, '')
+    try
+        Custom = load([PathName external_intensity '.mat']);
+        if isfield(Custom, 'intensities')
+            has_external_intensity = 1;
+        end
+    catch
+    end
+end
+for i=1:length(NewObjects)
+    if has_external_intensity
+        NewObjects(i).Custom.Intensity = Custom.intensities{i};
+        NewObjects(i).Custom.type_intensity = external_intensity;
+    else
+        if isfield(NewObjects(i).Custom, 'Intensity')
+            NewObjects(i).Custom.type_intensity = 'From File';
+        else
+            NewObjects(i).Custom.type_intensity = 'None';
+        end
+    end
+    str{i}=NewObjects(i).Name;
+    typecomment=strfind(NewObjects(i).Comments,'type:');
+    if ~isempty(typecomment)
+        restcomment=NewObjects(i).Comments(typecomment+5:end);
+        space=strfind(restcomment(1:end),' ');
+        if isempty(space)
+            space=length(restcomment(1:end))+1;
+        end
+        NewObjects(i).Type=restcomment(1:space(1)-1);
+        if strcmp(NewObjects(i).Type, 'unknown')
+            deleteobjects(i) = 1;
+        end
+        if strcmp(NewObjects(i).Type(end), 'A')
+            NewObjects(i).Type = [NewObjects(i).Type(1:end-1) ' +Ase1'];
+        else
+            NewObjects(i).Type = [NewObjects(i).Type ' -Ase1'];
+        end
+    else
+        NewObjects(i).Type='n/a';
+    end
+    NewObjects(i).LoadedFromPath = PathName;
+    NewObjects(i).LoadedFromFile = FileName;
+end
+if ~get(hDynamicFilamentsGui.cAllowUnknownTypes, 'Value') % deletes MTs with unknown type
+    NewObjects(deleteobjects) = [];
+end
+for i=1:length(NewObjects)
+    tags = fJKfloat2tags(NewObjects(i).Results(:,end));
+    if ref==1
+        tiptags = tags(:,7);
+        tags = tags(:,6);
+    else
+        tiptags = tags(:,10);
+        tags = tags(:,9);
+    end
+    catastrophes = tags==10;
+    rescues = tags==15;
+    if ~get(hDynamicFilamentsGui.cAllowWithoutReference, 'Value')
+        refcomment=strfind(NewObjects(i).Comments,'ref:');
+        if ~isempty(refcomment)
+            RefPos=fJKGetRefData(NewObjects(i), ref, tags==11, AllObjects([AllObjects.Channel]>1));
+        else
+            RefPos=nan;
+        end
+    else
+        RefPos=fJKGetRefData(NewObjects(i), ref, tags==11, AllObjects([AllObjects.Channel]>1));
+    end
+    if isnan(RefPos)
+        DynResults = [nan nan nan 1];
+    else
+        DynResults = [NewObjects(i).Results(:,1:2) RefPos (1:size(RefPos,1))'];
+        for m=length(tags):-1:1
+            if tags(m)==9||isnan(RefPos(m))
+                DynResults(m,:) = [];
+                tags(m) = [];
+                tiptags(m) = [];
+            end
+        end
+    end
+    NewObjects(i).CatRes = [sum(catastrophes) sum(rescues)];
+    NewObjects(i).Tags = [tags tiptags];
+    NewObjects(i).DynResults = DynResults;
+    NewObjects(i).SegTagAuto=[NaN NaN NaN NaN NaN];
+    NewObjects(i).Velocity=nan(2,6);
+    NewObjects(i).Duration = 0;
+    NewObjects(i).Disregard = 0;
+end
+hDynamicFilamentsGui = getappdata(0,'hDynamicFilamentsGui');
+OldObjects = getappdata(hDynamicFilamentsGui.fig,'Objects');
+if ~isempty(OldObjects)
+    NewObjects = [OldObjects NewObjects];
+end
+setappdata(hDynamicFilamentsGui.fig,'Objects',NewObjects);
+set(hDynamicFilamentsGui.cUsePosEnd, 'Enable', 'off');
+setappdata(0,'hDynamicFilamentsGui',hDynamicFilamentsGui);
+SetTable()
 
 function LoadIntensityPerMAP(FileName, PathName)
 hDynamicFilamentsGui = getappdata(0,'hDynamicFilamentsGui');

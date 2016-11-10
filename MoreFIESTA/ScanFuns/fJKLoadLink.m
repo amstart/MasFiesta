@@ -29,6 +29,7 @@ for i = 1:numfiles
             PathName = [UniqueStrings{idwhichUnique(i)} RestPathStr{i}]; %LoadedFromPath{i};
         end
     end
+    [FileName, PathName]
     fun(FileName, PathName);
     suppress_progressdlg = 0;
     progressdlg(i);

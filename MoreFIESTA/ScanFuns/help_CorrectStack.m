@@ -4,9 +4,12 @@ function [ Stack ] = help_CorrectStack(Stack, PathName, PixSize)
 %Objects were loaded
 global ScanOptions
 if ~isfield(ScanOptions, 'help_CorrectStack') || ~isfield(ScanOptions.help_CorrectStack, 'CorrectColor')
-    button = fQuestDlg('What should be corrected?','What?',{'Color (loads ''offset.mat'')','Drift (loads ''drift.mat'')', 'Both'},'Both', 'noplacefig');
-    if strcmp(button,'Color (loads ''offset.mat'')')
+    button = fQuestDlg('What should be corrected?','What?',{'Nothing', 'Color (loads ''offset.mat'')','Drift (loads ''drift.mat'')', 'Both'},'Both', 'noplacefig');
+    if strcmp(button,'Nothing')
         ScanOptions.help_CorrectStack.CorrectColor = 0;
+        ScanOptions.help_CorrectStack.CorrectDrift = 0;
+    elseif strcmp(button,'Color (loads ''offset.mat'')')
+        ScanOptions.help_CorrectStack.CorrectColor = 1;
         ScanOptions.help_CorrectStack.CorrectDrift = 0;
     elseif strcmp(button,'Drift (loads ''drift.mat'')')
         ScanOptions.help_CorrectStack.CorrectColor = 0;

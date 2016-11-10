@@ -33,19 +33,29 @@ for m = find(FilSelect==1)
         ind = sub2ind([512,512], FObPos(:,2), FObPos(:,1));
         mask(ind) = 1;
         in=strel('octagon',3);
-%         space=strel('octagon',6); %Create morphological structuring element
-%         out=strel('octagon',9); %Create morphological structuring element
+        space=strel('octagon',6); %Create morphological structuring element
+        out=strel('octagon',9); %Create morphological structuring element
         try
-            vals=I(logical(imdilate(mask,in)));
+            I_in=I(logical(imdilate(mask,in)));
         catch
             Filament(m).Custom.Intensity{n}=nan;
             continue
         end
-%         vals{2}=I(logical(imdilate(mask,space)));
-%         vals{3}=I(logical(imdilate(mask,out)));
-        BackgroundOrder = sort(I(:));
-        background = BackgroundOrder(1:10000);
-        intensitymatrix = [median(vals) mean(vals) std(vals) sum(vals) median(background) mean(background) std(background)];
+        try
+            I_space=I(logical(imdilate(mask,space)));
+            I_space=I_space(I_space<median(I_space)+std(I_space));
+        catch
+            warning([Filament(m).Name '= space out of bounds']);
+            I_space=nan;
+        end
+        try
+            I_out=I(logical(imdilate(mask,out)));
+            I_out=I_out(I_out<median(I_out)+std(I_out));
+        catch
+            warning([Filament(m).Name '= out out of bounds']);
+            I_out=nan;
+        end
+        intensitymatrix = [median(I_in) mean(I_in) std(I_in) sum(I_in); median(I_space) mean(I_space) std(I_space) sum(I_space); median(I_out) mean(I_out) std(I_out) sum(I_out)];
         Filament(m).Custom.Intensity{n} = intensitymatrix;
     end
     ifil=ifil+1;
