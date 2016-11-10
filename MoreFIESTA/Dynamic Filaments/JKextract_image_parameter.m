@@ -1,5 +1,7 @@
+%I have used this to compare the intensity of the lamp to the intensity of
+%the laser (the LampLaser.mat files, which is a stack with two frames: the
+%first taken with the lamp, the second with the laser
 [FileName,PathName] = uigetfile(['Z:\Data\Jochen\' '*'], 'Select the stack file');
-clipboard('copy', splitpathname{4});
 load('Z:\Data\Jochen\params.mat')
 img=StackRead([PathName FileName]);
 newimg = cell(1,2);
@@ -22,4 +24,4 @@ newimg{1}(isnan(newimg{2}))= NaN;
 factors = imdivide(newimg{1}, newimg{2});
 factorvector = factors(~isnan(factors));
 splitpathname = strsplit(PathName, '\');
-num2clip([splitpathname{4} char(9) FileName(1) char(9)], [median(factorvector) mean(factorvector) std(factorvector) stats{1} stats{2}])
+num2clip_jochen([splitpathname{4} char(9) FileName(1) char(9)], [median(factorvector) mean(factorvector) std(factorvector) stats{1} stats{2}])

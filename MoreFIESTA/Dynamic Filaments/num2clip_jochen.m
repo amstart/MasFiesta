@@ -1,4 +1,5 @@
-function arraystring = num2clip(array)
+function arraystring = num2clip_jochen(string, array)
+%Jochen: Changed it to accept a string too
 %NUM2CLIP copies a numerical-array to the clipboard
 %   
 %   ARRAYSTRING = NUM2CLIP(ARRAY)
@@ -32,4 +33,4 @@ arraystring = arraystring((double(arraystring)~=32 | double(arraystringshift)~=3
 
 arraystring(double(arraystring)==32) = char(9); %convert the space characters to tab characters
 
-clipboard('copy',arraystring); %copy the result to the clipboard ready for pasting
+clipboard('copy',[string arraystring]); %copy the result to the clipboard ready for pasting
