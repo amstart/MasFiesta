@@ -55,7 +55,7 @@ for m = find(FilSelect==1)
             warning([Filament(m).Name '= out out of bounds']);
             I_out=nan;
         end
-        intensitymatrix = [median(I_in) mean(I_in) std(I_in) sum(I_in); median(I_space) mean(I_space) std(I_space) sum(I_space); median(I_out) mean(I_out) std(I_out) sum(I_out)];
+        intensitymatrix = [median(I_in) mean(I_in) std(I_in) sum(I_in); median(I_space) mean(I_space) std(I_space) sum(I_space); median(I_out) mean(I_out) std(I_out) length(I_in)];
         Filament(m).Custom.Intensity{n} = intensitymatrix;
     end
     ifil=ifil+1;

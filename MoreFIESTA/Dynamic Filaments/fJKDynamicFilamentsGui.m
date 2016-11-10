@@ -225,12 +225,12 @@ hDynamicFilamentsGui.cIncludeNonTypePoints = uicontrol('Parent',hDynamicFilament
                                          'Position',[.75 .7 .25 .05],'Fontsize',10,'TooltipString', tooltipstr, 'Tag', 'cIncludeNonTypePoints',...
                                          'String','Include non-type datapoints','BackgroundColor',c,'HorizontalAlignment','center');       
                                      
-hDynamicFilamentsGui.tVelocity = uicontrol('Parent',hDynamicFilamentsGui.pOptions,'Units','normalized','BackgroundColor',c,...
-                             'Position',[0.05 0.5 0.29 0.125],'String','Track Velocity:','Style','text','Tag','tVelocity','HorizontalAlignment','left');     
+hDynamicFilamentsGui.tMethod_TrackValue = uicontrol('Parent',hDynamicFilamentsGui.pOptions,'Units','normalized','BackgroundColor',c,...
+                             'Position',[0.05 0.5 0.29 0.125],'String','Determine track value by:','Style','text','Tag','tVelocity','HorizontalAlignment','left');     
 
-hDynamicFilamentsGui.lSegmentVelocityType = uicontrol('Parent',hDynamicFilamentsGui.pOptions,'Units','normalized','Callback','fJKDynamicFilamentsGui(''SetTable''));',...
-                            'Position',[0.3 0.5 0.65 0.125],'BackgroundColor','white','String',{'median (magenta)','end-to-end (green)', 'linear fit (blue)', 'minimum', 'maximum', 'standard dev'},...
-                            'Value',3,'Style','popupmenu','Tag','lSegmentVelocityType','Enable','on');   
+hDynamicFilamentsGui.lMethod_TrackValue = uicontrol('Parent',hDynamicFilamentsGui.pOptions,'Units','normalized','Callback','fJKDynamicFilamentsGui(''SetTable'');',...
+                            'Position',[0.3 0.5 0.65 0.125],'BackgroundColor','white','String',{'median', 'mean', 'end-start', 'minimum', 'maximum', 'standard dev', 'linear fit (only for velocity) or sum (only for MAP count)'},...
+                            'Value',1,'Style','popupmenu','Tag','lMethod_TrackValue','Enable','on');   
                         
 tooltipstr=sprintf(['Applies a walking average to the X-Variable (number indicates over how many points). 1 = no smoothing. Only has effect on "X vs Y" and "Events along X during Y" plots.\n Uses "nanfastsmooth" (google it).']);
     
@@ -267,7 +267,7 @@ hDynamicFilamentsGui.lPlot_YVar = uicontrol('Parent',hDynamicFilamentsGui.pOptio
 % hDynamicFilamentsGui.YUnits = {'s', 'nm', 'nm/s', '1', '1/s'};
           
 hDynamicFilamentsGui.lChoosePlot = uicontrol('Parent',hDynamicFilamentsGui.pOptions,'Units','normalized','Callback','fJKDynamicFilamentsGui(''SetMenu'',getappdata(0,''hDynamicFilamentsGui''));',...
-                            'Position',[0.3 0.35 0.3 0.125],'BackgroundColor','white','String',{'X vs Y', 'Events along X during Y', 'Events', 'Velocities','Dataset (rough)', 'Intensity Vs Distance Weighted Velocity'}, 'TooltipString', tooltipstr,'Style','popupmenu','Tag','lChoosePlot','Enable','on');
+                            'Position',[0.3 0.35 0.3 0.125],'BackgroundColor','white','String',{'X vs Y', 'Events along X during Y', 'Events', 'Box(X)','Dataset (rough)', 'Intensity Vs Distance Weighted Velocity'}, 'TooltipString', tooltipstr,'Style','popupmenu','Tag','lChoosePlot','Enable','on');
                         
 hDynamicFilamentsGui.bDoPlot = uicontrol('Parent',hDynamicFilamentsGui.pOptions,'Units','normalized','Callback',@UpdateOptions,...
                                    'Position',[0.65 0.4 0.12 0.05],'String','Plot','Style','pushbutton', 'FontSize', 15); 
@@ -401,13 +401,13 @@ hDynamicFilamentsGui.cUsePosEnd = uicontrol('Parent',hDynamicFilamentsGui.pLoadO
 tooltipstr=sprintf(['If you have the intensities in extra files within the same folder as the original file, provide the filename here to load them (without .mat)']);
                                      
 hDynamicFilamentsGui.eLoadIntensityFile = uicontrol('Parent',hDynamicFilamentsGui.pLoadOptions,'Style','edit','Units','normalized',...
-                                         'Position',[.1 .2 0.8 .2],'Tag','eLoadIntensityFile','Fontsize',10, 'TooltipString', tooltipstr,...
+                                         'Position',[.1 .3 0.8 .2],'Tag','eLoadIntensityFile','Fontsize',10, 'TooltipString', tooltipstr,...
                                          'UserData', '.mat', 'String','','BackgroundColor','white','HorizontalAlignment','center');  
                                             
-tooltipstr=sprintf(['If you have extra data you can provide the filename here (without .mat)']);
+tooltipstr=sprintf(['If you have custom data you can provide the filename here (without .mat)']);
                                      
-hDynamicFilamentsGui.eLoadOtherFile = uicontrol('Parent',hDynamicFilamentsGui.pLoadOptions,'Style','edit','Units','normalized',...
-                                         'Position',[.1 .15 0.8 .2],'Tag','eLoadOtherFile','Fontsize',10, 'TooltipString', tooltipstr,...
+hDynamicFilamentsGui.eLoadCustomDataFile = uicontrol('Parent',hDynamicFilamentsGui.pLoadOptions,'Style','edit','Units','normalized',...
+                                         'Position',[.1 .05 0.8 .2],'Tag','eLoadCustomDataFile','Fontsize',10, 'TooltipString', tooltipstr,...
                                          'UserData', '.mat', 'String','','BackgroundColor','white','HorizontalAlignment','center');    
 
 if nargin == 0                                                                
@@ -537,7 +537,7 @@ if strcmp(get(gcf, 'CurrentCharacter'),'s')
 %     export_fig([QuicksaveDir filesep strrep(get(gcf, 'Name'), ' | ', '_')], '-png', '-nocrop');
     filename = strrep(get(gcf, 'Name'), ' | ', '_');
     optionsstart = strfind(filename, '- ');
-    filename = inputdlg('Filename?', 'Filename?', 1, filename(1:optionsstart));
+    filename = inputdlg('Filename?', 'Filename?', 1, {filename(1:optionsstart)});
     saveas(gcf,[QuicksaveDir filesep filename{1} '.png'], 'png');
 %     savefig(gcf,[QuicksaveDir filesep strrep(get(gcf, 'Name'), ' | ', '_') '.fig']);
 end
@@ -619,8 +619,9 @@ if FileName~=0
         end
         aligned = 1;
         driftcorrected = 1;
+        RefObjects = AllObjects([AllObjects.Channel]>1);
         if ~isempty(answer)
-            for RefObject = AllObjects([AllObjects.Channel]~=1);
+            for RefObject = RefObjects;
                 if RefObject.TformMat(3,3)==1;
                     aligned = 0;
                 end
@@ -642,30 +643,42 @@ if FileName~=0
                 end
             end
         end
-        PrepareFils(NewObjects);
+        PrepareFils(NewObjects, RefObjects, PathName, FileName);
     end
 end
 
-function PrepareFils(NewObjects)
+function PrepareFils(NewObjects, RefObjects, PathName, FileName)
+hDynamicFilamentsGui = getappdata(0,'hDynamicFilamentsGui');
+ref = get(hDynamicFilamentsGui.cUsePosEnd, 'Value')*2+1;
 fieldnames = {'Selected','Channel','TformMat','Color','PathData', 'Visible', 'PlotHandles', 'Data', 'TrackingResults'};
 NewObjects = rmfield(NewObjects,fieldnames);
-ref = get(hDynamicFilamentsGui.cUsePosEnd, 'Value')*2+1;
 str=cell(length(NewObjects),1);
 deleteobjects = false(length(NewObjects), 1);
 external_intensity = get(hDynamicFilamentsGui.eLoadIntensityFile, 'String');
 has_external_intensity = 0;
 if ~strcmp(external_intensity, '')
     try
-        Custom = load([PathName external_intensity '.mat']);
-        if isfield(Custom, 'intensities')
+        ExtIntensity = load([PathName external_intensity '.mat']);
+        if isfield(ExtIntensity, 'intensities')
             has_external_intensity = 1;
+        end
+    catch
+    end
+end
+custom_data = get(hDynamicFilamentsGui.eLoadCustomDataFile, 'String');
+has_custom_data = 0;
+if ~strcmp(custom_data, '')
+    try
+        CustomData = load([PathName custom_data '.mat']);
+        if isfield(CustomData, 'intensities')
+            has_custom_data = 1;
         end
     catch
     end
 end
 for i=1:length(NewObjects)
     if has_external_intensity
-        NewObjects(i).Custom.Intensity = Custom.intensities{i};
+        NewObjects(i).Custom.Intensity = ExtIntensity.intensities{i};
         NewObjects(i).Custom.type_intensity = external_intensity;
     else
         if isfield(NewObjects(i).Custom, 'Intensity')
@@ -673,6 +686,12 @@ for i=1:length(NewObjects)
         else
             NewObjects(i).Custom.type_intensity = 'None';
         end
+    end
+    if has_custom_data
+        NewObjects(i).Custom.CustomData = CustomData.intensities{i};
+        NewObjects(i).Custom.type_custom = custom_data;
+    else
+        NewObjects(i).Custom.type_custom = 'None';
     end
     str{i}=NewObjects(i).Name;
     typecomment=strfind(NewObjects(i).Comments,'type:');
@@ -714,12 +733,12 @@ for i=1:length(NewObjects)
     if ~get(hDynamicFilamentsGui.cAllowWithoutReference, 'Value')
         refcomment=strfind(NewObjects(i).Comments,'ref:');
         if ~isempty(refcomment)
-            RefPos=fJKGetRefData(NewObjects(i), ref, tags==11, AllObjects([AllObjects.Channel]>1));
+            RefPos=fJKGetRefData(NewObjects(i), ref, tags==11, RefObjects);
         else
             RefPos=nan;
         end
     else
-        RefPos=fJKGetRefData(NewObjects(i), ref, tags==11, AllObjects([AllObjects.Channel]>1));
+        RefPos=fJKGetRefData(NewObjects(i), ref, tags==11, RefObjects);
     end
     if isnan(RefPos)
         DynResults = [nan nan nan 1];
@@ -737,11 +756,10 @@ for i=1:length(NewObjects)
     NewObjects(i).Tags = [tags tiptags];
     NewObjects(i).DynResults = DynResults;
     NewObjects(i).SegTagAuto=[NaN NaN NaN NaN NaN];
-    NewObjects(i).Velocity=nan(2,6);
+    NewObjects(i).Velocity=nan(2,7);
     NewObjects(i).Duration = 0;
     NewObjects(i).Disregard = 0;
 end
-hDynamicFilamentsGui = getappdata(0,'hDynamicFilamentsGui');
 OldObjects = getappdata(hDynamicFilamentsGui.fig,'Objects');
 if ~isempty(OldObjects)
     NewObjects = [OldObjects NewObjects];
@@ -839,13 +857,13 @@ cutoff=str2double(get(hDynamicFilamentsGui.eRescueCutoff, 'String'));
 Objects = getappdata(hDynamicFilamentsGui.fig,'Objects');
 Tracks = getappdata(hDynamicFilamentsGui.fig,'Tracks');
 for n=1:length(Tracks)
-    if abs(Tracks(n).Event-4.9)<0.1 && Tracks(n).Data(end,2)<cutoff
+    if abs(Tracks(n).Event-4.9)<0.1 && Tracks(n).DistanceEventEnd<cutoff
         Tracks(n).TypeTag = [Tracks(n).Type ' tag4'];
     end
 end
 str=cell(length(Objects),1);
 for n = 1:length(Objects) 
-    velocity=Objects(n).Velocity(:,get(hDynamicFilamentsGui.lSegmentVelocityType, 'Value'));
+    velocity=Objects(n).Velocity(:,get(hDynamicFilamentsGui.lMethod_TrackValue, 'Value'));
     if isempty(strfind(Objects(n).Comments, '+'))
         hascomments=' ';
     else
@@ -928,12 +946,8 @@ if ~isempty(Objects)&&~isempty(Selected)
                 plot(hDynamicFilamentsGui.aPlot,t0,max(dseg)+d0/10,'LineStyle', 'none', 'Marker', '*', 'MarkerEdgeColor',c);
             end
         end
-        plot(hDynamicFilamentsGui.aPlot,tseg,tracks(i).Velocity(1).*(tseg-t0)+d0,'m-.');
-        plot(hDynamicFilamentsGui.aPlot,tseg,tracks(i).Velocity(2).*(tseg-t0)+d0,'g-.');
-        plot(hDynamicFilamentsGui.aPlot,tseg,tracks(i).Velocity(3).*(tseg-t0)+d0,'b-.');
-        plot(hDynamicFilamentsGui.aVelPlot,tseg,repmat(tracks(i).Velocity(1), 1, length(tseg)),'m-.');
-        plot(hDynamicFilamentsGui.aVelPlot,tseg,repmat(tracks(i).Velocity(2), 1, length(tseg)),'g-.');
-        plot(hDynamicFilamentsGui.aVelPlot,tseg,repmat(tracks(i).Velocity(3), 1, length(tseg)),'b-.');
+        plot(hDynamicFilamentsGui.aPlot,tseg,tracks(i).Velocity(end).*(tseg-t0)+d0,'b-.');
+        plot(hDynamicFilamentsGui.aVelPlot,tseg,repmat(tracks(i).Velocity(end), 1, length(tseg)),'b-.');
         plot(hDynamicFilamentsGui.aPlot,tseg,dseg,[c '-']);
         if tracks(i).end_first_subsegment
             plot(hDynamicFilamentsGui.aPlot,tseg(tracks(i).end_first_subsegment),dseg(tracks(i).end_first_subsegment),'LineStyle', 'none', 'Marker', 'd', 'MarkerEdgeColor',c);
@@ -1094,7 +1108,7 @@ else
         case 3
             EventPlot(group, Options.eRescueCutoff.val);
         case 4
-            VelocityPlot(group, Options);
+            BoxPlot(group, Options);
         case 5
             DataPlot(hDynamicFilamentsGui);
         case 6
@@ -1109,7 +1123,7 @@ ycolumn = Options.lPlot_YVar.val;
 if Options.mXReference.val == 5
     if ycolumn == 3
         for i=1:length(Tracks)
-            Tracks(i).Data(:,3) = Tracks(i).Data(:,3)-Tracks(i).Velocity(Options.lSegmentVelocityType.val);
+            Tracks(i).Data(:,3) = Tracks(i).Data(:,3)-Tracks(i).Velocity(Options.lMethod_TrackValue.val);
         end
     else
         return
@@ -1427,38 +1441,56 @@ for i=1:2
     end
 end
 
-function VelocityPlot(group, Options)
+function BoxPlot(group, Options)
 % subplot = @(m,n,p) subtightplot (m, n, p, [0.08 0.08], [0.08 0.08], [0.08 0.02]);
-velstr = Options.lSegmentVelocityType.print;
-[type, AnalyzedTracks, ~]=SetType(Options.cPlotGrowingTracks.val,0);
 hold on;
-velmethod=velstr(1:strfind(velstr,'(')-2);
-if isempty(velmethod)
-    velmethod=velstr;
+x_var = Options.lPlot_XVar.val;
+if x_var == 4
+    [type, AnalyzedTracks, ~]=SetType(Options.cPlotGrowingTracks.val,1);
+else
+    [type, AnalyzedTracks, ~]=SetType(Options.cPlotGrowingTracks.val,0);
 end
 if Options.cPlotGrowingTracks.val==1
     LongTracks=[AnalyzedTracks.Duration]>100;
     AnalyzedTracks=AnalyzedTracks(LongTracks);
     type=type(LongTracks);
-    str=['Growth Velocity (' velmethod '). Only tracks > 100s evaluated)'];
-else
-    str=['Shrink Velocity (' velmethod ')'];
 end
-vel=vertcat(AnalyzedTracks.Velocity);
-vel=vel(:,Options.lSegmentVelocityType.val);
+x_unit = Options.lPlot_XVar.str;
+x_title = Options.lPlot_XVar.print;
+methodstrtmp = Options.lMethod_TrackValue.print;
+methodstr=methodstrtmp(1:strfind(methodstrtmp,'(')-2);
+if isempty(methodstr)
+    methodstr=methodstrtmp;
+end
+if Options.cPlotGrowingTracks.val==1
+    str=[x_title ' (' methodstr '). Only tracks > 100s evaluated)'  ' [' x_unit ']'];
+else
+    str=[x_title ' (' methodstr ')' ' [' x_unit ']'];
+end
+switch x_var
+    case 1
+        datavec=vertcat(AnalyzedTracks.Time);
+    case 2
+        datavec=vertcat(AnalyzedTracks.Location);
+    case 3
+        datavec=vertcat(AnalyzedTracks.Velocity);
+    case 4
+        datavec=vertcat(AnalyzedTracks.Intensity);
+end
+datavec=datavec(:,Options.lMethod_TrackValue.val);
 %cla('reset');
-if isempty(vel)
+if isempty(datavec)
     text(0.3,0.5,'No data or path available for any objects','Parent','FontWeight','bold','FontSize',16);
     set('Visible','off');
     legend('off');
 else
     %try
         uniquetypes=unique(type, 'stable');
-        b=boxplot(vel, type);
+        b=boxplot(datavec, type);
         for j=1:length(uniquetypes)
-            typevel=vel(cellfun(@(x) strcmp(uniquetypes{j}, x), type));
-            plot(repmat(j, length(typevel),1), typevel, 'o', 'Color', [217;95;2]/255);
-            text(j,mean(typevel),{num2str(median(typevel),3) num2str(length(typevel))}, 'HorizontalAlignment', 'center', 'VerticalAlignment', 'middle');
+            type_datavec=datavec(cellfun(@(x) strcmp(uniquetypes{j}, x), type));
+            plot(repmat(j, length(type_datavec),1), type_datavec, 'o', 'Color', [217;95;2]/255);
+            text(j,mean(type_datavec),{num2str(median(type_datavec),3) num2str(length(type_datavec))}, 'HorizontalAlignment', 'center', 'VerticalAlignment', 'middle');
         end
         set(gca,'XTickLabel','');
         set(gca, 'XTickLabelMode','manual');
@@ -1472,7 +1504,7 @@ else
         set(h,'Visible','off');
     %catch
     %end
-    ylabel([str ' [nm/s]']);
+    ylabel(str);
 end
 hold off
 
@@ -1500,7 +1532,7 @@ for n = 1:length(Objects)
             end
     end
     group{n}=[prepend ' \_ ' Objects(n).Type];
-    hasvelocity(n) = ~all(isnan(Objects(n).Velocity(:,get(hDynamicFilamentsGui.lSegmentVelocityType, 'Value'))));
+    hasvelocity(n) = ~all(isnan(Objects(n).Velocity(:,get(hDynamicFilamentsGui.lMethod_TrackValue, 'Value'))));
     duration(n) = Objects(n).Duration;
     disregard(n) = Objects(n).Disregard;
 end

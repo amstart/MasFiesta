@@ -1,7 +1,7 @@
 function [Objects, Tracks] = fJKSegment(Options)
 hDynamicFilamentsGui = getappdata(0,'hDynamicFilamentsGui');
-Tracks=struct('Name', [], 'File', [], 'Type', [], 'Data', [NaN NaN NaN NaN], 'Velocity', [NaN NaN NaN], ...
-    'Duration', [NaN], 'Time', [NaN],  'Event', [NaN], 'EventEnd', [NaN], 'MTend', []); 
+Tracks=struct('Name', [], 'File', [], 'Type', [], 'Data', [NaN NaN NaN NaN], 'Velocity', nan(1,7), ...
+    'Event', [NaN], 'DistanceEventEnd', [NaN]);  %these are required for the SetTable function to work upon startup
 tagnum=4;
 Objects = getappdata(hDynamicFilamentsGui.fig,'Objects');
 trackN=1;
@@ -70,7 +70,7 @@ for n = 1:length(Objects)
     segtagauto(segmenti, 1:4)=[segmentstart tagstocheck(end) autotags(tagstocheck(end)) d(end)]; %add last segment
     segtagauto=segtagauto(~isnan(segtagauto(:,1)), :); %remove unused rows
     [segtagauto, autotags] = find_borders_and_pauses(segtagauto, autotags, v, t, d, Options);
-    velocity=nan(size(segtagauto,1),6);
+    velocity=nan(size(segtagauto,1),7);
     istype=false(size(segtagauto,1),1);
     segtagauto=segtagauto(segtagauto(:,1)<segtagauto(:,2),:); %remove nonsense tracks
     for m=2:size(segtagauto,1)
@@ -99,13 +99,15 @@ for n = 1:length(Objects)
             continue
         end
         segvel=[v(starti:endi-1); nan]; %why, see Calcvelocity()
+        segt=t(starti:endi);
+        segd=d(starti:endi);
+        segi=intensity(starti:endi);
         Tracks(trackN).Name=Objects(n).Name;
         Tracks(trackN).Index=[int2str(n) '/' int2str(trackN)];
         Tracks(trackN).File=Objects(n).File;
         Tracks(trackN).Type=Objects(n).Type;
-        Tracks(trackN).Duration=t(endi)-t(starti);
+        Tracks(trackN).Duration=segt(end)-segt(1);
         Objects(n).Duration=Objects(n).Duration+Tracks(trackN).Duration;
-        Tracks(trackN).Time=(t(endi)+t(starti))/2;
         Tracks(trackN).Event=segtagauto(m,3);
         if m==1 || abs(mod(Tracks(trackN-1).Event,1)-0.8)<0.05
             Tracks(trackN).PreviousEvent=0;
@@ -122,14 +124,21 @@ for n = 1:length(Objects)
         if Options.eSubEnd.val && istype(m)
             Tracks(trackN).start_last_subsegment = FindSubsegments(segvel, -1, Options.eSubEnd.val, Tracks(trackN).minindex);
         end
-        Tracks(trackN).DistanceEventEnd=d(endi);
-        Tracks(trackN).Data=[t(starti:endi) d(starti:endi) segvel intensity(starti:endi) autotags(starti:endi)];
-        Tracks(trackN).HasIntensity=~all(isnan(intensity(starti:endi)));
+        Tracks(trackN).DistanceEventEnd=segd(end);
+        Tracks(trackN).Data=[segt segd segvel segi autotags(starti:endi)];
+        Tracks(trackN).HasIntensity=~all(isnan(segi));
         segtagauto(m, 5)=trackN;
         segtagauto(m, 4)=Tracks(trackN).DistanceEventEnd;
-        fitp=polyfit(t(starti:endi),d(starti:endi),1);
-        velocity(m,:) = [nanmedian(segvel) (d(endi)-d(starti))/(t(endi)-t(starti)) fitp(1) min(segvel) max(segvel) nanstd(segvel)];
+        fitp=polyfit(segt,segd,1);
+        velocity(m,:) = [nanmean(segvel) nanmedian(segvel) (segd(end)-segd(1))/(segt(end)-segt(1)) min(segvel) max(segvel) nanstd(segvel) fitp(1)];
         Tracks(trackN).Velocity=velocity(m,:);
+        Tracks(trackN).Time=double([mean(segt) median(segt) segt(end)-segt(1) min(segt) max(segt) std(segt)]);
+        Tracks(trackN).Location=double([mean(segd) median(segd) segd(end)-segd(1) min(segd) max(segd) std(segd)]);
+        if Tracks(trackN).HasIntensity
+            Tracks(trackN).Intensity=double([mean(segi) median(segi) segi(end)-segi(1) min(segi) max(segi) std(segi) sum(segi)]);
+        else
+            Tracks(trackN).Intensity=nan(1, 5);
+        end
         Tracks(trackN).Selected=0;
         trackN=trackN+1;
     end
