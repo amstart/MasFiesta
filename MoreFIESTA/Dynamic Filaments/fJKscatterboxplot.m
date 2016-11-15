@@ -1,28 +1,16 @@
-function fJKscatterboxplot(plotx, ploty, plotN)
-[middle, edgesmid, nelements, allpointsx, allpointsy] = histcounts2(plotx, ploty);
-marker={'d','o'};
-selectedpoints=logical(plotN(:,2));
-for m=1:2
-    if m==2
-        selectedpoints=~selectedpoints;
-    end
-    plotNnew=plotN(:,1);
-    plotNnew=plotNnew(selectedpoints);
-    uniquetracks=unique(plotNnew);
-    clength=length(uniquetracks);
-    plotxnew=plotx(selectedpoints);
-    plotynew=ploty(selectedpoints);
-    try
-        cmap = distinguishable_colors(clength);
-    catch
-        cmap = linspecer(clength);
-    end
-    plotc=zeros(size(plotNnew,1),3);
-    for ci=1:size(plotNnew,1)
-        plotc(ci,:)=cmap(find(uniquetracks==plotNnew(ci)),:);
-    end
-    scatter(plotxnew, plotynew, 50, plotc, marker{m}); drawnow;
-end
+function fJKscatterboxplot(plot_x, plot_y, points_info)
+[middle, edgesmid, nelements, allpointsx, allpointsy] = histcounts2(plot_x, plot_y);
+gscatter(plot_x, plot_y, points_info, [], 'o')
+%     try
+%         cmap = distinguishable_colors(clength);
+%     catch
+%         cmap = linspecer(clength,'qualitative');
+%     end
+%     plotc=zeros(size(plotNnew,1),3);
+%     for ci=1:size(plotNnew,1)
+%         plotc(ci,:)=cmap(find(uniquetracks==plotNnew(ci)),:);
+%     end
+%     scatter(plotxnew, plotynew, 50, plotc, marker{m}); drawnow;
 b=boxplot(allpointsy, allpointsx+0.5, 'Color', 'k', 'position', unique(allpointsx), 'outliersize', 0.0001);
 %         hMarkers = plothandle{j}.MarkerHandle;
 %         hMarkers.get;
@@ -37,7 +25,7 @@ for m=1:length(nelements)
         text(double(edgesmid(m)), middle(m), num2str(nelements(m)), 'HorizontalAlignment', 'center');
     end
 end
-
+set(gca,'Color',[0.9 0.9 0.9]);
 
 function [middle, edgesmid, nelements, allpointsx, allpointsy] = histcounts2(plotx, ploty)
 %HISTCOUNTS2D Summary of this function goes here

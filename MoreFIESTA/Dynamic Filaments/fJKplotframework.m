@@ -1,4 +1,4 @@
-function [f] = fJKplotframework(Objects, type, exclude, refmode, isfrequencyplot, labels, units, events)
+function [f] = fJKplotframework(Objects, type, exclude, refmode, isfrequencyplot, curent_y_label, units, events)
 %SCATTERPLOT Summary of this function goes here
 %   Detailed explanation goes here
 additionalplots = 1;
@@ -8,7 +8,7 @@ if additionalplots>1
     figure(mainfig);
 end
 subplot = @(m,n,p) subtightplot (m, n, p, [0.08 0.08], [0.08 0.08], [0.08 0.02]);
-[labelx, labely, DelObjects] = SetUpMode(refmode, isfrequencyplot, events, [Objects.PreviousEvent]', units, labels);
+[labelx, labely, DelObjects] = SetUpMode(refmode, isfrequencyplot, events, [Objects.PreviousEvent]', units, curent_y_label);
 [uniquetype, ~, idvec] = unique(type,'stable');
 if isfrequencyplot
     for i = 1:length(uniquetype)
@@ -28,42 +28,36 @@ for j=1:ntypes    %Loop through all groups to be plotted, each group gets its ow
     if j>1 && ~isvalid(f)
         return
     end
+    curent_y_label = '';
     switch ntypes
         case 6
             f=subplot(2,3,j);
             if j==1 || j==4
-                ylabel(labely);
+                curent_y_label = labely;
             end
         case {7, 8}
             f=subplot(2,4,j);
             if j==1 || j==5
-                ylabel(labely);
+                curent_y_label = labely;
             end
         case {9, 10}
             f=subplot(2,5,j);
             if j==1 || j==6
-                ylabel(labely);
+                curent_y_label = labely;
             end
         otherwise
             f=subplot(1,ntypes,j);
             if j==1
-                ylabel(labely);
+                curent_y_label = labely;
             end
     end
-    hold on;
     title(uniquetype{j});
-    xlabel(labelx);
+    hold on;
     correct_type=cellfun(@(x) strcmp(x, uniquetype(j)),type);
     PlotObjects=Objects(correct_type);
     [plotx, ploty, ploteventends] = CalculateReference(PlotObjects, events(correct_type), refmode, isfrequencyplot, exclude);
     %plotx and ploty are vectors with all datapoints of the group to be plotted
-    selectedtracks=[PlotObjects.Selected];
-    cellN=cell(sum(correct_type),1);
-    for k=1:sum(correct_type)
-        cellN{k}=repmat([k selectedtracks(k)],size(PlotObjects(k).X(1+exclude:end-exclude,:)),1);
-    end
-    plotN=vertcat(cellN{:}); %plotN is a matrix which is used to identify:
-    %which track a point belongs (first column) and whether it is selected (second column)
+    %which track a point belongs to (first column) and whether it is selected (second column)
     if additionalplots==2
         figure(statfig);
         fqq=subplot(1,ntypes,j);
@@ -73,10 +67,18 @@ for j=1:ntypes    %Loop through all groups to be plotted, each group gets its ow
         axes(f);drawnow;
     end
     if isfrequencyplot
-        fJKfrequencyvsXplot(plotx, ploty, plotN, selectedtracks, ploteventends, units);
+        fJKfrequencyvsXplot(plotx, ploty, ploteventends, units);
     else
-        fJKscatterboxplot(plotx, ploty, plotN);
+        point_info=cell(sum(correct_type),1);
+        for k=1:sum(correct_type)
+            point_info{k}=repmat(k,size(PlotObjects(k).X(1+exclude:end-exclude,:)),1);
+        end
+        point_info=vertcat(point_info{:}); %plotN is a matrix which is used to identify:
+        fJKscatterboxplot(plotx, ploty, point_info);
+        legend({PlotObjects.Name}, 'Interpreter', 'none');
     end
+    xlabel(labelx);
+    ylabel(curent_y_label);
 end
 
 
