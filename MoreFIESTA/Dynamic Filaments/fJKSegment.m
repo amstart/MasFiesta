@@ -23,9 +23,20 @@ for n = 1:length(Objects)
     d = DynResults(:,3);
     intensity=fJKPlotIntensity(Objects(n),Options.eIevalLength.val,Options.cUsePosEnd.val+1);
     if isfield(Objects(n).Custom, 'IntensityPerMAP')
-        intensity = intensity(DynResults(:,4))./Objects(n).Custom.IntensityPerMAP;
+        intensity = intensity(DynResults(:,4))./Objects(n).Custom.IntensityPerMAP; %DynResults(:,4) is just a vector telling you in which rows 
     else
-        intensity = intensity(DynResults(:,4));
+        intensity = intensity(DynResults(:,4));                                    %of the original data the row data can be found, i.e. 1 2 4.. 542 323
+    end
+    if ~strcmp(Options.eLoadCustomDataFile, '.mat')
+        if isfield(Objects(n).Custom, 'CustomData')
+            custom_data = Objects(n).Custom.CustomData;
+            custom_data = fJKread_custom_data(custom_data);
+            custom_data = custom_data(DynResults(:,4));  
+            has_custom_data = 1;
+        else
+            custom_data = nan(size(t));
+            has_custom_data = 0;
+        end
     end
     autotags = ones(size(t));
     ddiff = diff(d);
@@ -101,6 +112,7 @@ for n = 1:length(Objects)
         segvel=[v(starti:endi-1); nan]; %why, see Calcvelocity()
         segt=t(starti:endi);
         segd=d(starti:endi);
+        segc=custom_data(starti:endi);
         segi=intensity(starti:endi);
         Tracks(trackN).Name=Objects(n).Name;
         Tracks(trackN).Index=[int2str(n) '/' int2str(trackN)];
@@ -125,7 +137,7 @@ for n = 1:length(Objects)
             Tracks(trackN).start_last_subsegment = FindSubsegments(segvel, -1, Options.eSubEnd.val, Tracks(trackN).minindex);
         end
         Tracks(trackN).DistanceEventEnd=segd(end);
-        Tracks(trackN).Data=[segt segd segvel segi autotags(starti:endi)];
+        Tracks(trackN).Data=[segt segd segvel segi autotags(starti:endi) segc];
         Tracks(trackN).HasIntensity=~all(isnan(segi));
         segtagauto(m, 5)=trackN;
         segtagauto(m, 4)=Tracks(trackN).DistanceEventEnd;
@@ -140,6 +152,7 @@ for n = 1:length(Objects)
             Tracks(trackN).Intensity=nan(1, 5);
         end
         Tracks(trackN).Selected=0;
+        Tracks(trackN).HasCustomData = has_custom_data;
         trackN=trackN+1;
     end
     Objects(n).SegTagAuto=segtagauto;

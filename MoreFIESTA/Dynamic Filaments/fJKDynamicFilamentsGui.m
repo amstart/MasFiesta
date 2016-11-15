@@ -44,6 +44,8 @@ switch func
         OpenProtocol;
     case 'Select'
         Select;
+    case 'Workspace'
+        Workspace;
 end
 
 function Create(varargin)
@@ -96,11 +98,15 @@ hDynamicFilamentsGui.lSortFilaments = uicontrol('Parent',hDynamicFilamentsGui.fi
                             'Position',[0.1 0.565 0.05 0.025],'Fontsize',10,'BackgroundColor','white','String',{'By Date','By Type'},'Value',1,'Style','popupmenu','Tag','lSortFilaments','Enable','on','TooltipString', tooltipstr);   
                         
 hDynamicFilamentsGui.bSelectAll = uicontrol('Parent',hDynamicFilamentsGui.fig,'Style','pushbutton','Units','normalized',...
-                              'Position',[.175 0.57 0.06 .025],'Tag','bSelectAll','Fontsize',10,...
+                              'Position',[.17 0.57 0.05 .025],'Tag','bSelectAll','Fontsize',10,...
                               'String','Select All','Callback','fJKDynamicFilamentsGui(''Select'');');   
                           
+hDynamicFilamentsGui.bIntoWorkSpace = uicontrol('Parent',hDynamicFilamentsGui.fig,'Style','pushbutton','Units','normalized',...
+                              'Position',[.25 0.57 0.05 .025],'Tag','bSelectAll','Fontsize',10,...
+                              'String','Into Workspace','Callback','fJKDynamicFilamentsGui(''Workspace'');');   
+                          
 hDynamicFilamentsGui.bDelete = uicontrol('Parent',hDynamicFilamentsGui.fig,'Style','pushbutton','Units','normalized',...
-                              'Position',[.3 0.57 0.06 .025],'Tag','bDelete','Fontsize',10,...
+                              'Position',[.325 0.57 0.05 .025],'Tag','bDelete','Fontsize',10,...
                               'String','Delete Selected','Callback','fJKDynamicFilamentsGui(''Delete'');');    
                           
 hDynamicFilamentsGui.bTIF = uicontrol('Parent',hDynamicFilamentsGui.fig,'Units','normalized','Callback','fJKDynamicFilamentsGui(''OpenInfo'');',...
@@ -257,14 +263,14 @@ hDynamicFilamentsGui.bUpdatePlots = uicontrol('Parent',hDynamicFilamentsGui.pOpt
                                
 tooltipstr=sprintf(['Set the X variable.']);
                                
-hDynamicFilamentsGui.lPlot_XVar = uicontrol('Parent',hDynamicFilamentsGui.pOptions,'Units','normalized', 'UserData', {'s', 'nm', 'nm/s', '1'},...
-                            'Position',[0.3 0.4 0.2 0.125],'BackgroundColor','white','String',{'time', 'location', 'velocity', 'MAP count'}, 'TooltipString', tooltipstr,'Style','popupmenu','Tag','lPlot_XVar','Enable','on');
+hDynamicFilamentsGui.lPlot_XVar = uicontrol('Parent',hDynamicFilamentsGui.pOptions,'Units','normalized', 'UserData', {'s', 'nm', 'nm/s', '1', '', '?'},...
+                            'Position',[0.3 0.4 0.2 0.125],'BackgroundColor','white','String',{'time', 'location', 'velocity', 'MAP count', 'auto tags' ,'custom data'}, 'TooltipString', tooltipstr,'Style','popupmenu','Tag','lPlot_XVar','Enable','on');
                        
 
 tooltipstr=sprintf(['Set the Y variable and plot (Either "X vs Y" or "Events along X during Y" have to be selected below).']);
                         
-hDynamicFilamentsGui.lPlot_YVar = uicontrol('Parent',hDynamicFilamentsGui.pOptions,'Units','normalized', 'UserData', {'s', 'nm', 'nm/s', '1'},...
-                            'Position',[0.55 0.4 0.2 0.125],'BackgroundColor','white','String',{'time', 'location', 'velocity', 'MAP count'}, 'TooltipString', tooltipstr,'Style','popupmenu','Tag','lPlot_YVar','Enable','on');
+hDynamicFilamentsGui.lPlot_YVar = uicontrol('Parent',hDynamicFilamentsGui.pOptions,'Units','normalized', 'UserData', {'s', 'nm', 'nm/s', '1', '', '?'},...
+                            'Position',[0.55 0.4 0.2 0.125],'BackgroundColor','white','String',{'time', 'location', 'velocity', 'MAP count', 'auto tags' ,'custom data'}, 'TooltipString', tooltipstr,'Style','popupmenu','Tag','lPlot_YVar','Enable','on');
 
 % hDynamicFilamentsGui.YUnits = {'s', 'nm', 'nm/s', '1', '1/s'};
           
@@ -299,13 +305,25 @@ hDynamicFilamentsGui.mXReference = uicontrol('Parent',hDynamicFilamentsGui.pOpti
                         
 tooltipstr=sprintf('Only plots data from selected Filaments (does not work for all plots).');
                                 
-hDynamicFilamentsGui.cOnlySelected = uicontrol('Parent',hDynamicFilamentsGui.pOptions,'Style','checkbox','Units','normalized', 'Tag', 'cGrowth',...
+hDynamicFilamentsGui.cOnlySelected = uicontrol('Parent',hDynamicFilamentsGui.pOptions,'Style','checkbox','Units','normalized',...
                                          'Position',[0.65 0.35 0.15 0.05],'Tag','cOnlySelected','Fontsize',10,'TooltipString', tooltipstr,...
                                          'String','Only Selected','BackgroundColor',c,'HorizontalAlignment','center', 'Value', 0);  
+                                     
+tooltipstr=sprintf('Plots a legend (does not work for all plots).');
+                                
+hDynamicFilamentsGui.cLegend = uicontrol('Parent',hDynamicFilamentsGui.pOptions,'Style','checkbox','Units','normalized', 'Tag', 'cLegend',...
+                                         'Position',[0.65 0.3 0.15 0.05],'Fontsize',10,'TooltipString', tooltipstr,...
+                                         'String','Legend','BackgroundColor',c,'HorizontalAlignment','center', 'Value', 1);  
+                                     
+tooltipstr=sprintf('Groups points of tracks which come from the same microtubule into one color and one legend entry.');
+                                
+hDynamicFilamentsGui.cGroupIntoMTs = uicontrol('Parent',hDynamicFilamentsGui.pOptions,'Style','checkbox','Units','normalized', 'Tag', 'cGroupIntoMTs',...
+                                         'Position',[0.65 0.25 0.15 0.05],'Fontsize',10,'TooltipString', tooltipstr,...
+                                         'String','Group Tracks','BackgroundColor',c,'HorizontalAlignment','center', 'Value', 1);  
 
 tooltipstr=sprintf('Plots data from untagged (growing) tracks.');
                                 
-hDynamicFilamentsGui.cPlotGrowingTracks = uicontrol('Parent',hDynamicFilamentsGui.pOptions,'Style','checkbox','Units','normalized', 'Tag', 'cGrowth',...
+hDynamicFilamentsGui.cPlotGrowingTracks = uicontrol('Parent',hDynamicFilamentsGui.pOptions,'Style','checkbox','Units','normalized',...
                                          'Position',[0.85 0.35 0.2 0.05],'Tag','cPlotGrowingTracks','Fontsize',10,'TooltipString', tooltipstr,...
                                          'String','Growing','BackgroundColor',c,'HorizontalAlignment','center', 'Value', 0);  
                         
@@ -320,21 +338,21 @@ hDynamicFilamentsGui.lGroup = uicontrol('Parent',hDynamicFilamentsGui.pOptions,'
 tooltipstr=sprintf(['Distinguishes between tracks (marked with *) with and without event in the end.']);
                                                     
 hDynamicFilamentsGui.cPlotEventsAsSeperateTypes = uicontrol('Parent',hDynamicFilamentsGui.pOptions,'Style','checkbox','Units','normalized',...
-                                         'Position',[.65 .25 .4 .1],'Tag','cPlotEventsAsSeperateTypes','Fontsize',10,'TooltipString', tooltipstr,...
+                                         'Position',[.8 .3 .4 .05],'Tag','cPlotEventsAsSeperateTypes','Fontsize',10,'TooltipString', tooltipstr,...
                                          'String','Distinguish events','BackgroundColor',c,'HorizontalAlignment','center', 'Value', 0); 
                                      
 tooltipstr=sprintf(['Excludes first and last points of tracks for plots.']);
                                                                                          
 hDynamicFilamentsGui.cExclude = uicontrol('Parent',hDynamicFilamentsGui.pOptions,'Style','checkbox','Units','normalized',...
-                                         'Position',[.65 .175 .4 .1],'Tag','cExclude','Fontsize',10,'TooltipString', tooltipstr,...
+                                         'Position',[.65 .175 .4 .05],'Tag','cExclude','Fontsize',10,'TooltipString', tooltipstr,...
                                          'String','Exclude borders','BackgroundColor',c,'HorizontalAlignment','center', 'Value', 0);  
                 
 hDynamicFilamentsGui.tStat = uicontrol('Parent',hDynamicFilamentsGui.pOptions,'Units','normalized','BackgroundColor',c,...
                              'Position',[0.05 0.1 0.225 0.125],'String','Additional Plots:','Style','text','Tag','tChoosePlot','HorizontalAlignment','left');    
         
-tooltipstr=sprintf(['Additional Plots']);
+tooltipstr=sprintf(['Not functional yet']);
 
-hDynamicFilamentsGui.lStat = uicontrol('Parent',hDynamicFilamentsGui.pOptions,'Units','normalized','Style','popupmenu','Tag','lStat','TooltipString', tooltipstr,...
+hDynamicFilamentsGui.lAdditionalPlots = uicontrol('Parent',hDynamicFilamentsGui.pOptions,'Units','normalized','Style','popupmenu','Tag','lAdditionalPlots','TooltipString', tooltipstr,...
                              'Position',[0.3 0.125 0.3 0.125],'BackgroundColor','white','String',{'None','QQ'}, 'Value',1);
                         
 tooltipstr=sprintf(['Shrinking segments ending below this value are considered rescues (except if at end of movie)\n' ...
@@ -584,6 +602,23 @@ hDynamicFilamentsGui = getappdata(0,'hDynamicFilamentsGui');
 Objects = getappdata(hDynamicFilamentsGui.fig,'Objects');
 set(hDynamicFilamentsGui.lSelection,'Value', 1:length(Objects));
 SetTable();
+
+function Workspace
+hDynamicFilamentsGui = getappdata(0,'hDynamicFilamentsGui');
+selected = get(hDynamicFilamentsGui.lSelection,'Value');
+selected = unique(selected);
+Objects = getappdata(hDynamicFilamentsGui.fig,'Objects');
+Objects = Objects(selected);
+assignin('base', 'Objects', Objects)
+Tracks = getappdata(hDynamicFilamentsGui.fig,'Tracks');
+selected_tracks = [];
+for m = 1:length(Objects)
+    selected_tracks = vertcat(selected_tracks, Objects(m).SegTagAuto(:,5));
+end
+selected_tracks = unique(selected_tracks);
+Tracks = Tracks(selected_tracks(logical(selected_tracks)));
+assignin('base', 'Tracks', Tracks)
+'workspace updated'
 
 function Delete
 hDynamicFilamentsGui = getappdata(0,'hDynamicFilamentsGui');
@@ -1076,18 +1111,17 @@ delete(h);
 function ChoosePlot(hDynamicFilamentsGui, Options)
 setappdata(0, 'hDynamicFilamentsGui', hDynamicFilamentsGui);
 f=figure;
-Selected=unique(get(hDynamicFilamentsGui.lSelection,'Value'));
 % catafterresc=num2str(get(hDynamicFilamentsGui.cDoubleCat, 'Value'));
 str = [' - '];
 optionfields = fields(Options);
 for field = optionfields'
     fchar = char(field);
-    if strcmp(fchar, 'lChoosePlot') || strcmp(fchar, 'lPlot_XVar') || strcmp(fchar, 'lPlot_YVar')
+    if strcmp(fchar, 'lChoosePlot') || strcmp(fchar, 'lPlot_XVar') || strcmp(fchar, 'lAdditionalPlots') || ...
+            strcmp(fchar, 'lPlot_YVar') || strcmp(fchar, 'cPlotGrowingTracks') || strcmp(fchar, 'cLegend') || strcmp(fchar, 'cOnlySelected')
         continue
     end
     str = [str fchar '=' Options.(fchar).print ' | '];
 end
-str = [str 'Selected=' num2str(Selected)];
 uicontrol(f, 'Style', 'text', 'String',str(4:end), 'Units','norm', 'Position', [0.1 0.98 0.9 0.02]);
 set(f,'WindowKeyPressFcn','fJKDynamicFilamentsGui(''Quicksave'');');
 ChosenPlot = get(hDynamicFilamentsGui.lChoosePlot, 'Value');
@@ -1096,19 +1130,14 @@ if ChosenPlot < 3
     YStr = Options.lPlot_YVar.print;
     XVar = Options.lPlot_XVar.val;
     YVar = Options.lPlot_YVar.val;
-    if ~isempty(strfind(XStr, 'MAP')) || ~isempty(strfind(YStr, 'MAP'))
-        OnlyWithIntensity = 1;
-    else
-        OnlyWithIntensity = 0;
-    end
     if ChosenPlot == 1
         set(f, 'Name',[XStr ' vs ' YStr str], 'Tag', 'Plot', ...
             'UserData', XVar*10+YVar);
-        PrepareXYData(0 , OnlyWithIntensity, Options);
+        PrepareXYData(0 , Options);
     else
         set(f, 'Name',['Events along ' XStr ' per ' YStr str], 'Tag', 'Plot', ...
             'UserData', 100+XVar*10+YVar);
-        PrepareXYData(1 , OnlyWithIntensity, Options);
+        PrepareXYData(1 , Options);
     end
 else
     plotstr = get(hDynamicFilamentsGui.lChoosePlot, 'String');
@@ -1127,8 +1156,8 @@ else
     end
 end
 
-function PrepareXYData(isfrequencyplot, OnlyWithIntensity, Options)
-[type, Tracks, events]=SetType(Options.cPlotGrowingTracks.val, OnlyWithIntensity);
+function PrepareXYData(isfrequencyplot, Options)
+[type, Tracks, events]=SetType(Options.cPlotGrowingTracks.val);
 xcolumn = Options.lPlot_XVar.val;
 ycolumn = Options.lPlot_YVar.val;
 if Options.mXReference.val == 5
@@ -1165,7 +1194,7 @@ type(DelObjects) = [];
 units = {Options.lPlot_XVar.str Options.lPlot_YVar.str};
 labels = {Options.lPlot_XVar.print Options.lPlot_YVar.print};
 Tracks = rmfield(Tracks, 'Data');
-fJKplotframework(Tracks, type, Options.cExclude.val, Options.mXReference.val, isfrequencyplot, labels, units,events);
+fJKplotframework(Tracks, type, Options.cExclude.val, Options.mXReference.val, isfrequencyplot, labels, units,events, Options.cLegend.val, Options.cGroupIntoMTs.val);
 
 function [Tracks, DelObjects] = SelectSubsegments(Tracks, Options)
 DelObjects = false(length(Tracks),1);
@@ -1270,24 +1299,38 @@ for m=1:length(binvecy)
 end
 
 
-function [type, Tracks, event]=SetType(PlotGrowingTags, OnlyWithIntensity)
+function [type, Tracks, event]=SetType(PlotGrowingTags) %PlotGrowingTags is needed because of the event plot
 if PlotGrowingTags 
     plottag = 1;
 else
     plottag = 4; %this is a code (see fJKSegment.m))
 end
 hDynamicFilamentsGui=getappdata(0,'hDynamicFilamentsGui');
+XStr = get(hDynamicFilamentsGui.lPlot_XVar, 'String');
+YStr = get(hDynamicFilamentsGui.lPlot_YVar, 'String');
+if ~isempty(strfind(XStr, 'MAP')) || ~isempty(strfind(YStr, 'MAP'))
+    OnlyWithIntensity = 1;
+else
+    OnlyWithIntensity = 0;
+end
+if ~isempty(strfind(XStr, 'custom')) || ~isempty(strfind(YStr, 'custom'))
+    OnlyWithCustomData = 1;
+else
+    OnlyWithCustomData = 0;
+end
 Tracks = getappdata(hDynamicFilamentsGui.fig,'Tracks');
 if get(hDynamicFilamentsGui.cOnlySelected, 'Value')
     Objects = getappdata(hDynamicFilamentsGui.fig,'Objects');
     selected=get(hDynamicFilamentsGui.lSelection,'Value');
+    selected=unique(selected);
+    selected=selected(logical(selected));
     Objects = Objects(selected);
     selected_tracks = [];
     for m = 1:length(Objects)
         selected_tracks = vertcat(selected_tracks, Objects(m).SegTagAuto(:,5));
     end
     selected_tracks = unique(selected_tracks);
-    Tracks = Tracks(selected_tracks);
+    Tracks = Tracks(selected_tracks(logical(selected_tracks)));
 end
 type={Tracks.Type};
 event=[Tracks.Event];
@@ -1303,6 +1346,12 @@ for i=1:length(type)
     end
     if OnlyWithIntensity
         if Tracks(i).HasIntensity==0
+            trackid(i)=0;
+            continue
+        end
+    end
+    if OnlyWithCustomData
+        if Tracks(i).HasCustomData==0
             trackid(i)=0;
             continue
         end
@@ -1407,7 +1456,7 @@ function EventPlot(group, cutoff)
 subplot = @(m,n,p) subtightplot (m, n, p, [0.08 0.08], [0.08 0.08], [0.08 0.02]);
 PlotGrowing=[1 0];
 for i=1:2
-    [type, Tracks, event]=SetType(PlotGrowing(i), 0);
+    [type, Tracks, event]=SetType(PlotGrowing(i));
     uniquetypes=unique(type, 'stable');
     NEvents=zeros(length(uniquetypes),1);
     sumTime=zeros(length(uniquetypes),1);
@@ -1499,9 +1548,9 @@ y_vec = vector{2};
 function TrackXYPlot(Options)
 hold on;
 if Options.lPlot_XVar.val == 4
-    [type, AnalyzedTracks, ~]=SetType(Options.cPlotGrowingTracks.val,1);
+    [type, AnalyzedTracks, ~]=SetType(Options.cPlotGrowingTracks.val);
 else
-    [type, AnalyzedTracks, ~]=SetType(Options.cPlotGrowingTracks.val,0);
+    [type, AnalyzedTracks, ~]=SetType(Options.cPlotGrowingTracks.val);
 end
 if Options.cPlotGrowingTracks.val==1
     LongTracks=[AnalyzedTracks.Duration]>100;
@@ -1510,7 +1559,7 @@ if Options.cPlotGrowingTracks.val==1
 end
 [~, type_id, track_type_id] = unique(type);
 [x_vec, y_vec] = get_plot_vectors(Options, AnalyzedTracks);
-fJKscatterboxplot(x_vec, y_vec, [track_type_id, [AnalyzedTracks.Selected]']);
+fJKscatterboxplot(x_vec, y_vec, track_type_id');
 ylabel(get_y_label(Options));
 Legend = type(type_id);
 legend(Legend{:});
@@ -1518,11 +1567,7 @@ hold off
 
 function BoxPlot(Options)
 hold on;
-if Options.lPlot_XVar.val == 4
-    [type, AnalyzedTracks, ~]=SetType(Options.cPlotGrowingTracks.val,1);
-else
-    [type, AnalyzedTracks, ~]=SetType(Options.cPlotGrowingTracks.val,0);
-end
+[type, AnalyzedTracks, ~]=SetType(Options.cPlotGrowingTracks.val);
 if Options.cPlotGrowingTracks.val==1
     LongTracks=[AnalyzedTracks.Duration]>100;
     AnalyzedTracks=AnalyzedTracks(LongTracks);

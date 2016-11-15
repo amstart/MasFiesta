@@ -1,4 +1,4 @@
-function [f] = fJKplotframework(Objects, type, exclude, refmode, isfrequencyplot, curent_y_label, units, events)
+function [f] = fJKplotframework(Objects, type, exclude, refmode, isfrequencyplot, curent_y_label, units, events, plotlegend, GroupIntoMTs)
 %SCATTERPLOT Summary of this function goes here
 %   Detailed explanation goes here
 additionalplots = 1;
@@ -70,12 +70,25 @@ for j=1:ntypes    %Loop through all groups to be plotted, each group gets its ow
         fJKfrequencyvsXplot(plotx, ploty, ploteventends, units);
     else
         point_info=cell(sum(correct_type),1);
-        for k=1:sum(correct_type)
-            point_info{k}=repmat(k,size(PlotObjects(k).X(1+exclude:end-exclude,:)),1);
+        if GroupIntoMTs
+            [legend_items, ~, object_name_ids] = unique({PlotObjects.Name}, 'stable');
+            for k=1:sum(correct_type)
+                point_info{k}=repmat(object_name_ids(k),size(PlotObjects(k).X(1+exclude:end-exclude,:)),1);
+            end
+            point_info=vertcat(point_info{:}); %plotN is a matrix which is used to identify:
+        else
+            legend_items = {PlotObjects.Name};
+            for k=1:sum(correct_type)
+                point_info{k}=repmat(k,size(PlotObjects(k).X(1+exclude:end-exclude,:)),1);
+            end
+            point_info=vertcat(point_info{:}); %plotN is a matrix which is used to identify:
         end
-        point_info=vertcat(point_info{:}); %plotN is a matrix which is used to identify:
         fJKscatterboxplot(plotx, ploty, point_info);
-        legend({PlotObjects.Name}, 'Interpreter', 'none');
+        if plotlegend
+            legend(legend_items, 'Interpreter', 'none', 'Location', 'best');
+        else
+            legend('hide');
+        end
     end
     xlabel(labelx);
     ylabel(curent_y_label);
