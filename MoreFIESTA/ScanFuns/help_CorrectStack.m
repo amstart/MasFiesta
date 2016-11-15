@@ -49,7 +49,7 @@ if ScanOptions.help_CorrectStack.CorrectDrift
     catch
         Drift = load([PathName 'drift.mat']);
     end
-    Drift = Drift.Drift{ScanOptions.Channel-1};
+    Drift = Drift.Drift{ScanOptions.Channel};
 else
     Drift = [];
 end

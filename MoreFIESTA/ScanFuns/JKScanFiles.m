@@ -13,9 +13,17 @@ ScanOptions.help_get_tip_intensities.MTend = 1; %1 = PosStart, 2 = PosEnd
 ScanOptions.help_get_tip_intensities.method = 'get_full_intensities_1_clip';
 ScanOptions.help_get_tip_intensities.AllFilaments = 1;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-ScanOptions.filename = [ScanOptions.help_get_tip_intensities.method '.mat'];
+ScanOptions.help_get_tip_kymo.framesuntilmissingframe = 0; %set to number higher than number of frames if you have the same number of frames for the channels
+ScanOptions.help_get_tip_kymo.method = 'get_pixelkymo';
+ScanOptions.help_get_tip_kymo.AllFilaments = 1;
+ScanOptions.help_get_tip_kymo.ScanSize = 3;
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+ScanOptions.help_CorrectObject.CorrectColor = 0;
+ScanOptions.help_CorrectObject.CorrectDrift = 1;
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+ScanOptions.filename = [ScanOptions.help_get_tip_kymo.method '.mat'];
 ScanOptions.ObjectChannel = 1;
-ScanOptions.Channel = 2;
+ScanOptions.Channel = 1;
 ScanOptions.ReplaceFileNamePattern{1} = 'red';
 ScanOptions.ReplaceFileNamePattern{2} = 'green';
 %% Do the work
