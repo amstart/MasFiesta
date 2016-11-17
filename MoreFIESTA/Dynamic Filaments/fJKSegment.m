@@ -30,7 +30,7 @@ for n = 1:length(Objects)
     if ~strcmp(Options.eLoadCustomDataFile, '.mat')
         if isfield(Objects(n).Custom, 'CustomData')
             custom_data = Objects(n).Custom.CustomData;
-            custom_data = fJKread_custom_data(custom_data);
+            custom_data = fJKread_custom_data(custom_data, Options.eLoadCustomDataFile.print);
             custom_data = custom_data(DynResults(:,4));  
             has_custom_data = 1;
         else

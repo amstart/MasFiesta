@@ -46,6 +46,8 @@ switch func
         Select;
     case 'Workspace'
         Workspace;
+    case 'SurfPlot'
+        SurfPlot;
 end
 
 function Create(varargin)
@@ -109,6 +111,9 @@ hDynamicFilamentsGui.bDelete = uicontrol('Parent',hDynamicFilamentsGui.fig,'Styl
                               'Position',[.325 0.57 0.05 .025],'Tag','bDelete','Fontsize',10,...
                               'String','Delete Selected','Callback','fJKDynamicFilamentsGui(''Delete'');');    
                           
+hDynamicFilamentsGui.bSurf = uicontrol('Parent',hDynamicFilamentsGui.fig,'Units','normalized','Callback','fJKDynamicFilamentsGui(''SurfPlot'');',...
+                                   'Position',[0.9775 0.8 0.02 0.03],'String','surf','Style','pushbutton','Tag','bSurf');   
+                          
 hDynamicFilamentsGui.bTIF = uicontrol('Parent',hDynamicFilamentsGui.fig,'Units','normalized','Callback','fJKDynamicFilamentsGui(''OpenInfo'');',...
                                    'Position',[0.9775 0.7 0.02 0.03],'String','tif','Style','pushbutton','Tag','bTIF');   
                                
@@ -120,6 +125,9 @@ hDynamicFilamentsGui.bTXT = uicontrol('Parent',hDynamicFilamentsGui.fig,'Units',
                                
 hDynamicFilamentsGui.bLOCATION = uicontrol('Parent',hDynamicFilamentsGui.fig,'Units','normalized','Callback','fJKDynamicFilamentsGui(''OpenInfo'');',...
                                    'Position',[0.9775 0.4 0.02 0.03],'String','max','Style','pushbutton','Tag','bLOCATION');   
+                               
+hDynamicFilamentsGui.bFOLDER = uicontrol('Parent',hDynamicFilamentsGui.fig,'Units','normalized','Callback','fJKDynamicFilamentsGui(''OpenInfo'');',...
+                                   'Position',[0.9775 0.3 0.02 0.03],'String','folder','Style','pushbutton','Tag','bFOLDER');   
      
 hDynamicFilamentsGui.pOptions = uipanel('Parent',hDynamicFilamentsGui.fig,'Units','normalized','Title','Options',...
                              'Position',[0.025 0.07 0.35 0.5],'Tag','pOptions','BackgroundColor',c);
@@ -508,8 +516,13 @@ for i = 1:length(children)
             end
         case 'edit'
             Options.(tagname).val = str2double(get(children(i), 'string'));
-            Options.(tagname).str = get(children(i), 'UserData');
-            Options.(tagname).print = [num2str(Options.(tagname).val,3) '[' get(children(i), 'UserData') ']'];
+            if isnan(Options.(tagname).val)
+                Options.(tagname).str = get(children(i), 'string');
+                Options.(tagname).print = get(children(i), 'string');
+            else
+                Options.(tagname).str = get(children(i), 'UserData');
+                Options.(tagname).print = [num2str(Options.(tagname).val,3) '[' get(children(i), 'UserData') ']'];
+            end
         otherwise
             continue
     end
@@ -692,6 +705,13 @@ if FileName~=0
     end
 end
 
+function custom_data = LoadCustomData(custom_data, custom_data_name)
+if ~isempty(strfind(custom_data_name, 'ymo'))
+    for m = 1:length(custom_data)
+        custom_data{m} = max(custom_data{m}, [], 1);
+    end
+end
+
 function PrepareFils(NewObjects, RefObjects, PathName, FileName)
 hDynamicFilamentsGui = getappdata(0,'hDynamicFilamentsGui');
 ref = get(hDynamicFilamentsGui.cUsePosEnd, 'Value')*2+1;
@@ -699,22 +719,22 @@ fieldnames = {'Selected','Channel','TformMat','Color','PathData', 'Visible', 'Pl
 NewObjects = rmfield(NewObjects,fieldnames);
 str=cell(length(NewObjects),1);
 deleteobjects = false(length(NewObjects), 1);
-external_intensity = get(hDynamicFilamentsGui.eLoadIntensityFile, 'String');
+external_intensity_name = get(hDynamicFilamentsGui.eLoadIntensityFile, 'String');
 has_external_intensity = 0;
-if ~strcmp(external_intensity, '')
+if ~strcmp(external_intensity_name, '')
     try
-        ExtIntensity = load([PathName external_intensity '.mat']);
+        ExtIntensity = load([PathName external_intensity_name '.mat']);
         if isfield(ExtIntensity, 'intensities')
             has_external_intensity = 1;
         end
     catch
     end
 end
-custom_data = get(hDynamicFilamentsGui.eLoadCustomDataFile, 'String');
+custom_data_name = get(hDynamicFilamentsGui.eLoadCustomDataFile, 'String');
 has_custom_data = 0;
-if ~strcmp(custom_data, '')
+if ~strcmp(custom_data_name, '')
     try
-        CustomData = load([PathName custom_data '.mat']);
+        CustomData = load([PathName custom_data_name '.mat']);
         if isfield(CustomData, 'intensities')
             has_custom_data = 1;
         end
@@ -724,7 +744,7 @@ end
 for i=1:length(NewObjects)
     if has_external_intensity
         NewObjects(i).Custom.Intensity = ExtIntensity.intensities{i};
-        NewObjects(i).Custom.type_intensity = external_intensity;
+        NewObjects(i).Custom.type_intensity = external_intensity_name;
     else
         if isfield(NewObjects(i).Custom, 'Intensity')
             NewObjects(i).Custom.type_intensity = 'From File';
@@ -733,8 +753,8 @@ for i=1:length(NewObjects)
         end
     end
     if has_custom_data
-        NewObjects(i).Custom.CustomData = CustomData.intensities{i};
-        NewObjects(i).Custom.type_custom = custom_data;
+        NewObjects(i).Custom.CustomData = LoadCustomData(CustomData.intensities{i}, custom_data_name);
+        NewObjects(i).Custom.type_custom = custom_data_name;
     else
         NewObjects(i).Custom.type_custom = 'None';
     end
@@ -925,6 +945,35 @@ Draw(hDynamicFilamentsGui);
 set(hDynamicFilamentsGui.lSelection, 'String', str);
 set(hDynamicFilamentsGui.lSelection, 'Value', max(1,min(get(hDynamicFilamentsGui.lSelection, 'Value'),length(str))));
 
+function SurfPlot()
+try
+    hDynamicFilamentsGui = getappdata(0,'hDynamicFilamentsGui');
+    Objects = getappdata(hDynamicFilamentsGui.fig,'Objects');
+    Selected=get(hDynamicFilamentsGui.lSelection,'Value');
+    Selected=Selected(Selected>0&Selected<length(Objects)+1);
+    if ~isempty(Objects)&&~isempty(Selected)
+        Object = Objects(Selected(1));
+        figure('Name', ['Surf: ' Object.Name ' ' Object.File])
+        maxLength=max(cellfun(@(x)numel(x),Object.Custom.CustomData));
+        padded_matrix=cell2mat(cellfun(@(x)cat(2,x, nan(1,maxLength-length(x))),Object.Custom.CustomData','UniformOutput',false));
+        
+        surf(padded_matrix)
+        hold on;
+        zlabel(['Intensity (' get(hDynamicFilamentsGui.eLoadCustomDataFile, 'String') ')'], 'Interpreter', 'none');
+        ylabel('frame');
+        xlabel('Arc length away from plus end [pixels]');
+        
+        x_length = size(padded_matrix,1);
+        z_min = min(max(padded_matrix(:,1:20,:)));
+        z_max = max(max(padded_matrix(:,1:20,:)));
+        v = patch([6 6 6 6], [0 0 x_length x_length], [z_min z_max z_max z_min],[0.9, 0.9, 0.9]);
+        set(v,'facealpha',0.3);
+        set(v,'edgealpha',0.1);
+    end
+catch
+    msgbox('you need to have kymograph data loaded as custom data (see in the UI group "What to load"');
+end
+
 function Draw(hDynamicFilamentsGui)
 showTrackN=get(hDynamicFilamentsGui.cshowTrackN,'Value');
 cla(hDynamicFilamentsGui.aPlot, 'reset');
@@ -1066,6 +1115,8 @@ elseif gcbo == hDynamicFilamentsGui.bTXT
     end
 elseif gcbo == hDynamicFilamentsGui.bLOCATION
     OpenFile = [Object.LoadedFromPath 'maximum' '.tif'];
+elseif gcbo == hDynamicFilamentsGui.bFOLDER
+    OpenFile = Object.LoadedFromPath;
 end
 try
     if isunix

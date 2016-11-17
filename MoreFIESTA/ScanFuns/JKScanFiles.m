@@ -1,37 +1,26 @@
 %This script sets the options for the file scan and calls a function which
 %scans through the link file you specify here. 
-global CurrentDir
-global ScanOptions
-global supress_progressdlg
-supress_progressdlg = 1;
-%rmappdata(0, 'hMainGui');
-ScanOptions.PixSize = 157; %is used as default if nothing else available
-%%%%%%%%%%%%%%%%%%%parameters for helper functions%%%%%%%%%%%%%%
-ScanOptions.help_get_tip_intensities.BlockHalf = 3; %only needed for mode "get_highest"
-ScanOptions.help_get_tip_intensities.framesuntilmissingframe = 40; %set to number higher than number of frames if you have the same number of frames for the channels
-ScanOptions.help_get_tip_intensities.MTend = 1; %1 = PosStart, 2 = PosEnd
-ScanOptions.help_get_tip_intensities.method = 'get_full_intensities_1_clip';
-ScanOptions.help_get_tip_intensities.AllFilaments = 1;
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-ScanOptions.help_get_tip_kymo.framesuntilmissingframe = 0; %set to number higher than number of frames if you have the same number of frames for the channels
-ScanOptions.help_get_tip_kymo.method = 'get_pixelkymo';
-ScanOptions.help_get_tip_kymo.AllFilaments = 1;
-ScanOptions.help_get_tip_kymo.ScanSize = 3;
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-ScanOptions.help_CorrectObject.CorrectColor = 0;
-ScanOptions.help_CorrectObject.CorrectDrift = 1;
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-ScanOptions.filename = [ScanOptions.help_get_tip_kymo.method '.mat'];
-ScanOptions.ObjectChannel = 1;
-ScanOptions.Channel = 1;
-ScanOptions.ReplaceFileNamePattern{1} = 'red';
-ScanOptions.ReplaceFileNamePattern{2} = 'green';
 %% Do the work
+global ScanOptions
 try
-    [FileName, PathName] = uigetfile({'*.mat','MAT-File (*.mat)';},'Load Link',CurrentDir);
+    [FileName, PathName] = uigetfile({'*.mat','MAT-File (*.mat)';},'Load Link',ScanOptions.LinkFolder);
 catch
     [FileName, PathName] = uigetfile({'*.mat','MAT-File (*.mat)';},'Load Link');        
 end
-CurrentDir=PathName;     
+ScanOptions.LinkFolder=PathName;     
 fJKLoadLink(FileName, PathName, @analyze_single_channel) %any analyze_x function
-supress_progressdlg = 0;
+
+% Z:\Data\Jochen\16.10.10\4\4_dynamics.mat
+% Subscript indices must either be real positive integers or logicals.
+% Error in help_get_tip_kymo>get_pixelkymo (line 72)
+% dis = id-d(idx);
+% Error in help_get_tip_kymo (line 47)
+%             Filament(m).Custom.CustomData{n} = fun(I, Filament(m), n,
+%             ScanOptions.help_get_tip_kymo.ScanSize,
+%             ScanOptions.help_get_tip_kymo.ExtensionLength);
+% Error in analyze_single_channel (line 42)
+% [Filament] = help_get_tip_kymo(Stack, Filament);
+% Error in fJKLoadLink (line 33)
+%     fun(FileName, PathName);
+% Error in JKScanFiles (line 11)
+% fJKLoadLink(FileName, PathName, @analyze_single_channel) %any analyze_x function 

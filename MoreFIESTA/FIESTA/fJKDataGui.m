@@ -1341,13 +1341,16 @@ Object = getappdata(hDataGui.fig,'Object');
 Check = getappdata(hDataGui.fig,'Check');
 Tags = getappdata(hDataGui.fig,'Tags');
 if sum(Check)<size(Object.Results,1)
+    if isfield(Object.Custom, 'Intensity')
+        Object.Custom.Intensity(Check==1)=[];  
+    end
     Tags(Check==1,:)=[];
     Object.Results(Check==1,:)=[];
     if strcmp(hDataGui.Type,'Filament')==1
         Object.PosStart(Check==1,:)=[];
         Object.PosCenter(Check==1,:)=[];   
         Object.PosEnd(Check==1,:)=[];
-        Object.Data(Check==1)=[];        
+        Object.Data(Check==1)=[];    
     end
     if ~isempty(Object.PathData)
         Object.PathData(Check==1,:)=[];   
