@@ -33,7 +33,7 @@ for m = find(FilSelect==1)
         for n = 1:size(Filament(m).Results,1)
             frame = Filament(m).Results(n,1);
             missedframes=ceil(frame/framesuntilmissingframe);
-            if mod(frame, framesuntilmissingframe)==1 || tags(m)==9
+            if mod(frame, framesuntilmissingframe)==1 || tags(n)==9
                 Filament(m).Custom.CustomData{n}=nan;
                 continue
             end
@@ -44,7 +44,7 @@ for m = find(FilSelect==1)
         ifil=ifil+1;
     else
         for n = 1:size(Filament(m).Results,1)
-            if tags(m)==9
+            if tags(n)==9
                 Filament(m).Custom.CustomData{n}=nan;
                 continue
             end

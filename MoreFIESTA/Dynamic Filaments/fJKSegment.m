@@ -4,7 +4,7 @@ Tracks=struct('Name', [], 'File', [], 'Type', [], 'Data', [NaN NaN NaN NaN], 'Ve
     'Event', [NaN], 'DistanceEventEnd', [NaN]);  %these are required for the SetTable function to work upon startup
 tagnum=4;
 Objects = getappdata(hDynamicFilamentsGui.fig,'Objects');
-trackN=1;
+track_id=1;
 progressdlg('String','Creating Tracks','Min',0,'Max',length(Objects));
 for n = 1:length(Objects) 
     Objects(n).Duration = 0;
@@ -27,11 +27,11 @@ for n = 1:length(Objects)
     else
         intensity = intensity(DynResults(:,4));                                    %of the original data the row data can be found, i.e. 1 2 4.. 542 323
     end
-    if ~strcmp(Options.eLoadCustomDataFile, '.mat')
+    if ~strcmp(Options.eLoadCustomDataFile.str, '')
         if isfield(Objects(n).Custom, 'CustomData')
             custom_data = Objects(n).Custom.CustomData;
-            custom_data = fJKread_custom_data(custom_data, Options.eLoadCustomDataFile.print);
-            custom_data = custom_data(DynResults(:,4));  
+            custom_data = fJKread_custom_data(custom_data, Options.eLoadCustomDataFile.print, Objects(n).Custom.options_custom.help_get_tip_kymo.ExtensionLength);
+            custom_data = custom_data(DynResults(:,4), :);  
             has_custom_data = 1;
         else
             custom_data = nan(size(t));
@@ -81,7 +81,7 @@ for n = 1:length(Objects)
     segtagauto(segmenti, 1:4)=[segmentstart tagstocheck(end) autotags(tagstocheck(end)) d(end)]; %add last segment
     segtagauto=segtagauto(~isnan(segtagauto(:,1)), :); %remove unused rows
     [segtagauto, autotags] = find_borders_and_pauses(segtagauto, autotags, v, t, d, Options);
-    velocity=nan(size(segtagauto,1),7);
+    velocity=nan(size(segtagauto,1),1);
     istype=false(size(segtagauto,1),1);
     segtagauto=segtagauto(segtagauto(:,1)<segtagauto(:,2),:); %remove nonsense tracks
     for m=2:size(segtagauto,1)
@@ -109,55 +109,48 @@ for n = 1:length(Objects)
             warning(['track too short:' Objects(n).Name]);
             continue
         end
+        segframes=(starti:endi)';
         segvel=[v(starti:endi-1); nan]; %why, see Calcvelocity()
         segt=t(starti:endi);
         segd=d(starti:endi);
-        segc=custom_data(starti:endi);
-        segi=intensity(starti:endi);
-        Tracks(trackN).Name=Objects(n).Name;
-        Tracks(trackN).Index=[int2str(n) '/' int2str(trackN)];
-        Tracks(trackN).File=Objects(n).File;
-        Tracks(trackN).Type=Objects(n).Type;
-        Tracks(trackN).Duration=segt(end)-segt(1);
-        Objects(n).Duration=Objects(n).Duration+Tracks(trackN).Duration;
-        Tracks(trackN).Event=segtagauto(m,3);
-        if m==1 || abs(mod(Tracks(trackN-1).Event,1)-0.8)<0.05
-            Tracks(trackN).PreviousEvent=0;
+        Tracks(track_id).Name=Objects(n).Name;
+        Tracks(track_id).MTIndex = n;
+        Tracks(track_id).TrackIndex= track_id;
+        Tracks(track_id).File=Objects(n).File;
+        Tracks(track_id).Type=Objects(n).Type;
+        Tracks(track_id).Duration=segt(end)-segt(1);
+        Objects(n).Duration=Objects(n).Duration+Tracks(track_id).Duration;
+        Tracks(track_id).Event=segtagauto(m,3);
+        if m==1 || abs(mod(Tracks(track_id-1).Event,1)-0.8)<0.05
+            Tracks(track_id).PreviousEvent=0;
         else
-            Tracks(trackN).PreviousEvent=1;
+            Tracks(track_id).PreviousEvent=1;
         end
-        Tracks(trackN).end_first_subsegment = 0;
-        Tracks(trackN).start_last_subsegment = 0;
+        Tracks(track_id).end_first_subsegment = 0;
+        Tracks(track_id).start_last_subsegment = 0;
         istype(m)=floor(segtagauto(m,3))==tagnum;
-        [~, Tracks(trackN).minindex] = min(segvel);
+        [~, Tracks(track_id).minindex] = min(segvel);
         if Options.eSubStart.val && istype(m)
-            Tracks(trackN).end_first_subsegment = FindSubsegments(segvel, 1, Options.eSubStart.val, Tracks(trackN).minindex);
+            Tracks(track_id).end_first_subsegment = FindSubsegments(segvel, 1, Options.eSubStart.val, Tracks(track_id).minindex);
         end
         if Options.eSubEnd.val && istype(m)
-            Tracks(trackN).start_last_subsegment = FindSubsegments(segvel, -1, Options.eSubEnd.val, Tracks(trackN).minindex);
+            Tracks(track_id).start_last_subsegment = FindSubsegments(segvel, -1, Options.eSubEnd.val, Tracks(track_id).minindex);
         end
-        Tracks(trackN).DistanceEventEnd=segd(end);
-        Tracks(trackN).Data=[segt segd segvel segi autotags(starti:endi) segc];
-        Tracks(trackN).HasIntensity=~all(isnan(segi));
-        segtagauto(m, 5)=trackN;
-        segtagauto(m, 4)=Tracks(trackN).DistanceEventEnd;
-        fitp=polyfit(segt,segd,1);
-        velocity(m,:) = [nanmean(segvel) nanmedian(segvel) (segd(end)-segd(1))/(segt(end)-segt(1)) min(segvel) max(segvel) nanstd(segvel) fitp(1)];
-        Tracks(trackN).Velocity=velocity(m,:);
-        Tracks(trackN).Time=double([mean(segt) median(segt) segt(end)-segt(1) min(segt) max(segt) std(segt)]);
-        Tracks(trackN).Location=double([mean(segd) median(segd) segd(end)-segd(1) min(segd) max(segd) std(segd)]);
-        if Tracks(trackN).HasIntensity
-            Tracks(trackN).Intensity=double([mean(segi) median(segi) segi(end)-segi(1) min(segi) max(segi) std(segi) sum(segi)]);
-        else
-            Tracks(trackN).Intensity=nan(1, 5);
-        end
-        Tracks(trackN).Selected=0;
-        Tracks(trackN).HasCustomData = has_custom_data;
-        trackN=trackN+1;
+        Tracks(track_id).DistanceEventEnd=segd(end);
+        Tracks(track_id).Data=[segt segd segvel intensity(starti:endi) autotags(starti:endi) segframes custom_data(starti:endi, :)];
+        Tracks(track_id).HasIntensity=~all(isnan(intensity(starti:endi)));
+        segtagauto(m, 5)=track_id;
+        segtagauto(m, 4)=Tracks(track_id).DistanceEventEnd;
+        tmp_fit = polyfit(segt,segd,1);
+        velocity(m) = tmp_fit(1);
+        Tracks(track_id).Velocity=velocity(m);
+        Tracks(track_id).Selected=0;
+        Tracks(track_id).HasCustomData = has_custom_data;
+        track_id=track_id+1;
     end
     Objects(n).SegTagAuto=segtagauto;
-    Objects(n).Velocity(1,:)=nanmean(velocity(~istype, :),1);
-    Objects(n).Velocity(2,:)=nanmean(velocity(istype, :),1);
+    Objects(n).Velocity(1)=nanmean(velocity(~istype));
+    Objects(n).Velocity(2)=nanmean(velocity(istype));
     progressdlg(n);
 end
 
