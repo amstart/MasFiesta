@@ -27,16 +27,14 @@ for n = 1:length(Objects)
     else
         intensity = intensity(DynResults(:,4));                                    %of the original data the row data can be found, i.e. 1 2 4.. 542 323
     end
-    if ~strcmp(Options.eLoadCustomDataFile.str, '')
-        if isfield(Objects(n).Custom, 'CustomData')
-            custom_data = Objects(n).Custom.CustomData;
-            custom_data = fJKread_custom_data(custom_data, Options.eLoadCustomDataFile.print, Objects(n).Custom.options_custom.help_get_tip_kymo.ExtensionLength);
-            custom_data = custom_data(DynResults(:,4), :);  
-            has_custom_data = 1;
-        else
-            custom_data = nan(size(t));
-            has_custom_data = 0;
-        end
+    if ~strcmp(Options.eLoadCustomDataFile.str, '') && isfield(Objects(n).Custom, 'CustomData')
+        custom_data = Objects(n).Custom.CustomData;
+        custom_data = fJKread_custom_data(custom_data, Options.eLoadCustomDataFile.print, Objects(n).Custom.options_custom.help_get_tip_kymo.ExtensionLength);
+        custom_data = custom_data(DynResults(:,4), :);  
+        has_custom_data = 1;
+    else
+        custom_data = nan(size(t));
+        has_custom_data = 0;
     end
     autotags = ones(size(t));
     ddiff = diff(d);
@@ -72,7 +70,7 @@ for n = 1:length(Objects)
             end
             if autotags(m+1)~=tagnum&&d(segmentstart)>Options.eDisregard.val %tagged track creation
                 autotags(m)=tagnum+0.9;
-                segtagauto(segmenti, 1:4)=[segmentstart m tagnum+0.9 d(m)];
+                segtagauto(segmenti, 1:4)=[segmentstart m autotags(m) d(m)];
                 segmentstart=m+1;
                 segmenti=segmenti+1;
             end
@@ -105,8 +103,8 @@ for n = 1:length(Objects)
                 segtagauto(m,1) = lastid;
             end
         end
-        if endi-starti<Options.eMinLength.val
-            warning(['track too short:' Objects(n).Name]);
+        if starti==endi
+            warning(['track only one frame long:' Objects(n).Name]);
             continue
         end
         segframes=(starti:endi)';

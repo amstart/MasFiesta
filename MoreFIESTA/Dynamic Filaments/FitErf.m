@@ -28,7 +28,4 @@ opts.StartPoint = [0.915991244131425 1 0 0.424349039815375];
 % Fit model to data.
 [fitresult, gof] = fit( xData, yData, ft, opts );
 
-% Plot fit with data.
-plot( fitresult, 'k-');
-
 

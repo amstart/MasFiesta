@@ -95,7 +95,9 @@ for j=1:ntypes    %Loop through all groups to be plotted, each group gets its ow
             if isfield(Options, 'FilamentEndPlot')
                 if Options.FilamentEndPlot.has_err_fun_format
                     try
-                        FitErf(plot_x, plot_y)
+                        [fitresult, gof] = FitErf(plot_x, plot_y);
+                        % Plot fit with data.
+                        plot( fitresult, 'k-');
                     catch
                     end
                 end

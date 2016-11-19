@@ -292,7 +292,8 @@ hDynamicFilamentsGui.lPlot_YVar = uicontrol('Parent',hDynamicFilamentsGui.pOptio
 % hDynamicFilamentsGui.YUnits = {'s', 'nm', 'nm/s', '1', '1/s'};
           
 hDynamicFilamentsGui.lChoosePlot = uicontrol('Parent',hDynamicFilamentsGui.pOptions,'Units','normalized','Callback','fJKDynamicFilamentsGui(''SetMenu'',getappdata(0,''hDynamicFilamentsGui''));', 'Value', 3,...
-                            'Position',[0.3 0.35 0.3 0.125],'BackgroundColor','white','String',{'X vs Y', 'Events along X during Y', 'Events', 'Box(X)', 'X vs Y (Tracks)', 'Dataset (rough)', 'Shape of Filament End'}, 'TooltipString', tooltipstr,'Style','popupmenu','Tag','lChoosePlot','Enable','on');
+                            'Position',[0.3 0.35 0.3 0.125],'BackgroundColor','white','String',{'X vs Y', 'Events along X during Y', 'Events', 'Box(X)', 'X vs Y (Tracks)', 'Dataset (rough)', 'Shape of Filament End', 'MAP vs distance weighted velocity'}, ...
+                            'TooltipString', tooltipstr,'Style','popupmenu','Tag','lChoosePlot','Enable','on');
                         
 hDynamicFilamentsGui.bDoPlot = uicontrol('Parent',hDynamicFilamentsGui.pOptions,'Units','normalized','Callback',@UpdateOptions,...
                                    'Position',[0.65 0.4 0.12 0.05],'String','Plot','Style','pushbutton', 'FontSize', 15); 
@@ -998,20 +999,19 @@ if ~isempty(Objects)&&~isempty(Selected)
     set(v,'facealpha',0.3);
     set(v,'edgealpha',0.1);
     
-    track_id=Object.SegTagAuto(:,5);
-    track_id=track_id(track_id>0);
-    tracks=Tracks(track_id);
-    vector = [];
-    for i=1:length(tracks)
-        vector=vertcat(vector, tracks(i).Data(:,6:7));
-    end
-    value=zeros(length(vector), 1);
-    for m = 1:length(vector)
-        value(m) = padded_matrix(m, max(1,ceil(vector(m,2))));
-    end
-    plot3(vector(:,2), vector(:,1), value, 'r-');
+%     track_id=Object.SegTagAuto(:,5);
+%     track_id=track_id(track_id>0);
+%     tracks=Tracks(track_id);
+%     vector = [];
+%     for i=1:length(tracks)
+%         vector=vertcat(vector, tracks(i).Data(:,6:7));
+%     end
+%     value=zeros(length(vector), 1);
+%     for m = 1:length(vector)
+%         value(m) = padded_matrix(m, max(1,ceil(vector(m,2))));
+%     end
+%     plot3(vector(:,2), vector(:,1), value, 'r-');
 end
-
 
 function CustomPlot()
 hDynamicFilamentsGui = getappdata(0,'hDynamicFilamentsGui');
@@ -1026,14 +1026,16 @@ if ~isempty(Objects)&&~isempty(Selected)
     track_id=Object.SegTagAuto(:,5);
     track_id=track_id(track_id>0);
     tracks=Tracks(track_id);
+    custom1 = subplot(2,1,1);
+    custom2 = subplot(2,1,2);
     for i=1:length(tracks)
         segtrack=tracks(i).Data;
-        plot(segtrack(:,1),segtrack(:,7), 'r-');
-        plot(segtrack(:,1),segtrack(:,8), 'b-');
+        plot(custom1, segtrack(:,1),segtrack(:,7), 'r-');
+        plot(custom2, segtrack(:,1),segtrack(:,8), 'b-');
     end
     xlabel('time [s]');
-    ylabel('custom data');
-    legend('data1 (sigma)', 'data2 (position)');
+    legend('data2 (signal)');
+    legend(custom1, 'data1 (SNR)', 'data2 (signal)');
 end
 
 function Draw(hDynamicFilamentsGui)
@@ -1089,6 +1091,9 @@ if ~isempty(Objects)&&~isempty(Selected)
         plot(hDynamicFilamentsGui.aPlot,tseg(pauses),dseg(pauses),'LineStyle', 'none', 'Marker', 'x', 'MarkerEdgeColor','c');
         if floor(tracks(i).Event)==tagnum
             c='r';
+            if size(dseg,1) < str2double(get(hDynamicFilamentsGui.eMinLength, 'String'))
+                c=[0.7 0.7 0.7];
+            end
             if modevents(i)>0.85&&dseg(end)>cutoff
                 plot(hDynamicFilamentsGui.aPlot,tseg(end),dseg(end),'LineStyle', 'none', 'Marker', '*', 'MarkerEdgeColor',c);
             elseif modevents(i)>0.7&&dseg(end)>cutoff
@@ -1104,15 +1109,15 @@ if ~isempty(Objects)&&~isempty(Selected)
         end
         plot(hDynamicFilamentsGui.aPlot,tseg,tracks(i).Velocity(end).*(tseg-t0)+d0,'b-.');
         plot(hDynamicFilamentsGui.aVelPlot,tseg,repmat(tracks(i).Velocity(end), 1, length(tseg)),'b-.');
-        plot(hDynamicFilamentsGui.aPlot,tseg,dseg,[c '-']);
+        plot(hDynamicFilamentsGui.aPlot,tseg,dseg,'Color', c);
         if tracks(i).end_first_subsegment
             plot(hDynamicFilamentsGui.aPlot,tseg(tracks(i).end_first_subsegment),dseg(tracks(i).end_first_subsegment),'LineStyle', 'none', 'Marker', 'd', 'MarkerEdgeColor',c);
         end
         if tracks(i).start_last_subsegment
             plot(hDynamicFilamentsGui.aPlot,tseg(tracks(i).start_last_subsegment),dseg(tracks(i).start_last_subsegment),'LineStyle', 'none', 'Marker', 's', 'MarkerEdgeColor',c);
         end
-        plot(hDynamicFilamentsGui.aVelPlot,tseg,vseg,[c '-']);
-        plot(hDynamicFilamentsGui.aIPlot,tseg,iseg,[c '-']);
+        plot(hDynamicFilamentsGui.aVelPlot,tseg,vseg,'Color', c);
+        plot(hDynamicFilamentsGui.aIPlot,tseg,iseg,'Color', c);
     end
     xy=get(hDynamicFilamentsGui.aPlot,{'xlim','ylim'});
     if xy{2}(1)<cutoff&&xy{2}(2)>cutoff
@@ -1222,6 +1227,9 @@ h=findobj('Tag','Plot');
 delete(h);
 
 function ChoosePlot(hDynamicFilamentsGui)
+userdata = {'s', 'nm', 'nm/s', '1', '', '1', '1', 'AU'};
+string = {'time', 'location', 'velocity', 'MAP count', 'auto tags', 'frames', 'SNR', 'signal'};
+set(hDynamicFilamentsGui.lPlot_XVar, 'UserData', userdata ,'String', string);
 Options = getappdata(hDynamicFilamentsGui.fig,'Options');
 f=figure;
 str = [' - '];
@@ -1271,6 +1279,8 @@ else
                 has_err_fun_format = 0;
             end
             FilamentEndPlot(hDynamicFilamentsGui, has_err_fun_format);
+        case 8
+            IntensityVsDistWeightedVel(Options);
     end
 end
 
@@ -1371,49 +1381,6 @@ switch Options.lSubsegment.val
         end
 end
 
-function IntensityVsDistWeightedVel(hDynamicFilamentsGui)
-[type, Tracks, events]=SetType(hDynamicFilamentsGui,1);
-for i=1:length(Tracks)
-    Data=Tracks(i).Data;
-    [middlex, middley, middlez] = histcounts2(Data(:,2), Data(:,3), Data(:,4));
-    middley=middley(~isnan(middley));
-    middlez=middlez(~isnan(middley));
-    Tracks(i).Data=[middley', middlez'];
-end
-fJKscatterboxplot(Tracks, type, 2,1, get(hDynamicFilamentsGui.cExclude, 'Value'), get(hDynamicFilamentsGui.mXReference, 'Value'), {'Distance weighted velocity', 'Intensity'}, {'nm/s', 'AU'},events)
-
-function [middlex, middley, middlez] = histcounts2(plotx, ploty, plotz)
-%HISTCOUNTS2D Summary of this function goes here
-%   Detailed explanation goes here
-hDynamicFilamentsGui=getappdata(0,'hDynamicFilamentsGui');
-binwidth=str2double(get(hDynamicFilamentsGui.eDistanceWeight, 'String'));
-plotx=plotx(~isnan(plotx));
-limits=[min(plotx) max(plotx)];
-span=ceil((limits(2)-limits(1))/binwidth)*(binwidth);
-edges=(-span/2:binwidth:span/2)+mean(limits);
-[~, edges, xid] = histcounts(plotx,edges);
-binvecy=cell(numel(edges)-1,1);
-binvecz=cell(numel(edges)-1,1);
-for m=1:length(xid)
-    if isempty(binvecy{xid(m)})
-        binvecy{xid(m)}=ploty(m);
-        binvecz{xid(m)}=plotz(m);
-    else
-        binvecy{xid(m)}=[binvecy{xid(m)}; ploty(m)];
-        binvecz{xid(m)}=[binvecz{xid(m)}; plotz(m)];
-    end
-end
-middlex=edges(1:end-1)+diff(edges)/2;
-middlex=middlex(~cellfun(@isempty, binvecz));
-binvecy=binvecy(~cellfun(@isempty, binvecy));
-binvecz=binvecz(~cellfun(@isempty, binvecz));
-middley=zeros(1,length(binvecy));
-middlez=zeros(1,length(binvecz));
-for m=1:length(binvecy)
-    middley(m)=nanmean([binvecy{m}]);
-    middlez(m)=nanmean([binvecz{m}]);
-end
-
 
 function [type, Tracks, event]=SetType(PlotGrowingTags) %PlotGrowingTags is needed because of the event plot
 if PlotGrowingTags 
@@ -1453,7 +1420,7 @@ distance_event_end=[Tracks.DistanceEventEnd];
 file={Tracks.File};
 track_id=1:length(type);
 for i=1:length(type)
-    if floor(event(i))~=plottag
+    if floor(event(i))~=plottag || size(Tracks(i).Data, 1) < Options.eMinLength.val
         track_id(i)=0;
         continue
     end
@@ -1630,11 +1597,12 @@ function label = get_label(Options, isX)
 if isX
     unit = Options.lPlot_XVar.str;
     title = Options.lPlot_XVar.print;
+    methodstrtmp = Options.lMethod_TrackValue.print;
 else
     unit = Options.lPlot_YVar.str;
     title = Options.lPlot_YVar.print;
+    methodstrtmp = Options.lMethod_TrackValueY.print;
 end
-methodstrtmp = Options.lMethod_TrackValue.print;
 methodstr=methodstrtmp(1:strfind(methodstrtmp,'(')-2);
 if isempty(methodstr)
     methodstr=methodstrtmp;
@@ -1653,9 +1621,9 @@ for m = 1:nargout
     for n = 1:length(AnalyzedTracks) % {'median', 'mean', 'end-start', 'minimum', 'maximum', 'standard dev', 'linear fit (only for velocity) or sum (only for MAP count)'}
         switch Options.lMethod_TrackValue.val
             case 1
-                vector{m}(n) = median(AnalyzedTracks(n).Data(:,selected_vars{m}));
+                vector{m}(n) = nanmedian(AnalyzedTracks(n).Data(:,selected_vars{m}));
             case 2
-                vector{m}(n) = mean(AnalyzedTracks(n).Data(:,selected_vars{m}));
+                vector{m}(n) = nanmean(AnalyzedTracks(n).Data(:,selected_vars{m}));
             case 3
                 vector{m}(n) = AnalyzedTracks(n).Data(end,selected_vars{m}) - AnalyzedTracks(n).Data(1,selected_vars{m});
             case 4
@@ -1677,6 +1645,7 @@ x_vec = vector{1};
 y_vec = vector{2};
 
 function TrackXYPlot(Options)
+hold on
 [type, AnalyzedTracks, ~]=SetType(Options.cPlotGrowingTracks.val);
 if Options.cPlotGrowingTracks.val==1
     LongTracks=[AnalyzedTracks.Duration]>100;
@@ -1690,6 +1659,55 @@ xlabel(get_label(Options, 1));
 ylabel(get_label(Options, 0));
 Legend = type(type_id);
 legend(Legend{:});
+hold off
+
+function [middlex, middley, middlez] = histcounts2(plotx, ploty, plotz)
+%HISTCOUNTS2D Summary of this function goes here
+%   Detailed explanation goes here
+hDynamicFilamentsGui=getappdata(0,'hDynamicFilamentsGui');
+binwidth=str2double(get(hDynamicFilamentsGui.eDistanceWeight, 'String'));
+plotx=plotx(~isnan(plotx));
+limits=[min(plotx) max(plotx)];
+span=ceil((limits(2)-limits(1))/binwidth)*(binwidth);
+edges=(-span/2:binwidth:span/2)+mean(limits);
+[~, edges, xid] = histcounts(plotx,edges);
+binvecy=cell(numel(edges)-1,1);
+binvecz=cell(numel(edges)-1,1);
+for m=1:length(xid)
+    if isempty(binvecy{xid(m)})
+        binvecy{xid(m)}=ploty(m);
+        binvecz{xid(m)}=plotz(m);
+    else
+        binvecy{xid(m)}=[binvecy{xid(m)}; ploty(m)];
+        binvecz{xid(m)}=[binvecz{xid(m)}; plotz(m)];
+    end
+end
+middlex=edges(1:end-1)+diff(edges)/2;
+middlex=middlex(~cellfun(@isempty, binvecz));
+binvecy=binvecy(~cellfun(@isempty, binvecy));
+binvecz=binvecz(~cellfun(@isempty, binvecz));
+middley=zeros(1,length(binvecy));
+middlez=zeros(1,length(binvecz));
+for m=1:length(binvecy)
+    middley(m)=nanmean([binvecy{m}]);
+    middlez(m)=nanmean([binvecz{m}]);
+end
+
+function IntensityVsDistWeightedVel(Options)
+[type, Tracks, events]=SetType(Options.cPlotGrowingTracks.val);
+for i=1:length(Tracks)
+    Data=Tracks(i).Data;
+    [middlex, middley, middlez] = histcounts2(Data(:,2), Data(:,3), Data(:,4));
+    middley=middley(~isnan(middley));
+    middlez=middlez(~isnan(middley));
+    Tracks(i).X = middley';
+    Tracks(i).Y = middlez';
+end
+Options.lPlot_XVar.print = 'Distance weighted Velocity (no subsegmenting/smoothing)';
+Options.lPlot_XVar.str = '1';
+Options.lPlot_YVar.print = 'MAP count';
+Options.lPlot_YVar.str = '1';
+fJKplotframework(Tracks, type, 0, events, Options);
 
 function FilamentEndPlot(hDynamicFilamentsGui, has_err_fun_format)
 Options = getappdata(hDynamicFilamentsGui.fig,'Options');
@@ -1753,19 +1771,20 @@ if isempty(x_vec)
     set('Visible','off');
     legend('off');
 else
-    uniquetypes=unique(type, 'stable');
+    [~, type_id, track_type_id] = unique(type);
     b=boxplot(x_vec, type);
-    for j=1:length(uniquetypes)
-        type_datavec=x_vec(cellfun(@(x) strcmp(uniquetypes{j}, x), type));
-        plot(repmat(j, length(type_datavec),1), type_datavec, 'o', 'Color', [217;95;2]/255);
-        text(j,nanmean(type_datavec),{num2str(median(type_datavec),3) num2str(length(type_datavec))}, 'HorizontalAlignment', 'center', 'VerticalAlignment', 'middle');
+    for j=1:length(type_id)
+        type_datavec=x_vec(track_type_id == j);
+        plot_x = repmat(j, size(type_datavec)) + (rand(size(type_datavec))-0.5)./2.2;
+        plot(plot_x, type_datavec, 'o', 'Color', [217;95;2]/255);
+        text(j,nanmean(type_datavec),{num2str(median(type_datavec),3), ['N = ' num2str(length(type_datavec))]}, 'HorizontalAlignment', 'center', 'VerticalAlignment', 'middle');
     end
     set(gca,'XTickLabel','');
     set(gca, 'XTickLabelMode','manual');
     hxt = get(gca, 'XTick');
     ypos = min(ylim) - diff(ylim)*0.05;
-    newtext = text(hxt, ones(1, length(uniquetypes))*ypos, uniquetypes, 'HorizontalAlignment', 'center');
-    if (length(uniquetypes)>2&&Options.lGroup.val>1)||length(uniquetypes)>3
+    newtext = text(hxt, ones(1, length(type_id))*ypos, type(type_id), 'HorizontalAlignment', 'center');
+    if (length(type_id)>2&&Options.lGroup.val>1)||length(type_id)>3
         set(newtext, 'rotation', 15);
     end
     h = findobj(b,'tag','Outliers');
