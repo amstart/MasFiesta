@@ -1,4 +1,4 @@
-function [ output_args ] = analyze_single_channel(FileName, PathName)
+function [ output_args ] = batch_single_channel(FileName, PathName)
 %Gets Objects from a file, evaluates their intensities within the Stack
 %they were tracked in and saves the output
 %% Options
@@ -31,7 +31,6 @@ if ~isfield(ScanOptions, 'ObjectChannel')
     ScanOptions.Channel = str2double(input);
 end
 %% Load the Filament
-load([PathName FileName]);
 Filament = load([PathName FileName], 'Filament');
 Filament = Filament.Filament;
 Filament = Filament([Filament.Channel]==ScanOptions.ObjectChannel);
@@ -41,13 +40,12 @@ Filament = help_CorrectObject(Filament, PathName);
 Stack = Stack{1};
 [Filament] = help_get_tip_kymo(Stack, Filament);
 %% save data
-deletefields = setxor(fields(Filament), {'Custom'});
-CroppedFilament = rmfield(Filament, deletefields);
-intensities = cell(length(CroppedFilament),1);
-for i = 1:length(CroppedFilament)
-    intensities{i} = CroppedFilament(i).Custom.CustomData;
+Data = cell(length(Filament),2);
+for i = 1:length(Filament)
+    Data{i,1} = Filament(i).Custom.CustomData;
+    Data{i,2} = Filament(i).Name;
 end
-save([PathName ScanOptions.filename], 'intensities', 'ScanOptions')
+save([PathName ScanOptions.filename], 'Data', 'ScanOptions')
 %%
 % %% Helper Functions
 % [Stack, ~, PixSize] = help_GetStack(PathName, Filament(1).File);

@@ -133,6 +133,9 @@ hDynamicFilamentsGui.bLOCATION = uicontrol('Parent',hDynamicFilamentsGui.fig,'Un
                                
 hDynamicFilamentsGui.bFOLDER = uicontrol('Parent',hDynamicFilamentsGui.fig,'Units','normalized','Callback','fJKDynamicFilamentsGui(''OpenInfo'');',...
                                    'Position',[0.9775 0.3 0.02 0.03],'String','folder','Style','pushbutton','Tag','bFOLDER');   
+                               
+hDynamicFilamentsGui.bFIESTA = uicontrol('Parent',hDynamicFilamentsGui.fig,'Units','normalized','Callback','fJKDynamicFilamentsGui(''OpenInfo'');',...
+                                   'Position',[0.9775 0.2 0.02 0.03],'String','FIESTA','Style','pushbutton','Tag','bFIESTA'); 
      
 hDynamicFilamentsGui.pOptions = uipanel('Parent',hDynamicFilamentsGui.fig,'Units','normalized','Title','Options',...
                              'Position',[0.025 0.07 0.35 0.5],'Tag','pOptions','BackgroundColor',c);
@@ -292,8 +295,8 @@ hDynamicFilamentsGui.lPlot_YVar = uicontrol('Parent',hDynamicFilamentsGui.pOptio
 % hDynamicFilamentsGui.YUnits = {'s', 'nm', 'nm/s', '1', '1/s'};
           
 hDynamicFilamentsGui.lChoosePlot = uicontrol('Parent',hDynamicFilamentsGui.pOptions,'Units','normalized','Callback','fJKDynamicFilamentsGui(''SetMenu'',getappdata(0,''hDynamicFilamentsGui''));', 'Value', 3,...
-                            'Position',[0.3 0.35 0.3 0.125],'BackgroundColor','white','String',{'X vs Y', 'Events along X during Y', 'Events', 'Box(X)', 'X vs Y (Tracks)', 'Dataset (rough)', 'Shape of Filament End', 'MAP vs distance weighted velocity'}, ...
-                            'TooltipString', tooltipstr,'Style','popupmenu','Tag','lChoosePlot','Enable','on');
+                            'Position',[0.3 0.35 0.3 0.125],'BackgroundColor','white','TooltipString', tooltipstr,'Style','popupmenu','Tag','lChoosePlot','Enable','on', ...
+                            'String',{'X vs Y', 'Events along X during Y', 'Events', 'Box(X)', 'X vs Y (Tracks)', 'Dataset (rough)', 'Shape of Filament End', 'Plot X against Y of tracks of same MT', 'MAP vs distance weighted velocity'});
                         
 hDynamicFilamentsGui.bDoPlot = uicontrol('Parent',hDynamicFilamentsGui.pOptions,'Units','normalized','Callback',@UpdateOptions,...
                                    'Position',[0.65 0.4 0.12 0.05],'String','Plot','Style','pushbutton', 'FontSize', 15); 
@@ -556,7 +559,7 @@ if gcbo == hDynamicFilamentsGui.bSaveOptions
         end
     end
 elseif gcbo == hDynamicFilamentsGui.bDoPlot
-    ChoosePlot(hDynamicFilamentsGui);
+    ChoosePlot();
 elseif gcbo == hDynamicFilamentsGui.bUpdatePlots
     UpdatePlot(hDynamicFilamentsGui);
 else %when the GUI is initialized
@@ -591,6 +594,26 @@ if strcmp(get(gcf, 'CurrentCharacter'),'s')
     saveas(gcf,[QuicksaveDir filesep filename{1} '.png'], 'png');
 %     savefig(gcf,[QuicksaveDir filesep strrep(get(gcf, 'Name'), ' | ', '_') '.fig']);
 end
+
+
+function AddCustomData
+hDynamicFilamentsGui = getappdata(0,'hDynamicFilamentsGui');
+Objects = getappdata(hDynamicFilamentsGui.fig,'Objects');
+LoadedFromPath = {Objects.LoadedFromPath};
+[unique_paths, ~, MT_index] = unique(LoadedFromPath, 'stable');
+filename = inputdlg('Filename (without .mat)? You will find the data under Object.Custom.<filename>', 'Filename?', 1, 'pixelkymo');
+for m=1:length(unique_paths)
+    load_data = load([unique_path(m) filename '.mat']);
+    for n = find(MT_index == m)
+        Objects(n).Custom.(filename).ScanOptions = load_data.ScanOptions;
+        for p=1:size(load_data.Data,1)
+            if strcmp(Objects(n).Name, load_data.Data{p, 2})
+                Objects(n).Custom.(filename).Data = load_data.Data{p, 1};
+            end
+        end
+    end
+end
+
 
 function Save
 hDynamicFilamentsGui = getappdata(0,'hDynamicFilamentsGui');
@@ -675,7 +698,7 @@ if FileName~=0
     AllObjects = load([PathName FileName], 'Filament');
     if ~isfield(AllObjects, 'Filament')
         fJKLoadLink(FileName, PathName, @Load)
-        LoadIntensityPerMAP('intensities.txt', PathName)
+        LoadIntensityPerMAP('intensities.csv', PathName)
     else
         AllObjects = AllObjects.Filament;
         NewObjects = AllObjects([AllObjects.Channel]==1);
@@ -742,14 +765,18 @@ if ~strcmp(external_intensity_name, '')
     end
 end
 custom_data_name = get(hDynamicFilamentsGui.eLoadCustomDataFile, 'String');
-has_custom_data = 0;
 if ~strcmp(custom_data_name, '')
     try
         CustomData = load([PathName custom_data_name '.mat']);
-        if isfield(CustomData, 'intensities')
-            has_custom_data = 1;
+        has_custom_data = 1;
+        try 
+            FitData = load([PathName custom_data_name '_fit.mat']);
+            has_fit_data = 1;
+        catch
+            has_fit_data = 0;
         end
     catch
+        has_custom_data = 0;
     end
 end
 for i=1:length(NewObjects)
@@ -764,7 +791,7 @@ for i=1:length(NewObjects)
         end
     end
     if has_custom_data
-        NewObjects(i).Custom.CustomData = LoadCustomData(CustomData.intensities{i}, custom_data_name);
+        NewObjects(i).Custom.CustomData = LoadCustomData(CustomData.Data{i,1}, custom_data_name);
         NewObjects(i).Custom.type_custom = custom_data_name;
         NewObjects(i).Custom.options_custom = CustomData.ScanOptions;
     else
@@ -850,7 +877,7 @@ function LoadIntensityPerMAP(FileName, PathName)
 hDynamicFilamentsGui = getappdata(0,'hDynamicFilamentsGui');
 Objects = getappdata(hDynamicFilamentsGui.fig,'Objects');
 LoadedFromPath = {Objects.LoadedFromPath};
-table = readtable([PathName filesep FileName], 'Format', '%s%s%d');
+table = readtable([PathName FileName], 'Format', '%s%s%d', 'Delimiter',';');
 for i = 1:length(table.Value)
     if strcmp(table.Moviefolder(i),'all')
         changeobjects = cellfun(@(x) ~isempty(strfind(x, table.Folder(i))), LoadedFromPath);
@@ -998,7 +1025,14 @@ if ~isempty(Objects)&&~isempty(Selected)
     v = patch([l l l l], [0 0 x_length x_length], [z_min z_max z_max z_min],[0.9, 0.9, 0.9]);
     set(v,'facealpha',0.3);
     set(v,'edgealpha',0.1);
-    
+%     value = zeros(1, 428);
+%     value2 = zeros(1, 428);
+%     for m = 1:428
+%         value(m) = padded_matrix(m, 6+ceil(Object.x0(m)));
+%         value2(m) = padded_matrix(m, 6+ceil(Object.w0(m)));
+%     end
+%     plot3(Object.x0+6, 1:length(value), value+100, 'r-');
+%     plot3(Object.x0+Object.w0+6, 1:length(value), value2+100, 'g-');
 %     track_id=Object.SegTagAuto(:,5);
 %     track_id=track_id(track_id>0);
 %     tracks=Tracks(track_id);
@@ -1031,7 +1065,10 @@ if ~isempty(Objects)&&~isempty(Selected)
     for i=1:length(tracks)
         segtrack=tracks(i).Data;
         plot(custom1, segtrack(:,1),segtrack(:,7), 'r-');
-        plot(custom2, segtrack(:,1),segtrack(:,8), 'b-');
+        try
+            plot(custom2, segtrack(:,1),segtrack(:,8), 'b-');
+        catch
+        end
     end
     xlabel('time [s]');
     legend('data2 (signal)');
@@ -1184,6 +1221,9 @@ elseif gcbo == hDynamicFilamentsGui.bLOCATION
     OpenFile = [Object.LoadedFromPath 'maximum' '.tif'];
 elseif gcbo == hDynamicFilamentsGui.bFOLDER
     OpenFile = Object.LoadedFromPath;
+elseif gcbo == hDynamicFilamentsGui.bFIESTA
+    fMenuData('LoadTracks', Object.LoadedFromFile, Object.LoadedFromPath);
+    return
 end
 try
     if isunix
@@ -1217,7 +1257,7 @@ for userdata=userdatacell'
         else
             set(hDynamicFilamentsGui.lChoosePlot, 'Value', userdatafixed);
         end
-        ChoosePlot(hDynamicFilamentsGui);
+        ChoosePlot();
     end
 end
 set(hDynamicFilamentsGui.lChoosePlot, 'Value', 3);
@@ -1226,10 +1266,12 @@ function DeletePlots
 h=findobj('Tag','Plot');
 delete(h);
 
-function ChoosePlot(hDynamicFilamentsGui)
+function ChoosePlot()
+hDynamicFilamentsGui = getappdata(0,'hDynamicFilamentsGui');
 userdata = {'s', 'nm', 'nm/s', '1', '', '1', '1', 'AU'};
 string = {'time', 'location', 'velocity', 'MAP count', 'auto tags', 'frames', 'SNR', 'signal'};
 set(hDynamicFilamentsGui.lPlot_XVar, 'UserData', userdata ,'String', string);
+set(hDynamicFilamentsGui.lPlot_YVar, 'UserData', userdata ,'String', string);
 Options = getappdata(hDynamicFilamentsGui.fig,'Options');
 f=figure;
 str = [' - '];
@@ -1280,6 +1322,32 @@ else
             end
             FilamentEndPlot(hDynamicFilamentsGui, has_err_fun_format);
         case 8
+%             button = fQuestDlg('Against which tracks of the same MT?','Which tracks?',...
+%                 {'Previous Growing Track', 'Previous Shrinking Track', 'All Other Growing', 'All Other Shrinking'},'Previous Growing Track', 'noplacefig');
+%             if strcmp(button,'Previous Growing Track')
+%                 ChosePlusTracks = 1;
+%                 ChosePreviousTrack = 1;
+%             elseif strcmp(button,'Previous Shrinking Track')
+%                 ChosePlusTracks = 0;
+%                 ChosePreviousTrack = 1;
+%             elseif strcmp(button,'All Other Growing')
+%                 ChosePlusTracks = 1;
+%                 ChosePreviousTrack = 0;
+%             elseif strcmp(button,'All Other Shrinking')
+%                 ChosePlusTracks = 0;
+%                 ChosePreviousTrack = 0;
+%             end
+            button = fQuestDlg('Against which tracks of the same MT?','Which tracks?',...
+                {'All Other Growing', 'All Other Shrinking'},'All Other Growing', 'noplacefig');
+            if strcmp(button,'All Other Growing')
+                ChosePlusTracks = 1;
+                ChosePreviousTrack = 0;
+            elseif strcmp(button,'All Other Shrinking')
+                ChosePlusTracks = 0;
+                ChosePreviousTrack = 0;
+            end
+            AgainstOtherMTTracksPlot(Options, ChosePlusTracks, ChosePreviousTrack);
+        case 9
             IntensityVsDistWeightedVel(Options);
     end
 end
@@ -1613,10 +1681,10 @@ else
     label=[title ' (' methodstr ')' ' [' unit ']'];
 end
 
-function [x_vec, y_vec] = get_plot_vectors(Options, AnalyzedTracks)
+function [x_vec, y_vec] = get_plot_vectors(Options, AnalyzedTracks, xy)
 vector = cell(1,2);
 selected_vars = {Options.lPlot_XVar.val, Options.lPlot_YVar.val};
-for m = 1:nargout
+for m = xy
     vector{m} = nan(length(AnalyzedTracks),1);
     for n = 1:length(AnalyzedTracks) % {'median', 'mean', 'end-start', 'minimum', 'maximum', 'standard dev', 'linear fit (only for velocity) or sum (only for MAP count)'}
         switch Options.lMethod_TrackValue.val
@@ -1644,6 +1712,40 @@ end
 x_vec = vector{1};
 y_vec = vector{2};
 
+function AgainstOtherMTTracksPlot(Options, ChosePlusTracks, ChosePreviousTrack)
+hold on
+[type, AnalyzedTracks, ~]=SetType(Options.cPlotGrowingTracks.val);
+if Options.cPlotGrowingTracks.val==1
+    LongTracks=[AnalyzedTracks.Duration]>100;
+    AnalyzedTracks=AnalyzedTracks(LongTracks);
+    type=type(LongTracks);
+end
+if Options.cPlotGrowingTracks.val && ~ChosePlusTracks
+    [~, AnalyzedOtherTracks, ~]=SetType(0);
+elseif (Options.cPlotGrowingTracks.val && ChosePlusTracks) || (~Options.cPlotGrowingTracks.val && ~ChosePlusTracks)
+    AnalyzedOtherTracks = AnalyzedTracks;
+elseif ~Options.cPlotGrowingTracks.val && ChosePlusTracks
+    [~, AnalyzedOtherTracks, ~]=SetType(1);
+end
+[~, type_id, track_type_id] = unique(type);
+[x_vec, ~] = get_plot_vectors(Options, AnalyzedTracks, 1);
+[~, other_y_vecs] = get_plot_vectors(Options, AnalyzedOtherTracks, 2);
+MT_indices = [AnalyzedOtherTracks.MTIndex];
+if ~ChosePreviousTrack
+    for m = 1:length(x_vec)
+        track_indices = find(MT_indices == AnalyzedTracks(m).MTIndex);
+        same_MT_vecs = other_y_vecs(track_indices);
+        y_vec(m) = mean(same_MT_vecs);
+    end
+end
+fJKscatterboxplot(x_vec, y_vec, track_type_id');
+xlabel(get_label(Options, 1));
+ylabel(get_label(Options, 0));
+Legend = type(type_id);
+legend(Legend{:});
+hold off
+
+
 function TrackXYPlot(Options)
 hold on
 [type, AnalyzedTracks, ~]=SetType(Options.cPlotGrowingTracks.val);
@@ -1653,7 +1755,7 @@ if Options.cPlotGrowingTracks.val==1
     type=type(LongTracks);
 end
 [~, type_id, track_type_id] = unique(type);
-[x_vec, y_vec] = get_plot_vectors(Options, AnalyzedTracks);
+[x_vec, y_vec] = get_plot_vectors(Options, AnalyzedTracks, 1:2);
 fJKscatterboxplot(x_vec, y_vec, track_type_id');
 xlabel(get_label(Options, 1));
 ylabel(get_label(Options, 0));
@@ -1708,6 +1810,7 @@ Options.lPlot_XVar.str = '1';
 Options.lPlot_YVar.print = 'MAP count';
 Options.lPlot_YVar.str = '1';
 fJKplotframework(Tracks, type, 0, events, Options);
+
 
 function FilamentEndPlot(hDynamicFilamentsGui, has_err_fun_format)
 Options = getappdata(hDynamicFilamentsGui.fig,'Options');
@@ -1765,13 +1868,13 @@ if Options.cPlotGrowingTracks.val==1
     AnalyzedTracks=AnalyzedTracks(LongTracks);
     type=type(LongTracks);
 end
-[x_vec, ~] = get_plot_vectors(Options, AnalyzedTracks);
+[x_vec, ~] = get_plot_vectors(Options, AnalyzedTracks, 1);
 if isempty(x_vec)
     text(0.3,0.5,'No data or path available for any objects','Parent','FontWeight','bold','FontSize',16);
     set('Visible','off');
     legend('off');
 else
-    [~, type_id, track_type_id] = unique(type);
+    [~, type_id, track_type_id] = unique(type, 'stable');
     b=boxplot(x_vec, type);
     for j=1:length(type_id)
         type_datavec=x_vec(track_type_id == j);

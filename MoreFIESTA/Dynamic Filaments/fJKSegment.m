@@ -28,8 +28,7 @@ for n = 1:length(Objects)
         intensity = intensity(DynResults(:,4));                                    %of the original data the row data can be found, i.e. 1 2 4.. 542 323
     end
     if ~strcmp(Options.eLoadCustomDataFile.str, '') && isfield(Objects(n).Custom, 'CustomData')
-        custom_data = Objects(n).Custom.CustomData;
-        custom_data = fJKread_custom_data(custom_data, Options.eLoadCustomDataFile.print, Objects(n).Custom.options_custom.help_get_tip_kymo.ExtensionLength);
+        custom_data = fJKread_custom_data(Objects(n), Options);
         custom_data = custom_data(DynResults(:,4), :);  
         has_custom_data = 1;
     else

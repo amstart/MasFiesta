@@ -20,10 +20,11 @@ function [fitresult, gof] = FitErf(x, y)
 % Set up fittype and options.
 ft = fittype( 'y0+(p0/2)*erf((x-x0)/(sqrt(2)*w0))', 'independent', 'x', 'dependent', 'y' );
 opts = fitoptions( 'Method', 'NonlinearLeastSquares' );
-opts.Algorithm = 'Levenberg-Marquardt';
 opts.Display = 'Off';
+opts.Lower = [1 0 -2 -0.25];
 opts.Robust = 'Bisquare';
-opts.StartPoint = [0.915991244131425 1 0 0.424349039815375];
+opts.StartPoint = [0.141886338627215 0.421761282626275 0.915735525189067 0];
+opts.Upper = [2 20 2 0.25];
 
 % Fit model to data.
 [fitresult, gof] = fit( xData, yData, ft, opts );
