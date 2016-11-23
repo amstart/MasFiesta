@@ -281,18 +281,17 @@ hDynamicFilamentsGui.tChoosePlot = uicontrol('Parent',hDynamicFilamentsGui.pOpti
 hDynamicFilamentsGui.bUpdatePlots = uicontrol('Parent',hDynamicFilamentsGui.pOptions,'Units','normalized','Callback',@UpdateOptions,...
                                    'Position',[0.15 0.45 0.12 0.05],'String','Update All','Style','pushbutton','Tag','bUpdatePlots');     
                                
-tooltipstr=sprintf(['Set the X variable.']);
+tooltipstr=sprintf(['Set the X variable.']); %lPlot_XVar and lPlot_YVar are set in UpdateOptions()
                                
-hDynamicFilamentsGui.lPlot_XVar = uicontrol('Parent',hDynamicFilamentsGui.pOptions,'Units','normalized', 'UserData', {'s', 'nm', 'nm/s', '1', '', '1', '?', '?'},...
-                            'Position',[0.3 0.4 0.2 0.125],'BackgroundColor','white','String',{'time', 'location', 'velocity', 'MAP count', 'auto tags', 'frames', 'custom data 1', 'custom data 2'}, 'TooltipString', tooltipstr,'Style','popupmenu','Tag','lPlot_XVar','Enable','on');
+hDynamicFilamentsGui.lPlot_XVar = uicontrol('Parent',hDynamicFilamentsGui.pOptions,'Units','normalized',...
+                            'Position',[0.3 0.4 0.2 0.125],'BackgroundColor','white', 'TooltipString', tooltipstr,'Style','popupmenu','Tag','lPlot_XVar','Enable','on');
                        
 
 tooltipstr=sprintf(['Set the Y variable and plot (Either "X vs Y" or "Events along X during Y" have to be selected below).']);
                         
-hDynamicFilamentsGui.lPlot_YVar = uicontrol('Parent',hDynamicFilamentsGui.pOptions,'Units','normalized', 'UserData', {'s', 'nm', 'nm/s', '1', '', '1', '?', '?'},...
-                            'Position',[0.55 0.4 0.2 0.125],'BackgroundColor','white','String',{'time', 'location', 'velocity', 'MAP count', 'auto tags', 'frames', 'custom data 1', 'custom data 2'}, 'TooltipString', tooltipstr,'Style','popupmenu','Tag','lPlot_YVar','Enable','on');
+hDynamicFilamentsGui.lPlot_YVar = uicontrol('Parent',hDynamicFilamentsGui.pOptions,'Units','normalized',...
+                            'Position',[0.55 0.4 0.2 0.125],'BackgroundColor','white', 'TooltipString', tooltipstr,'Style','popupmenu','Tag','lPlot_YVar','Enable','on');
 
-% hDynamicFilamentsGui.YUnits = {'s', 'nm', 'nm/s', '1', '1/s'};
           
 hDynamicFilamentsGui.lChoosePlot = uicontrol('Parent',hDynamicFilamentsGui.pOptions,'Units','normalized','Callback','fJKDynamicFilamentsGui(''SetMenu'',getappdata(0,''hDynamicFilamentsGui''));', 'Value', 3,...
                             'Position',[0.3 0.35 0.3 0.125],'BackgroundColor','white','TooltipString', tooltipstr,'Style','popupmenu','Tag','lChoosePlot','Enable','on', ...
@@ -451,11 +450,11 @@ hDynamicFilamentsGui.eLoadIntensityFile = uicontrol('Parent',hDynamicFilamentsGu
                                          'Position',[.1 .3 0.8 .2],'Tag','eLoadIntensityFile','Fontsize',10, 'TooltipString', tooltipstr,...
                                          'UserData', '.mat', 'String','','BackgroundColor','white','HorizontalAlignment','center');  
                                             
-tooltipstr=sprintf(['If you have custom data you can provide the filename here (without .mat)']);
+tooltipstr=sprintf(['If you have custom data you can add it to your objects here']);
                                      
-hDynamicFilamentsGui.eLoadCustomDataFile = uicontrol('Parent',hDynamicFilamentsGui.pLoadOptions,'Style','edit','Units','normalized',...
-                                         'Position',[.1 .05 0.8 .2],'Tag','eLoadCustomDataFile','Fontsize',10, 'TooltipString', tooltipstr,...
-                                         'UserData', '.mat', 'String','','BackgroundColor','white','HorizontalAlignment','center');    
+hDynamicFilamentsGui.bAppendCustomData = uicontrol('Parent',hDynamicFilamentsGui.pLoadOptions,'Units','normalized','Callback', @AddCustomData,...
+                                         'Position',[.1 .05 0.8 .2],'Tag','bAppendCustomData','Fontsize',10, 'TooltipString', tooltipstr,...
+                                         'String','Append Custom Data','BackgroundColor',c,'HorizontalAlignment','center');    
 
 if nargin == 0                                                                
     set(hDynamicFilamentsGui.fig,'Visible','on');
@@ -504,7 +503,21 @@ SetTable();
 
 function UpdateOptions(varargin)
 global CurrentDir
+var_units = {'s', 'nm', 'nm/s', '1', '', '1'};
+var_names = {'time', 'location', 'velocity', 'MAP count', 'auto tags', 'frames'};
 hDynamicFilamentsGui = getappdata(0,'hDynamicFilamentsGui');
+Objects = getappdata(hDynamicFilamentsGui.fig,'Objects');
+if ~isempty(Objects)
+    Objects = Objects(1);
+    if isfield(Objects, 'CustomData')
+        for customfield = fields(Objects.CustomData)
+            var_units = {var_units{:} Objects.CustomData.(customfield{1}).plot_options{2,:}};
+            var_names = {var_names{:} Objects.CustomData.(customfield{1}).plot_options{1,:}};
+        end
+    end
+end
+set(hDynamicFilamentsGui.lPlot_XVar, 'UserData', var_units ,'String', var_names);
+set(hDynamicFilamentsGui.lPlot_YVar, 'UserData', var_units ,'String', var_names);
 children = get(hDynamicFilamentsGui.pOptions, 'Children');
 children = vertcat(children, get(hDynamicFilamentsGui.pLoadOptions, 'Children'));
 Options = struct;
@@ -596,24 +609,72 @@ if strcmp(get(gcf, 'CurrentCharacter'),'s')
 end
 
 
-function AddCustomData
+function AddCustomData(varargin)
 hDynamicFilamentsGui = getappdata(0,'hDynamicFilamentsGui');
 Objects = getappdata(hDynamicFilamentsGui.fig,'Objects');
 LoadedFromPath = {Objects.LoadedFromPath};
 [unique_paths, ~, MT_index] = unique(LoadedFromPath, 'stable');
-filename = inputdlg('Filename (without .mat)? You will find the data under Object.Custom.<filename>', 'Filename?', 1, 'pixelkymo');
+filename = inputdlg('Filename (without .mat)? You will find the data under Object.Custom.<filename>', 'Filename?', 1, {'pixelkymo'});
+filename = filename{1};
+if ~isempty(strfind(filename, 'fit'))
+    fun = @PrepareFitData;
+    read_fun = @ReadFitData;
+    plot_options = {'error function width', 'error function displacement'; 'pixels', 'pixels'};
+elseif ~isempty(strfind(filename, 'kymo'))
+    fun = @PrepareKymoData;
+    read_fun = [];
+    plot_options = {};
+else
+    fun = @(x) x;
+    read_fun = [];
+    plot_options = {};
+end
+progressdlg('String','Appending Custom Data','Min',0,'Max',length(unique_paths));
 for m=1:length(unique_paths)
-    load_data = load([unique_path(m) filename '.mat']);
-    for n = find(MT_index == m)
-        Objects(n).Custom.(filename).ScanOptions = load_data.ScanOptions;
-        for p=1:size(load_data.Data,1)
+    load_data = load([unique_paths{m} filename '.mat']);
+    for n = find(MT_index == m)'
+        Objects(n).CustomData.(filename).ScanOptions = load_data.ScanOptions;
+        for p=1:size(load_data.Data,1) %find microtubule data by name in second column
             if strcmp(Objects(n).Name, load_data.Data{p, 2})
-                Objects(n).Custom.(filename).Data = load_data.Data{p, 1};
+                custom_data = load_data.Data{p, 1};
+                Objects(n).CustomData.(filename).Data = fun(custom_data);
+                Objects(n).CustomData.(filename).read_fun = read_fun;
+                Objects(n).CustomData.(filename).plot_options = plot_options;
             end
         end
     end
+    progressdlg(m);
+end
+setappdata(hDynamicFilamentsGui.fig,'Objects',Objects);
+UpdateOptions();
+
+function [matrix] = ReadFitData(prepared_fit_data)
+matrix = nan(length(prepared_fit_data), 2);
+for m = 1:length(prepared_fit_data)
+    if isstruct(prepared_fit_data{m})
+        matrix(m,1) = prepared_fit_data{m}.w0;
+        matrix(m,2) = prepared_fit_data{m}.x0;
+    end
 end
 
+function fit_data = PrepareFitData(fit_data)
+for m = 1:length(fit_data)
+    if ~isstruct(fit_data{m})
+        fit_data{m} = nan;
+        continue
+    end
+    tmp = fit_data{m}.gof;
+    tmp.w0 = fit_data{m}.fitresult.w0;
+    tmp.x0 = fit_data{m}.fitresult.x0;
+    tmp.p0 = fit_data{m}.fitresult.p0;
+    tmp.y0 = fit_data{m}.fitresult.y0;
+    fit_data{m} = tmp;
+end
+
+function kymo_data = PrepareKymoData(kymo_data)
+for m = 1:length(kymo_data)
+    kymo_data{m} = max(kymo_data{m}, [], 1);
+end
 
 function Save
 hDynamicFilamentsGui = getappdata(0,'hDynamicFilamentsGui');
@@ -739,13 +800,6 @@ if FileName~=0
     end
 end
 
-function custom_data = LoadCustomData(custom_data, custom_data_name)
-if ~isempty(strfind(custom_data_name, 'ymo'))
-    for m = 1:length(custom_data)
-        custom_data{m} = max(custom_data{m}, [], 1);
-    end
-end
-
 function PrepareFils(NewObjects, RefObjects, PathName, FileName)
 hDynamicFilamentsGui = getappdata(0,'hDynamicFilamentsGui');
 ref = get(hDynamicFilamentsGui.cUsePosEnd, 'Value')*2+1;
@@ -764,21 +818,6 @@ if ~strcmp(external_intensity_name, '')
     catch
     end
 end
-custom_data_name = get(hDynamicFilamentsGui.eLoadCustomDataFile, 'String');
-if ~strcmp(custom_data_name, '')
-    try
-        CustomData = load([PathName custom_data_name '.mat']);
-        has_custom_data = 1;
-        try 
-            FitData = load([PathName custom_data_name '_fit.mat']);
-            has_fit_data = 1;
-        catch
-            has_fit_data = 0;
-        end
-    catch
-        has_custom_data = 0;
-    end
-end
 for i=1:length(NewObjects)
     if has_external_intensity
         NewObjects(i).Custom.Intensity = ExtIntensity.intensities{i};
@@ -789,13 +828,6 @@ for i=1:length(NewObjects)
         else
             NewObjects(i).Custom.type_intensity = 'None';
         end
-    end
-    if has_custom_data
-        NewObjects(i).Custom.CustomData = LoadCustomData(CustomData.Data{i,1}, custom_data_name);
-        NewObjects(i).Custom.type_custom = custom_data_name;
-        NewObjects(i).Custom.options_custom = CustomData.ScanOptions;
-    else
-        NewObjects(i).Custom.type_custom = 'None';
     end
     str{i}=NewObjects(i).Name;
     typecomment=strfind(NewObjects(i).Comments,'type:');
@@ -847,15 +879,18 @@ for i=1:length(NewObjects)
     if isnan(RefPos)
         DynResults = [nan nan nan 1];
     else
+        deleted_rows = [];
         DynResults = [NewObjects(i).Results(:,1:2) RefPos (1:size(RefPos,1))'];
         for m=length(tags):-1:1
             if tags(m)==9||isnan(RefPos(m))
+                deleted_rows = [deleted_rows m];
                 DynResults(m,:) = [];
                 tags(m) = [];
                 tiptags(m) = [];
             end
         end
     end
+    NewObjects(i).Deleted_Rows = deleted_rows;
     NewObjects(i).CatRes = [sum(catastrophes) sum(rescues)];
     NewObjects(i).Tags = [tags tiptags];
     NewObjects(i).DynResults = DynResults;
@@ -1006,25 +1041,41 @@ if ~isempty(Objects)&&~isempty(Selected)
         includepoints = includepoints & Object.Tags(:,2)==0;
     end
     try
-        custom_data = Object.Custom.CustomData(includepoints)';
+        custom_data = Object.CustomData.pixelkymo.Data(includepoints)';
     catch
-        msgbox('you need to have kymograph data loaded as custom data (see in the UI group "What to load"');
+        msgbox('you need to have kymograph data loaded in the field CustomData.pixelkymo');
     end
     maxLength=max(cellfun(@(x)numel(x),custom_data));
     padded_matrix=cell2mat(cellfun(@(x)cat(2,x, nan(1,maxLength-length(x))),custom_data,'UniformOutput',false));
-
     surf(padded_matrix)
     hold on;
-    zlabel(['Intensity (' get(hDynamicFilamentsGui.eLoadCustomDataFile, 'String') ')'], 'Interpreter', 'none');
+    zlabel('Intensity');
     ylabel('frame');
     xlabel('Arc length away from plus end [pixels]');
-    l = Object.Custom.options_custom.help_get_tip_kymo.ExtensionLength;
+    l = Object.CustomData.pixelkymo.ScanOptions.help_get_tip_kymo.ExtensionLength;
     x_length = size(padded_matrix,1);
     z_min = min(max(padded_matrix(:,1:20,:)));
     z_max = max(max(padded_matrix(:,1:20,:)));
     v = patch([l l l l], [0 0 x_length x_length], [z_min z_max z_max z_min],[0.9, 0.9, 0.9]);
     set(v,'facealpha',0.3);
     set(v,'edgealpha',0.1);
+%     try
+        fit_data = Object.CustomData.pixelkymo_fit.Data(includepoints);
+        fit_matrix = zeros(length(fit_data),2);
+        values = zeros(length(fit_data),2);
+        for m = 1:length(fit_data)
+            if ~isstruct(fit_data{m})
+                fit_matrix(m,:) = [nan nan];
+                continue
+            end
+            fit_matrix(m,:) = [6+fit_data{m}.x0 6+fit_data{m}.w0+fit_data{m}.x0];
+            values(m,1) = padded_matrix(m, 6+ceil(fit_matrix(m,1)));
+            values(m,2) = padded_matrix(m, 6+ceil(fit_matrix(m,1))+ceil(fit_matrix(m,2)));
+        end
+        plot3(fit_matrix(:,1), 1:length(fit_data), values(:,1), 'r-');
+        plot3(fit_matrix(:,2), 1:length(fit_data), values(:,1), 'g-');
+%     catch
+%     end
 %     value = zeros(1, 428);
 %     value2 = zeros(1, 428);
 %     for m = 1:428
@@ -1049,6 +1100,8 @@ end
 
 function CustomPlot()
 hDynamicFilamentsGui = getappdata(0,'hDynamicFilamentsGui');
+var_units = get(hDynamicFilamentsGui.lPlot_XVar, 'UserData');
+var_names = get(hDynamicFilamentsGui.lPlot_XVar, 'String');
 Tracks = getappdata(hDynamicFilamentsGui.fig,'Tracks');
 Objects = getappdata(hDynamicFilamentsGui.fig,'Objects');
 Selected=get(hDynamicFilamentsGui.lSelection,'Value');
@@ -1060,19 +1113,15 @@ if ~isempty(Objects)&&~isempty(Selected)
     track_id=Object.SegTagAuto(:,5);
     track_id=track_id(track_id>0);
     tracks=Tracks(track_id);
-    custom1 = subplot(2,1,1);
-    custom2 = subplot(2,1,2);
-    for i=1:length(tracks)
-        segtrack=tracks(i).Data;
-        plot(custom1, segtrack(:,1),segtrack(:,7), 'r-');
-        try
-            plot(custom2, segtrack(:,1),segtrack(:,8), 'b-');
-        catch
+    for m = 1:size(tracks(1).Data,2)-6
+        subplot(size(tracks(1).Data,2)-6,1,m);
+        hold on;
+        for i=1:length(tracks)
+            plot(tracks(i).Data(:,1),tracks(i).Data(:,m+6));
         end
+        ylabel([var_names{m+6} ' [' var_units{m+6} ']']);
     end
     xlabel('time [s]');
-    legend('data2 (signal)');
-    legend(custom1, 'data1 (SNR)', 'data2 (signal)');
 end
 
 function Draw(hDynamicFilamentsGui)
@@ -1268,10 +1317,6 @@ delete(h);
 
 function ChoosePlot()
 hDynamicFilamentsGui = getappdata(0,'hDynamicFilamentsGui');
-userdata = {'s', 'nm', 'nm/s', '1', '', '1', '1', 'AU'};
-string = {'time', 'location', 'velocity', 'MAP count', 'auto tags', 'frames', 'SNR', 'signal'};
-set(hDynamicFilamentsGui.lPlot_XVar, 'UserData', userdata ,'String', string);
-set(hDynamicFilamentsGui.lPlot_YVar, 'UserData', userdata ,'String', string);
 Options = getappdata(hDynamicFilamentsGui.fig,'Options');
 f=figure;
 str = [' - '];

@@ -27,10 +27,20 @@ for n = 1:length(Objects)
     else
         intensity = intensity(DynResults(:,4));                                    %of the original data the row data can be found, i.e. 1 2 4.. 542 323
     end
-    if ~strcmp(Options.eLoadCustomDataFile.str, '') && isfield(Objects(n).Custom, 'CustomData')
-        custom_data = fJKread_custom_data(Objects(n), Options);
-        custom_data = custom_data(DynResults(:,4), :);  
-        has_custom_data = 1;
+    if isfield(Objects(n), 'CustomData')
+        custom_data = [];
+        for customfield = fields(Objects(n).CustomData)
+            if ~isempty(Objects(n).CustomData.(customfield{1}).read_fun)
+                custom_data = [custom_data Objects(n).CustomData.(customfield{1}).read_fun(Objects(n).CustomData.(customfield{1}).Data)];
+            end
+        end
+        if ~isempty(custom_data)
+            custom_data = custom_data(DynResults(:,4), :);  
+            has_custom_data = 1;
+        else
+            custom_data = nan(size(t));
+            has_custom_data = 0;
+        end
     else
         custom_data = nan(size(t));
         has_custom_data = 0;
