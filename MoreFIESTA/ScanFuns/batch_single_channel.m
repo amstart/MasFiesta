@@ -3,6 +3,7 @@ function [ output_args ] = batch_single_channel(FileName, PathName)
 %they were tracked in and saves the output
 %% Options
 global ScanOptions
+% try
 %rmappdata(0, 'hMainGui');
 ScanOptions.PixSize = 157; %is used as default if nothing else available
 %%%%%%%%%%%%%%%%%%%parameters for helper functions%%%%%%%%%%%%%%
@@ -12,18 +13,21 @@ ScanOptions.help_get_tip_intensities.MTend = 1; %1 = PosStart, 2 = PosEnd
 ScanOptions.help_get_tip_intensities.method = 'get_full_intensities_1_clip';
 ScanOptions.help_get_tip_intensities.AllFilaments = 1;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-ScanOptions.help_get_tip_kymo.framesuntilmissingframe = 0; %set to number higher than number of frames if you have the same number of frames for the channels
+ScanOptions.help_get_tip_kymo.framesuntilmissingframe = 40; %set to number higher than number of frames if you have the same number of frames for the channels
 ScanOptions.help_get_tip_kymo.method = 'get_pixelkymo';
 ScanOptions.help_get_tip_kymo.AllFilaments = 1;
 ScanOptions.help_get_tip_kymo.ScanSize = 3;
 ScanOptions.help_get_tip_kymo.ExtensionLength = 6;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-ScanOptions.help_CorrectObject.AddDrift = 1;
-ScanOptions.help_CorrectObject.RemoveColorCorrection = 0;
+ScanOptions.help_get_tip_points.max_points = 1000;
+ScanOptions.help_get_tip_points.GFP_frame_where = 0.4759;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-ScanOptions.filename = [ScanOptions.help_get_tip_kymo.method '.mat'];
+ScanOptions.help_CorrectObject.AddDrift = 1;
+ScanOptions.help_CorrectObject.RemoveColorCorrection = 1;
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+ScanOptions.filename = ['pixelkymo_GFP_shifted.mat'];
 ScanOptions.ReplaceFileNamePattern{1} = 'red';
-ScanOptions.ReplaceFileNamePattern{2} = 'red';
+ScanOptions.ReplaceFileNamePattern{2} = 'green';
 if ~isfield(ScanOptions, 'ObjectChannel')
     input = inputdlg('Analyze objects in which channel?','Object Channel',1,{'1'});
     ScanOptions.ObjectChannel = str2double(input);
@@ -36,6 +40,7 @@ Filament = Filament.Filament;
 Filament = Filament([Filament.Channel]==ScanOptions.ObjectChannel);
 %% Helper Functions
 Filament = help_CorrectObject(Filament, PathName);
+[Filament] = help_get_tip_points(Filament, ScanOptions);
 [Stack, ~, ~] = help_GetStack(PathName, Filament(1).File);
 Stack = Stack{1};
 [Filament] = help_get_tip_kymo(Stack, Filament);
@@ -46,6 +51,9 @@ for i = 1:length(Filament)
     Data{i,2} = Filament(i).Name;
 end
 save([PathName ScanOptions.filename], 'Data', 'ScanOptions')
+% catch
+%     'not working'
+% end
 %%
 % %% Helper Functions
 % [Stack, ~, PixSize] = help_GetStack(PathName, Filament(1).File);

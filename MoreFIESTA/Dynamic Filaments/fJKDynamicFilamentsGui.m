@@ -156,7 +156,7 @@ tooltipstr=sprintf(['Minimum distance filament has to shrink in order for it to 
 hDynamicFilamentsGui.tMinDist = uicontrol('Parent',hDynamicFilamentsGui.pOptions,'Units','normalized','BackgroundColor',c,...
                              'Position',[0.05 0.825 0.3 0.125],'String','Min Shrinkage Distance:','Style','text','Tag','tIntensity','HorizontalAlignment','left');  
                         
-hDynamicFilamentsGui.eMinDist = uicontrol('Parent',hDynamicFilamentsGui.pOptions,'TooltipString', tooltipstr, 'Units','normalized','Callback',@UpdateOptions,...
+hDynamicFilamentsGui.eMinDist = uicontrol('Parent',hDynamicFilamentsGui.pOptions,'TooltipString', tooltipstr, 'Units','normalized',...
                                 'Position',[.3 0.9 .1 .05],'String','400','Style','edit','Fontsize',10,'BackgroundColor','white',...
                                 'UserData', 'nm', 'Tag','eMinDist','Value',0,'Enable','on'); 
                             
@@ -504,15 +504,17 @@ SetTable();
 function UpdateOptions(varargin)
 global CurrentDir
 var_units = {'s', 'nm', 'nm/s', '1', '', '1'};
-var_names = {'time', 'location', 'velocity', 'MAP count', 'auto tags', 'frames'};
+var_names = {'time', 'location', 'velocity', 'Ase1 count', 'auto tags', 'frames'};
 hDynamicFilamentsGui = getappdata(0,'hDynamicFilamentsGui');
 Objects = getappdata(hDynamicFilamentsGui.fig,'Objects');
 if ~isempty(Objects)
     Objects = Objects(1);
     if isfield(Objects, 'CustomData')
-        for customfield = fields(Objects.CustomData)
-            var_units = {var_units{:} Objects.CustomData.(customfield{1}).plot_options{2,:}};
-            var_names = {var_names{:} Objects.CustomData.(customfield{1}).plot_options{1,:}};
+        for customfield = fields(Objects.CustomData)'
+            if  ~isempty(Objects.CustomData.(customfield{1}).plot_options)
+                var_units = {var_units{:} Objects.CustomData.(customfield{1}).plot_options{2,:}};
+                var_names = {var_names{:} Objects.CustomData.(customfield{1}).plot_options{1,:}};
+            end
         end
     end
 end
@@ -534,7 +536,7 @@ for i = 1:length(children)
         case 'popupmenu'
             Options.(tagname).val = get(children(i), 'value');
             strings = get(children(i), 'string');
-            Options.(tagname).print = strings{Options.(tagname).val};
+            Options.(tagname).print = strings{min(Options.(tagname).val, length(strings))};
             try %currently used for units
                 userdata = get(children(i), 'UserData');
                 Options.(tagname).str = userdata{Options.(tagname).val};
@@ -603,7 +605,7 @@ if strcmp(get(gcf, 'CurrentCharacter'),'s')
 %     export_fig([QuicksaveDir filesep strrep(get(gcf, 'Name'), ' | ', '_')], '-png', '-nocrop');
     filename = strrep(get(gcf, 'Name'), ' | ', '_');
     optionsstart = strfind(filename, '- ');
-    filename = inputdlg('Filename?', 'Filename?', 1, {filename(1:optionsstart)});
+    filename = inputdlg('Filename?', 'Filename?', 1, {[filename(1:optionsstart) ' ']});
     saveas(gcf,[QuicksaveDir filesep filename{1} '.png'], 'png');
 %     savefig(gcf,[QuicksaveDir filesep strrep(get(gcf, 'Name'), ' | ', '_') '.fig']);
 end
@@ -619,8 +621,12 @@ filename = filename{1};
 if ~isempty(strfind(filename, 'fit'))
     fun = @PrepareFitData;
     read_fun = @ReadFitData;
-    plot_options = {'error function width', 'error function displacement'; 'pixels', 'pixels'};
-elseif ~isempty(strfind(filename, 'kymo'))
+    if ~isempty(strfind(filename, 'GFP'))
+        plot_options = {'GFP error function width', 'GFP error function displacement'; 'pixels', 'pixels'};
+    else
+        plot_options = {'error function width', 'error function displacement'; 'pixels', 'pixels'};
+    end
+elseif ~isempty(strfind(filename, 'pixelkymo'))
     fun = @PrepareKymoData;
     read_fun = [];
     plot_options = {};
@@ -1025,7 +1031,6 @@ set(hDynamicFilamentsGui.lSelection, 'Value', max(1,min(get(hDynamicFilamentsGui
 function SurfPlot()
 hDynamicFilamentsGui = getappdata(0,'hDynamicFilamentsGui');
 Objects = getappdata(hDynamicFilamentsGui.fig,'Objects');
-Tracks = getappdata(hDynamicFilamentsGui.fig,'Tracks');
 Options = getappdata(hDynamicFilamentsGui.fig,'Options');
 Selected=get(hDynamicFilamentsGui.lSelection,'Value');
 Selected=Selected(Selected>0&Selected<length(Objects)+1);
@@ -1041,9 +1046,16 @@ if ~isempty(Objects)&&~isempty(Selected)
         includepoints = includepoints & Object.Tags(:,2)==0;
     end
     try
-        custom_data = Object.CustomData.pixelkymo.Data(includepoints)';
+        answer = questdlg('Rhodamine/GFP?', 'Channel?', 'Rhodamine','GFP','Rhodamine' );
+        if strcmp(answer, 'GFP')
+            kymo_field = 'pixelkymo_GFP';
+        else
+            kymo_field = 'pixelkymo';
+        end
+        custom_data = Object.CustomData.(kymo_field).Data(includepoints)';
     catch
         msgbox('you need to have kymograph data loaded in the field CustomData.pixelkymo');
+        return
     end
     maxLength=max(cellfun(@(x)numel(x),custom_data));
     padded_matrix=cell2mat(cellfun(@(x)cat(2,x, nan(1,maxLength-length(x))),custom_data,'UniformOutput',false));
@@ -1052,15 +1064,15 @@ if ~isempty(Objects)&&~isempty(Selected)
     zlabel('Intensity');
     ylabel('frame');
     xlabel('Arc length away from plus end [pixels]');
-    l = Object.CustomData.pixelkymo.ScanOptions.help_get_tip_kymo.ExtensionLength;
+    l = Object.CustomData.(kymo_field).ScanOptions.help_get_tip_kymo.ExtensionLength;
     x_length = size(padded_matrix,1);
     z_min = min(max(padded_matrix(:,1:20,:)));
     z_max = max(max(padded_matrix(:,1:20,:)));
     v = patch([l l l l], [0 0 x_length x_length], [z_min z_max z_max z_min],[0.9, 0.9, 0.9]);
     set(v,'facealpha',0.3);
     set(v,'edgealpha',0.1);
-%     try
-        fit_data = Object.CustomData.pixelkymo_fit.Data(includepoints);
+    try
+        fit_data = Object.CustomData.([kymo_field '_fit']).Data(includepoints);
         fit_matrix = zeros(length(fit_data),2);
         values = zeros(length(fit_data),2);
         for m = 1:length(fit_data)
@@ -1074,8 +1086,8 @@ if ~isempty(Objects)&&~isempty(Selected)
         end
         plot3(fit_matrix(:,1), 1:length(fit_data), values(:,1), 'r-');
         plot3(fit_matrix(:,2), 1:length(fit_data), values(:,1), 'g-');
-%     catch
-%     end
+    catch
+    end
 %     value = zeros(1, 428);
 %     value2 = zeros(1, 428);
 %     for m = 1:428
@@ -1200,7 +1212,7 @@ if ~isempty(Objects)&&~isempty(Selected)
             plot(hDynamicFilamentsGui.aPlot,tseg(tracks(i).end_first_subsegment),dseg(tracks(i).end_first_subsegment),'LineStyle', 'none', 'Marker', 'd', 'MarkerEdgeColor',c);
         end
         if tracks(i).start_last_subsegment
-            plot(hDynamicFilamentsGui.aPlot,tseg(tracks(i).start_last_subsegment),dseg(tracks(i).start_last_subsegment),'LineStyle', 'none', 'Marker', 's', 'MarkerEdgeColor',c);
+            plot(hDynamicFilamentsGui.aPlot,tseg(tracks(i).start_last_subsegment+1),dseg(tracks(i).start_last_subsegment+1),'LineStyle', 'none', 'Marker', 's', 'MarkerEdgeColor',c);
         end
         plot(hDynamicFilamentsGui.aVelPlot,tseg,vseg,'Color', c);
         plot(hDynamicFilamentsGui.aIPlot,tseg,iseg,'Color', c);
@@ -1212,7 +1224,7 @@ if ~isempty(Objects)&&~isempty(Selected)
     set(hDynamicFilamentsGui.aPlot,{'xlim','ylim'},xy);
     legend(hDynamicFilamentsGui.aPlot,'off');
     xlabel(hDynamicFilamentsGui.aPlot,'time [s]');
-    ylabel(hDynamicFilamentsGui.aPlot,'distance [nm]'); 
+    ylabel(hDynamicFilamentsGui.aPlot,'distance to seed [nm]'); 
     xlabel(hDynamicFilamentsGui.aVelPlot,'time [s]');
     ylabel(hDynamicFilamentsGui.aVelPlot,'velocity [nm/s]'); 
     xlabel(hDynamicFilamentsGui.aIPlot,'time [s]');
@@ -1324,7 +1336,8 @@ optionfields = fields(Options);
 for field = optionfields'
     fchar = char(field);
     if strcmp(fchar, 'lChoosePlot') || strcmp(fchar, 'lPlot_XVar') || strcmp(fchar, 'lAdditionalPlots') || ...
-            strcmp(fchar, 'lPlot_YVar') || strcmp(fchar, 'cPlotGrowingTracks') || strcmp(fchar, 'cLegend') || strcmp(fchar, 'cOnlySelected') || strcmp(fchar, 'lMethod_TrackValue') || strcmp(fchar, 'lMethod_TrackValueY')
+            strcmp(fchar, 'lPlot_YVar') || strcmp(fchar, 'cPlotGrowingTracks') || strcmp(fchar, 'cLegend') || strcmp(fchar, 'cOnlySelected') ...
+            || strcmp(fchar, 'lMethod_TrackValue') || strcmp(fchar, 'lMethod_TrackValueY') || strcmp(fchar, 'lSubsegment')
         continue
     end
     str = [str fchar '=' Options.(fchar).print ' | '];
@@ -1396,6 +1409,7 @@ else
             IntensityVsDistWeightedVel(Options);
     end
 end
+set(gcf, 'Position', get(0,'Screensize')); 
 
 function PrepareXYData(isfrequencyplot, Options)
 [type, Tracks, events]=SetType(Options.cPlotGrowingTracks.val);
@@ -1427,6 +1441,10 @@ else
     for i=1:length(Tracks)
         Tracks(i).Y = Tracks(i).Data(:,ycolumn);
     end
+end
+for i=1:length(Tracks)
+    Tracks(i).XEventEnd = Tracks(i).XEventEnd(xcolumn);
+    Tracks(i).XEventStart = Tracks(i).XEventStart(xcolumn);
 end
 [Tracks, DelObjects] = SelectSubsegments(Tracks, Options);
 Tracks(DelObjects) = [];
@@ -1493,6 +1511,11 @@ switch Options.lSubsegment.val
             end
         end
 end
+for i=1:length(Tracks)
+    if isempty(Tracks(i).X)
+        DelObjects(i) = 1;
+    end
+end
 
 
 function [type, Tracks, event]=SetType(PlotGrowingTags) %PlotGrowingTags is needed because of the event plot
@@ -1503,12 +1526,12 @@ else
 end
 hDynamicFilamentsGui = getappdata(0,'hDynamicFilamentsGui');
 Options = getappdata(hDynamicFilamentsGui.fig,'Options');
-if ~isempty(strfind(Options.lPlot_XVar.print, 'MAP')) || ~isempty(strfind(Options.lPlot_YVar.print, 'MAP'))
+if ~isempty(strfind(Options.lPlot_XVar.print, 'Ase1')) || ~isempty(strfind(Options.lPlot_YVar.print, 'Ase1'))
     OnlyWithIntensity = 1;
 else
     OnlyWithIntensity = 0;
 end
-if ~isempty(strfind(Options.lPlot_XVar.print, 'custom')) || ~isempty(strfind(Options.lPlot_YVar.print, 'custom'))
+if Options.lPlot_XVar.val > 6 || Options.lPlot_YVar.val > 6 
     OnlyWithCustomData = 1;
 else
     OnlyWithCustomData = 0;
@@ -1639,6 +1662,7 @@ if ~isempty(Objects)
             [~, order] = sort(orderstr);
         case 2
             [~, order] = sort({Objects.Type});
+            order = fliplr(order);
     end
     Objects = Objects(order);
 end
@@ -1668,8 +1692,8 @@ for i=1:2
             print_str = [int2str(Tracks(n).MTIndex) '/' int2str(Tracks(n).TrackIndex)];
             if event(n)
                 NEvents(typenum)=NEvents(typenum)+1;
-                text(typenum+0.1, double(Tracks(n).Data(end,2)), print_str, 'Color','green');
-                plot(typenum, Tracks(n).Data(end,2), 'Color','green', 'LineStyle', 'none', 'Marker','o');
+                text(typenum+0.1, double(Tracks(n).Data(end,2)), print_str, 'Color','red');
+                plot(typenum, Tracks(n).Data(end,2), 'Color','red', 'LineStyle', 'none', 'Marker','o');
             else
                 text(typenum+0.1, double(Tracks(n).Data(end,2)), print_str, 'Color','black');
                 plot(typenum, Tracks(n).Data(end,2), 'Color','black', 'LineStyle', 'none', 'Marker','o');
@@ -1677,9 +1701,7 @@ for i=1:2
             sumTime(typenum)=sumTime(typenum)+Tracks(n).Duration/60;
         end
     end
-    set(gca,'XTick',1:length(uniquetypes));
-    set(gca,'xticklabel',uniquetypes);
-    set(gca, 'Ticklength', [0 0])
+    set(gca,'XTick',1:length(uniquetypes), 'FontSize',18, 'LabelFontSizeMultiplier', 1.5,'xticklabel',uniquetypes, 'Ticklength', [0 0]);
     if (length(uniquetypes)>2&&group>1)||length(uniquetypes)>3
         set(gca,'XTickLabelRotation',15);
     end
@@ -1688,21 +1710,19 @@ for i=1:2
     bar(fEvents(1:end),'stacked', 'r');
     for j=1:length(uniquetypes)
         if fEvents(j)
-            text(j, fEvents(j)/2, {[num2str(fEvents(j), 2) ' /min'], ['N=' num2str(NEvents(j))], [num2str(sumTime(j),'%1.1f') ' min']}, 'HorizontalAlignment', 'center');
+            text(j, fEvents(j)/2, {[num2str(fEvents(j), 2) ' per s'], ['N=' num2str(NEvents(j))], [num2str(sumTime(j),'%1.1f') ' min']}, 'HorizontalAlignment', 'center', 'FontSize',16);
         else
-            text(j, fEvents(j)/2, ['0 in ' num2str(sumTime(j),'%1.1f') ' min'], 'HorizontalAlignment', 'center', 'VerticalAlignment', 'bottom');
+            text(j, fEvents(j)/2, ['0 in ' num2str(sumTime(j),'%1.1f') ' min'], 'HorizontalAlignment', 'center', 'VerticalAlignment', 'bottom', 'FontSize',16);
         end
     end
-    set(gca,'XTick',1:length(uniquetypes));
-    set(gca,'xticklabel',uniquetypes);
-    set(gca, 'Ticklength', [0 0])
+    set(gca,'XTick',1:length(uniquetypes), 'FontSize',18, 'LabelFontSizeMultiplier', 1.5,'xticklabel',uniquetypes, 'Ticklength', [0 0]);
     if (length(uniquetypes)>2&&group>1)||length(uniquetypes)>3
         set(gca,'XTickLabelRotation',15);
     end
     if isempty(strfind(uniquetypes{1}, '\downarrow'))
-        ylabel('Catastrophe frequency [per s]');
+        ylabel('Catastrophe frequency [1/s]');
     else
-        ylabel('Rescue frequency [per s]');
+        ylabel('Rescue frequency [1/s]');
     end
 end
 
@@ -1720,8 +1740,15 @@ methodstr=methodstrtmp(1:strfind(methodstrtmp,'(')-2);
 if isempty(methodstr)
     methodstr=methodstrtmp;
 end
+if Options.lMethod_TrackValue.val == 7
+    if strcmp(unit, 'nm/s')
+        methodstr = 'linear fit';
+    else
+        methodstr = 'sum';
+    end
+end
 if Options.cPlotGrowingTracks.val==1
-    label=[title ' (' methodstr '). Only tracks > 100s evaluated)'  ' [' unit ']'];
+    label=[title ' (' methodstr '. Only tracks > 100s evaluated)'  ' [' unit ']'];
 else
     label=[title ' (' methodstr ')' ' [' unit ']'];
 end
@@ -1860,7 +1887,13 @@ fJKplotframework(Tracks, type, 0, events, Options);
 function FilamentEndPlot(hDynamicFilamentsGui, has_err_fun_format)
 Options = getappdata(hDynamicFilamentsGui.fig,'Options');
 Objects = getappdata(hDynamicFilamentsGui.fig,'Objects');
-l = Objects(1).Custom.options_custom.help_get_tip_kymo.ExtensionLength;
+answer = questdlg('Rhodamine/GFP?', 'Channel?', 'Rhodamine','GFP','Rhodamine' );
+if strcmp(answer, 'GFP')
+    kymo_field = 'pixelkymo_GFP';
+else
+    kymo_field = 'pixelkymo';
+end
+l = Objects(1).CustomData.(kymo_field).ScanOptions.help_get_tip_kymo.ExtensionLength;
 [type, Tracks, events]=SetType(Options.cPlotGrowingTracks.val);
 for n = 1:length(Tracks)
     Tracks(n).X = Tracks(n).Data(:, 6); %Frames from .Data Container
@@ -1876,7 +1909,7 @@ for n = 1:length(Tracks)
     X_cell = cell(length(frames),1);
     Y_cell = cell(length(frames),1);
     for p = 1:length(frames)
-        data = Objects(Tracks(n).MTIndex).Custom.CustomData{p};
+        data = Objects(Tracks(n).MTIndex).CustomData.(kymo_field).Data{p};
         Y_cell{p} = (data(1:min(15+l+1, length(data))))';
         if isnan(Y_cell{p})
             Y_cell{p} = [];
@@ -1925,13 +1958,12 @@ else
         type_datavec=x_vec(track_type_id == j);
         plot_x = repmat(j, size(type_datavec)) + (rand(size(type_datavec))-0.5)./2.2;
         plot(plot_x, type_datavec, 'o', 'Color', [217;95;2]/255);
-        text(j,nanmean(type_datavec),{num2str(median(type_datavec),3), ['N = ' num2str(length(type_datavec))]}, 'HorizontalAlignment', 'center', 'VerticalAlignment', 'middle');
+        text(j,nanmean(type_datavec),{num2str(median(type_datavec),3), ['N = ' num2str(length(type_datavec))]}, 'HorizontalAlignment', 'center', 'VerticalAlignment', 'middle', 'FontSize',16);
     end
-    set(gca,'XTickLabel','');
-    set(gca, 'XTickLabelMode','manual');
+    set(gca,'XTickLabel','', 'FontSize',18, 'LabelFontSizeMultiplier', 1.5, 'XTickLabelMode','manual');
     hxt = get(gca, 'XTick');
     ypos = min(ylim) - diff(ylim)*0.05;
-    newtext = text(hxt, ones(1, length(type_id))*ypos, type(type_id), 'HorizontalAlignment', 'center');
+    newtext = text(hxt, ones(1, length(type_id))*ypos, type(type_id), 'HorizontalAlignment', 'center', 'FontSize',18);
     if (length(type_id)>2&&Options.lGroup.val>1)||length(type_id)>3
         set(newtext, 'rotation', 15);
     end
@@ -1943,29 +1975,35 @@ hold off
 
 function DataPlot(hDynamicFilamentsGui)
 Objects = getappdata(hDynamicFilamentsGui.fig,'Objects');
+Options = getappdata(hDynamicFilamentsGui.fig,'Options');
 hasvelocity=nan(length(Objects),1);
 group=cell(length(Objects),1);
 grouping=get(hDynamicFilamentsGui.lGroup, 'Value');
 for n = 1:length(Objects) 
-    splitstr = strsplit(Objects(n).File,'_');
-    switch grouping
+    group{n} = Objects(n).Type;
+    switch Options.lGroup.val
         case 1
             prepend = '';
         case 2
+            splitstr = strsplit(Objects(n).File,'_');
             if length(splitstr{1})>3
-                prepend=splitstr{1};
+                prepend=[splitstr{1}  ' \_ '];
             else
-                prepend=splitstr{2};
+                prepend=[splitstr{2}  ' \_ '];
             end
         case 3
+            splitstr = strsplit(Objects(n).File,'_');
             if length(splitstr{1})>3
-                prepend=[splitstr{1}(7:8) '-' splitstr{2}];
+                prepend=[splitstr{1}(7:8) ' \_ ' splitstr{2} ' \_ '];
             else
-                prepend=[splitstr{2} ' - ' splitstr{1}];
+                prepend=[splitstr{2} ' \_ ' splitstr{1} ' \_ '];
             end
+        case 4
+            prepend = '';
+            group{n} = 'everything';
     end
-    group{n}=[prepend ' \_ ' Objects(n).Type];
-    hasvelocity(n) = ~all(isnan(Objects(n).Velocity(:,get(hDynamicFilamentsGui.lMethod_TrackValue, 'Value'))));
+    group{n}=[prepend group{n}];
+    hasvelocity(n) = ~all(isnan(Objects(n).Velocity(:,1)));
     duration(n) = Objects(n).Duration;
     disregard(n) = Objects(n).Disregard;
 end

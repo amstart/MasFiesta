@@ -11,7 +11,7 @@ gscatter(plot_x, plot_y, points_info, [], 'o')
 %         plotc(ci,:)=cmap(find(uniquetracks==plotNnew(ci)),:);
 %     end
 %     scatter(plotxnew, plotynew, 50, plotc, marker{m}); drawnow;
-b=boxplot(allpointsy, allpointsx+0.5, 'Color', 'k', 'position', unique(allpointsx), 'outliersize', 0.0001);
+b=boxplot(allpointsy, allpointsx, 'Color', 'k', 'position', unique(allpointsx), 'outliersize', 0.0001);
 %         hMarkers = plothandle{j}.MarkerHandle;
 %         hMarkers.get;
 %         hMarkers.EdgeColorData = uint8([allcolors{1};200]);
@@ -22,10 +22,11 @@ set(b(:,:),'linewidth',1.5);
  set(h,'Color','red');
 for m=1:length(nelements)
     if nelements(m)>0
-        text(double(edgesmid(m)), middle(m), num2str(nelements(m)), 'HorizontalAlignment', 'center');
+        text(double(edgesmid(m)), middle(m), num2str(nelements(m)), 'HorizontalAlignment', 'center', 'FontSize', 18);
     end
 end
 set(gca,'Color',[0.9 0.9 0.9]);
+% ylim([-600 0])
 
 function [middle, edgesmid, nelements, allpointsx, allpointsy] = histcounts2(plotx, ploty)
 %HISTCOUNTS2D Summary of this function goes here
@@ -34,15 +35,18 @@ plotx=plotx(~isnan(plotx));
 binnum = 0;
 if binnum == 0
     [~, edges, xid] = histcounts(plotx);
-    if length(edges)>7
-        [~, edges, xid] = histcounts(plotx,7);
-    end
+%     if length(edges)>7
+%         [~, edges, xid] = histcounts(plotx,0:20:400);
+%     end
 else
     [~, edges, xid] = histcounts(plotx,binnum);
 end
 binvec=cell(numel(edges)-1,1);
 binedgevec=cell(numel(edges)-1,1);
 for m=1:length(xid)
+    if xid(m) == 0
+        continue
+    end
     if isempty(binvec{xid(m)})
         binvec{xid(m)}=ploty(m);
     else

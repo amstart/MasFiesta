@@ -1,11 +1,11 @@
 function [GFP] = fJKPlotIntensity(Object,IevalLength,MTend, varargin)
 %PLOTINTENSITY Summary of this function goes here
 %   Detailed explanation goes here
-GFP=nan(size(Object.Results,1),1);
 if MTend>1
     MTend=2;
 end
 if isfield(Object.Custom, 'Intensity')
+    GFP=nan(size(Object.Results,1),1);
     if ~isempty(Object.Custom.Intensity);
         for i=1:size(Object.Results,1)
 %             if CalcDistance(Object.Data{i}(1,1:2), Object.PosStart(i,:))>CalcDistance(Object.Data{i}(1,1:2), Object.PosEnd(i,:))
@@ -25,4 +25,6 @@ if isfield(Object.Custom, 'Intensity')
             end
         end
     end
+else
+    GFP=zeros(size(Object.Results,1),1);
 end

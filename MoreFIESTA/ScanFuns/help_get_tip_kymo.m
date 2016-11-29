@@ -38,7 +38,7 @@ for m = find(FilSelect==1)
                 continue
             end
             I = Stack(:,:,frame-missedframes);
-            Filament(m).Custom.CustomData{n} = fun(I, Filament(m), n);
+            Filament(m).Custom.CustomData{n} = fun(I, Filament(m), n, ScanOptions.help_get_tip_kymo.ScanSize, ScanOptions.help_get_tip_kymo.ExtensionLength);
         end
         progressdlg(ifil);
         ifil=ifil+1;
@@ -65,9 +65,10 @@ d=cumsum(sqrt((nX(2:end)-nX(1:end-1)).^2 + (nY(2:end)-nY(1:end-1)).^2));
 rest = 1-(d(end)+ExtensionLength - floor(d(end)+ExtensionLength));
 delta = [nX(1)-nX(2) nX(end)-nX(end-1); nY(1)-nY(2) nY(end)-nY(end-1)];
 slope=[abs(delta(2,1)/delta(1,1)) abs(delta(2,2)/delta(1,2))];
-addx=[sqrt((ExtensionLength)^2/(1+slope(1)^2)) sqrt(rest^2/(1+slope(2)^2))];
-nX([1,end])=[nX(1)+sign(delta(1,1))*addx(1) nX(end)+sign(delta(1,2))*addx(2)];
-nY([1,end])=[nY(1)+sign(delta(2,1))*addx(1)*slope(1) nY(end)+sign(delta(2,2))*addx(2)*slope(2)];
+slope(slope == inf) = 0;
+add_d=[sqrt((ExtensionLength)^2/(1+slope(1)^2)) sqrt(rest^2/(1+slope(2)^2))];
+nX([1,end])=[nX(1)+sign(delta(1,1))*add_d(1) nX(end)+sign(delta(1,2))*add_d(2)];
+nY([1,end])=[nY(1)+sign(delta(2,1))*add_d(1)*slope(1) nY(end)+sign(delta(2,2))*add_d(2)*slope(2)];
 d=[0; cumsum(sqrt((nX(2:end)-nX(1:end-1)).^2 + (nY(2:end)-nY(1:end-1)).^2))];
 dt=max(d)/round(max(d));
 id=(0:round(max(d)))'*dt;

@@ -43,25 +43,8 @@ end
 
 % function [Filament] = get_TFI(Stack, Filament, Options)
 function [Object] = fGetIntensity(Object)
-global Stack
-ang = 0:pi/100:2*pi;
-IStack = Stack{2};
-for n = 1:length(Object)
-    xStack = size(IStack,2);
-    yStack = size(IStack,1);
-    for m = 1:size(Object(n).Results,1)
-        I = IStack(:,:,Object(n).Results(m,1));
-        area = false(yStack,xStack ,size(Object(n).Data{m},1));
-        for k = 1:size(Object(n).Data{m},1) %this is the problem with this script: it takes datapoints, not paths
-            %if the widths of the datapoints are not equal (i.e. the filaments have varying brightness), you might get
-            %surprising results
-            x = Object(n).Data{m}(k,1)+cos(ang)*Object(n).Data{m}(k,4)/(2*sqrt(2*log(2)))*4;
-            y = Object(n).Data{m}(k,2)+sin(ang)*Object(n).Data{m}(k,4)/(2*sqrt(2*log(2)))*4;
-            area(:,:,k) = roipoly(I,x/Object(n).PixelSize,y/Object(n).PixelSize);
-        end
-        Object(n).Intensity(m)=sum(I(max(area, [], 3)));  %das musst du nochmal ueberpruefen, hab das eben geschrieben. das area zeug ist vom originalen skript
-    end
-end
+global ScanOptions
+
 
 
 

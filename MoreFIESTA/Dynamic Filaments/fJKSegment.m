@@ -1,6 +1,6 @@
 function [Objects, Tracks] = fJKSegment(Options)
 hDynamicFilamentsGui = getappdata(0,'hDynamicFilamentsGui');
-Tracks=struct('Name', [], 'File', [], 'Type', [], 'Data', [NaN NaN NaN NaN], 'Velocity', nan(1,7), ...
+Tracks=struct('Name', [], 'File', [], 'Type', [], 'Data', [NaN NaN NaN NaN], 'Velocity', nan(2,1), ...
     'Event', [NaN], 'DistanceEventEnd', [NaN]);  %these are required for the SetTable function to work upon startup
 tagnum=4;
 Objects = getappdata(hDynamicFilamentsGui.fig,'Objects');
@@ -29,7 +29,7 @@ for n = 1:length(Objects)
     end
     if isfield(Objects(n), 'CustomData')
         custom_data = [];
-        for customfield = fields(Objects(n).CustomData)
+        for customfield = fields(Objects(n).CustomData)'
             if ~isempty(Objects(n).CustomData.(customfield{1}).read_fun)
                 custom_data = [custom_data Objects(n).CustomData.(customfield{1}).read_fun(Objects(n).CustomData.(customfield{1}).Data)];
             end
@@ -145,6 +145,8 @@ for n = 1:length(Objects)
         end
         Tracks(track_id).DistanceEventEnd=segd(end);
         Tracks(track_id).Data=[segt segd segvel intensity(starti:endi) autotags(starti:endi) segframes custom_data(starti:endi, :)];
+        Tracks(track_id).XEventStart=Tracks(track_id).Data(1,:);
+        Tracks(track_id).XEventEnd=Tracks(track_id).Data(end,:);
         Tracks(track_id).HasIntensity=~all(isnan(intensity(starti:endi)));
         segtagauto(m, 5)=track_id;
         segtagauto(m, 4)=Tracks(track_id).DistanceEventEnd;
@@ -242,20 +244,16 @@ else
 end
 for i = starti:step:minindex
     if velocity(i)/velocity(minindex) > bordervalue/100 && velocity(i) < 0
-        if step > 0 %Due to how velocity is calculated, see Calcvelocity()
-            borderindex = i;
+        if step > 0 
+            borderindex = max(i, 2);
         else
-            borderindex = i-step; 
+            borderindex = min(i, starti-1);
         end
         break
     end
 end
-if isempty(i) || i == starti
+if isempty(i)
     borderindex = 0;
-elseif i == minindex
-    if step > 0 %Due to how velocity is calculated, see Calcvelocity()
-        borderindex = minindex;
-    else
-        borderindex = minindex-step;
-    end
+elseif i == minindex && isempty(borderindex)
+    borderindex = minindex;
 end

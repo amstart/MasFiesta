@@ -6,7 +6,7 @@ if additionalplots>1
     statfig=figure('Name',[get(mainfig, 'Name') '_STATS'], 'Tag','Plot');
     figure(mainfig);
 end
-subplot = @(m,n,p) subtightplot (m, n, p, [0.08 0.08], [0.08 0.08], [0.08 0.02]);
+subplot = @(m,n,p) subtightplot (m, n, p, [0.08 0.11], [0.08 0.08], [0.08 0.02]);
 [label_x, label_y, DelTracks] = SetUpMode(plot_mode, events, [Tracks.PreviousEvent]', Options);
 [uniquetype, ~, idvec] = unique(type,'stable');
 if plot_mode
@@ -28,36 +28,49 @@ for j=1:ntypes    %Loop through all groups to be plotted, each group gets its ow
         return
     end
     curent_y_label = '';
+    curent_x_label = '';
     switch ntypes
         case {1,2,3,4,5}
             f=subplot(1,ntypes,j);
             if j==1
                 curent_y_label = label_y;
             end
+            curent_x_label = label_x;
         case 6
             f=subplot(2,3,j);
             if j==1 || j==4
                 curent_y_label = label_y;
+            end
+            if j > 3
+                curent_x_label = label_x;
             end
         case {7, 8}
             f=subplot(2,4,j);
             if j==1 || j==5
                 curent_y_label = label_y;
             end
+            if j > 4
+                curent_x_label = label_x;
+            end
         case {9, 10}
             f=subplot(2,5,j);
             if j==1 || j==6
                 curent_y_label = label_y;
+            end
+            if j > 5
+                curent_x_label = label_x;
             end
         case {11, 12}
             f=subplot(2,6,j);
             if j==1 || j==7
                 curent_y_label = label_y;
             end
+            if j > 6
+                curent_x_label = label_x;
+            end
         otherwise
             msgbox('that would be more than 12 plots! Try checking the "Only selected" checkbox');
     end
-    title(uniquetype{j});
     hold on;
     correct_type=cellfun(@(x) strcmp(x, uniquetype(j)),type);
     PlotTracks=Tracks(correct_type);
@@ -106,8 +119,10 @@ for j=1:ntypes    %Loop through all groups to be plotted, each group gets its ow
             [plot_x, plot_y, ploteventends] = Get_Vectors(PlotTracks, events(correct_type), Options.mXReference.val, plot_mode, Options.cExclude.val);
             fJKfrequencyvsXplot(plot_x, plot_y, ploteventends, {Options.lPlot_XVar.str, Options.lPlot_YVar.str});
     end
-    xlabel(label_x);
-    ylabel(curent_y_label);
+    set(gca, 'FontSize', 16, 'LabelFontSizeMultiplier', 1.5);
+    title(uniquetype{j}, 'FontSize', 18);
+    xlabel(curent_x_label);
+    ylabel([curent_y_label]);
 end
 
 
@@ -134,7 +149,7 @@ if plot_mode
             diffy=diff(PlotTracks(k).Y);
             celly{k}=[diffy(1)/2; (diffy(1:end-1)+diffy(2:end))/2; diffy(end)/2];
             if plotevents(k)
-                ploteventends(k)=PlotTracks(k).X(end)-PlotTracks(k).X(1);
+                ploteventends(k)=PlotTracks(k).X(end)-PlotTracks(k).XEventStart;
             end
         end
         case {3, 7}
@@ -143,7 +158,7 @@ if plot_mode
             diffy=diff(PlotTracks(k).Y);
             celly{k}=[diffy(1)/2; (diffy(1:end-1)+diffy(2:end))/2; diffy(end)/2];
             if plotevents(k)
-                ploteventends(k)=PlotTracks(k).X(1)-PlotTracks(k).X(end);
+                ploteventends(k)=PlotTracks(k).X(1)-PlotTracks(k).XEventEnd;
             end
         end
         case 4
@@ -165,12 +180,12 @@ else
         end
         case {2, 6}
         for k=1:pr
-            cellx{k}=PlotTracks(k).X(1+exclude:end-exclude)-PlotTracks(k).X(1);
+            cellx{k}=PlotTracks(k).X(1+exclude:end-exclude)-PlotTracks(k).XEventStart;
             celly{k}=PlotTracks(k).Y(1+exclude:end-exclude);
         end
         case {3, 7}
         for k=1:pr
-            cellx{k}=PlotTracks(k).X(1+exclude:end-exclude)-PlotTracks(k).X(end);
+            cellx{k}=PlotTracks(k).X(1+exclude:end-exclude)-PlotTracks(k).XEventEnd;
             celly{k}=PlotTracks(k).Y(1+exclude:end-exclude);
         end
         case 4
@@ -210,5 +225,10 @@ else
     labelprefixy='';
     unitprefixy='';
 end
+if strcmp(Options.lSubsegment.print, 'All') || Options.cPlotGrowingTracks.val==1
+    segment = '';
+else
+    segment =  [' (' Options.lSubsegment.print ' only)'];
+end
 labelx=[Options.lPlot_XVar.print ' ' labelsuffixx ' [' Options.lPlot_XVar.str ']'];
-labely=[labelprefixy Options.lPlot_YVar.print ' [' unitprefixy Options.lPlot_YVar.str ']'];
+labely=[labelprefixy Options.lPlot_YVar.print segment ' [' unitprefixy Options.lPlot_YVar.str ']'];

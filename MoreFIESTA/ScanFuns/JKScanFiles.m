@@ -7,9 +7,8 @@ try
 catch
     [FileName, PathName] = uigetfile({'*.mat','MAT-File (*.mat)';},'Load Link');        
 end
+fJKLoadLink(FileName, PathName, @batch_kymo_data) %any analyze_x function
 ScanOptions.LinkFolder=PathName;     
-fJKLoadLink(FileName, PathName, @batch_rename) %any analyze_x function
-
 % Z:\Data\Jochen\16.10.10\4\4_dynamics.mat
 % Subscript indices must either be real positive integers or logicals.
 % Error in help_get_tip_kymo>get_pixelkymo (line 72)
