@@ -320,7 +320,7 @@ hDynamicFilamentsGui.tPlotRef = uicontrol('Parent',hDynamicFilamentsGui.pOptions
                              'Position',[0.05 0.225 0.225 0.125],'String','x axis reference:','Style','text','Tag','tChoosePlot','HorizontalAlignment','left');    
                          
 hDynamicFilamentsGui.mXReference = uicontrol('Parent',hDynamicFilamentsGui.pOptions,'Units','normalized',...
-                            'Position',[0.3 0.24 0.3 0.125],'BackgroundColor','white','String',{'No reference','To start (with events only)','To end (with events only)','To median', 'To track velocity (velocity only)','To start (all tracks)','To end (all tracks)'}, ...
+                            'Position',[0.3 0.24 0.3 0.125],'BackgroundColor','white','String',{'No reference','To start (after events only)','To end (before events only)','To median', 'To track velocity (velocity only)','To start (all tracks)','To end (all tracks)'}, ...
                             'Style','popupmenu','Tag','mXReference','Enable','on', 'Value', 1); 
                         
 tooltipstr=sprintf('Only plots data from selected Filaments (does not work for all plots).');
@@ -509,7 +509,7 @@ hDynamicFilamentsGui = getappdata(0,'hDynamicFilamentsGui');
 Objects = getappdata(hDynamicFilamentsGui.fig,'Objects');
 if ~isempty(Objects)
     Objects = Objects(1);
-    if isfield(Objects, 'CustomData')
+    if isfield(Objects, 'CustomData') && ~isempty(Objects.CustomData)
         for customfield = fields(Objects.CustomData)'
             if  ~isempty(Objects.CustomData.(customfield{1}).plot_options)
                 var_units = {var_units{:} Objects.CustomData.(customfield{1}).plot_options{2,:}};
@@ -518,8 +518,8 @@ if ~isempty(Objects)
         end
     end
 end
-set(hDynamicFilamentsGui.lPlot_XVar, 'UserData', var_units ,'String', var_names);
-set(hDynamicFilamentsGui.lPlot_YVar, 'UserData', var_units ,'String', var_names);
+set(hDynamicFilamentsGui.lPlot_XVar, 'UserData', var_units ,'String', var_names, 'Value', min(length(var_names), get(hDynamicFilamentsGui.lPlot_XVar, 'Value')));
+set(hDynamicFilamentsGui.lPlot_YVar, 'UserData', var_units ,'String', var_names, 'Value', min(length(var_names), get(hDynamicFilamentsGui.lPlot_YVar, 'Value')));
 children = get(hDynamicFilamentsGui.pOptions, 'Children');
 children = vertcat(children, get(hDynamicFilamentsGui.pLoadOptions, 'Children'));
 Options = struct;
@@ -616,16 +616,14 @@ hDynamicFilamentsGui = getappdata(0,'hDynamicFilamentsGui');
 Objects = getappdata(hDynamicFilamentsGui.fig,'Objects');
 LoadedFromPath = {Objects.LoadedFromPath};
 [unique_paths, ~, MT_index] = unique(LoadedFromPath, 'stable');
-filename = inputdlg('Filename (without .mat)? You will find the data under Object.Custom.<filename>', 'Filename?', 1, {'pixelkymo'});
+filename = inputdlg('Filename (without .mat)? You will find the data under Object.Custom.<filename>', 'Filename?', 1, {'pixelkymo_GFP'});
 filename = filename{1};
 if ~isempty(strfind(filename, 'fit'))
     fun = @PrepareFitData;
     read_fun = @ReadFitData;
-    if ~isempty(strfind(filename, 'GFP'))
-        plot_options = {'GFP error function width', 'GFP error function displacement'; 'pixels', 'pixels'};
-    else
-        plot_options = {'error function width', 'error function displacement'; 'pixels', 'pixels'};
-    end
+    prefix = strrep(filename, 'pixelkymo_', '');
+    prefix = strrep(prefix, '_fit', '');
+    plot_options = {[prefix ' error function width'], [prefix ' error function displacement']; 'pixels', 'pixels'};
 elseif ~isempty(strfind(filename, 'pixelkymo'))
     fun = @PrepareKymoData;
     read_fun = [];
@@ -637,19 +635,22 @@ else
 end
 progressdlg('String','Appending Custom Data','Min',0,'Max',length(unique_paths));
 for m=1:length(unique_paths)
-    load_data = load([unique_paths{m} filename '.mat']);
-    for n = find(MT_index == m)'
-        Objects(n).CustomData.(filename).ScanOptions = load_data.ScanOptions;
-        for p=1:size(load_data.Data,1) %find microtubule data by name in second column
-            if strcmp(Objects(n).Name, load_data.Data{p, 2})
-                custom_data = load_data.Data{p, 1};
-                Objects(n).CustomData.(filename).Data = fun(custom_data);
-                Objects(n).CustomData.(filename).read_fun = read_fun;
-                Objects(n).CustomData.(filename).plot_options = plot_options;
+    try
+        load_data = load([unique_paths{m} filename '.mat']);
+        for n = find(MT_index == m)'
+            Objects(n).CustomData.(filename).ScanOptions = load_data.ScanOptions;
+            for p=1:size(load_data.Data,1) %find microtubule data by name in second column
+                if strcmp(Objects(n).Name, load_data.Data{p, 2})
+                    custom_data = load_data.Data{p, 1};
+                    Objects(n).CustomData.(filename).Data = fun(custom_data);
+                    Objects(n).CustomData.(filename).read_fun = read_fun;
+                    Objects(n).CustomData.(filename).plot_options = plot_options;
+                end
             end
         end
-    end
     progressdlg(m);
+    catch
+    end
 end
 setappdata(hDynamicFilamentsGui.fig,'Objects',Objects);
 UpdateOptions();
@@ -1036,7 +1037,6 @@ Selected=get(hDynamicFilamentsGui.lSelection,'Value');
 Selected=Selected(Selected>0&Selected<length(Objects)+1);
 if ~isempty(Objects)&&~isempty(Selected)
     Object = Objects(Selected(1));
-    figure('Name', ['Surf: ' Object.Name ' ' Object.File])
     includepoints = ones(size(Object.Tags,1), 1);
     if ~Options.cIncludeUnclearPoints.val
         includepoints = includepoints & Object.Tags(:,1)~=8;
@@ -1046,13 +1046,11 @@ if ~isempty(Objects)&&~isempty(Selected)
         includepoints = includepoints & Object.Tags(:,2)==0;
     end
     try
-        answer = questdlg('Rhodamine/GFP?', 'Channel?', 'Rhodamine','GFP','Rhodamine' );
-        if strcmp(answer, 'GFP')
-            kymo_field = 'pixelkymo_GFP';
-        else
-            kymo_field = 'pixelkymo';
-        end
+        customfields = fields(Object.CustomData);
+        answer = listdlg('ListString', customfields, 'SelectionMode', 'single');
+        kymo_field = customfields{answer};
         custom_data = Object.CustomData.(kymo_field).Data(includepoints)';
+        figure('Name', ['Surf: ' Object.Name ' ' Object.File ' ' kymo_field])
     catch
         msgbox('you need to have kymograph data loaded in the field CustomData.pixelkymo');
         return
@@ -1060,6 +1058,7 @@ if ~isempty(Objects)&&~isempty(Selected)
     maxLength=max(cellfun(@(x)numel(x),custom_data));
     padded_matrix=cell2mat(cellfun(@(x)cat(2,x, nan(1,maxLength-length(x))),custom_data,'UniformOutput',false));
     surf(padded_matrix)
+    colormap(linspecer_modified);
     hold on;
     zlabel('Intensity');
     ylabel('frame');
@@ -1068,9 +1067,11 @@ if ~isempty(Objects)&&~isempty(Selected)
     x_length = size(padded_matrix,1);
     z_min = min(max(padded_matrix(:,1:20,:)));
     z_max = max(max(padded_matrix(:,1:20,:)));
+    set(gca, 'FontSize', 18, 'LabelFontSizeMultiplier', 1.5)
     v = patch([l l l l], [0 0 x_length x_length], [z_min z_max z_max z_min],[0.9, 0.9, 0.9]);
     set(v,'facealpha',0.3);
-    set(v,'edgealpha',0.1);
+    set(v,'edgealpha',0.5);
+    set(v,'edgecolor','red');
     try
         fit_data = Object.CustomData.([kymo_field '_fit']).Data(includepoints);
         fit_matrix = zeros(length(fit_data),2);
@@ -1085,29 +1086,9 @@ if ~isempty(Objects)&&~isempty(Selected)
             values(m,2) = padded_matrix(m, 6+ceil(fit_matrix(m,1))+ceil(fit_matrix(m,2)));
         end
         plot3(fit_matrix(:,1), 1:length(fit_data), values(:,1), 'r-');
-        plot3(fit_matrix(:,2), 1:length(fit_data), values(:,1), 'g-');
+%         plot3(fit_matrix(:,2), 1:length(fit_data), values(:,1), 'g-');
     catch
     end
-%     value = zeros(1, 428);
-%     value2 = zeros(1, 428);
-%     for m = 1:428
-%         value(m) = padded_matrix(m, 6+ceil(Object.x0(m)));
-%         value2(m) = padded_matrix(m, 6+ceil(Object.w0(m)));
-%     end
-%     plot3(Object.x0+6, 1:length(value), value+100, 'r-');
-%     plot3(Object.x0+Object.w0+6, 1:length(value), value2+100, 'g-');
-%     track_id=Object.SegTagAuto(:,5);
-%     track_id=track_id(track_id>0);
-%     tracks=Tracks(track_id);
-%     vector = [];
-%     for i=1:length(tracks)
-%         vector=vertcat(vector, tracks(i).Data(:,6:7));
-%     end
-%     value=zeros(length(vector), 1);
-%     for m = 1:length(vector)
-%         value(m) = padded_matrix(m, max(1,ceil(vector(m,2))));
-%     end
-%     plot3(vector(:,2), vector(:,1), value, 'r-');
 end
 
 function CustomPlot()
@@ -1351,10 +1332,16 @@ if ChosenPlot < 3
     XVar = Options.lPlot_XVar.val;
     YVar = Options.lPlot_YVar.val;
     if ChosenPlot == 1
+        varnames = get(hDynamicFilamentsGui.lPlot_XVar, 'String');
+        [Options.ZVar,Options.ZOK] = listdlg('ListString', varnames, 'SelectionMode', 'single');
+        if Options.ZOK
+            Options.ZVarName = varnames{Options.ZVar};
+        end
         set(f, 'Name',[XStr ' vs ' YStr str], 'Tag', 'Plot', ...
             'UserData', XVar*10+YVar);
         PrepareXYData(0 , Options);
     else
+        Options.ZOK = 0;
         set(f, 'Name',['Events along ' XStr ' per ' YStr str], 'Tag', 'Plot', ...
             'UserData', 100+XVar*10+YVar);
         PrepareXYData(1 , Options);
@@ -1446,21 +1433,27 @@ for i=1:length(Tracks)
     Tracks(i).XEventEnd = Tracks(i).XEventEnd(xcolumn);
     Tracks(i).XEventStart = Tracks(i).XEventStart(xcolumn);
 end
-[Tracks, DelObjects] = SelectSubsegments(Tracks, Options);
+[Tracks, DelObjects] = SelectSubsegments(Tracks, Options, 'X');
 Tracks(DelObjects) = [];
 events(DelObjects) = [];
 type(DelObjects) = [];
+[Tracks, ~] = SelectSubsegments(Tracks, Options, 'Y');
+if Options.ZOK
+    for i=1:length(Tracks)
+        Tracks(i).Z = Tracks(i).Data(:,Options.ZVar);
+    end
+    [Tracks, ~] = SelectSubsegments(Tracks, Options, 'Z');
+end
 Tracks = rmfield(Tracks, 'Data');
 fJKplotframework(Tracks, type, isfrequencyplot, events, Options);
 
-function [Tracks, DelObjects] = SelectSubsegments(Tracks, Options)
+function [Tracks, DelObjects] = SelectSubsegments(Tracks, Options, field)
 DelObjects = false(length(Tracks),1);
 switch Options.lSubsegment.val
     case 2
         for i=1:length(Tracks)
             if Tracks(i).end_first_subsegment
-                Tracks(i).X = Tracks(i).X(1:Tracks(i).end_first_subsegment);
-                Tracks(i).Y = Tracks(i).Y(1:Tracks(i).end_first_subsegment);
+                Tracks(i).(field) = Tracks(i).(field)(1:Tracks(i).end_first_subsegment);
             else
                 DelObjects(i) = 1;
             end
@@ -1468,8 +1461,7 @@ switch Options.lSubsegment.val
     case 3
         for i=1:length(Tracks)
             if Tracks(i).end_first_subsegment && Tracks(i).start_last_subsegment
-                Tracks(i).X = Tracks(i).X(Tracks(i).end_first_subsegment:Tracks(i).start_last_subsegment);
-                Tracks(i).Y = Tracks(i).Y(Tracks(i).end_first_subsegment:Tracks(i).start_last_subsegment);
+                Tracks(i).(field) = Tracks(i).(field)(Tracks(i).end_first_subsegment:Tracks(i).start_last_subsegment);
             else
                 DelObjects(i) = 1;
             end
@@ -1477,8 +1469,7 @@ switch Options.lSubsegment.val
     case 4
         for i=1:length(Tracks)
             if Tracks(i).start_last_subsegment
-                Tracks(i).X = Tracks(i).X(Tracks(i).start_last_subsegment:end);
-                Tracks(i).Y = Tracks(i).Y(Tracks(i).start_last_subsegment:end);
+                Tracks(i).(field) = Tracks(i).(field)(Tracks(i).start_last_subsegment:end);
             else
                 DelObjects(i) = 1;
             end
@@ -1486,8 +1477,7 @@ switch Options.lSubsegment.val
     case 5
         for i=1:length(Tracks)
             if Tracks(i).end_first_subsegment && Tracks(i).start_last_subsegment
-                Tracks(i).X = Tracks(i).X(1:Tracks(i).start_last_subsegment);
-                Tracks(i).Y = Tracks(i).Y(1:Tracks(i).start_last_subsegment);
+                Tracks(i).(field) = Tracks(i).(field)(1:Tracks(i).start_last_subsegment);
             else
                 DelObjects(i) = 1;
             end
@@ -1495,24 +1485,22 @@ switch Options.lSubsegment.val
     case 6
         for i=1:length(Tracks)
             if Tracks(i).end_first_subsegment && Tracks(i).start_last_subsegment
-                Tracks(i).X = Tracks(i).X(Tracks(i).end_first_subsegment:end);
-                Tracks(i).Y = Tracks(i).Y(Tracks(i).end_first_subsegment:end);
+                Tracks(i).(field) = Tracks(i).(field)(Tracks(i).end_first_subsegment:end);
             else
                 DelObjects(i) = 1;
             end
         end
     case 7
         for i=1:length(Tracks)
-            if Tracks(i).minindex > 1 && Tracks(i).minindex < length(Tracks(i).X)
-                Tracks(i).X = Tracks(i).X(Tracks(i).minindex:end);
-                Tracks(i).Y = Tracks(i).Y(Tracks(i).minindex:end);
+            if Tracks(i).minindex > 1 && Tracks(i).minindex < length(Tracks(i).(field))
+                Tracks(i).(field) = Tracks(i).(field)(Tracks(i).minindex:end);
             else
                 DelObjects(i) = 1;
             end
         end
 end
 for i=1:length(Tracks)
-    if isempty(Tracks(i).X)
+    if isempty(Tracks(i).(field))
         DelObjects(i) = 1;
     end
 end
@@ -1771,7 +1759,7 @@ for m = xy
             case 5
                 vector{m}(n) = max(AnalyzedTracks(n).Data(:,selected_vars{m}));
             case 6
-                vector{m}(n) = std(AnalyzedTracks(n).Data(:,selected_vars{m}));
+                vector{m}(n) = nanstd(AnalyzedTracks(n).Data(:,selected_vars{m}));
             case 7
                 if selected_vars{m} == 3
                     vector{m}(n) = AnalyzedTracks(n).Velocity;
@@ -1957,10 +1945,10 @@ else
     for j=1:length(type_id)
         type_datavec=x_vec(track_type_id == j);
         plot_x = repmat(j, size(type_datavec)) + (rand(size(type_datavec))-0.5)./2.2;
-        plot(plot_x, type_datavec, 'o', 'Color', [217;95;2]/255);
-        text(j,nanmean(type_datavec),{num2str(median(type_datavec),3), ['N = ' num2str(length(type_datavec))]}, 'HorizontalAlignment', 'center', 'VerticalAlignment', 'middle', 'FontSize',16);
+        plot(plot_x, type_datavec, '*', 'Color', [1,102,94]/255, 'MarkerSize', 25); %[217;95;2]/255
+        text(j,nanmean(type_datavec),{num2str(median(type_datavec),3), ['N = ' num2str(length(type_datavec))]}, 'HorizontalAlignment', 'center', 'VerticalAlignment', 'middle', 'FontSize',18);
     end
-    set(gca,'XTickLabel','', 'FontSize',18, 'LabelFontSizeMultiplier', 1.5, 'XTickLabelMode','manual');
+    set(gca,'XTickLabel','', 'FontSize',26, 'LabelFontSizeMultiplier', 1.5, 'XTickLabelMode','manual');
     hxt = get(gca, 'XTick');
     ypos = min(ylim) - diff(ylim)*0.05;
     newtext = text(hxt, ones(1, length(type_id))*ypos, type(type_id), 'HorizontalAlignment', 'center', 'FontSize',18);

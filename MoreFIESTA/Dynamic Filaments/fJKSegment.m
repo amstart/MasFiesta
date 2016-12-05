@@ -27,7 +27,7 @@ for n = 1:length(Objects)
     else
         intensity = intensity(DynResults(:,4));                                    %of the original data the row data can be found, i.e. 1 2 4.. 542 323
     end
-    if isfield(Objects(n), 'CustomData')
+    if isfield(Objects(n), 'CustomData') && ~isempty(Objects(n).CustomData)
         custom_data = [];
         for customfield = fields(Objects(n).CustomData)'
             if ~isempty(Objects(n).CustomData.(customfield{1}).read_fun)

@@ -1,6 +1,13 @@
-function fJKscatterboxplot(plot_x, plot_y, points_info)
+function fJKscatterboxplot(plot_x, plot_y, point_info, color_mode)
 [middle, edgesmid, nelements, allpointsx, allpointsy] = histcounts2(plot_x, plot_y);
-gscatter(plot_x, plot_y, points_info, [], 'o')
+if color_mode == 0
+    gscatter(plot_x, plot_y, point_info, [], 'o')
+else
+    colormap(linspecer_modified);
+    scatter(plot_x, plot_y, 500, point_info, 'o');
+    colorbar();
+%     scatter3(plot_x, plot_y, points_info, 50);
+end
 %     try
 %         cmap = distinguishable_colors(clength);
 %     catch
@@ -12,9 +19,6 @@ gscatter(plot_x, plot_y, points_info, [], 'o')
 %     end
 %     scatter(plotxnew, plotynew, 50, plotc, marker{m}); drawnow;
 b=boxplot(allpointsy, allpointsx, 'Color', 'k', 'position', unique(allpointsx), 'outliersize', 0.0001);
-%         hMarkers = plothandle{j}.MarkerHandle;
-%         hMarkers.get;
-%         hMarkers.EdgeColorData = uint8([allcolors{1};200]);
 set(b(:,:),'linewidth',1.5);
  h = findobj(b,'tag','Outliers');
  set(h,'Visible','off');
@@ -35,9 +39,9 @@ plotx=plotx(~isnan(plotx));
 binnum = 0;
 if binnum == 0
     [~, edges, xid] = histcounts(plotx);
-%     if length(edges)>7
-%         [~, edges, xid] = histcounts(plotx,0:20:400);
-%     end
+    if length(edges)>7
+        [~, edges, xid] = histcounts(plotx,7);
+    end
 else
     [~, edges, xid] = histcounts(plotx,binnum);
 end
