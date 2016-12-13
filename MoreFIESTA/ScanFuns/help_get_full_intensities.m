@@ -1,24 +1,7 @@
 function [Filament] = help_get_full_intensities(Stack, Filament)
 global ScanOptions
-FilSelect = [Filament.Selected];
-selectall = 0;
-if isfield(ScanOptions.help_get_tip_intensities, 'AllFilaments') && ScanOptions.help_get_tip_intensities.AllFilaments == 1
-    selectall = 1;
-end
-for i=1:length(FilSelect)
-    if ~isempty(strfind(Filament(i).Comments, '--'))
-        FilSelect(i)=0;
-    end
-    if Filament(i).Channel~=ScanOptions.ObjectChannel
-        FilSelect(i)=0;
-    end
-    if Filament(i).Channel==ScanOptions.ObjectChannel && selectall
-        FilSelect(i)=1;
-    end
-end
 framesuntilmissingframe=ScanOptions.help_get_tip_intensities.framesuntilmissingframe;
-ifil=1;
-for m = find(FilSelect==1)
+for m = 1:length(Filament)
     Filament(m).Custom.Intensity=cell(1,size(Filament(m).Results,1));
     for n = 1:size(Filament(m).Results,1)
         frame = Filament(m).Results(n,1);
@@ -58,5 +41,4 @@ for m = find(FilSelect==1)
         intensitymatrix = [median(I_in) mean(I_in) std(I_in) sum(I_in); median(I_space) mean(I_space) std(I_space) sum(I_space); median(I_out) mean(I_out) std(I_out) length(I_in)];
         Filament(m).Custom.Intensity{n} = intensitymatrix;
     end
-    ifil=ifil+1;
 end

@@ -9,8 +9,6 @@ switch (func)
 %         end
     case 'FixOrientation'
         FixOrientation(varargin{1});  
-    case 'GetIntensity'
-        GetIntensity(varargin{:});
     case 'ShowTable'
         ShowTable(varargin{1});
     case 'Draw'
@@ -19,12 +17,6 @@ switch (func)
         PlotXY(varargin{1});
     case 'Kymo'
         Kymo;
-    case 'PlotDisTime'
-        PlotDisTime(varargin{1});
-    case 'PlotIntLen'
-        PlotIntLen(varargin{1});
-    case 'PlotVelTim'
-        PlotVelTim(varargin{1});
     case 'DeletePoints'
         DeletePoints(varargin{1});
     case 'DeleteObject'
@@ -318,14 +310,7 @@ if isempty(h) %JochenK: Changed arrangement of buttons slightly
     hDataGui.cKymo = uicontrol('Parent',hDataGui.fig,'Units','normalized','TooltipString', tooltipstr,...
                                 'Position',[0.955 0.51 0.0175 0.025],'String','','Style','checkbox','BackgroundColor',c,'Tag','cKymo','Value',0,'Enable','on');
                             
-    tooltipstr='Gets intensities from other channel and saves it to Object.Custom.Intensity';          
-    hDataGui.bIntensity = uicontrol('Parent',hDataGui.fig,'TooltipString', tooltipstr,'Units','normalized','Callback','fJKDataGui(''GetIntensity'',getappdata(0,''hDataGui''));',...
-                                'Position',[0.77 0.48 0.1 0.025],'String','Get Intensity','Tag','bIntensity');     
-                            
     tooltipstr='Provide evaluation length. Makes intensity available to plot on the y-axis.';       
-                            
-    hDataGui.eIntensity = uicontrol('Parent',hDataGui.fig,'TooltipString', tooltipstr, 'Units','normalized','Callback','fJKDataGui(''RefreshData'',getappdata(0,''hDataGui''),0);',...
-                                'Position',[0.875 0.48 0.1 0.025],'String','Plot Intensity','Style','edit','BackgroundColor','white','Tag','eIntensity','Value',0,'Enable','on');            
                             
     hDataGui.bUndo = uicontrol('Parent',hDataGui.fig,'Units','normalized','Callback','fJKDataGui(''Undo'',getappdata(0,''hDataGui''));',...
                                 'Position',[0.77 0.510 0.1 0.025],'String','Undo','Tag','bUndo', 'TooltipString','Undos last action and updates kymographs.');
@@ -439,8 +424,6 @@ if get(hDataGui.cTable, 'Value')
     set(hDataGui.bKymo,'Position',[0.875 0.51 0.075 0.025]);
     set(hDataGui.cKymo,'Position',[0.955 0.51 0.0175 0.025]);
     set(hDataGui.bInterpolate,'Position',[0.665 0.48 0.1 0.025]);
-    set(hDataGui.bIntensity,'Position',[0.77 0.48 0.1 0.025]);     
-    set(hDataGui.eIntensity,'Position',[0.875 0.48 0.1 0.025]);   
     set(hDataGui.bTagCode, 'Visible', 'off');
     RefreshData(hDataGui,-1);
 else
@@ -461,8 +444,6 @@ else
     set(hDataGui.bKymo,'Position',[0.235 0.45 0.075 0.025]);
     set(hDataGui.cKymo,'Position',[0.315 0.45 0.0175 0.025]);
     set(hDataGui.bInterpolate,'Position',[0.025 0.1 0.1 0.025]);
-    set(hDataGui.bIntensity,'Position',[0.13 0.1 0.1 0.025]);     
-    set(hDataGui.eIntensity,'Position',[0.235 0.1 0.1 0.025]);
     set(hDataGui.bTagCode, 'Visible', 'on');
 end
 
@@ -1299,26 +1280,6 @@ catch
     warning('UpdateCursor problem');
 end
 
-function GetIntensity(hDataGui)
-global Filament
-fShared('BackUp',getappdata(0,'hMainGui'));
-for i=1:length(Filament)
-    Filament(i).Selected=0;
-end
-Filament(hDataGui.idx).Selected=1;
-hMainGui=getappdata(0,'hMainGui');
-if strcmp(get(hMainGui.Menu.mCorrectStack,'Checked'),'off')
-    answer = questdlg('Stack not corrected. Continue anyway?', 'Warning', 'Yes','No','No' );
-    if strcmp(answer, 'No')
-        return
-    end
-end
-channel=2;
-framesuntilmissingframe=40;
-BlockHalf=3;
-fJKDynamicUtility('JKGetIntensity', channel, framesuntilmissingframe, BlockHalf);
-RefreshData(hDataGui,-1);
-
 function Close(hObject,eventdata) %#ok<INUSD>
 hDataGui=getappdata(0,'hDataGui');
 hDataGui.idx=0;
@@ -1341,9 +1302,6 @@ Object = getappdata(hDataGui.fig,'Object');
 Check = getappdata(hDataGui.fig,'Check');
 Tags = getappdata(hDataGui.fig,'Tags');
 if sum(Check)<size(Object.Results,1)
-    if isfield(Object.Custom, 'Intensity')
-        Object.Custom.Intensity(Check==1)=[];  
-    end
     Tags(Check==1,:)=[];
     Object.Results(Check==1,:)=[];
     if strcmp(hDataGui.Type,'Filament')==1
@@ -1494,7 +1452,7 @@ end
 fRightPanel('CheckDrift',hMainGui);
 ReturnFocus([],[]);
 
-function [lXaxis,lYaxis]=CreatePlotList(Object,Type, ref, IevalLength, tags)
+function [lXaxis,lYaxis]=CreatePlotList(Object,Type, ref, tags)
 %create list for X-Axis
 vel=CalcVelocity(Object);
 n=4;
@@ -1567,14 +1525,6 @@ else
 end
 lYaxis(2).data{n}=vel;
 n=n+1;
-
-if ~isnan(IevalLength)
-    GFP=fJKPlotIntensity(Object,IevalLength,ref);
-    lYaxis(2).list{n}='GFP Intensity';
-    lYaxis(2).data{n}=GFP;
-    lYaxis(2).units{n}='[AU]';
-    n=n+1;
-end
 
 if strcmp(Type,'Molecule')==1
     if strcmp(Object.Type,'symmetric')
@@ -1973,9 +1923,6 @@ if isempty(Object.Comments)
 else
     set(hDataGui.eComments,'String',Object.Comments,'Enable','on','ForegroundColor','k','HorizontalAlignment','left','ButtonDownFcn','');
 end
-if strcmp('Plot Intensity', get(hDataGui.eIntensity, 'String'))
-    set(hDataGui.eIntensity,'ForegroundColor',[0.5 0.5 0.5],'HorizontalAlignment','center', 'Enable','inactive','ButtonDownFcn',@Clear);
-end
 set(hDataGui.cDrift,'Value',Object.Drift);
 set(hDataGui.cAligned,'Value',~(Object.TformMat(3,3)==1));
 set(hDataGui.gColor,'SelectedObject',findobj('UserData',Object.Color,'Parent',hDataGui.gColor));
@@ -2009,7 +1956,7 @@ end
 hDataGui.Name = Object.Name;
 hDataGui.idx=idx;
 setappdata(0,'hDataGui',hDataGui);
-[lXaxis,lYaxis]=CreatePlotList(Object,hDataGui.Type, refpoint, str2double(get(hDataGui.eIntensity,'String')), reftags);
+[lXaxis,lYaxis]=CreatePlotList(Object,hDataGui.Type, refpoint, reftags);
 set(hDataGui.lXaxis,'String',lXaxis.list);
 set(hDataGui.lXaxis,'UserData',lXaxis);
 set(hDataGui.lYaxis,'UserData',lYaxis);

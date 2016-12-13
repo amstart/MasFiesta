@@ -786,7 +786,7 @@ if FileName~=0
         LoadIntensityPerMAP('intensities.csv', PathName)
     else
         AllObjects = AllObjects.Filament;
-        NewObjects = AllObjects([AllObjects.Channel]==1);
+        NewObjects = select_filaments(AllObjects, 1);
         answer = [];
         if ~all([NewObjects.Drift])
             answer = questdlg('Some Filaments had not been drift-corrected. Continue anyway?', 'Warning', 'Yes','No','Yes' );

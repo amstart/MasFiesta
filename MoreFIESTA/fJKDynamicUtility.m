@@ -8,16 +8,12 @@ switch (func)
         GetIntensities;
     case 'ApplyType'
         ApplyType;
-    case 'JKGetIntensity'
-        JKGetIntensity(varargin{:});
     case 'JKInterpolateTrack'
         JKInterpolateTrack(varargin{:});
     case 'Match'
         Match(varargin{:});
     case 'FindPlusEnd'
         FindPlusEnd(varargin{:});
-    case 'SetIntensityPerMAP'
-        SetIntensityPerMAP;
 end
 
 function Create
@@ -34,22 +30,10 @@ fJKDynamicUtility.bFindPlusEnd = uicontrol('Parent',fJKDynamicUtility.fig,'Units
                              'String','Find Plus Ends','HorizontalAlignment','center', 'Callback', 'fJKDynamicUtility(''FindPlusEnd'');');
 fJKDynamicUtility.bInterpolateTracks = uicontrol('Parent',fJKDynamicUtility.fig,'Units','normalized','Position',[0.2 0.3 0.6 0.07],'FontSize',13,...
                              'String','Interpolate Tracks','HorizontalAlignment','center', 'Callback', 'answer=str2double(inputdlg(''How many frames per framein channel 1?'', ''?'',1, {''40''})); fJKDynamicUtility(''JKInterpolateTrack'', answer, 0);');
-fJKDynamicUtility.bGetIntensities = uicontrol('Parent',fJKDynamicUtility.fig,'Units','normalized','Position',[0.2 0.2 0.6 0.07],'FontSize',13,...
-                             'String','Get Intensities','HorizontalAlignment','center', 'Callback', 'fJKDynamicUtility(''GetIntensities'');', 'TooltipString', 'If not done yet, corrects the Stack first before getting the intensities.');
-fJKDynamicUtility.bSetIntensityPerMAP = uicontrol('Parent',fJKDynamicUtility.fig,'Units','normalized','Position',[0.2 0.12 0.6 0.05],'FontSize',13,...
-                             'String','Set Intensity Per MAP','HorizontalAlignment','center', 'Callback', 'fJKDynamicUtility(''SetIntensityPerMAP'');', 'TooltipString', 'Sets Filament.Custom.IntensityPerMAP.');
 fJKDynamicUtility.bDynamicFilamentsGUI = uicontrol('Parent',fJKDynamicUtility.fig,'Units','normalized','Position',[0.2 0.01 0.6 0.07],'FontSize',13,...
                              'String','Open Dynamic Filaments GUI','HorizontalAlignment','center', 'Callback', @fJKDynamicFilamentsGui, 'TooltipString', 'Calls fJKDynamicFilamentsGui.m');
 setappdata(0,'fJKDynamicUtility',fJKDynamicUtility);
                   
-function SetIntensityPerMAP
-global Filament
-value = inputdlg('How much intensity per MAP?', '?',1, {'238'});
-for i=1:length(Filament)
-    if ~isempty(Filament(i).Custom)
-        Filament(i).Custom.IntensityPerMAP=str2double(value);
-    end
-end
 
 function ApplyType
 fJKDynamicUtility = getappdata(0,'fJKDynamicUtility');
@@ -69,33 +53,6 @@ for i=1:length(Filament)
         Filament(i).Comments=strrep(Filament(i).Comments, ['type:' restcomment(1:space(1)-1)], ['type:' newType]);
     end
 end
-
-function GetIntensities
-global Stack
-global Filament
-global ScanOptions
-hMainGui=getappdata(0,'hMainGui');
-if strcmp(get(hMainGui.Menu.mCorrectStack,'Checked'),'off')
-    answer = questdlg('Want to continue and correct the stack?', 'Warning', 'Yes','No','Yes' );
-    if strcmp(answer, 'No')
-        return
-    end
-    Drift=getappdata(hMainGui.fig,'Drift');
-    OffSetMap=getappdata(hMainGui.fig,'OffsetMap');
-    if isempty(Drift) || isempty(OffSetMap) 
-        msgbox('Error: Either Drift or Offsetmap not loaded.');
-        return
-    end
-    fMenuView('CorrectStack');
-end
-ScanOptions.help_get_tip_intensities.BlockHalf = 3; %only needed for mode "get_highest"
-ScanOptions.help_get_tip_intensities.framesuntilmissingframe = 40; %set to number higher than number of frames if you have the same number of frames for the channels
-ScanOptions.help_get_tip_intensities.MTend = 1; %1 = PosStart, 2 = PosEnd
-ScanOptions.help_get_tip_intensities.method = 'get_highest';
-ScanOptions.help_get_tip_intensities.AllFilaments = 1;
-ScanOptions.Channel = 2;
-fShared('BackUp',hMainGui);
-[Filament] = help_get_tip_intensities(Stack{ScanOptions.Channel}, Filament);
                                  
 
 function JKInterpolateTrack(copynumber,idx)
@@ -208,6 +165,8 @@ if ~isempty(Filament)
     end
 end
 
+
+%% Not used anymore
 function JKGetIntensityold
 global Filament
 global Stack
@@ -314,3 +273,40 @@ for nfil = find(FilSelect==1)'
     progressdlg(ifil);
     ifil=ifil+1;
 end
+
+function SetIntensityPerMAP
+global Filament
+value = inputdlg('How much intensity per MAP?', '?',1, {'238'});
+for i=1:length(Filament)
+    if ~isempty(Filament(i).Custom)
+        Filament(i).Custom.IntensityPerMAP=str2double(value);
+    end
+end
+
+
+function GetIntensities
+global Stack
+global Filament
+global ScanOptions
+hMainGui=getappdata(0,'hMainGui');
+if strcmp(get(hMainGui.Menu.mCorrectStack,'Checked'),'off')
+    answer = questdlg('Want to continue and correct the stack?', 'Warning', 'Yes','No','Yes' );
+    if strcmp(answer, 'No')
+        return
+    end
+    Drift=getappdata(hMainGui.fig,'Drift');
+    OffSetMap=getappdata(hMainGui.fig,'OffsetMap');
+    if isempty(Drift) || isempty(OffSetMap) 
+        msgbox('Error: Either Drift or Offsetmap not loaded.');
+        return
+    end
+    fMenuView('CorrectStack');
+end
+ScanOptions.help_get_tip_intensities.BlockHalf = 3; %only needed for mode "get_highest"
+ScanOptions.help_get_tip_intensities.framesuntilmissingframe = 40; %set to number higher than number of frames if you have the same number of frames for the channels
+ScanOptions.help_get_tip_intensities.MTend = 1; %1 = PosStart, 2 = PosEnd
+ScanOptions.help_get_tip_intensities.method = 'get_highest';
+ScanOptions.help_get_tip_intensities.AllFilaments = 1;
+ScanOptions.Channel = 2;
+fShared('BackUp',hMainGui);
+[Filament] = help_get_tip_intensities(Stack{ScanOptions.Channel}, Filament);
