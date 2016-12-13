@@ -31,7 +31,7 @@ for n = 1:length(Objects)
         custom_data = [];
         for customfield = fields(Objects(n).CustomData)'
             if ~isempty(Objects(n).CustomData.(customfield{1}).read_fun)
-                custom_data = [custom_data Objects(n).CustomData.(customfield{1}).read_fun(Objects(n).CustomData.(customfield{1}).Data)];
+                custom_data = [custom_data Objects(n).CustomData.(customfield{1}).read_fun(Objects(n), customfield, Options)];
             end
         end
         if ~isempty(custom_data)

@@ -26,26 +26,74 @@ framesuntilmissingframe=ScanOptions.help_get_tip_intensities.framesuntilmissingf
 progressdlg('String','Extracting Intensities','Min',0,'Max',sum(FilSelect));
 ifil=1;
 for m = find(FilSelect==1)
-    Filament(m).Custom.Intensity=cell(1,size(Filament(m).Results,1));
+    Filament(m).Custom.CustomData=cell(1,size(Filament(m).Results,1));
     for n = 1:size(Filament(m).Results,1)
         frame = Filament(m).Results(n,1);
         missedframes=ceil(frame/framesuntilmissingframe);
         if mod(frame, framesuntilmissingframe)==1
-            Filament(m).Custom.Intensity{n}=nan;
+            Filament(m).Custom.CustomData{n}=nan;
             continue
         end
         I = Stack(:,:,frame-missedframes);
-        Filament(m).Custom.Intensity{n} = fun(I, Filament(m), n);
+        Filament(m).Custom.CustomData{n} = fun(I, Filament(m), n);
     end
     progressdlg(ifil);
     ifil=ifil+1;
 end
 
 % function [Filament] = get_TFI(Stack, Filament, Options)
-function [Object] = fGetIntensity(Object)
-global ScanOptions
-
-
+function [sum_intensity] = get_TFI(I, Filament, n)
+data = Filament.Data{n};
+new_points = round(data./Filament.PixelSize);
+edgepoints = [new_points(1,1:2); new_points(end,1:2)];
+start_i = max([min(edgepoints)-9; 1 1]);
+new_points = [new_points(:, 1) - start_i(1)+1, new_points(:, 2) - start_i(2)+1];
+end_i = min([max(edgepoints)+9; 512 512]);
+I = I(start_i(2):end_i(2), start_i(1):end_i(1));
+if edgepoints(1, 1) > edgepoints(2, 1) %make it so that the plus end is on the top
+    I = flipud(I);
+    new_points = [flipud(new_points(:, 1)) new_points(:, 2)];
+end
+if edgepoints(1, 2) > edgepoints(2, 2) %make it so that the plus end is on the left
+    I = fliplr(I);
+    new_points = [new_points(:, 1) flipud(new_points(:, 2))];
+end
+mask = false(size(I));
+mask = linept2(mask, fliplr(new_points));
+in=strel('octagon',3);
+spacer=strel('octagon',6); %Create morphological structuring element
+out=strel('octagon',9); %Create morphological structuring element
+in_region = imdilate(mask,in);
+I_in = I;
+I_in(~in_region) = 0;
+I_in = I_in(8:min(17, size(I_in, 1)), 8:min(17, size(I_in, 2))); %cut off pixels which are too far from tip for sure
+I_in( ~any(I_in,2), : ) = [];  %delete empty rows
+I_in( :, ~any(I_in,1) ) = [];  %columns
+out_region = imdilate(mask,out);
+spacer_region = imdilate(mask,spacer);
+background = I(out_region & ~spacer_region);
+I_in = I_in - mean(background);
+sum_intensity = zeros(1,7);
+for x = 1:size(I_in, 1)
+    for y = 1:size(I_in, 2)
+        distance = sqrt((x-4)^2+(y-4)^2);
+        if distance < 1.01
+            sum_intensity(1) = sum_intensity(1) + double(I_in(x, y));
+        elseif distance < 2.01
+            sum_intensity(2) = sum_intensity(2) + double(I_in(x, y));
+        elseif distance < 3.01
+             sum_intensity(3) = sum_intensity(3) + double(I_in(x, y));
+         elseif distance < 4.01
+             sum_intensity(4) = sum_intensity(4) + double(I_in(x, y));
+         elseif distance < 5.01
+             sum_intensity(5) = sum_intensity(5) + double(I_in(x, y));
+         elseif distance < 6.01
+             sum_intensity(6) = sum_intensity(6) + double(I_in(x, y));
+         elseif distance < 6.37
+             sum_intensity(7) = sum_intensity(7) + double(I_in(x, y));
+        end
+    end
+end
 
 
 function [intensity_vec] = get_highest(I, Filament, n)

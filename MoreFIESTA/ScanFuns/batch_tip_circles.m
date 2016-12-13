@@ -4,20 +4,41 @@ function [ output_args ] = batch_tip_circles(FileName, PathName)
 %% Options
 global ScanOptions
 %rmappdata(0, 'hMainGui');
+ScanOptions.PixSize = 157; %is used as default if nothing else available
+%%%%%%%%%%%%%%%%%%%parameters for helper functions%%%%%%%%%%%%%%
+ScanOptions.help_get_tip_intensities.framesuntilmissingframe = 40; %set to number higher than number of frames if you have the same number of frames for the channels
+ScanOptions.help_get_tip_intensities.method = 'get_TFI';
+ScanOptions.help_get_tip_intensities.AllFilaments = 1;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-ScanOptions.filename = ['tip_points' '.mat'];
-ScanOptions.help_get_tip_points.max_points = 5;
+ScanOptions.help_CorrectObject.AddDrift = 1;
+ScanOptions.help_CorrectObject.RemoveColorCorrection = 1;
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+ScanOptions.filename = ['tfi_intensity' '.mat'];
+ScanOptions.help_get_tip_points.max_points = 6;
 ScanOptions.help_get_tip_points.GFP_frame_where = 0.4759;
-%% Load the Kymograph data
+if ~isfield(ScanOptions, 'ObjectChannel')
+    input = inputdlg('Analyze objects in which channel?','Object Channel',1,{'1'});
+    ScanOptions.ObjectChannel = str2double(input);
+    input = inputdlg('Extract data from which channel?','Channel',1,{'2'});
+    ScanOptions.Channel = str2double(input);
+end
+%% Load the Filament
 Filament = load([PathName FileName]);
 Filament = Filament.Filament;
 Filament = Filament([Filament.Channel]==1);
 %% Helper Functions
-[testfil] = help_get_tip_points(Filament, ScanOptions);
-%TODO: get finer points from first points until wanted distance (cumsum?)
-% Data = [fit_results, kymodata(:,2)];
+Filament = help_CorrectObject(Filament, PathName);
+[Filament] = help_get_tip_points(Filament, ScanOptions);
+[Stack, ~, ~] = help_GetStack(PathName, Filament(1).File);
+Stack = Stack{1};
+[Filament] = help_get_tip_intensities(Stack, Filament);
 %% save data
-% save([PathName ScanOptions.filename], 'Data', 'ScanOptions')
+Data = cell(length(Filament),2);
+for i = 1:length(Filament)
+    Data{i,1} = Filament(i).Custom.CustomData;
+    Data{i,2} = Filament(i).Name;
+end
+save([PathName ScanOptions.filename], 'Data', 'ScanOptions')
 
 
 %how to calculate GFP_frame_where:

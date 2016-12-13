@@ -1,4 +1,4 @@
-function [result]=linept2(matrice, X1, Y1, X2, Y2)
+function [result]=linept2(matrice, points)
 % Connect two pixels in a matrice with 1
 %
 % Command line
@@ -29,16 +29,22 @@ function [result]=linept2(matrice, X1, Y1, X2, Y2)
 % Version 1.0
 
 result = matrice;
-for x=max(1, X1):sign(X2 - X1):max(1, X2)
-    y = round(f(x, X1, Y1, X2, Y2));
-    if y > 0
-        result(x, y) = 1;
+for m = 1:size(points, 1)-1
+    X1 = points(m,1);
+    Y1 = points(m,2);
+    X2 = points(m+1,1);
+    Y2 = points(m+1,2);
+    for x=max(1, X1):sign(X2 - X1):max(1, X2)
+        y = round(f(x, X1, Y1, X2, Y2));
+        if y > 0
+            result(x, y) = 1;
+        end
     end
-end
-for y=max(1, Y1):sign(Y2 - Y1):max(1, Y2)
-    x = round(f2(y, X1, Y1, X2, Y2));
-    if x > 0
-        result(x, y) = 1;
+    for y=max(1, Y1):sign(Y2 - Y1):max(1, Y2)
+        x = round(f2(y, X1, Y1, X2, Y2));
+        if x > 0
+            result(x, y) = 1;
+        end
     end
 end
 

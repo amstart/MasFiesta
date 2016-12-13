@@ -203,7 +203,7 @@ hDynamicFilamentsGui.tIntensity = uicontrol('Parent',hDynamicFilamentsGui.pOptio
                          
 tooltipstr = 'How many pixels from MT end to evaluate for GFP intensity calculation. Only applies to intensity/MAP count plots.';
 hDynamicFilamentsGui.eIevalLength = uicontrol('Parent',hDynamicFilamentsGui.pOptions,'TooltipString', tooltipstr, 'Units','normalized',...
-                                'Position',[.3 .75 .1 .05],'String','10','Style','edit','Fontsize',10,...
+                                'Position',[.3 .75 .1 .05],'String','7','Style','edit','Fontsize',10,...
                                 'UserData', 'pixels','BackgroundColor','white','Tag','eIevalLength','Value',0,'Enable','on');            
 
 hDynamicFilamentsGui.tDisregard = uicontrol('Parent',hDynamicFilamentsGui.pOptions,'Units','normalized','BackgroundColor',c,...
@@ -628,6 +628,10 @@ elseif ~isempty(strfind(filename, 'pixelkymo'))
     fun = @PrepareKymoData;
     read_fun = [];
     plot_options = {};
+elseif ~isempty(strfind(filename, 'tfi_intensity'))
+    fun = @(x) x;
+    read_fun = @ReadTFIData;
+    plot_options = {'TFI MAP count'; '1'};
 else
     fun = @(x) x;
     read_fun = [];
@@ -655,12 +659,25 @@ end
 setappdata(hDynamicFilamentsGui.fig,'Objects',Objects);
 UpdateOptions();
 
-function [matrix] = ReadFitData(prepared_fit_data)
-matrix = nan(length(prepared_fit_data), 2);
-for m = 1:length(prepared_fit_data)
-    if isstruct(prepared_fit_data{m})
-        matrix(m,1) = prepared_fit_data{m}.w0;
-        matrix(m,2) = prepared_fit_data{m}.x0;
+function [matrix] = ReadTFIData(Object, customfield, Options)
+data = Object.CustomData.(customfield{1}).Data;
+matrix = nan(length(data), 1);
+for m = 1:length(data)
+    if ~isnan(data{m})
+        matrix(m) = sum(data{m}(1:Options.eIevalLength.val));
+    end
+end
+if isfield(Object.Custom, 'IntensityPerMAP')
+    matrix = matrix./Object.Custom.IntensityPerMAP; %DynResults(:,4) is just a vector telling you in which rows 
+end
+
+function [matrix] = ReadFitData(Object, customfield, ~)
+data = Object.CustomData.(customfield{1}).Data;
+matrix = nan(length(data), 2);
+for m = 1:length(data)
+    if isstruct(data{m})
+        matrix(m,1) = data{m}.w0;
+        matrix(m,2) = data{m}.x0;
     end
 end
 
