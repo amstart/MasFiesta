@@ -1,15 +1,22 @@
-function answer = fQuestDlg(prompt,name,button,default)
+function answer = fQuestDlg(prompt,name,button,default, varargin)
 if numel(button)>1
     hQuestDlg = dialog('Name',name,'UserData',default,'KeyPressFcn',@doFigureKeyPress,'Visible','off');
-    fPlaceFig(hQuestDlg,'small');
+    if nargin < 5
+        fPlaceFig(hQuestDlg,'small');
+    end
     uicontrol('Parent',hQuestDlg ,'Units','normalized','Position',[0.05 0.45 0.9 0.475],'Style','text','String',prompt,'HorizontalAlignment','left');
     if numel(button)==2
         hPrompt(1) = uicontrol('Parent',hQuestDlg,'Units','normalized','Position',[0.05 0.1 0.4 0.3],'Style','pushbutton','String',button{1},'UserData',button{1},'Callback',@doControlCallback,'KeyPressFcn',@doControlKeyPress);
         hPrompt(2) = uicontrol('Parent',hQuestDlg,'Units','normalized','Position',[0.55 0.1 0.4 0.3],'Style','pushbutton','String',button{2},'UserData',button{2},'Callback',@doControlCallback,'KeyPressFcn',@doControlKeyPress);
-    else
+    elseif numel(button)==3
         hPrompt(1) = uicontrol('Parent',hQuestDlg,'Units','normalized','Position',[0.05 0.1 0.25 0.3],'Style','pushbutton','String',button{1},'UserData',button{1},'Callback',@doControlCallback,'KeyPressFcn',@doControlKeyPress);
         hPrompt(2) = uicontrol('Parent',hQuestDlg,'Units','normalized','Position',[0.375 0.1 0.25 0.3],'Style','pushbutton','String',button{2},'UserData',button{2},'Callback',@doControlCallback,'KeyPressFcn',@doControlKeyPress);
         hPrompt(3) = uicontrol('Parent',hQuestDlg,'Units','normalized','Position',[0.7 0.1 0.25 0.3],'Style','pushbutton','String',button{3},'UserData',button{3},'Callback',@doControlCallback,'KeyPressFcn',@doControlKeyPress);
+    else
+        hPrompt(1) = uicontrol('Parent',hQuestDlg,'Units','normalized','Position',[0.05 0.1 0.2 0.3],'Style','pushbutton','String',button{1},'UserData',button{1},'Callback',@doControlCallback,'KeyPressFcn',@doControlKeyPress);
+        hPrompt(2) = uicontrol('Parent',hQuestDlg,'Units','normalized','Position',[0.3 0.1 0.2 0.3],'Style','pushbutton','String',button{2},'UserData',button{2},'Callback',@doControlCallback,'KeyPressFcn',@doControlKeyPress);
+        hPrompt(3) = uicontrol('Parent',hQuestDlg,'Units','normalized','Position',[0.55 0.1 0.2 0.3],'Style','pushbutton','String',button{3},'UserData',button{3},'Callback',@doControlCallback,'KeyPressFcn',@doControlKeyPress);
+        hPrompt(4) = uicontrol('Parent',hQuestDlg,'Units','normalized','Position',[0.8 0.1 0.2 0.3],'Style','pushbutton','String',button{4},'UserData',button{4},'Callback',@doControlCallback,'KeyPressFcn',@doControlKeyPress);
     end
     uicontrol(hPrompt(strcmp(default,button)));
     uiwait(hQuestDlg);

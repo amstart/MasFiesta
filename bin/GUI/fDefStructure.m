@@ -15,8 +15,10 @@ if isfield(Object,'File')==0
     end
 end
 if isfield(Object,'Directory')==1
-    for i=1:nObj    
-        Object(i).Comments = Object(i).Directory;
+    if isfield(Object,'Comments')==0
+        for i=1:nObj    
+            Object(i).Comments = Object(i).Directory;
+        end
     end
     Object = rmfield(Object,'Directory');
 end
@@ -188,6 +190,41 @@ if isfield(Object,'TrackingResults')==0
     end 
 end
 
+if isfield(Object,'Custom')==0 %JochenK
+    for i=1:nObj    
+        Object(i).Custom = {};
+    end
+end
+
+if isfield(Object,'Tags')==1 %JochenK
+    for m = 1:length(Object)
+        tags = zeros(size(Object(m).Tags,1),11);
+        for i = 1:size(Object(m).Tags,1)
+            if Object(m).Tags(i,1)==255
+                tags(i,2) = 1;
+            elseif Object(m).Tags(i,1)==1
+                tags(i,1) = 1;
+            elseif Object(m).Tags(i,1)>9
+                tags(i,1) = 1;
+                tags(i,6) = Object(m).Tags(i,1)-10;
+                tags(i,9) = Object(m).Tags(i,2)-10;
+            else
+                tags(i,6) = Object(m).Tags(i,1);
+                tags(i,9) = Object(m).Tags(i,2);
+            end
+        end
+        try
+            Object(m).Results(:,end) = fJKtags2float(tags);
+        catch
+            Object(m).Results(:,end) = 0;
+            msgbox(['tag conversion failed for Object' int2str(m)]);
+        end
+    end
+    Object=rmfield(Object,'Tags');
+end
+if isfield(Object,'Intensity')==1 %JochenK
+    Object=rmfield(Object,'Intensity');
+end
 if isfield(Object,'p')==1
     Object=rmfield(Object,'p');
 end

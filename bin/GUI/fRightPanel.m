@@ -1,5 +1,7 @@
 function fRightPanel(func,varargin)
 switch func
+    case 'DeleteHandles'
+        DeleteHandles;
     case 'UpdateMeasure'
         UpdateMeasure(varargin{1});
     case 'NewScan'
@@ -40,10 +42,10 @@ switch func
         ScanSize(varargin{1});
     case 'ShowKymoGraph'
         ShowKymoGraph(varargin{1});
-    case 'DeleteScan'
-        DeleteScan(varargin{1});        
+   case 'DeleteScan'
+       DeleteScan(varargin{:});      
     case 'UpdateList'
-        UpdateList(varargin{1},varargin{2},varargin{3},varargin{4});
+        UpdateList(varargin{:});
     case 'ListSlider'
         ListSlider(varargin{1});
     case 'ListButton'
@@ -93,14 +95,19 @@ fConfigGui('Create');
 fShared('ReturnFocus');
 
 function ExportKymo(hMainGui)
-[FileName, PathName, FilterIndex] = uiputfile({'*.tif','TIFF-File (*.tif)';'*.pdf','Portable Document Format (*.pdf)';'*.*','Both pdf and tif'},'Save FIESTA Kymograph',fShared('GetSaveDir')); 
+if isfield(hMainGui, 'KymoName') %JochenK
+   KymoName=[fShared('GetSaveDir') hMainGui.KymoName];
+else
+   KymoName=fShared('GetSaveDir');
+end
+[FileName, PathName, FilterIndex] = uiputfile({'*.*','Both pdf and tif';'*.tif','TIFF-File (*.tif)';'*.pdf','Portable Document Format (*.pdf)'},'Save FIESTA Kymograph',KymoName); 
 if FileName~=0
     fShared('SetSaveDir',PathName);
     FileName = strrep(FileName, '.pdf', '');
     FileName = strrep(FileName, '.tif', '');
     file = [PathName FileName];
     Image=hMainGui.KymoImage;
-    if FilterIndex==1||FilterIndex==3
+    if FilterIndex==1||FilterIndex==2
         imwrite(uint16(Image(:,:,1)),[file '.tif'],'Compression','none');  
         if size(Image,3)>1
             for c=2:size(Image,3)
@@ -108,13 +115,16 @@ if FileName~=0
             end
         end
     end
-    if FilterIndex==2||FilterIndex==3
+    if FilterIndex==1||FilterIndex==3
         saveas(hMainGui.MidPanel.aKymoGraph, [file '.pdf'], 'pdf') %Save figure;
     end
     if get(hMainGui.RightPanel.pTools.cKymoLocation,'Value')==1
         set(hMainGui.MidPanel.pView,'Visible','on');
         set(hMainGui.MidPanel.pKymoGraph,'Visible','off');
-        saveas(hMainGui.MidPanel.aView, [file '.jpg'], 'jpg') %Save figure;
+        if ~exist([PathName 'locations'], 'dir')
+          mkdir([PathName 'locations']);
+        end
+        saveas(hMainGui.MidPanel.aView, [PathName 'locations' filesep FileName '.jpg'], 'jpg') %Save figure;
         set(hMainGui.MidPanel.pView,'Visible','off');
         set(hMainGui.MidPanel.pKymoGraph,'Visible','on');
     end
@@ -218,72 +228,66 @@ if FileName~=0
 end
 fShared('ReturnFocus');
 
-function Object=CalcDrift(Object,Drift,Value)
-if ~isempty(Drift)
-    if Value == 1 && Object.Drift == 0
-        t = -1; %subtract drift
-    elseif Value == 0 && Object.Drift == 1
-        t = 1; %add drift
-    else
-        return;
-    end
-    nData = size(Object.Results,1);    
-    for i=1:nData
-        k=find(Drift(:,1)==Object.Results(i,1));
-        if length(k)==1
-            Object.Results(i,3:5)=Object.Results(i,3:5)+t*Drift(k,2:4);
-            if any(isnan(Drift(:,4)))
-                Object.Results(i,9) = Object.Results(i,9) - t* norm(Drift(k,5:6));    
-            else
-                Object.Results(i,9) = Object.Results(i,9) - t* norm(Drift(k,4:7));
-            end
-            if isfield(Object,'PosCenter')
-                Object.PosStart(i,:) = Object.PosStart(i,:) + t*Drift(k,2:4);
-                Object.PosCenter(i,:) = Object.PosCenter(i,:) + t*Drift(k,2:4);
-                Object.PosEnd(i,:) = Object.PosEnd(i,:) + t*Drift(k,2:4);
-                Object.Data{i}(:,1) = Object.Data{i}(:,1) + t*Drift(k,2);
-                Object.Data{i}(:,2) = Object.Data{i}(:,2) + t*Drift(k,3);  
-                Object.Data{i}(:,3) = Object.Data{i}(:,3) + t*Drift(k,4);  
-            end
-        end
-        Object.Results(:,6)=fDis(Object.Results(:,3:5));
-    end    
-    Object.Drift=Value;
-end
-
 function SubtractDrift(hMainGui)
 global Molecule;
 global Filament;
 Drift=getappdata(hMainGui.fig,'Drift');
-if ~isempty(Drift)
-    fDataGui('DeleteGUI',1);
-    Value=get(gcbo,'Value');
-    set(hMainGui.RightPanel.pData.cMolDrift,'Value',Value);
-    set(hMainGui.RightPanel.pData.cFilDrift,'Value',Value);    
+if ~isempty(Drift)  
     nMol=length(Molecule);
     nFil=length(Filament);
-    for i=1:nMol
-        if length(Drift)>=Molecule(i).Channel && ~isempty(Drift{Molecule(i).Channel})
-            Molecule(i)=CalcDrift(Molecule(i),Drift{Molecule(i).Channel},Value);
+    aligned = 0; %JochenK: Progressdialogue and aligned check are new
+    if gcbo==hMainGui.RightPanel.pData.cMolDrift
+        for i=1:nMol
+            if Molecule(i).TformMat(3,3)==0
+                aligned = 1;
+            end
+        end
+    else
+        for i=1:nFil
+            if Filament(i).TformMat(3,3)==0
+                aligned = 1;
+            end
         end
     end
-    for i=1:nFil
-        if length(Drift)>=Filament(i).Channel && ~isempty(Drift{Filament(i).Channel})
-            Filament(i)=CalcDrift(Filament(i),Drift{Filament(i).Channel},Value);
-        end
+    answer = 'Yes';
+    if aligned
+        answer = questdlg('Some objects are color-aligned. Maybe you should first unalign them by clicking "Align Channels" and then realign them after drift correction. Continue anyway?', 'Warning', 'Yes','No','No' );
     end
-    fShow('Tracks');
-else
-    set(hMainGui.RightPanel.pData.cMolDrift,'Value',0);
-    set(hMainGui.RightPanel.pData.cFilDrift,'Value',0);    
+    if strcmp(answer, 'Yes')
+        hfDataGui=hMainGui.Extensions.JochenK.fDataGui;
+        hfDataGui('DeleteGUI',1);
+        Value=get(gcbo,'Value');
+        if gcbo==hMainGui.RightPanel.pData.cMolDrift
+            progressdlg('String','Correcting Molecules','Min',1,'Max',nMol);
+            for i=1:nMol
+                if length(Drift)>=Molecule(i).Channel && ~isempty(Drift{Molecule(i).Channel})
+                    Molecule(i)=fCalcDrift(Molecule(i),Drift{Molecule(i).Channel},Value);
+                end
+                progressdlg(i);
+            end
+        else
+            progressdlg('String','Correcting Filaments','Min',1,'Max',nFil);
+            for i=1:nFil
+                if length(Drift)>=Filament(i).Channel && ~isempty(Drift{Filament(i).Channel})
+                    Filament(i)=fCalcDrift(Filament(i),Drift{Filament(i).Channel},Value);
+                end
+                progressdlg(i);
+            end
+        end
+        fShow('Tracks');
+    end
 end
+set(hMainGui.RightPanel.pData.cMolDrift,'Value',all([Molecule.Drift]));
+set(hMainGui.RightPanel.pData.cFilDrift,'Value',all([Filament.Drift]));  
 fShared('ReturnFocus');
 
 function CheckDrift(hMainGui)
+global Molecule
+global Filament
 Drift=getappdata(hMainGui.fig,'Drift');
 if ~isempty(Drift)
-    set(hMainGui.RightPanel.pData.cMolDrift,'Value',0);   
-    set(hMainGui.RightPanel.pData.cFilDrift,'Value',0); 
+    set(hMainGui.RightPanel.pData.cMolDrift,'Value',all([Molecule.Drift]));   %JochenK
+    set(hMainGui.RightPanel.pData.cFilDrift,'Value',all([Filament.Drift]));   %JochenK     
     fShow('Marker',hMainGui,hMainGui.Values.FrameIdx);
     fShow('Tracks');    
 end
@@ -297,7 +301,10 @@ fShow('Image');
 function ListButton(hMainGui,type)
 global Molecule;
 global Filament;
-fShared('BackUp',hMainGui);
+if ~hMainGui.Extensions.JochenK.Data
+    fShared('BackUp',hMainGui);
+end
+hfDataGui=hMainGui.Extensions.JochenK.fDataGui;
 if strcmp(type,'Molecule')
     Object=Molecule;
 else
@@ -311,9 +318,9 @@ else
     value=round(get(hMainGui.RightPanel.pData.sFilList,'Value'));
 end
 if nObj>8
-    fDataGui('Create',type,nObj-7-value+idx);
+    hfDataGui('Create',type,nObj-7-value+idx);
 else
-    fDataGui('Create',type,idx);
+    hfDataGui('Create',type,idx);
 end
 
 
@@ -329,7 +336,7 @@ else
 end
 fShared('ReturnFocus');
 
-function ListVisible(hMainGui,Mode)
+function ListVisible(hMainGui,Mode) %JochenK BugFixCandidate
 global Molecule;
 global Filament;
 global KymoTrackMol;
@@ -346,15 +353,16 @@ fShow('Image');
 function ListSlider(hMainGui)
 global Molecule;
 global Filament;
-UpdateList(hMainGui.RightPanel.pData.MolList,Molecule,hMainGui.RightPanel.pData.sMolList,hMainGui.Menu.ctListMol);
-UpdateList(hMainGui.RightPanel.pData.FilList,Filament,hMainGui.RightPanel.pData.sFilList,hMainGui.Menu.ctListFil);
+fRightPanel('UpdateList',hMainGui.RightPanel.pData,Molecule,hMainGui.Menu.ctListMol,hMainGui.Values.MaxIdx);%JochenK
+fRightPanel('UpdateList',hMainGui.RightPanel.pData,Filament,hMainGui.Menu.ctListFil,hMainGui.Values.MaxIdx);%JochenK
 fShared('ReturnFocus');
 
 function ShowKymoGraph(hMainGui)
+DeleteScan(hMainGui,0);                              %JochenK
 NewKymoGraph(hMainGui);
 fShared('ReturnFocus');
 
-function IgnoreObjects(hMainGui,Mode)
+function IgnoreObjects(hMainGui,Mode)               %JochenK BugFixCandidate
 global Molecule;
 global Filament;
 global KymoTrackMol;
@@ -384,8 +392,8 @@ if strcmp(Mode,'Molecule')
 else
     Filament=Object;
 end
-UpdateList(hMainGui.RightPanel.pData.MolList,Molecule,hMainGui.RightPanel.pData.sMolList,hMainGui.Menu.ctListMol);
-UpdateList(hMainGui.RightPanel.pData.FilList,Filament,hMainGui.RightPanel.pData.sFilList,hMainGui.Menu.ctListFil);
+fRightPanel('UpdateList',hMainGui.RightPanel.pData,Molecule,hMainGui.Menu.ctListMol,hMainGui.Values.MaxIdx);%JochenK
+fRightPanel('UpdateList',hMainGui.RightPanel.pData,Filament,hMainGui.Menu.ctListFil,hMainGui.Values.MaxIdx);%JochenK
 fShow('Marker',hMainGui,hMainGui.Values.FrameIdx);
 fShared('ReturnFocus');
 
@@ -512,14 +520,18 @@ global KymoTrackFil;
 s=str2double(get(hMainGui.RightPanel.pTools.eKymoStart,'String'));
 e=str2double(get(hMainGui.RightPanel.pTools.eKymoEnd,'String'));
 if ~isnan(s)&&~isnan(e)&&~isempty(Stack)
-    [KymoGraph,KymoPixSize]=NewKymo(hMainGui.Scan);
+    if hMainGui.Extensions.JochenK.Kymo&&strcmp(get(hMainGui.ToolBar.ToolChannels(5),'State'),'on')
+        [KymoGraph,KymoPixSize]=fJKNewKymo(hMainGui.Scan, Stack);
+    else
+        [KymoGraph,KymoPixSize]=NewKymo(hMainGui.Scan);
+    end
     KymoGraph(e+1:end,:,:)=[];
     KymoGraph(1:s-1,:,:)=[];
-    try
-        delete(hMainGui.MidPanel.aKymoGraph);
-    catch
-        delete(findobj('Tag','aKymoGraph'));
-    end
+%     try %JochenK
+%         delete(hMainGui.MidPanel.aKymoGraph);
+%     catch
+%         delete(findobj('Tag','aKymoGraph'));
+%     end
     hMainGui.MidPanel.aKymoGraph = axes('Parent',hMainGui.MidPanel.pKymoGraph,'Units','normalized','UIContextMenu',hMainGui.Menu.ctKymoGraph,'Position',[0 0 1 1],'Tag','aKymoGraph','NextPlot','add','Visible','off');  
     [y,x,~]=size(KymoGraph);
     if y/x >= hMainGui.ZoomKymo.aspect
@@ -555,19 +567,24 @@ if ~isnan(s)&&~isnan(e)&&~isempty(Stack)
     set(hMainGui.MidPanel.aKymoGraph,'Visible','on'); 
     set(hMainGui.fig,'colormap',colormap('Gray'));
     set(hMainGui.KymoGraph,'Tag','plotScan','UserData',KymoPixSize);
+    if hMainGui.Extensions.JochenK.TracksKymo
+        hfShowTracksKymo = @JKShowTracksKymo;
+    else
+        hfShowTracksKymo = @ShowTracksKymo;
+    end
     if ~isempty(Molecule)
-        [hMainGui,KymoTrackMol]=ShowTracksKymo(hMainGui,Molecule,hMainGui.Scan.InterpX,hMainGui.Scan.InterpY,s,e,hMainGui.Scan.lx,hMainGui.Scan.ux,hMainGui.Scan.ly,hMainGui.Scan.uy,KymoPixSize);
+        [hMainGui,KymoTrackMol]=hfShowTracksKymo(hMainGui,Molecule,hMainGui.Scan.InterpX,hMainGui.Scan.InterpY,s,e,hMainGui.Scan.lx,hMainGui.Scan.ux,hMainGui.Scan.ly,hMainGui.Scan.uy,KymoPixSize);
     end
     if ~isempty(Filament)
-        [hMainGui,KymoTrackFil]=ShowTracksKymo(hMainGui,Filament,hMainGui.Scan.InterpX,hMainGui.Scan.InterpY,s,e,hMainGui.Scan.lx,hMainGui.Scan.ux,hMainGui.Scan.ly,hMainGui.Scan.uy,KymoPixSize);
+        [hMainGui,KymoTrackFil]=hfShowTracksKymo(hMainGui,Filament,hMainGui.Scan.InterpX,hMainGui.Scan.InterpY,s,e,hMainGui.Scan.lx,hMainGui.Scan.ux,hMainGui.Scan.ly,hMainGui.Scan.uy,KymoPixSize);
     end
     set(hMainGui.MidPanel.aKymoGraph,{'xlim','ylim'},hMainGui.ZoomKymo.globalXY,'Visible','off'); 
     hMainGui.ZoomKymo.currentXY=hMainGui.ZoomKymo.globalXY;
     hMainGui.ZoomKymo.level=0;
     setappdata(0,'hMainGui',hMainGui);
-    if gcbo == hMainGui.RightPanel.pTools.bShowKymoGraph
-        fToolBar('KymoGraph',hMainGui)
-    end
+%     if gcbo == hMainGui.RightPanel.pTools.bShowKymoGraph %JochenK
+    fToolBar('KymoGraph',hMainGui)
+%     end
 end
 
 function [KymoGraph,KymoPix] = NewKymo(Scan)
@@ -664,29 +681,33 @@ s=str2double(get(hMainGui.RightPanel.pTools.eKymoStart,'String'));
 e=str2double(get(hMainGui.RightPanel.pTools.eKymoEnd,'String'));
 if ~isempty(hMainGui.KymoImage)
     KymoPixSize = get(hMainGui.KymoGraph,'UserData');
+    if hMainGui.Extensions.JochenK.TracksKymo
+        hfShowTracksKymo = @JKShowTracksKymo;
+    else
+        hfShowTracksKymo = @ShowTracksKymo;
+    end
+    DeleteHandles; %JochenK
     if ~isempty(Molecule)
-        h = [KymoTrackMol.PlotHandles];
-        delete(h(ishandle(h)));
-        [hMainGui,KymoTrackMol]=ShowTracksKymo(hMainGui,Molecule,hMainGui.Scan.InterpX,hMainGui.Scan.InterpY,s,e,hMainGui.Scan.lx,hMainGui.Scan.ux,hMainGui.Scan.ly,hMainGui.Scan.uy,KymoPixSize);
+        [hMainGui,KymoTrackMol]=hfShowTracksKymo(hMainGui,Molecule,hMainGui.Scan.InterpX,hMainGui.Scan.InterpY,s,e,hMainGui.Scan.lx,hMainGui.Scan.ux,hMainGui.Scan.ly,hMainGui.Scan.uy,KymoPixSize);
     end
     if ~isempty(Filament)
-        h = [KymoTrackFil.PlotHandles];
-        delete(h(ishandle(h)));
-        [hMainGui,KymoTrackFil]=ShowTracksKymo(hMainGui,Filament,hMainGui.Scan.InterpX,hMainGui.Scan.InterpY,s,e,hMainGui.Scan.lx,hMainGui.Scan.ux,hMainGui.Scan.ly,hMainGui.Scan.uy,KymoPixSize);
+        [hMainGui,KymoTrackFil]=hfShowTracksKymo(hMainGui,Filament,hMainGui.Scan.InterpX,hMainGui.Scan.InterpY,s,e,hMainGui.Scan.lx,hMainGui.Scan.ux,hMainGui.Scan.ly,hMainGui.Scan.uy,KymoPixSize);
     end
 end
 setappdata(0,'hMainGui',hMainGui);
 
 function CreateFilamentScan(hMainGui)
 global Filament;
+DeleteScan(hMainGui,0);                              %JochenK
 k = find([Filament.Selected]==1);
 if isempty(k)
     fMsgDlg('No filament selected','error');
 else
     hMainGui.Scan(1).X = (double(Filament(k(1)).Data{1}(:,1))/Filament(k(1)).PixelSize)';
     hMainGui.Scan(1).Y = (double(Filament(k(1)).Data{1}(:,2))/Filament(k(1)).PixelSize)';
+    hMainGui.KymoName = Filament.Name;                  %JochenK
+    NewScan(hMainGui)
 end
-NewScan(hMainGui)
 
 function NewScan(hMainGui)
 set(0,'CurrentFigure',hMainGui.fig);
@@ -764,29 +785,51 @@ UpdateLineScan(hMainGui);
 AllToolsOff(hMainGui);
 fToolBar('Cursor',hMainGui);
 
-function DeleteScan(hMainGui)
+function DeleteHandles 
+%JochenK
 global KymoTrackMol;
 global KymoTrackFil;
+for temp=KymoTrackFil
+   h=temp.PlotHandles;
+   delete(h(ishandle(h)));
+end
+for temp=KymoTrackMol
+   h=temp.PlotHandles;
+   delete(h(ishandle(h)));
+end
+KymoTrackMol(:)=[];
+KymoTrackFil(:)=[];
+
+function DeleteScan(hMainGui, varargin)
+%JochenK: reorganized the function and made it more flexible and added utility, but it is
+%essentially the same as before
+if nargin>1
+    DeleteCompletely=varargin{1};
+else
+    DeleteCompletely=1;
+end
 plotScan=findobj('Tag','plotScan');
 hMainGui.KymoGraph=[];
 hMainGui.KymoImage=[];
-hMainGui.Scan=[];
+if DeleteCompletely
+%     hMainGui.Scan = struct('X',[0 0],'Y',[0 0]); %JochenK. Formerly hMainGui.Scan=[];
+    hMainGui.KymoName = '';
+end
 if ~isempty(plotScan)
     hMainGui.Values.CursorDownPos(:)=0;
-    h = [KymoTrackMol.PlotHandles KymoTrackFil.PlotHandles];
-    delete(h(ishandle(h)));
-    KymoTrackMol(:)=[];
-    KymoTrackFil(:)=[];
-    delete(plotScan);
+    DeleteHandles;
     delete(findobj('Tag','plotLineScan'));
     cla(hMainGui.MidPanel.aKymoGraph,'reset');
-    cla(hMainGui.RightPanel.pTools.aLineScan,'reset');
-    set(hMainGui.RightPanel.pTools.bLineScanExport,'Enable','off');
-    set(get(hMainGui.RightPanel.pTools.pKymoGraph,'Children'),'Enable','off');
+    if DeleteCompletely
+        delete(plotScan);
+        cla(hMainGui.RightPanel.pTools.aLineScan,'reset');
+        set(hMainGui.RightPanel.pTools.bLineScanExport,'Enable','off');
+        set(get(hMainGui.RightPanel.pTools.pKymoGraph,'Children'),'Enable','off');
+    end
     fToolBar('NormImage',hMainGui);
 else
     setappdata(0,'hMainGui',hMainGui);    
-end
+end            
 
 
 function [hMainGui,KymoTrackObj]=ShowTracksKymo(hMainGui,Objects,X,Y,s,e,lx,ux,ly,uy,KymoPixSize)
@@ -814,26 +857,27 @@ for idx=kObj
         KymoTrack(n,1:2)=[Objects(idx).Results(IN(k(n)),1)-s+1 fi(t)*KymoPixSize]; %#ok<AGROW> 
     end
     if isfield(Objects(idx),'PosStart') && ~isempty(KymoTrack)
-        KymoTrack(end+1,:) = NaN;
+        KymoTrack(end+1,:) = NaN;%#ok<AGROW> 
         OX=Objects(idx).PosStart(:,1)/hMainGui.Values.PixSize;
         OY=Objects(idx).PosStart(:,2)/hMainGui.Values.PixSize;
         for n=1:length(k)
             [~,t]=min(sqrt( (newX-OX(IN(k(n)))).^2 + (newY-OY(IN(k(n)))).^2));
-            KymoTrack(length(k)+1+n,1:2)=[Objects(idx).Results(IN(k(n)),1)-s+1 fi(t)*KymoPixSize]; %#ok<AGROW> 
+            KymoTrack(length(k)+1+n,1:2)=[Objects(idx).Results(IN(k(n)),1)-s+1 fi(t)*KymoPixSize]; 
         end
-        KymoTrack(end+1,:) = NaN;
+        KymoTrack(end+1,:) = NaN;%#ok<AGROW> 
         OX=Objects(idx).PosEnd(:,1)/hMainGui.Values.PixSize;
         OY=Objects(idx).PosEnd(:,2)/hMainGui.Values.PixSize;
         for n=1:length(k)
             [~,t]=min(sqrt( (newX-OX(IN(k(n)))).^2 + (newY-OY(IN(k(n)))).^2));
-            KymoTrack(2*length(k)+2+n,1:2)=[Objects(idx).Results(IN(k(n)),1)-s+1 fi(t)*KymoPixSize]; %#ok<AGROW> 
+            KymoTrack(2*length(k)+2+n,1:2)=[Objects(idx).Results(IN(k(n)),1)-s+1 fi(t)*KymoPixSize]; 
         end
     end
     if ~isempty(KymoTrack)
+        KymoTrackObj(nTrack).RefPos='PosCenter'; %JochenK
         KymoTrackObj(nTrack).Name=Objects(idx).Name;
         KymoTrackObj(nTrack).Index=idx;        
         KymoTrackObj(nTrack).Track=KymoTrack;        
-        KymoTrackObj(nTrack).PlotHandles(1,1) = line(KymoTrack(:,2),KymoTrack(:,1),'Color',Objects(idx).Color,'Visible','off','Tag','pKymoTracks');
+        KymoTrackObj(nTrack).PlotHandles(1,1) = line(KymoTrack(:,2),KymoTrack(:,1),'Visible','off','Tag','pKymoTracks');
         if Objects(idx).Visible
             set(KymoTrackObj(nTrack).PlotHandles(1,1),'Visible','on');
         end
@@ -841,32 +885,32 @@ for idx=kObj
     end
 end
 
-function CorrectKymoIndex(mode)
-global Molecule;
-global Filament;
-global KymoTrackMol;
-global KymoTrackFil;
-if strcmp(mode,'Molecule')
-    Objects=Molecule;
-    KymoTrack=KymoTrackMol;
-else
-    Objects=Filament;
-    KymoTrack=KymoTrackFil;
-end
-Names=cell(1,length(Objects));
-for n=1:length(Objects)
-    Names{n}=Objects(n).Name;
-end    
-for n=1:length(KymoTrack)
-    KymoTrack(n).Index=strmatch(KymoTrack(n).Name, Names);    
-end
-if strcmp(mode,'Molecule')
-    Molecule=Objects;
-    KymoTrackMol=KymoTrack;
-else
-    Filament=Objects;
-    KymoTrackFil=KymoTrack;
-end
+% function CorrectKymoIndex(mode)
+% global Molecule;
+% global Filament;
+% global KymoTrackMol;
+% global KymoTrackFil;
+% if strcmp(mode,'Molecule')
+%     Objects=Molecule;
+%     KymoTrack=KymoTrackMol;
+% else
+%     Objects=Filament;
+%     KymoTrack=KymoTrackFil;
+% end
+% Names=cell(1,length(Objects));
+% for n=1:length(Objects)
+%     Names{n}=Objects(n).Name;
+% end    
+% for n=1:length(KymoTrack)
+%     KymoTrack(n).Index=strmatch(KymoTrack(n).Name, Names);    
+% end
+% if strcmp(mode,'Molecule')
+%     Molecule=Objects; JochenK CountBugFix
+%     KymoTrackMol=KymoTrack;
+% else
+%     Filament=Objects; JochenK CountBugFix
+%     KymoTrackFil=KymoTrack;
+% end
     
 
 function UpdateMeasure(hMainGui)
@@ -996,12 +1040,15 @@ if isfield(hMainGui,'Plots')
     if isfield(hMainGui,'Region')
         nRegion=length(hMainGui.Region);
         if nRegion>0
-            color=get(hMainGui.Plots.Region(nRegion),'Color');    
-            if sum(color)==3
-                hMainGui.Values.CursorDownPos(:)=0; 
-                delete(hMainGui.Plots.Region(nRegion));
-                hMainGui.Region(nRegion)=[];
-                hMainGui.Plots.Region(nRegion)=[];
+            try %JochenK
+                color=get(hMainGui.Plots.Region(nRegion),'Color');    
+                if sum(color)==3
+                    hMainGui.Values.CursorDownPos(:)=0; 
+                    delete(hMainGui.Plots.Region(nRegion));
+                    hMainGui.Region(nRegion)=[];
+                    hMainGui.Plots.Region(nRegion)=[];
+                end
+            catch
             end
         end
     end
@@ -1012,7 +1059,7 @@ if ~isempty(plotScan)
     if sum(color)==3
         hMainGui.Values.CursorDownPos(:)=0;
         delete(plotScan);    
-        hMainGui.Scan=[];
+%         hMainGui.Scan = struct('X',[0 0],'Y',[0 0]); %JochenK. Formerly hMainGui.Scan=[];
     end
 end
 setappdata(0,'hMainGui',hMainGui);
@@ -1036,8 +1083,19 @@ end
 hMainGui.Values.CursorDownPos(:)=0;
 setappdata(0,'hMainGui',hMainGui);
 
-function UpdateList(hList,List,slider,UIContext)
+function UpdateList(pData,List,UIContext, varargin) %JochenK
 l=length(List);
+if isfield(List, 'PosCenter')
+    slider = pData.sFilList;
+    hList = pData.FilList;
+    set(pData.tFilamentsM, 'String', ['Filaments (' int2str(l) ')']);
+    set(pData.tFilamentsF, 'String', ['Filaments (' int2str(l) ')']);
+else
+    slider = pData.sMolList;
+    hList = pData.MolList;
+    set(pData.tMoleculesM, 'String', ['Molecules (' int2str(l) ')']);
+    set(pData.tMoleculesF, 'String', ['Molecules (' int2str(l) ')']);
+end
 if l>8
     slider_step(1) = 1/(l-8);
     slider_step(2) = 8/(l-8);
@@ -1069,18 +1127,32 @@ for i=1:ListLength
     fgcolor=[1 1 1];
     enableText='inactive';    
     enable='on';    
-    bgcolor=get(slider,'Background');    
-    switch(List(i+ListBegin).Selected)
-        case 2
-            bgcolor=[0.8 0 0];
-        case 1
-            bgcolor=[0 0 0.8];
-        case 0
-            fgcolor=[0 0 0];
-        otherwise
-            bgcolor=get(slider,'Background');
-            enable='off';
-            enableText='off';  
+    bgcolor=get(slider,'Background');
+    try
+        switch(List(i+ListBegin).Selected)
+            case 2
+                bgcolor=[0.8 0 0];
+            case 1
+                bgcolor=[0 0 0.8];
+            case 0
+                fgcolor=[0 0 0];
+                ResultsLength = size(List(i+ListBegin).Results,1);
+                if List(i+ListBegin).Results(end,1)==ResultsLength %JochenK
+                    bgcolor=[0.8000 1 1];
+                    if nargin>3
+                        if length(varargin{1})>=List(i+ListBegin).Channel+1
+                            if varargin{1}(List(i+ListBegin).Channel+1)==ResultsLength
+                                bgcolor=[0.8000 1 0.80];
+                            end
+                        end
+                    end
+                end
+            otherwise
+                bgcolor=get(slider,'Background');
+                enable='off';
+                enableText='off';  
+        end
+    catch
     end
     if List(i+ListBegin).Visible
         CData=CDataVisible;
@@ -1261,3 +1333,120 @@ if m < 10; m0 = '0'; else m0 = '';end     % Put leading zero on minutes if < 10
 if s < 10; s0 = '0'; else s0 = '';end     % Put leading zero on seconds if < 10
 timestr = strcat(h0,num2str(h),':',m0,...
           num2str(m),':',s0,num2str(s));
+
+function [hMainGui,KymoTrackObj]=JKShowTracksKymo(hMainGui,Objects,X,Y,s,e,lx,ux,ly,uy,KymoPixSize)
+set(0,'CurrentFigure',hMainGui.fig);
+set(hMainGui.fig,'CurrentAxes',hMainGui.MidPanel.aKymoGraph);
+KymoTrackObj=struct('Index',{},'Track',{},'PlotHandles',{});
+nTrack=1;
+newX=mean(X,1);
+newY=mean(Y,1);
+stidx = getChannels;
+kObj = find(ismember([Objects.Channel],stidx));
+if isfield(Objects, 'PosStart')
+    fieldnames={'PosStart' 'PosEnd'};
+    xcol=1;
+    ycol=2;
+else
+    fieldnames={'Results'};
+    xcol=3;
+    ycol=4;
+end
+for idx=kObj
+    for fieldname=fieldnames
+    polyX=[lx ux(length(ux):-1:1)];
+    polyY=[ly uy(length(uy):-1:1)];  
+    OX=Objects(idx).(char(fieldname))(:,xcol)/hMainGui.Values.PixSize;
+    OY=Objects(idx).(char(fieldname))(:,ycol)/hMainGui.Values.PixSize;
+    IN=find(inpolygon(OX,OY,polyX,polyY)==1);
+    k=find(Objects(idx).Results(IN,1)>=s&Objects(idx).Results(IN,1)<=e);
+    KymoTrack=[];
+    for n=1:length(k)
+        minvec=sqrt( (newX-OX(IN(k(n)))).^2 + (newY-OY(IN(k(n)))).^2);
+        [~,id]=min(minvec);
+        if id>2&&length(minvec)>id+1
+            t=id+(minvec(id-2)-minvec(id+2))/(minvec(id-2)/minvec(id-1));
+        else
+            t=id;
+        end
+        KymoTrack(n,:)=[Objects(idx).Results(IN(k(n)),1)-s+1 t*KymoPixSize]; %#ok<AGROW>
+    end
+    if ~isempty(KymoTrack)
+        KymoTrackObj(nTrack).Index=idx;
+        KymoTrackObj(nTrack).RefPos=char(fieldname);  
+        KymoTrackObj(nTrack).Name=Objects(idx).Name;
+        KymoTrackObj(nTrack).Track=KymoTrack;
+        Tags=fJKfloat2tags(Objects(idx).Results(:,end));
+        tagcol = hMainGui.Extensions.JochenK.ActiveTag;
+        if strcmp(KymoTrackObj(nTrack).RefPos,'PosEnd')&&hMainGui.Extensions.JochenK.DynTags&&tagcol>5
+            tagcol=tagcol+3;
+        end
+        KymoTrackObj(nTrack).Tags=Tags(:,tagcol);
+        KymoTrackObj(nTrack).ObjFrames=Objects(idx).Results(:,1);
+        KymoTrackObj(nTrack).Color=Objects(idx).Color;
+        KymoTrackObj(nTrack).Visible=Objects(idx).Visible;
+        KymoTrackObj(nTrack).PlotHandles(1,1) = line(KymoTrack(:,2),KymoTrack(:,1),'Color',Objects(idx).Color,'Visible','off');
+        if Objects(idx).Visible
+            set(KymoTrackObj(nTrack).PlotHandles(1,1),'Visible','on');
+        end
+        nTrack=nTrack+1;
+    end
+    end
+end
+direction=nan(length(KymoTrackObj),1);
+for nTrack=1:length(KymoTrackObj)
+    if isnan(direction(nTrack))
+        if strcmp(KymoTrackObj(nTrack).RefPos,'Results')
+            direction(nTrack)=0;
+        else
+            if nTrack<length(KymoTrackObj)
+                if strcmp(KymoTrackObj(nTrack).Name,KymoTrackObj(nTrack+1).Name)
+                    if KymoTrackObj(nTrack).Track(1,2)<KymoTrackObj(nTrack+1).Track(1,2)
+                        direction(nTrack)=-1;
+                        direction(nTrack+1)=+1;
+                    else
+                        direction(nTrack)=+1;
+                        direction(nTrack+1)=-1;                    
+                    end
+                else
+                    direction(nTrack)=-1;
+                end
+            else %last object, no direction determined yet
+                direction(nTrack)=-1;
+            end
+        end
+    end
+end
+colors = [1,0,1;0.896551724137931,1,0.793103448275862;1,0.586206896551724,0.793103448275862;1,0.965517241379310,0;0,0.413793103448276,0;0,0,0.620689655172414;1,1,1;0.379310344827586,0,0.344827586206897;0.517241379310345,0.413793103448276,0.275862068965517;0,1,0.655172413793103;0.689655172413793,0.482758620689655,1;1,0,0.413793103448276;0,0.448275862068966,0.413793103448276;0.448275862068966,0,0.103448275862069;1,0.758620689655172,0.379310344827586]; %JochenK
+for nTrack=1:length(KymoTrackObj)
+    if isempty(KymoTrackObj(nTrack).Tags) || ~KymoTrackObj(nTrack).Visible
+        continue
+    end
+    switch direction(nTrack)
+        case 1
+            aligntag='left';
+            before='  ';
+            after='';
+        case 0
+            aligntag='center';
+            before='';
+            after='';
+        case -1
+            aligntag='right';
+            before='';
+            after='  ';
+    end
+    tags=KymoTrackObj(nTrack).Tags(ismember(KymoTrackObj(nTrack).ObjFrames,intersect(KymoTrackObj(nTrack).ObjFrames,KymoTrackObj(nTrack).Track(:,1))));
+    if tagcol>4
+        symbol='x';
+    else
+        symbol='-';
+    end
+    for m=1:length(tags)
+        if tags(m)>0
+            KymoTrackObj(nTrack).PlotHandles(1+m,1) = text(KymoTrackObj(nTrack).Track(m,2),KymoTrackObj(nTrack).Track(m,1),[before symbol after],'Color',colors(tags(m),:), 'VerticalAlignment','middle', 'HorizontalAlignment', aligntag);
+        end
+    end
+    m=round(length(KymoTrackObj(nTrack).Track)/2);
+    KymoTrackObj(nTrack).PlotHandles(end+1,1) = text(KymoTrackObj(nTrack).Track(m,2),KymoTrackObj(nTrack).Track(m,1),[before before before before before KymoTrackObj(nTrack).RefPos after after after after after],'Color',KymoTrackObj(nTrack).Color, 'VerticalAlignment','middle', 'HorizontalAlignment', aligntag);
+end

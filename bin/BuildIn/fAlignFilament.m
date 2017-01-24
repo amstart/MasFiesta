@@ -1,20 +1,21 @@
 function Filament = fAlignFilament(Filament,Config)
 refPoint = fGetRefPoint(Filament);
-dis = norm([Filament.Results(1,3)-Filament.Results(end,3) Filament.Results(1,4)-Filament.Results(end,4)]);  
-if dis > 2*Filament.PixelSize
-    d_start = sqrt( (Filament.Data{1}(1,1) - Filament.Results(2:end,3)).^2 + (Filament.Data{1}(1,2) - Filament.Results(2:end,4)).^2 );
-    d_end = sqrt( (Filament.Data{1}(end,1) - Filament.Results(2:end,3)).^2 + (Filament.Data{1}(end,2) - Filament.Results(2:end,4)).^2 );
-
-    s_start = double(d_start < d_end);
-    s_end = double(d_start > d_end);
-
-    weights = (1./(1:length(d_start)).^2)';
-    weights = weights / sum(weights);
-
-    if sum(weights.*s_start) < sum(weights.*s_end)
-        Filament.Data{1} = flipud(Filament.Data{1});
-    end
-end
+% JochenK
+% dis = norm([Filament.Results(1,3)-Filament.Results(end,3) Filament.Results(1,4)-Filament.Results(end,4)]);  
+% if dis > 2*Filament.PixelSize
+%     d_start = sqrt( (Filament.Data{1}(1,1) - Filament.Results(2:end,3)).^2 + (Filament.Data{1}(1,2) - Filament.Results(2:end,4)).^2 );
+%     d_end = sqrt( (Filament.Data{1}(end,1) - Filament.Results(2:end,3)).^2 + (Filament.Data{1}(end,2) - Filament.Results(2:end,4)).^2 );
+% 
+%     s_start = double(d_start < d_end);
+%     s_end = double(d_start > d_end);
+% 
+%     weights = (1./(1:length(d_start)).^2)';
+%     weights = weights / sum(weights);
+% 
+%     if sum(weights.*s_start) < sum(weights.*s_end)
+%         Filament.Data{1} = flipud(Filament.Data{1});
+%     end
+% end
 
 for n = 1:size(Filament.Results,1)
     if n>1

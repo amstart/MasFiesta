@@ -1,10 +1,16 @@
 function fMenuData(func,varargin)
 try
 switch func
+    case 'LoadLink'
+        LoadLink;
+    case 'SaveLink'
+        SaveLink;
+    case 'LoadFolder'
+        LoadFolder(varargin{:});
     case 'OpenStack'
-        OpenStack(varargin{1});
+        OpenStack(varargin{:});
     case 'OpenStackSpecial'
-        OpenStackSpecial(varargin{1});
+        OpenStackSpecial(varargin{:});
     case 'LoadStack'
         LoadStack; 
     case 'SaveStack'
@@ -12,7 +18,7 @@ switch func
     case 'CloseStack'
         CloseStack(varargin{1});
     case 'LoadTracks'
-        LoadTracks(varargin{1});
+        LoadTracks(varargin{:});
     case 'ImportTracks'
         ImportTracks(varargin{1});        
     case 'SaveTracks'
@@ -34,17 +40,23 @@ catch ME
     fMsgDlg({'FIESTA detected a problem during analysis','Error message:','',getReport(ME,'extended','hyperlinks','off')},'error');    
 end
 
-function OpenStack(hMainGui)
+function OpenStack(hMainGui, reopen)
 global Stack;
 global TimeInfo;
 global Config;
 global Molecule;
 global Filament;
 global FiestaDir;
+Config.Mode= 'Single';
 set(hMainGui.MidPanel.pNoData,'Visible','on')
 set(hMainGui.MidPanel.tNoData,'String','Loading Stack...','Visible','on');
 set(hMainGui.MidPanel.pView,'Visible','off');
-[FileName,PathName] = uigetfile({'*.stk;*.nd2;*.zvi;*.tif;*.tiff','Image Stacks (*.stk,*.nd2,*.zvi,*.tif,*.tiff)'},'Select the Stack',FiestaDir.Stack); %open dialog for *.stk files
+if reopen == 0  %JochenK
+    [FileName,PathName] = uigetfile({'*.stk;*.nd2;*.zvi;*.tif;*.tiff','Image Stacks (*.stk,*.nd2,*.zvi,*.tif,*.tiff)'},'Select the Stack',FiestaDir.Stack); %open dialog for *.stk files
+else
+    FileName = Config.StackName{1};
+    PathName = Config.Directory{1};
+end
 if PathName~=0
     Time = NaN;
     PixSize = [];
@@ -62,6 +74,16 @@ if PathName~=0
     hMainGui=getappdata(0,'hMainGui');
     failed=0;
     FiestaDir.Stack=PathName;
+    if strcmp(get(hMainGui.Menu.mSaveLoadDir,'Checked'),'on') %JochenK
+        underscores = strfind(FileName, '_');
+        if exist([FiestaDir.Stack FileName(1:underscores(1)-1)], 'dir')
+            FiestaDir.Load = [FiestaDir.Stack FileName(1:underscores(1)-1)];
+            FiestaDir.Save = [FiestaDir.Stack FileName(1:underscores(1)-1)];
+        elseif isempty(strfind(FiestaDir.Load, FiestaDir.Stack))
+            FiestaDir.Load = FiestaDir.Stack;
+            FiestaDir.Save = FiestaDir.Stack;
+        end
+    end
     f=[PathName FileName];
     try
         if strcmp(filetype,'ND2')||strcmp(filetype,'ZVI')
@@ -116,17 +138,35 @@ else
 end
 set(hMainGui.fig,'Pointer','arrow');
 
-function OpenStackSpecial(hMainGui)
+function OpenStackSpecial(hMainGui, reopen)
 global Stack;
 global TimeInfo;
 global Config;
 global Molecule;
 global Filament;
+global FiestaDir
+if isfield(Config, 'Mode') && strcmp(Config.Mode, 'Single') && gcbo ~= hMainGui.Menu.mOpenStackSpecial %JochenK
+    OpenStack(hMainGui, 1);
+    return
+end
 set(hMainGui.MidPanel.pNoData,'Visible','on')
 set(hMainGui.MidPanel.tNoData,'String','Loading Stack...','Visible','on');
 set(hMainGui.MidPanel.pView,'Visible','off');
 set(hMainGui.Menu.mAlignChannels,'Enable','off','Checked','off');
-fOpenStruct = fOpenStackSpecial;
+if isfield(Config, 'Mode') && reopen == 1 %JochenK
+    fOpenStruct.Mode = Config.Mode;
+    fOpenStruct.Optional = [];
+    names = Config.StackName;
+    names = names(~cellfun(@(x) strcmp(x,'~'), names));
+    fOpenStruct.Data = cell(length(names),2);
+    for i=1:length(names)
+        fOpenStruct.Data{i,1} = names{i};    
+        fOpenStruct.Data{i,2} = Config.Directory{i};
+    end
+else
+    fOpenStruct = fOpenStackSpecial;
+    Config.Mode = fOpenStruct.Mode;
+end
 if ~isempty(fOpenStruct)
     set(hMainGui.fig,'Pointer','watch');   
     CloseStack(hMainGui);
@@ -295,6 +335,17 @@ if ~isempty(fOpenStruct)
             end
         end
     end
+    FiestaDir.Stack=PathName;
+    if strcmp(get(hMainGui.Menu.mSaveLoadDir,'Checked'),'on') %JochenK
+        underscores = strfind(FileName, '_');
+        if exist([FiestaDir.Stack FileName(1:underscores(1)-1)], 'dir')
+            FiestaDir.Load = [FiestaDir.Stack FileName(1:underscores(1)-1)];
+            FiestaDir.Save = [FiestaDir.Stack FileName(1:underscores(1)-1)];
+        elseif isempty(strfind(FiestaDir.Load, FiestaDir.Stack))
+            FiestaDir.Load = FiestaDir.Stack;
+            FiestaDir.Save = FiestaDir.Stack;
+        end
+    end
     if ~isempty(Stack)
         n = length(nFrames);
         if n>1
@@ -332,6 +383,7 @@ function SaveStack
 global Stack;
 global TimeInfo; %#ok<NUSED>
 global FiestaDir
+msgbox('DO NOT overwrite your original stack because you will lose Metadata (Time data for example).', 'modal');
 [FileName,PathName,FilterSpec] = uiputfile({'*.mat','MATLAB-File (*.mat)';'*.tif','Multilayer TIFF-Files (*.tif)'},'Save Stack',FiestaDir.Stack); %open dialog for *.stk files 
 if FileName~=0
     if FilterSpec==1
@@ -463,11 +515,38 @@ for i=nRegion:-1:1
 end
 fLeftPanel('RegUpdateList',hMainGui);
 
-function LoadTracks(hMainGui)
+function LoadFolder(hMainGui)
+persistent answer
+if isempty(answer)
+    answer = {''};
+end
+answer = inputdlg('What pattern should the filenames contain (only .mat files are looked for)?', 'Filenames', 1, answer);
+LoadDir = fShared('GetLoadDir');
+folder = uigetdir(LoadDir, 'Select the folder');
+if folder~=0
+    fileList = getAllFiles(folder);
+    fileList = fileList(~cellfun(@isempty, strfind(fileList, '.mat'))); %only mat files
+    fileList = fileList(~cellfun(@isempty, strfind(fileList, answer))); %only with pattern
+    numfiles = length(fileList);
+    progressdlg('String','Loading Files','Min',0,'Max',numfiles,'Parent',hMainGui.fig);
+    for i = 1:numfiles
+        [PathName, FileName, ext] = fileparts(char(fileList(i)));
+        LoadTracks(hMainGui, [filesep FileName ext],PathName);
+        progressdlg(i);
+    end
+end
+
+
+function LoadTracks(varargin)
 global Stack
 global Molecule;
 global Filament;
 global Config;
+if nargin == 1
+    hMainGui=varargin{1};
+else
+    hMainGui=getappdata(0,'hMainGui');
+end
 fRightPanel('CheckDrift',hMainGui);
 Mode=get(gcbo,'UserData');
 set(hMainGui.MidPanel.pNoData,'Visible','on')
@@ -483,9 +562,14 @@ else
         return;
     end
 end
-[FileName, PathName] = uigetfile({'*.mat','FIESTA Data(*.mat)'},'Load FIESTA Tracks',LoadDir,'MultiSelect','on');
-if ~iscell(FileName)
-    FileName={FileName};
+if nargin<2
+    [FileName, PathName] = uigetfile({'*.mat','FIESTA Data(*.mat)'},'Load FIESTA Tracks',LoadDir,'MultiSelect','on');
+    if ~iscell(FileName)
+        FileName={FileName};
+    end
+else
+    FileName = varargin(1);
+    PathName = varargin{2};
 end
 if PathName~=0
     set(hMainGui.fig,'Pointer','watch');
@@ -513,10 +597,12 @@ if PathName~=0
                     fMsgDlg(['Data in ' FileName{n} ' not compatible with FIESTA - try to Import Data'],'warn');
                 else
                     if ~isempty(tempMolecule)
+                        tempMolecule = set_loaded_from(tempMolecule, PathName, FileName{n}); %JochenK
                         tempMolecule = fDefStructure(tempMolecule,'Molecule');
                         Molecule = [Molecule tempMolecule]; %#ok<AGROW>
                     end
                     if ~isempty(tempFilament)
+                        tempFilament = set_loaded_from(tempFilament, PathName, FileName{n}); %JochenK
                         tempFilament = fDefStructure(tempFilament,'Filament');
                         Filament = [Filament tempFilament]; %#ok<AGROW>
                     end
@@ -527,8 +613,8 @@ if PathName~=0
         end
         progressdlg(n,['Loading file ' num2str(n) ' of ' num2str(length(FileName)) '...']);
     end
-    fRightPanel('UpdateList',hMainGui.RightPanel.pData.MolList,Molecule,hMainGui.RightPanel.pData.sMolList,hMainGui.Menu.ctListMol);
-    fRightPanel('UpdateList',hMainGui.RightPanel.pData.FilList,Filament,hMainGui.RightPanel.pData.sFilList,hMainGui.Menu.ctListFil);
+    fRightPanel('UpdateList',hMainGui.RightPanel.pData,Molecule,hMainGui.Menu.ctListMol,hMainGui.Values.MaxIdx);%JochenK
+    fRightPanel('UpdateList',hMainGui.RightPanel.pData,Filament,hMainGui.Menu.ctListFil,hMainGui.Values.MaxIdx);%JochenK
     hMainGui.ZoomView.level = [];
     setappdata(0,'hMainGui',hMainGui);
     fShared('UpdateMenu',hMainGui);        
@@ -550,6 +636,53 @@ else
 end
 set(hMainGui.fig,'Pointer','arrow');    
 
+function Objects = set_loaded_from(Objects, PathName, FileName)
+for i = 1:length(Objects)
+    Objects(i).Custom.LoadedFromPath = PathName;
+    Objects(i).Custom.LoadedFromFile = FileName;
+end
+
+function LoadLink()
+LoadDir = fShared('GetLoadDir');
+[FileName, PathName] = uigetfile({'*.mat','FIESTA Data(*.mat)'},'Load Link File',LoadDir);
+fJKLoadLink(FileName, PathName, @LoadTracks)
+
+function SaveLink()
+global Molecule;
+global Filament;
+LoadedFromFile = cell(length(Molecule) + length(Filament),1);
+LoadedFromPath = cell(length(Molecule) + length(Filament),1);
+for i = 1:length(Molecule)
+    LoadedFromPath{i} = Molecule(i).Custom.LoadedFromPath;
+    LoadedFromFile{i} = Molecule(i).Custom.LoadedFromFile;
+end
+for i = 1:length(Filament)
+    LoadedFromPath{i+length(Molecule)} = Filament(i).Custom.LoadedFromPath;
+    LoadedFromFile{i+length(Molecule)} = Filament(i).Custom.LoadedFromFile;
+end
+tmp = cell(size(LoadedFromFile));
+for i = 1:length(LoadedFromFile)
+    tmp{i} = [LoadedFromPath{i} LoadedFromFile{i}];
+end
+[~, id, ~] = unique(tmp);
+LoadedFromFile = LoadedFromFile(id);
+LoadedFromPath = LoadedFromPath(id);
+try
+    [FileName, PathName] = uiputfile({'*.mat','MAT-File (*.mat)';},'Save Links' ,fShared('GetSaveDir'));
+catch
+    [FileName, PathName] = uiputfile({'*.mat','MAT-File (*.mat)';},'Save Links');
+end
+if FileName~=0
+    file = [PathName FileName];
+    if isempty(strfind(file,'.mat'))
+        file = [file '.mat'];
+    end
+    save(file,'LoadedFromFile', 'LoadedFromPath');
+    try
+        fShared('SetSaveDir',PathName);
+    catch
+    end
+end
     
 function ImportTracks(hMainGui)
 global Molecule;
@@ -624,8 +757,8 @@ if FileName~=0
         Filament = sFilament;
         clear sFilament;
     end
-    fRightPanel('UpdateList',hMainGui.RightPanel.pData.MolList,Molecule,hMainGui.RightPanel.pData.sMolList,hMainGui.Menu.ctListMol);
-    fRightPanel('UpdateList',hMainGui.RightPanel.pData.FilList,Filament,hMainGui.RightPanel.pData.sFilList,hMainGui.Menu.ctListFil);
+    fRightPanel('UpdateList',hMainGui.RightPanel.pData,Molecule,hMainGui.Menu.ctListMol,hMainGui.Values.MaxIdx);%JochenK
+    fRightPanel('UpdateList',hMainGui.RightPanel.pData,Filament,hMainGui.Menu.ctListFil,hMainGui.Values.MaxIdx);%JochenK
     setappdata(0,'hMainGui',hMainGui);
     fShared('UpdateMenu',hMainGui)
     fShow('Image',hMainGui);
@@ -645,13 +778,23 @@ set(hMainGui.fig,'Pointer','arrow');
 function SaveTracks(hMainGui)
 global Molecule; 
 global Filament; 
+persistent SaveWithCustomField
 [FileName, PathName] = uiputfile({'*.mat','MAT-files (*.mat)'},'Save FIESTA Tracks',fShared('GetSaveDir'));
 if FileName ~= 0
-    if ~isempty(strfind(get(gcbo,'UserData'),'select'))
+    if isempty(SaveWithCustomField)
+        SaveWithCustomField = questdlg('Save with the custom field (you will have to remove it manually if you want to open the file in vanilla FIESTA)?', 'Choice will be remembered', 'Yes','No','Yes' );
+    end
+    if ~isempty(strfind(get(gcbo,'UserData'),'select')) || strcmp(SaveWithCustomField, 'Yes')
         backup_Molecule = Molecule;
         backup_Filament = Filament;
+    end
+    if ~isempty(strfind(get(gcbo,'UserData'),'select'))
         Molecule([Molecule.Selected] ~= 1) = [];
         Filament([Filament.Selected] ~= 1) = [];
+    end
+    if strcmp(SaveWithCustomField, 'No')
+        Molecule = rmfield(Molecule, 'Custom');
+        Filament = rmfield(Filament, 'Custom');
     end
     set(gcf,'Pointer','watch');    
     fShared('SetSaveDir',PathName);
@@ -661,7 +804,7 @@ if FileName ~= 0
     end
     save(file,'Molecule','Filament','-v6');
     set(hMainGui.fig,'Pointer','arrow');    
-    if ~isempty(strfind(get(gcbo,'UserData'),'select'))
+    if ~isempty(strfind(get(gcbo,'UserData'),'select')) || strcmp(SaveWithCustomField, 'Yes')
         Molecule = backup_Molecule;
         Filament = backup_Filament;
     end

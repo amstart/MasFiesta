@@ -5,10 +5,10 @@ function hMenu=fMenuCreate(hMainGui)
 %create Data menu
 hMenu.mData=uimenu('Parent',hMainGui.fig,'Label','Data','Tag','mData');
 
-hMenu.mOpenStack = uimenu('Parent',hMenu.mData,'Callback','fMenuData(''OpenStack'',getappdata(0,''hMainGui''));',...
+hMenu.mOpenStack = uimenu('Parent',hMenu.mData,'Callback','fMenuData(''OpenStack'',getappdata(0,''hMainGui''), 0);',...
                           'Label','Open Stack','Tag','mOpenStack','Accelerator','S');               
 
-hMenu.mOpenStackSpecial = uimenu('Parent',hMenu.mData,'Callback','fMenuData(''OpenStackSpecial'',getappdata(0,''hMainGui''));',...
+hMenu.mOpenStackSpecial = uimenu('Parent',hMenu.mData,'Callback','fMenuData(''OpenStackSpecial'',getappdata(0,''hMainGui''), 0);',...
                           'Label','Open Stack Special','Tag','mOpenStackSpecial'); 
                       
 hMenu.mLoadStack = uimenu('Parent',hMenu.mData,'Callback','fMenuData(''LoadStack'');','Enable','on',...
@@ -20,11 +20,14 @@ hMenu.mSaveStack = uimenu('Parent',hMenu.mData,'Callback','fMenuData(''SaveStack
 hMenu.mCloseStack = uimenu('Parent',hMenu.mData,'Callback','fMenuData(''CloseStack'',getappdata(0,''hMainGui''));','Enable','off',...
                            'Label','Close Stack','Tag','mCloseStack');
                        
-hMenu.mLoadTracks = uimenu('Parent',hMenu.mData,'Callback','fMenuData(''LoadTracks'',getappdata(0,''hMainGui''));',...
+hMenu.mLoadTracks = uimenu('Parent',hMenu.mData,'Callback','fMenuData(''LoadTracks'');',...
                          'Label','Load Tracks','Tag','mLoadTracks','Accelerator','L','Separator','on','UserData','local');
 
 hMenu.mLoadServer = uimenu('Parent',hMenu.mData,'Callback','fMenuData(''LoadTracks'',getappdata(0,''hMainGui''));',...
                            'Label','Load Tracks (Server)','Tag','mLoadServer','UserData','server');
+                       
+hMenu.mLoadFolder = uimenu('Parent',hMenu.mData,'Callback','fMenuData(''LoadFolder'',getappdata(0,''hMainGui''));',...
+                         'Label','Load tracks in folder','Tag','mLoadFolder','UserData','local');
                      
 hMenu.mSaveTracks = uimenu('Parent',hMenu.mData,'Callback','fMenuData(''SaveTracks'',getappdata(0,''hMainGui''));','Enable','off',...
                          'Label','Save all Tracks','Tag','mSaveTracks','Accelerator','D','UserData','mat');
@@ -47,6 +50,9 @@ hMenu.mSaveSelStxt = uimenu('Parent',hMenu.mSaveSelAs,'Callback','fMenuData(''Sa
                      
 hMenu.mSaveSelMtxt = uimenu('Parent',hMenu.mSaveSelAs,'Callback','fMenuData(''SaveText'',getappdata(0,''hMainGui''));',...
                          'Label','Multiple *.txt Files','Tag','mSaveSelMtxt','UserData','select_multiple');
+                     
+hMenu.mSaveLoadDir = uimenu('Parent',hMenu.mData,'Callback','fShared(''SaveLoadDir'',getappdata(0,''hMainGui''));',...
+                           'Label','Couple save/load folders','Tag','mSaveLoadDir','UserData','local');
 
 hMenu.mClearTracks = uimenu('Parent',hMenu.mData,'Callback','fShared(''ClearTracks'',getappdata(0,''hMainGui''));','Enable','off',...
                            'Label','Clear all Tracks','Tag','mClearTracks','UserData','local');
@@ -62,6 +68,12 @@ hMenu.mSaveObjects = uimenu('Parent',hMenu.mData,'Callback','fMenuData(''SaveObj
                        
 hMenu.mClearObjects = uimenu('Parent',hMenu.mData,'Callback','fMenuData(''ClearObjects'',getappdata(0,''hMainGui''));','Enable','off',...
                            'Label','Clear Objects','Tag','mClearObjects');
+                       
+hMenu.mLoadLink = uimenu('Parent',hMenu.mData,'Callback','fMenuData(''LoadLink'');','Enable','on',...
+                           'Label','Load Link','Tag','mLoadLink','Separator','on');
+                       
+hMenu.mSaveLink = uimenu('Parent',hMenu.mData,'Callback','fMenuData(''SaveLink'');','Enable','on',...
+                           'Label','Save Link','Tag','mSaveLink'); 
                        
 hMenu.mExit = uimenu('Parent',hMenu.mData,'Callback','close all;',...
                      'Label','Exit','Tag','mExit','Accelerator','E','Separator','on');
@@ -139,7 +151,13 @@ hMenu.mObjProjection = uimenu('Parent',hMenu.mView,'Callback','fMenuView(''View'
                             'Label','Objects projection','Tag','mObjProjection');              
                         
 hMenu.mCorrectStack = uimenu('Parent',hMenu.mView,'Callback','fMenuView(''CorrectStack'');','Enable','off',...
-                            'Label','Correct Stack (Drift and/or Color Offset)','Tag','mCorrectStack','Separator','on','Checked', 'off');        
+                            'Label','Correct Stack (Drift and/or Color Offset)','Tag','mCorrectStack','Separator','on','Checked', 'off'); 
+                        
+hMenu.mKeepFrames = uimenu('Parent',hMenu.mView,'Callback','fMenuView(''KeepFrames'',getappdata(0,''hMainGui''));',...
+                          'Label','Keep Frames','Tag','mReloadStack','Enable','off'); 
+                        
+hMenu.mReloadStack = uimenu('Parent',hMenu.mView,'Callback','fMenuData(''OpenStackSpecial'',getappdata(0,''hMainGui''),1);',...
+                          'Label','Reload Stack','Tag','mReloadStack'); 
                     
 hMenu.mColorOverlay = uimenu('Parent',hMenu.mView,'Callback','fMenuView(''ColorOverlay'');','Enable','off',...
                                 'Label','Color-Overlay','Tag','mColorOverlay','Separator','on');  
@@ -170,8 +188,11 @@ hMenu.mSaveDrift = uimenu('Parent',hMenu.mOptions,'Callback','fMenuOptions(''Sav
                       
 hMenu.mLoadDrift = uimenu('Parent',hMenu.mOptions,'Callback','fMenuOptions(''LoadDrift'',getappdata(0,''hMainGui''));',...
                           'Label','Load Drift','Tag','mLoadDrift');
+                      
+hMenu.mClearDrift = uimenu('Parent',hMenu.mOptions,'Callback','fMenuOptions(''ClearDrift'',getappdata(0,''hMainGui''));',...
+                          'Label','Clear Drift','Tag','mLoadDrift'); %JochenK
            
-%create Options menu                      
+%create OffsetMap menu                      
 hMenu.mOffsetMap = uimenu('Parent',hMainGui.fig,'Label','Offset Map','Tag','mOffsetMap');
 
 hMenu.mAlignChannels = uimenu('Parent',hMenu.mOffsetMap,'Callback','fMenuOffsetMap(''AlignCheck'');','Enable','off',...
@@ -232,11 +253,18 @@ hMenu.mFilamentScan = uimenu('Parent',hMenu.mTools,'Callback','fMenuTools(''Scan
 %create Statistics menu
 hMenu.mStats = uimenu('Parent',hMainGui.fig,'Label','Statistics','Tag','mStats');
 
+
+hMenu.mDynamicFilaments = uimenu('Parent',hMenu.mStats,'Callback','fJKDynamicUtility(''Create'');',...
+                            'Label','Dynamic Filaments','Tag','mDynamicFilaments');
+
 hMenu.mPathStats = uimenu('Parent',hMenu.mStats,'Callback','fPathStatsGui(''Create'');',...
                             'Label','Path Statistics','Tag','PathStats');
                         
 hMenu.mVelocityStats = uimenu('Parent',hMenu.mStats,'Callback','fVelocityStatsGui(''Create'');',...
-                             'Label','Velocity Statistics','Tag','mVelocityStats');                        
+                             'Label','Velocity Statistics','Tag','mVelocityStats'); 
+                         
+hMenu.mAmplitudeStats = uimenu('Parent',hMenu.mStats,'Callback','fJKAmplitudeStatsGui(''Create'');',...
+                             'Label','Amplitude/Length Statistics','Tag','mAmplitudeStats'); 
                         
 hMenu.mMSD = uimenu('Parent',hMenu.mStats,'Callback','fMenuStatistics(''MSD'');',...
                     'Label','Mean square displacement','Tag','mMSD');            
@@ -272,6 +300,11 @@ hMenu.mHowToFil = uimenu('Parent',hMenu.mHelp,'Label','How to track filaments','
 
 hMenu.mAbout = uimenu('Parent',hMenu.mHelp,'Callback','fAboutGui(getappdata(0,''hMainGui''));',...
                       'Label','About FIESTA','Tag','mAbout','Separator','on');
+                  
+%create Extensions menu
+hMenu.mExtensions = uimenu('Parent',hMainGui.fig,'Label','Extensions','Tag','mExtensions');
+
+hMenu.mJochenK = uimenu('Parent',hMenu.mExtensions,'Label','MásFIESTA','Tag','mJochenK','Callback','fJKMenu');
 
 %create region context menu
 hMenu.ctRegion = uicontextmenu('Parent',hMainGui.fig);
@@ -414,7 +447,34 @@ hMenu.ListMol.Mark.mCyan = uimenu('Parent',hMenu.ListMol.mMarkSelection,'Callbac
                                   'Label','Cyan','Tag','mCyan','UserData',[0 1 1]);                                                           
 
 hMenu.ListMol.Mark.mPink = uimenu('Parent',hMenu.ListMol.mMarkSelection,'Callback','fMenuContext(''MarkSelection'');',...
-                                  'Label','Pink','Tag','mPink ','UserData',[1 0.5 0.5]);          
+                                  'Label','Pink','Tag','mPink ','UserData',[1 0.5 0.5]);      
+                              
+                              %JochenK
+                              
+hMenu.ListMol.mRename = uimenu('Parent',hMenu.ctListMol,'Label','Unique names for selection','Tag','mRenameSelection',...
+    'Callback','fShared(''RenameTracks'',getappdata(0,''hMainGui''));');  
+
+hMenu.ListMol.mSort = uimenu('Parent',hMenu.ctListMol,'Label','Sort Molecules by','Tag','mSort'); 
+
+hMenu.ListMol.Sort.filename = uimenu('Parent',hMenu.ListMol.mSort,'Callback','fShared(''Sort'',getappdata(0,''hMainGui''));',...         
+                            'Label','filename','Tag','mx','UserData',[1 -1]); 
+
+hMenu.ListMol.Sort.name = uimenu('Parent',hMenu.ListMol.mSort,'Callback','fShared(''Sort'',getappdata(0,''hMainGui''));',...         
+                            'Label','name','Tag','mx','UserData',[1 0]); 
+        
+hMenu.ListMol.Sort.x = uimenu('Parent',hMenu.ListMol.mSort,'Callback','fShared(''Sort'',getappdata(0,''hMainGui''));',...         
+                            'Label','first x location','Tag','mx','UserData',[1 1]);       
+
+hMenu.ListMol.Sort.y = uimenu('Parent',hMenu.ListMol.mSort,'Callback','fShared(''Sort'',getappdata(0,''hMainGui''));',...
+                                'Label','first y location','Tag','my','UserData',[1 2]);   
+
+hMenu.ListMol.Sort.frame = uimenu('Parent',hMenu.ListMol.mSort,'Callback','fShared(''Sort'',getappdata(0,''hMainGui''));',...
+                                'Label','first frame','Tag','mf','UserData',[1 3]);              
+
+hMenu.ListMol.Sort.channel = uimenu('Parent',hMenu.ListMol.mSort,'Callback','fShared(''Sort'',getappdata(0,''hMainGui''));',...
+                                  'Label','channel','Tag','mc ','UserData',[1 4]);  
+                              
+                              %end JochenK
                             
 hMenu.ListMol.mSetDrift = uimenu('Parent',hMenu.ctListMol,'Callback','fShared(''SetDrift'',getappdata(0,''hMainGui''));',...
                                 'Label','Set as Drift Control','Tag','mSetDrift','Separator','on');
@@ -464,7 +524,34 @@ hMenu.ListFil.Mark.mCyan = uimenu('Parent',hMenu.ListFil.mMarkSelection,'Callbac
                                   'Label','Cyan','Tag','mCyan','UserData',[0 1 1]);                                                           
 
 hMenu.ListFil.Mark.mPink = uimenu('Parent',hMenu.ListFil.mMarkSelection,'Callback','fMenuContext(''MarkSelection'');',...
-                                  'Label','Pink','Tag','mPink ','UserData',[1 0.5 0.5]);          
+                                  'Label','Pink','Tag','mPink ','UserData',[1 0.5 0.5]);
+                              
+                              %JochenK
+                              
+hMenu.ListFil.mRename = uimenu('Parent',hMenu.ctListFil,'Label','Unique names for selection','Tag','mRenameSelection',...
+    'Callback','fShared(''RenameTracks'',getappdata(0,''hMainGui''));');                  
+
+hMenu.ListFil.mSort = uimenu('Parent',hMenu.ctListFil,'Label','Sort Filaments by','Tag','mSort');   
+
+hMenu.ListFil.Sort.filename = uimenu('Parent',hMenu.ListFil.mSort,'Callback','fShared(''Sort'',getappdata(0,''hMainGui''));',...         
+                            'Label','filename','Tag','mx','UserData',[2 -1]); 
+
+hMenu.ListFil.Sort.name = uimenu('Parent',hMenu.ListFil.mSort,'Callback','fShared(''Sort'',getappdata(0,''hMainGui''));',...         
+                            'Label','name','Tag','mx','UserData',[2 0]);   
+        
+hMenu.ListFil.Sort.x = uimenu('Parent',hMenu.ListFil.mSort,'Callback','fShared(''Sort'',getappdata(0,''hMainGui''));',...         
+                            'Label','first x location','Tag','mx','UserData',[2 1]);       
+
+hMenu.ListFil.Sort.y = uimenu('Parent',hMenu.ListFil.mSort,'Callback','fShared(''Sort'',getappdata(0,''hMainGui''));',...
+                                'Label','first y location','Tag','my','UserData',[2 2]);   
+
+hMenu.ListFil.Sort.frame = uimenu('Parent',hMenu.ListFil.mSort,'Callback','fShared(''Sort'',getappdata(0,''hMainGui''));',...
+                                'Label','first frame','Tag','mf','UserData',[2 3]);              
+
+hMenu.ListFil.Sort.channel = uimenu('Parent',hMenu.ListFil.mSort,'Callback','fShared(''Sort'',getappdata(0,''hMainGui''));',...
+                                  'Label','channel','Tag','mc ','UserData',[2 4]);           
+                              
+                              %end JochenK
                             
 hMenu.ListFil.mMerge = uimenu('Parent',hMenu.ctListFil,'Callback','fShared(''MergeTracks'',getappdata(0,''hMainGui''));',...
                                 'Label','Join selected tracks','Separator','on','Tag','mMergeFil','UserData','Filament');

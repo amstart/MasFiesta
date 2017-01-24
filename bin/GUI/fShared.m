@@ -1,6 +1,10 @@
 function Object=fShared(func,varargin)
 Object=[];
 switch func
+   case 'RenameTracks'
+       RenameTracks(varargin{:});
+   case 'Sort'
+       SortObjects(varargin{:});
     case 'AddStack'
         AddStack(varargin{1});
     case 'AnalyseQueue'
@@ -39,6 +43,129 @@ switch func
         Object=AddDataMol(varargin{1},varargin{2},varargin{3},varargin{4},varargin{5},varargin{6});
     case 'AddDataFil'
         Object=AddDataFil(varargin{1},varargin{2},varargin{3},varargin{4},varargin{5},varargin{6}); 
+    case 'SaveLoadDir'
+        SaveLoadDir(varargin{1});
+end
+
+function RenameTracks(hMainGui)
+%JochenK
+global Molecule;
+global Filament;
+global Stack;
+BackUpData(hMainGui);
+if ~isempty(Molecule)
+    for i=1:length(Molecule)
+        if Molecule(i).Selected
+            x=sprintf('%03d',round(Molecule(i).Results(1,3)/Molecule(i).PixelSize));
+            y=sprintf('%03d',round(Molecule(i).Results(1,4)/Molecule(i).PixelSize));
+            str=['m_' x '_' y '_' sprintf('%03d',Molecule(i).Results(1)) '_' num2str(Molecule(i).Channel)];
+            Molecule(i).Name = str;
+        end
+    end
+end
+if ~isempty(Filament)
+    for i=1:length(Filament)
+        if Filament(i).Selected
+            x=sprintf('%03d',round(Filament(i).PosCenter(1,1)/Filament(i).PixelSize));
+            y=sprintf('%03d',round(Filament(i).PosCenter(1,2)/Filament(i).PixelSize));
+            str=['f_' x '_' y '_' sprintf('%03d',Filament(i).Results(1)) '_' num2str(Filament(i).Channel)];
+            Filament(i).Name = str;
+        end
+    end
+end
+fRightPanel('UpdateList',hMainGui.RightPanel.pData,Molecule,hMainGui.Menu.ctListMol,hMainGui.Values.MaxIdx);%JochenK (All Update List calls)
+fRightPanel('UpdateList',hMainGui.RightPanel.pData,Filament,hMainGui.Menu.ctListFil,hMainGui.Values.MaxIdx);
+UpdateMenu(hMainGui)
+setappdata(0,'hMainGui',hMainGui);
+if isempty(Stack) && isempty(Filament) && isempty(Molecule)
+    set(hMainGui.MidPanel.pView,'Visible','off');
+    set(hMainGui.MidPanel.pNoData,'Visible','on')
+    set(hMainGui.MidPanel.tNoData,'String','No Stack or Tracks present','Visible','on');      
+    drawnow expose
+else
+    fShow('Image',hMainGui);
+    fShow('Tracks',hMainGui);
+end
+
+function SortObjects(hMainGui)
+%JochenK
+global Molecule;
+global Filament;
+global Stack;
+mode=get(gcbo,'UserData');
+if mode(1)==1
+    if ~isempty(Molecule)
+        orderval=zeros(length(Molecule),1);
+        switch mode(2)
+            case 1
+                for i=1:length(Molecule)
+                    orderval(i)=Molecule(i).Results(1,3);
+                end
+            case 2
+                for i=1:length(Molecule)
+                    orderval(i)=Molecule(i).Results(1,4);
+                end
+            case 3
+                for i=1:length(Molecule)
+                    orderval(i)=Molecule(i).Results(1,1);
+                end
+            case 4
+                for i=1:length(Molecule)
+                    orderval(i)=Molecule(i).Channel;
+                end
+        end
+        if mode(2) > 0
+            [~, order] = sort(orderval);
+        elseif mode(2) < 0
+            [~, order] = sort({Molecule.File});
+        else
+            [~, order] = sort({Molecule.Name});
+        end
+        Molecule = Molecule(order);
+    end
+else
+    if ~isempty(Filament)
+        orderval=zeros(length(Filament),1);
+        switch mode(2)
+            case 1
+                for i=1:length(Filament)
+                    orderval(i)=Filament(i).Results(1,3);
+                end
+            case 2
+                for i=1:length(Filament)
+                    orderval(i)=Filament(i).Results(1,4);
+                end
+            case 3
+                for i=1:length(Filament)
+                    orderval(i)=Filament(i).Results(1,1);
+                end
+            case 4
+                for i=1:length(Filament)
+                    orderval(i)=Filament(i).Channel;
+                end
+        end
+        if mode(2) > 0
+            [~, order] = sort(orderval);
+        elseif mode(2) < 0
+            [~, order] = sort({Filament.File});
+        else
+            [~, order] = sort({Filament.Name});
+        end
+        Filament = Filament(order);
+    end
+end
+fRightPanel('UpdateList',hMainGui.RightPanel.pData,Molecule,hMainGui.Menu.ctListMol,hMainGui.Values.MaxIdx);
+fRightPanel('UpdateList',hMainGui.RightPanel.pData,Filament,hMainGui.Menu.ctListFil,hMainGui.Values.MaxIdx);
+UpdateMenu(hMainGui)
+setappdata(0,'hMainGui',hMainGui);
+if isempty(Stack) && isempty(Filament) && isempty(Molecule)
+    set(hMainGui.MidPanel.pView,'Visible','off');
+    set(hMainGui.MidPanel.pNoData,'Visible','on')
+    set(hMainGui.MidPanel.tNoData,'String','No Stack or Tracks present','Visible','on');      
+    drawnow expose
+else
+    fShow('Image',hMainGui);
+    fShow('Tracks',hMainGui);
 end
 
 function SaveDir=GetSaveDir
@@ -52,9 +179,20 @@ if isempty(SaveDir)
     end
 end
 
+function SaveLoadDir(hMainGui)
+if strcmp(get(hMainGui.Menu.mSaveLoadDir,'Checked'),'on') %JochenK
+    set(hMainGui.Menu.mSaveLoadDir,'Checked','off');
+else
+    set(hMainGui.Menu.mSaveLoadDir,'Checked','on');
+end
+
 function SetSaveDir(SaveDir)
 global FiestaDir;
 FiestaDir.Save=SaveDir;
+hMainGui=getappdata(0,'hMainGui');
+if strcmp(get(hMainGui.Menu.mSaveLoadDir,'Checked'),'on')&&isempty(strfind(FiestaDir.Load, SaveDir)) %JochenK
+    FiestaDir.Load=SaveDir;
+end
 
 function LoadDir=GetLoadDir
 global FiestaDir;
@@ -66,6 +204,17 @@ end
 function SetLoadDir(LoadDir)
 global FiestaDir;
 FiestaDir.Load=LoadDir;
+hMainGui=getappdata(0,'hMainGui');
+if strcmp(FiestaDir.AppData, FiestaDir.Stack)%JochenK
+    FiestaDir.Stack=LoadDir;
+end
+if strcmp(get(hMainGui.Menu.mSaveLoadDir,'Checked'),'on')&&isempty(strfind(FiestaDir.Save, LoadDir)) %JochenK
+    FiestaDir.Save=LoadDir;
+end
+if strcmp(get(hMainGui.Menu.mSaveLoadDir,'Checked'),'on') %JochenK
+    fileseps = strfind(LoadDir, filesep);
+    FiestaDir.Stack=LoadDir(1:fileseps(end-1));
+end
 
 function ReturnFocus
 hMainGui=getappdata(0,'hMainGui');
@@ -110,7 +259,7 @@ BackUp.KymoTrackMol = KymoTrackMol;
 BackUp.KymoTrackFil = KymoTrackFil;
 set(hMainGui.Menu.mUndo,'Enable','on');
 
-function DeleteTracks(hMainGui,MolSelect,FilSelect)
+function DeleteTracks(hMainGui,MolSelect,FilSelect)      %JochenK BugFixCandidate
 global Molecule;
 global Filament;
 global KymoTrackMol;
@@ -129,8 +278,8 @@ if ~isempty(Filament)
     end
     [Filament,KymoTrackFil]=DeleteSelection(Filament,KymoTrackFil,FilSelect);
 end
-fRightPanel('UpdateList',hMainGui.RightPanel.pData.MolList,Molecule,hMainGui.RightPanel.pData.sMolList,hMainGui.Menu.ctListMol);
-fRightPanel('UpdateList',hMainGui.RightPanel.pData.FilList,Filament,hMainGui.RightPanel.pData.sFilList,hMainGui.Menu.ctListFil);
+fRightPanel('UpdateList',hMainGui.RightPanel.pData,Molecule,hMainGui.Menu.ctListMol,hMainGui.Values.MaxIdx);
+fRightPanel('UpdateList',hMainGui.RightPanel.pData,Filament,hMainGui.Menu.ctListFil,hMainGui.Values.MaxIdx);
 if isempty(Molecule)
     Molecule=[];
     Molecule=fDefStructure(Molecule,'Molecule');
@@ -167,7 +316,7 @@ if isempty(Stack)
     set(hMainGui.MidPanel.pNoData,'Visible','on')
     set(hMainGui.MidPanel.tNoData,'String','No Stack or Tracks present','Visible','on');      
     drawnow expose
-end 
+end
 
 function SetDrift(hMainGui)
 global Molecule;
@@ -232,10 +381,10 @@ if ~isempty(Track)
     delete(h(ishandle(h)));
 end
 if ~isempty(KymoObject)
-    KymoTrack = [KymoObject.PlotHandles];
-    k = ismember([KymoObject.Index],find(Selection==1));
-    if ishandle(KymoTrack(:,k))
-        delete(KymoTrack(:,k));
+    k = ismember([KymoObject.Index],find(Selection==1));        
+    for temp=KymoObject(k) %JochenK
+       h=temp.PlotHandles;
+       delete(h(ishandle(h)));
     end
     KymoObject(k) = [];
     for n=1:length(KymoObject)
@@ -259,6 +408,7 @@ if ~isempty(Stack)
     enable='on';
 end
 set(hMainGui.RightPanel.pButton.bAddLocal,'Enable',enable);
+set(hMainGui.Menu.mReloadStack,'Enable',enable); %JochenK
 set(hMainGui.Menu.mSaveStack,'Enable',enable);
 set(hMainGui.Menu.mCloseStack,'Enable',enable);
 if isempty(BackUp)
@@ -329,7 +479,7 @@ else
     set(hMainGui.Menu.mFindDrift,'Enable','on');                
     set(hMainGui.Menu.mCreateOffsetMap,'Enable','on');
     if ~isempty(Drift)
-        set(hMainGui.RightPanel.pData.cMolDrift,'Enable','on');
+        set(hMainGui.RightPanel.pData.cMolDrift,'Enable', 'on', 'Value', all([Molecule.Drift])); %JochenK
     else
         set(hMainGui.RightPanel.pData.cMolDrift,'Enable','off','Value',0);
     end
@@ -340,7 +490,7 @@ if isempty(Filament)
     set(hMainGui.RightPanel.pData.cIgnoreFil,'Enable','off','Value',0);            
 else
     if ~isempty(Drift)
-        set(hMainGui.RightPanel.pData.cFilDrift,'Enable','on');
+        set(hMainGui.RightPanel.pData.cFilDrift,'Enable','on', 'Value', all([Filament.Drift])); %JochenK
     else
         set(hMainGui.RightPanel.pData.cFilDrift,'Enable','off','Value',0);
     end
@@ -406,19 +556,22 @@ if numel(Object.Selected)==1
         end
         if ishandle(Object.PlotHandles(1))
             set(Object.PlotHandles(1),'Selected',selected,'LineStyle',line);
-            if ~isempty(KymoObject)
-                k=find([KymoObject.Index]==n);
-                if ~isempty(k)
-                    if ishandle(KymoObject(k).PlotHandles(1))
-                        set(KymoObject(k).PlotHandles(1),'Selected',selected,'LineStyle',line);        
-                    end
-                end   
+            if ~isempty(KymoObject) %JochenK
+               k=find([KymoObject.Index]==n);
+               if ~isempty(k)
+                   for m=k
+                       if ishandle(KymoObject(m).PlotHandles(1))
+                               set(KymoObject(m).PlotHandles(1),'Selected',selected,'LineStyle',line);   
+                       end    
+                   end
+               end   
             end
         end
     end
 end
 
 function Object=VisibleOne(Object,KymoObject,List,n,v,slider)
+tic
 hMainGui=getappdata(0,'hMainGui');
 nObj=length(Object);
 value=round(get(slider,'Value'));
@@ -463,11 +616,14 @@ if Object(n).Selected>-1
         setappdata(0,'hMainGui',hMainGui);
     end
     set(Object(n).PlotHandles(1),'Visible',visible,'Selected',selected,'LineStyle',line);
-    k=find([KymoObject.Index]==n);
+    k=find([KymoObject.Index]==n); %JochenK
     if ~isempty(k)
-        set(KymoObject(k).PlotHandles(1),'Visible',visible,'Selected',selected,'LineStyle',line);            
+       for m=k
+           set(KymoObject(m).PlotHandles(1),'Visible',visible,'Selected',selected,'LineStyle',line); %this for loop is new
+       end        
     end  
 end
+toc
 
 function DeleteScan(hMainGui)
 %fToolBar('Cursor',hMainGui);
@@ -639,10 +795,10 @@ if strcmp(Mode,'Server')
             server_version = '';
         end
         %compare server version with local version
-        if ~strcmp( local_version , server_version )
-            fMsgDlg({'Detected a different version on the server!';'Restart server for newest version'},'error');
-            DirServer='';
-        end
+%         if ~strcmp( local_version , server_version ) %JochenK
+%             fMsgDlg({'Detected a different version on the server!';'Restart server for newest version'},'error');
+%             DirServer='';
+%         end
     end
     if ~isempty(DirServer)
         set(hMainGui.MidPanel.pView,'Visible','off');
@@ -765,11 +921,13 @@ if isempty(FileName) || iscell(FileName)
             if isempty(hMainGui.Values.PostSpecial)
                 k = n;
                 addConfig.TformChannel{1} = hMainGui.Values.TformChannel{n};
+                addConfig.TrackChannel = hMainGui.Values.FrameIdx(1);
             else
                 k = 1:length(hMainGui.Values.TformChannel);
                 Config.BorderMargin = 0;
                 addConfig.TformChannel = hMainGui.Values.TformChannel;
                 addConfig.TformChannel{1}(3,3) = n;
+                addConfig.TrackChannel = hMainGui.Values.FrameIdx(1);
             end
             addConfig.StackReadOptions = Config.StackReadOptions;
             if strcmp(addConfig.Threshold.Mode,'relative')==1

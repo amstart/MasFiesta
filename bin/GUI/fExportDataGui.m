@@ -300,6 +300,10 @@ function Export(hExportDataGui)
 global Molecule;
 global Filament;
 global GSpath;
+if get(hExportDataGui.rCurrentPlot,'Value')  
+   hMainGui=getappdata(0,'hMainGui');
+   hfDataGui=hMainGui.Extensions.JochenK.fDataGui;
+end    
 if strcmp(hExportDataGui.Type,'Molecule')
     Objects=Molecule;
 else
@@ -345,8 +349,8 @@ if format == 1
 end
 for index  = k
     if get(hExportDataGui.rCurrentPlot,'Value')       
-       hDataGui=getappdata(0,'hDataGui');            
-       fDataGui('Create',hDataGui.Type, index);     
+       hDataGui=getappdata(0,'hDataGui');       
+       hfDataGui('Create',hDataGui.Type, index);     
     end                                               
     p = 1;
     n = 1;

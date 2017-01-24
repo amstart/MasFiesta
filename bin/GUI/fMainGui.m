@@ -58,6 +58,7 @@ hMainGui.RightPanel=fRightPanelCreate(hMainGui);
 %set(findobj(hMainGui.fig,'-property','KeyPressFcn'),'KeyPressFcn',@CheckKeyPress);
 %set(findobj(hMainGui.fig,'-property','KeyReleaseFcn'),'KeyReleaseFcn',@CheckKeyRelease);
 
+set(hMainGui.fig, 'KeyPressFcn',@keypressfocused);
 set(hMainGui.fig, 'WindowKeyPressFcn',@keypress);
 set(hMainGui.fig, 'WindowKeyReleaseFcn',@keyrelease);
 set(hMainGui.fig, 'CloseRequestFcn',@Exit);
@@ -81,8 +82,14 @@ set(hMainGui.fig, 'WindowScrollWheelFcn',@Scroll);
 set(hMainGui.fig,'Visible','on');
 maximize(hMainGui.fig);
 
+fJKMenu();
+
 function Exit(hObject,eventdata) %#ok<INUSD>
 global PathBackup;
+answer = questdlg('Are you sure to quit?', 'Warning', 'Yes','No','Yes' );
+if strcmp(answer, 'No')
+    return
+end
 if ~isempty(PathBackup)
     path(PathBackup);
 end
@@ -111,7 +118,7 @@ if isdeployed
         FiestaDir.AppData = '~/Library/Fiesta/';
         DirCurrent = '~/';
     else
-        FiestaDir.AppData = [winqueryreg('HKEY_CURRENT_USER','Software\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders','Local AppData') filesep 'Fiesta' filesep];
+        FiestaDir.AppData = [ctfroot filesep 'FIESTA JochenK 1.0' filesep 'source' filesep];
     end 
 else
     FiestaDir.AppData = DirCurrent;
@@ -141,6 +148,8 @@ hMainGui.IsRunningUpdate=0;
 hMainGui.Image=[];
 
 hMainGui.CursorMode='Normal';
+
+hMainGui.Extensions=[];
 
 BackUp = [];
 
@@ -285,16 +294,22 @@ p=1;
 strInfo=[];
 List=[];
 if ~isempty(KymoTrack)
-    idx = [KymoTrack.Index];
-    obj = find([Objects(idx).Visible]==1 & [Objects(idx).Selected]>=0 & ismember([Objects(idx).Channel],stidx));
-    for i = obj
-        k = abs(KymoTrack(i).Track(:,2)-cp(1))<dx & abs(KymoTrack(i).Track(:,1)-cp(2))<dy;
-        if any(k)
-            strInfo{p}=Objects(idx(i)).Name; %#ok<AGROW>
-            List(p)=idx(i); %#ok<AGROW>
-            p=p+1;
-        end
-    end
+   idx = [KymoTrack.Index];
+   obj = find([Objects(idx).Visible]==1 & [Objects(idx).Selected]>=0 & ismember([Objects(idx).Channel],stidx));
+   for i = obj
+       k = abs(KymoTrack(i).Track(:,2)-cp(1))<dx & abs(KymoTrack(i).Track(:,1)-cp(2))<dy;
+       if any(k)
+           %strInfo{p}=Objects(idx(i)).Name; %#ok<AGROW>
+           List(p)=idx(i); %#ok<AGROW>
+           p=p+1;
+           strInfo{p}=KymoTrack(i).Name;
+           if strcmp(KymoTrack(i).RefPos, 'PosStart')
+                   strInfo{p}=[KymoTrack(i).Name ' start']; %#ok<AGROW>
+           elseif strcmp(KymoTrack(i).RefPos, 'PosEnd')
+                   strInfo{p}=[KymoTrack(i).Name ' end']; %#ok<AGROW>
+           end
+       end
+   end
 else
     obj = find([Objects.Visible]==1 & [Objects.Selected]>=0 & ismember([Objects.Channel],stidx));
     for i = obj
@@ -315,6 +330,7 @@ global KymoTrackFil;
 global Stack;
 global TrackInfo;
 global TimeInfo;
+global IsPlaying;
 hMainGui=getappdata(0,'hMainGui');
 if ~strcmp(get(hMainGui.fig,'Pointer'),'watch')
     set(0,'CurrentFigure',hMainGui.fig);
@@ -407,7 +423,7 @@ if ~strcmp(get(hMainGui.fig,'Pointer'),'watch')
                     ' ' char(956) 'm     Y: ' num2str(time,'%0.3f') ' s']);
             end
         end
-    elseif strcmp(hMainGui.CurrentAxes,'View') && all(cpView>=[xyView{1}(1) xyView{2}(1)]) && all(cpView<=[xyView{1}(2) xyView{2}(2)]) && strcmp(get(hMainGui.MidPanel.pView,'Visible'),'on')
+    elseif strcmp(hMainGui.CurrentAxes,'View') && all(cpView>=[xyView{1}(1) xyView{2}(1)]) && all(cpView<=[xyView{1}(2) xyView{2}(2)]) && strcmp(get(hMainGui.MidPanel.pView,'Visible'),'on') && isempty(IsPlaying) %JochenK
         xy=xyView;
         cp=cpView;
         dx=((xy{1}(2)-xy{1}(1))/100);
@@ -545,18 +561,20 @@ if ~strcmp(get(hMainGui.fig,'Pointer'),'watch')
         ct(Object(n).Selected==2)=2;
         ct(Object(n).Selected==1)=3;
         Selected=[Object.Selected];
-        o = [Object.PlotHandles];
-        if ~isempty(o)
-            set(o,'UIContextMenu',[]);
+        for i=1:length(Object) %JochenK
+            o = [Object(i).PlotHandles];
+            if ~isempty(o)&&ishandle(o)
+                set(o,'UIContextMenu',[]);
+            end
         end
         if all(Selected(List)<2)||strcmp(hMainGui.CurrentAxes,'Kymo')
             if isempty(hMainGui.Plots.TrackInfo)
-                hMainGui.Plots.TrackInfo=text(cp(1)-dx,cp(2),strInfo(1:p),'Parent',hMainGui.CurrentAxesHandle,'BackgroundColor',[.7 .9 .7],'Tag','TrackInfo','UserData',TrackInfo);
+                hMainGui.Plots.TrackInfo=text(cp(1)-dx,cp(2),strInfo(1:p), 'Interpreter', 'none', 'Parent',hMainGui.CurrentAxesHandle,'BackgroundColor',[.7 .9 .7],'Tag','TrackInfo','UserData',TrackInfo); %JochenK: Added 'Interpreter', 'none'
             else
                 try
                     set(hMainGui.Plots.TrackInfo,'String',strInfo(1:p),'Position',[cp(1)-dx,cp(2)],'UserData',TrackInfo);
                 catch
-                    hMainGui.Plots.TrackInfo=text(cp(1)-dx,cp(2),strInfo(1:p),'Parent',hMainGui.CurrentAxesHandle,'BackgroundColor',[.7 .9 .7],'Tag','TrackInfo','UserData',TrackInfo);
+                    hMainGui.Plots.TrackInfo=text(cp(1)-dx,cp(2),strInfo(1:p), 'Interpreter', 'none', 'Parent',hMainGui.CurrentAxesHandle,'BackgroundColor',[.7 .9 .7],'Tag','TrackInfo','UserData',TrackInfo); %JochenK: Added 'Interpreter', 'none'
                 end
             end
             if isempty(hMainGui.CurrentKey)
@@ -767,12 +785,10 @@ if ~strcmp(hMainGui.CurrentAxes,'none') && all(hMainGui.Values.CursorDownPos==0)
 end
 if strcmp(hMainGui.CurrentAxes,'none')
     if strcmp(get(hMainGui.RightPanel.pData.pMoleculesPan,'Visible'),'on')
-        List=hMainGui.RightPanel.pData.MolList;
         Object=Molecule;
         Slider=hMainGui.RightPanel.pData.sMolList;
         Context=hMainGui.Menu.ctListMol;
     elseif strcmp(get(hMainGui.RightPanel.pData.pFilamentsPan,'Visible'),'on')
-        List=hMainGui.RightPanel.pData.FilList;
         Object=Filament;
         Slider=hMainGui.RightPanel.pData.sFilList;
         Context=hMainGui.Menu.ctListFil;  
@@ -795,11 +811,11 @@ if strcmp(hMainGui.CurrentAxes,'none')
         value(value<minValue)=minValue;
         value(value>maxValue)=maxValue;
         set(Slider,'Value',value);
-        fRightPanel('UpdateList',List,Object,Slider,Context);
+        fRightPanel('UpdateList',hMainGui.RightPanel.pData,Object,Context,hMainGui.Values.MaxIdx);%JochenK
     end
 end
 
-function SelectObject(hMainGui,Mode,n,button)
+function SelectObject(hMainGui,Mode,n,button)   %JochenK BugFixCandidate
 global Molecule;
 global Filament;
 global KymoTrackMol;
@@ -855,11 +871,11 @@ end
 if strcmp(Mode,'Molecule')==1
     Molecule=Object;
     KymoTrackMol=KymoObject;
-    fRightPanel('UpdateList',hMainGui.RightPanel.pData.MolList,Molecule,hMainGui.RightPanel.pData.sMolList,hMainGui.Menu.ctListMol);
+    fRightPanel('UpdateList',hMainGui.RightPanel.pData,Molecule,hMainGui.Menu.ctListMol,hMainGui.Values.MaxIdx);%JochenK
 else
     Filament=Object;
     KymoTrackFil=KymoObject;    
-    fRightPanel('UpdateList',hMainGui.RightPanel.pData.FilList,Filament,hMainGui.RightPanel.pData.sFilList,hMainGui.Menu.ctListFil);
+    fRightPanel('UpdateList',hMainGui.RightPanel.pData,Filament,hMainGui.Menu.ctListFil,hMainGui.Values.MaxIdx);%JochenK
 end
 setappdata(0,'hMainGui',hMainGui);
 
@@ -919,8 +935,8 @@ else
     Filament(idx).Name=get(hName,'String');
 end
 set(hName,'Callback',[],'Enable','inactive','Style','text','BackgroundColor',get(get(hName,'Parent'),'BackgroundColor'));
-fRightPanel('UpdateList',hMainGui.RightPanel.pData.MolList,Molecule,hMainGui.RightPanel.pData.sMolList,hMainGui.Menu.ctListMol);
-fRightPanel('UpdateList',hMainGui.RightPanel.pData.FilList,Filament,hMainGui.RightPanel.pData.sFilList,hMainGui.Menu.ctListFil);
+fRightPanel('UpdateList',hMainGui.RightPanel.pData,Molecule,hMainGui.Menu.ctListMol,hMainGui.Values.MaxIdx);%JochenK
+fRightPanel('UpdateList',hMainGui.RightPanel.pData,Filament,hMainGui.Menu.ctListFil,hMainGui.Values.MaxIdx);%JochenK
 set(hMainGui.fig, 'WindowButtonMotionFcn', @UpdateCursor);
 set(hMainGui.fig, 'WindowButtonDownFcn',@ButtonDown);
 set(hMainGui.fig, 'WindowButtonUpFcn',@ButtonUp);    
@@ -965,7 +981,7 @@ end
 fRightPanel('UpdateQueue','Local');
 setappdata(0,'hMainGui',hMainGui);
 
-function SelectRegionObject(hMainGui,button)
+function SelectRegionObject(hMainGui,button)    %JochenK BugFixCandidate
 global Molecule;
 global Filament;
 global KymoTrackMol;
@@ -1020,26 +1036,29 @@ elseif strcmp(hMainGui.CurrentAxes,'Kymo')
 end
 hMainGui.SelectLast=[];
 hMainGui.SelectMode=[];
-fRightPanel('UpdateList',hMainGui.RightPanel.pData.MolList,Molecule,hMainGui.RightPanel.pData.sMolList,hMainGui.Menu.ctListMol);
-fRightPanel('UpdateList',hMainGui.RightPanel.pData.FilList,Filament,hMainGui.RightPanel.pData.sFilList,hMainGui.Menu.ctListFil);
+fRightPanel('UpdateList',hMainGui.RightPanel.pData,Molecule,hMainGui.Menu.ctListMol,hMainGui.Values.MaxIdx);%JochenK
+fRightPanel('UpdateList',hMainGui.RightPanel.pData,Filament,hMainGui.Menu.ctListFil,hMainGui.Values.MaxIdx);%JochenK
 setappdata(0,'hMainGui',hMainGui);
 
 function OpenObject(hMainGui,Mode,n)
 global Molecule
 global Filament;
-fShared('BackUp',hMainGui);
+if ~hMainGui.Extensions.JochenK.Data
+    fShared('BackUp',hMainGui);
+end
 v=[length(Molecule) length(Filament)]-6-n;
 v(v<1)=1;
-fDataGui('Create',Mode,n);
+hfDataGui=hMainGui.Extensions.JochenK.fDataGui;
+hfDataGui('Create',Mode,n);
 if strcmp(Mode,'Molecule')==1
     set(hMainGui.RightPanel.pData.sMolList,'Value',v(1));
-    fRightPanel('UpdateList',hMainGui.RightPanel.pData.MolList,Molecule,hMainGui.RightPanel.pData.sMolList,hMainGui.Menu.ctListMol);
+    fRightPanel('UpdateList',hMainGui.RightPanel.pData,Molecule,hMainGui.Menu.ctListMol,hMainGui.Values.MaxIdx);%JochenK
     if strcmp(get(hMainGui.RightPanel.pData.panel,'Visible'),'on')
         fRightPanel('DataMoleculesPanel',hMainGui);            
     end    
 else
     set(hMainGui.RightPanel.pData.sFilList,'Value',v(2));
-    fRightPanel('UpdateList',hMainGui.RightPanel.pData.FilList,Filament,hMainGui.RightPanel.pData.sFilList,hMainGui.Menu.ctListFil);
+    fRightPanel('UpdateList',hMainGui.RightPanel.pData,Filament,hMainGui.Menu.ctListFil,hMainGui.Values.MaxIdx);%JochenK
     if strcmp(get(hMainGui.RightPanel.pData.panel,'Visible'),'on')
         fRightPanel('DataFilamentsPanel',hMainGui);   
     end            
@@ -1401,6 +1420,20 @@ if ~strcmp(get(hMainGui.fig,'Pointer'),'watch')
 end
 
 
+function keypressfocused(src,evnt) %#ok<INUSL>
+hMainGui=getappdata(0,'hMainGui');
+if ~strcmp(get(hMainGui.fig,'Pointer'),'watch')
+    key = double(evnt.Character);
+    if ~isempty(key)
+        switch(key)
+            case 97
+                fMidPanel('sFrame',hMainGui, -1, 1);
+            case 115
+                fMidPanel('sFrame',hMainGui, 1, 1);
+        end
+    end
+end
+
 function keypress(src,evnt) %#ok<INUSL>
 global Queue;
 hMainGui=getappdata(0,'hMainGui');
@@ -1436,7 +1469,7 @@ if ~strcmp(get(hMainGui.fig,'Pointer'),'watch')
                 set(hMainGui.MidPanel.eFrame,'String',int2str(hMainGui.Values.FrameIdx(n)));
                 set(hMainGui.MidPanel.sFrame,'Value',hMainGui.Values.FrameIdx(n));
                 setappdata(0,'hMainGui',hMainGui);
-                fMidPanel('Update',hMainGui);            
+                fMidPanel('Update',hMainGui);   
         end
         Zoom=hMainGui.ZoomView;
         if xy{1}(1)<Zoom.globalXY{1}(1)
@@ -1462,7 +1495,7 @@ if ~strcmp(get(hMainGui.fig,'Pointer'),'watch')
         hMainGui=DeleteSelectRegion(hMainGui);
     end
     if ~isempty(key)
-        if key==127 || key==8
+        if key==127 %|| key==8 JochenK
             if strcmp(get(hMainGui.RightPanel.pData.panel,'Visible'),'on') || strcmp(get(hMainGui.RightPanel.pTools.panel,'Visible'),'on')
                 fShared('DeleteTracks',hMainGui,[],[]);
             elseif strcmp(get(hMainGui.RightPanel.pQueue.panel,'Visible'),'on')

@@ -251,26 +251,28 @@ Y=[];
 stidx = getChannels;
 for nCh = 1:length(stidx)
     k=find([Object.Visible]==1&[Object.Selected]>-1&[Object.Channel]==stidx(nCh));
-    for i=k
-        t=find(Object(i).Results(:,1)==idx(nCh),1,'first');
-        if ~isempty(t)
-            X(p,1:2)=Object(i).Results(t,3)/hMainGui.Values.PixSize; 
-            Y(p,1:2)=Object(i).Results(t,4)/hMainGui.Values.PixSize; 
-            C{p}=Object(i).Color; 
-            N{p}=Object(i).Name; %#ok<*AGROW>
-            if get(hMainGui.RightPanel.pData.cShowWholeFil,'Value') && isfield(Object,'Data') && numel(Object(i).Data)>=t
-                line(Object(i).Data{t}(:,1)/hMainGui.Values.PixSize,Object(i).Data{t}(:,2)/hMainGui.Values.PixSize,'Tag','pObjects','Color','r');
-            end 
-            p=p+1;
+    if length(idx)>=nCh %JochenK
+        for i=k
+            t=find(Object(i).Results(:,1)==idx(nCh),1,'first');
+            if ~isempty(t)
+                X(p,1:2)=Object(i).Results(t,3)/hMainGui.Values.PixSize; 
+                Y(p,1:2)=Object(i).Results(t,4)/hMainGui.Values.PixSize; 
+                C{p}=[max(Object(i).Color(1) -0.3,0) max(Object(i).Color(2) -0.3,0) max(Object(i).Color(3) -0.3,0)]; 
+                N{p}=Object(i).Name; %#ok<*AGROW>
+                if get(hMainGui.RightPanel.pData.cShowWholeFil,'Value') && isfield(Object,'Data') && numel(Object(i).Data)>=t
+                    line(Object(i).Data{t}(:,1)/hMainGui.Values.PixSize,Object(i).Data{t}(:,2)/hMainGui.Values.PixSize,'Tag','pObjects','Color','r');  %JochenK
+                end 
+                p=p+1;
+            end
         end
     end
 end
 if ~isempty(X)
-    h=line(X',Y','Parent',hMainGui.MidPanel.aView,'Marker','.','MarkerSize',20,'Tag','pObjects');
+    h=line(X',Y','Parent',hMainGui.MidPanel.aView,'Marker','.','MarkerSize',25,'Tag','pObjects');
     set(h,{'Color'},C',{'UserData'},N');
 end
 
-function ShowTracks
+function ShowTracks     %JochenK BugFixCandidate
 global Molecule;
 global Filament;
 global Stack;

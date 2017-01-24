@@ -2,6 +2,8 @@ function fMenuView(func,varargin)
 switch func
     case 'View'
         View(varargin{1},varargin{2});
+    case 'KeepFrames'
+        KeepFrames(varargin{:});
     case 'ViewCheck'
         ViewCheck;
     case 'ColorOverlay'
@@ -9,6 +11,18 @@ switch func
     case 'CorrectStack'
         CorrectStack;
 end
+
+function KeepFrames(hMainGui) %JochenK
+global Stack
+global TimeInfo
+channel = hMainGui.Values.FrameIdx(1);
+answer = fInputDlg({'Enter first and the last frames to keep in current channel (the others will be deleted for the session).','Enter last frame'},{int2str(1),int2str(hMainGui.Values.MaxIdx(channel+1))});
+firstframe = str2double(answer{1});
+lastframe = str2double(answer{2});
+Stack{channel} = Stack{channel}(:,:, firstframe:lastframe);
+TimeInfo{channel} = TimeInfo{channel}(firstframe:lastframe);
+hMainGui.Values.MaxIdx(channel+1) = length(TimeInfo{channel});
+setappdata(0,'hMainGui',hMainGui);
 
 function CorrectStack
 global Stack;
@@ -107,7 +121,8 @@ for m = 1:length(Stack)
                 progressdlg(n/z*100);
             end
         end
-        set(hMainGui.Menu.mCorrectStack,'Enable','off','Checked','on');
+        set(hMainGui.Menu.mCorrectStack,'Checked','on');
+        set(hMainGui.Menu.mCorrectStack,'Enable','off');
         hMainGui.Values.TformChannel{m}=hMainGui.Values.TformChannel{1};
     end
     if strcmp(get(hMainGui.Menu.mCorrectStack,'Checked'),'on')

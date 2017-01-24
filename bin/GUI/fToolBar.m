@@ -147,10 +147,10 @@ if ~isempty(Stack)
     set(hMainGui.Menu.mColorOverlay,'Checked',s);
     fShow('Image');
     fShow('Tracks');
-    if ~isempty(hMainGui.KymoImage) 
-        hMainGui=getappdata(0,'hMainGui');
-        fRightPanel('ShowKymoGraph',hMainGui);
-    end
+%     if ~isempty(hMainGui.KymoImage) JochenK
+%         hMainGui=getappdata(0,'hMainGui');
+%         fRightPanel('ShowKymoGraph',hMainGui);
+%     end
 end
 
 function SwitchChannel(nCh)
@@ -203,10 +203,10 @@ if ~isempty(Stack)
     fLeftPanel('Update',hMainGui);    
     fShow('SelectChannel',Molecule);
     fShow('SelectChannel',Filament);
-    if ~isempty(hMainGui.KymoImage) 
-        hMainGui=getappdata(0,'hMainGui');
-        fRightPanel('ShowKymoGraph',hMainGui);
-    end
+%     if ~isempty(hMainGui.KymoImage)&&strcmp(get(hMainGui.ToolBar.ToolChannels(5),'State'),'off') %JochenK
+%         hMainGui=getappdata(0,'hMainGui');
+%         fRightPanel('ShowKymoGraph',hMainGui);
+%     end
 end
 
 function SetZoom(hMainGui)

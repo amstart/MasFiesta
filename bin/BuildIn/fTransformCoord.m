@@ -2,7 +2,7 @@ function Object = fTransformCoord(Object,mode,filament)
 nObj = length(Object);
 for n = 1:nObj
     T = Object(n).TformMat;
-    if Object(n).Channel>1 && mode~=T(3,3)
+    if Object(n).Channel>1 && mode~=T(3,3) && T(1,1)~=1 %JochenK: Added T(1,1)~=1 to omit Objects without an offset map
         T(:,3) = [0;0;1];
         if mode
             [X,Y] = transformPointsInverse(affine2d(T),double(Object(n).Results(:,3))/Object(n).PixelSize,double(Object(n).Results(:,4))/Object(n).PixelSize);

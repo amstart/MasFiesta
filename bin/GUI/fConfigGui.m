@@ -920,12 +920,12 @@ else
     hMainGui.Values.PixSize=tempConfig.PixSize;
 end
 
-if strcmp(tempConfig.StackType{nCh-1},'TIFF')==1&&hMainGui.Values.MaxIdx(nCh)>1
-    tempConfig.Time(nCh-1) = str2double(get(hConfigGui.pGeneral.eTimeDiff,'String'));
-    if tempConfig.Time(nCh-1)<=0||isnan(tempConfig.Time(nCh-1))
-        err{length(err)+1}='Wrong time difference input for TIFF file';
-    end
-end
+% if strcmp(tempConfig.StackType{nCh-1},'TIFF')==1&&hMainGui.Values.MaxIdx(nCh)>1
+%     tempConfig.Time(nCh-1) = str2double(get(hConfigGui.pGeneral.eTimeDiff,'String'));
+%     if tempConfig.Time(nCh-1)<=0||isnan(tempConfig.Time(nCh-1))
+%         err{length(err)+1}='Wrong time difference input for TIFF file';
+%     end
+% end
 
 tempConfig.FirstTFrame=round(str2double(get(hConfigGui.pGeneral.eFirstFrame,'String')));
 if tempConfig.FirstTFrame<0||isnan(tempConfig.FirstTFrame)||tempConfig.FirstTFrame>max(hMainGui.Values.MaxIdx)
@@ -1146,7 +1146,7 @@ if get(hConfigGui.pRefPoint.rStart,'Value')==1&&strcmp(tempConfig.RefPoint,'star
     nFil=length(Filament);
     for i=1:nFil
         Filament(i).Results(:,3:5) = Filament(i).PosStart;
-        Filament(i).Results(:,5) = fDis( Filament(i).PosStart );
+        Filament(i).Results(:,6) = fDis( Filament(i).PosStart );
     end
 end    
 
@@ -1155,7 +1155,7 @@ if get(hConfigGui.pRefPoint.rCenter,'Value')==1&&strcmp(tempConfig.RefPoint,'cen
     nFil=length(Filament);
     for i=1:nFil
         Filament(i).Results(:,3:5) = Filament(i).PosCenter;
-        Filament(i).Results(:,5) = fDis( Filament(i).PosCenter );
+        Filament(i).Results(:,6) = fDis( Filament(i).PosCenter );
     end
 end  
 
@@ -1164,7 +1164,7 @@ if get(hConfigGui.pRefPoint.rEnd,'Value')==1&&strcmp(tempConfig.RefPoint,'end')=
     nFil=length(Filament);
     for i=1:nFil
         Filament(i).Results(:,3:5) = Filament(i).PosEnd;
-        Filament(i).Results(:,5) = fDis( Filament(i).PosEnd );
+        Filament(i).Results(:,6) = fDis( Filament(i).PosEnd );
     end
 end  
 
@@ -1185,7 +1185,7 @@ tempConfig.DynamicFil = get(hConfigGui.pExperimental.cDynamicFil,'Value');
 if isempty(err)&&strcmp(warn,'continue')
     Config = tempConfig;
     if all(isreal(hMainGui.Values.FrameIdx))
-        if strcmp(tempConfig.StackType{nCh-1},'TIFF')==1
+        if strcmp(tempConfig.StackType{nCh-1},'TIFF')==1&&~isnan(tempConfig.Time(1))
             for i=0:length(TimeInfo{nCh-1})-1
                 TimeInfo{nCh-1}(i+1) = (i*tempConfig.Time(nCh-1));
             end

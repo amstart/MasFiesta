@@ -26,6 +26,11 @@ if ~isempty(DirServer);
             catch
                 addQueue=[];
             end
+            %JochenK
+            if ~isempty(addQueue) && ~isempty(Queue)
+                removefields = setdiff(fields(Queue), fields(addQueue));
+                Queue = rmfield(Queue, removefields);
+            end
             Queue = [Queue addQueue];
         end
     end

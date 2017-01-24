@@ -10,6 +10,8 @@ switch func
         SaveDrift(varargin{1});
     case 'LoadDrift'
         LoadDrift(varargin{1});
+    case 'ClearDrift'
+        ClearDrift(varargin{1});
 end
 
 function LoadConfig(hMainGui)
@@ -29,11 +31,20 @@ if FileName~=0
     Config.DynamicFil=tempConfig.DynamicFil;
     Config.ReduceFitBox=tempConfig.ReduceFitBox;
     Config.FilFocus=tempConfig.FilFocus;
+    if isfield(tempConfig, 'mSaveLoadDir')%JochenK
+        hDataGui = getappdata(0,'hDataGui'); 
+        set(hMainGui.Menu.mSaveLoadDir,'Checked', tempConfig.mSaveLoadDir);
+        hMainGui.Extensions.JochenK = tempConfig.JochenK;
+        setappdata(0,'hMainGui',hMainGui);
+        hDataGui.Extensions.JochenK.DynTags = hMainGui.Extensions.JochenK.DynTags;
+        setappdata(0,'hDataGui',hDataGui);
+        fJKMenu;
+    end
 end
 fShow('Image',hMainGui);
 
 function SaveConfig
-global Config; %#ok<NUSED>
+global Config; 
 [FileName, PathName] = uiputfile({'*.mat','MAT-File(*.mat)'},'Save FIESTA Config',fShared('GetSaveDir'));
 if FileName~=0
     fShared('SetSaveDir',PathName);
@@ -41,8 +52,12 @@ if FileName~=0
     if isempty(findstr('.mat',file))
         file = [file '.mat'];
     end
+    hMainGui=getappdata(0,'hMainGui'); %JochenK
+    Config.JochenK = hMainGui.Extensions.JochenK;
+    Config.mSaveLoadDir = get(hMainGui.Menu.mJochenK,'Checked');
     save(file,'Config');
 end
+
 
 function SetDefaultConfig
 global Config;
@@ -181,3 +196,7 @@ if FileName~=0
     end
     save(file,'Drift');
 end
+
+function ClearDrift(hMainGui)
+%JochenK
+setappdata(hMainGui.fig,'Drift',[]);

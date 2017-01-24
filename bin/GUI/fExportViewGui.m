@@ -794,9 +794,9 @@ y_total=borders{2}(2)-borders{2}(1);
 s = max([x_total y_total]);
 
 if get(hExportViewGui.mPosTime,'Value')==1||get(hExportViewGui.mPosTime,'Value')==3
-    x=borders{1}(1)+0.10*s;
+    x=borders{1}(1)+0.05*s;
 else
-    x=borders{1}(2)-0.10*s;
+    x=borders{1}(2)-0.05*s;
 end
 if get(hExportViewGui.mPosTime,'Value')==1||get(hExportViewGui.mPosTime,'Value')==2
     y=borders{2}(1)+0.075*s;

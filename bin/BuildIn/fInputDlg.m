@@ -1,7 +1,9 @@
-function answer = fInputDlg(prompt,default)
+function answer = fInputDlg(prompt,default, varargin)
 drawnow
 hInputDlg = dialog('Name','FIESTA Input','UserData','Cancel','KeyPressFcn',@doFigureKeyPress,'Visible','off');
-fPlaceFig(hInputDlg,'small');
+if nargin < 3
+    fPlaceFig(hInputDlg,'small');
+end
 if ~iscell(prompt)
     uicontrol('Parent',hInputDlg ,'Units','normalized','Position',[0.05 0.7 0.9 0.2],'Style','text','String',prompt,'HorizontalAlignment','left');
     hPrompt = uicontrol('Parent',hInputDlg ,'Units','normalized','Position',[0.05 0.5 0.9 0.2],'Style','edit','BackgroundColor','white','String',default,'Tag','eAnswer','Callback',@doPromptCallback,'HorizontalAlignment','left');

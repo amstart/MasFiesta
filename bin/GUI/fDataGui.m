@@ -6,14 +6,14 @@ switch (func)
         catch
             return;
         end
-    case 'SetAdvanced'
-        SetAdvanced(varargin{1});
+    case 'Kymo'
+        Kymo(varargin{1});
+    case 'ZoomIn'
+        ZoomIn(varargin{:});
     case 'Draw'
         Draw(varargin{1},varargin{2});
     case 'PlotXY'
         PlotXY(varargin{1});
-    case 'Comment'
-        Comment(varargin{1});
     case 'PlotDisTime'
         PlotDisTime(varargin{1});
     case 'PlotIntLen'
@@ -32,8 +32,6 @@ switch (func)
         FitMissingPoints(varargin{1}); 
     case 'Tags'
         Tags(varargin{1});
-    case 'Undo'
-        Undo(varargin{1}); 
     case 'Split'
         Split(varargin{1});          
     case 'SelectAll'
@@ -54,12 +52,12 @@ switch (func)
         Export(varargin{1});
     case 'ChangeReference'
         ChangeReference(varargin{1});
-    case 'OnlyChecked'
-        OnlyChecked(varargin{:});
     case 'SetChannel'
         SetChannel;
     case 'SetComments'
         SetComments;
+    case 'AlignColor'
+        AlignColor(varargin{1});
 end
 
 function hDataGui = Create(Type,idx)
@@ -93,7 +91,7 @@ end
 hDataGui.idx=idx;
 h=findobj('Tag','hDataGui');
 [lXaxis,lYaxis]=CreatePlotList(Object,Type);
-if isempty(h)
+if isempty(h) %JochenK: Changed arrangement of buttons slightly
     hDataGui.fig = figure('Units','normalized','DockControls','off','IntegerHandle','off','MenuBar','none','Name',Object.Name,...
                           'NumberTitle','off','HandleVisibility','callback','Tag','hDataGui',...
                           'Visible','off','Resize','off','WindowStyle','normal');
@@ -137,7 +135,7 @@ if isempty(h)
     hDataGui.tIndex = uicontrol('Parent',hDataGui.fig,'Units','normalized','FontSize',10,'HorizontalAlignment','left',...
                                 'Position',[0.02 0.93 0.1 0.02],'String',['Index: ' num2str(idx)],'Style','text','Tag','tIndex','BackgroundColor',c);   
                     
-    hDataGui.cAligned = uicontrol('Parent',hDataGui.fig,'Units','normalized','Position',[0.13 0.93 0.1 0.02],'TooltipString','Whether the object has been color aligned',...
+    hDataGui.cAligned = uicontrol('Parent',hDataGui.fig,'Units','normalized','Position',[0.13 0.93 0.1 0.02],'TooltipString','Whether the object has been color aligned. Be careful with this in conjunction with Drift correction!','Callback','fDataGui(''AlignColor'',getappdata(0,''hDataGui''),0);',... %JochenK AlignColor
                                   'String','Aligned','Style','checkbox','BackgroundColor',c,'Tag','cAligned','Value',~(Object.TformMat(3,3)==1),'Enable','inactive');   
     
     hDataGui.tChannel = uicontrol('Parent',hDataGui.fig,'Units','normalized','FontSize',10,'HorizontalAlignment','left',...
@@ -199,7 +197,7 @@ if isempty(h)
                                      
     hDataGui.lTags = uicontrol('Parent',hDataGui.pTags,'Style','popupmenu','Units','normalized',...
                                          'Position',[0.525 0.75 0.45 0.25],'Tag','eTags','Fontsize',10,...
-                                         'String',num2cell(1:63)','BackgroundColor','white','HorizontalAlignment','center');  
+                                         'String',num2cell(1:24)','BackgroundColor','white','HorizontalAlignment','center');  
                                                       
     hDataGui.bApplyTag = uicontrol('Parent',hDataGui.pTags,'Units','normalized','TooltipString','Tag points with selected tag','Callback','fDataGui(''Tags'',getappdata(0,''hDataGui''));',...
                                 'Position',[0.1 0.35 0.8 0.25],'String','Apply Tag','Tag','bApplyTag');
@@ -243,22 +241,42 @@ if isempty(h)
                              'Position',[0.13 0.51 0.1 0.025],'String','Clear selection','Tag','bClear','UserData',0);                         
     
     hDataGui.bDeletePoints = uicontrol('Parent',hDataGui.fig,'Units','normalized','Callback','fDataGui(''DeletePoints'',getappdata(0,''hDataGui''));',...
-                             'Position',[0.235 0.51 0.1 0.025],'String','Delete points','Tag','bDelete');
+                             'Position',[0.35 0.510 0.1 0.025],'String','Delete points','Tag','bDelete');
                          
     hDataGui.bSplit = uicontrol('Parent',hDataGui.fig,'Units','normalized','Callback','fDataGui(''Split'',getappdata(0,''hDataGui''));',...
-                             'Position',[0.35 0.51 0.2 0.025],'String','Create new track','Tag','bSplit');
+                             'Position',[0.455 0.510 0.1 0.025],'String','Create new track','Tag','bSplit');
+                         
+    tooltipstr=sprintf('Newly tracked points have an "i" in the tag column in the table below.'); 
    
     hDataGui.bInsertPoints = uicontrol('Parent',hDataGui.fig,'Units','normalized','Callback','fDataGui(''FitMissingPoints'',getappdata(0,''hDataGui''));',...
-                             'Position',[0.565 0.51 0.2 0.025],'String','Track missing frames','Tag','bInsertPoints');
+                             'Position',[0.665 0.51 0.1 0.025],'String','Track missing frames','Tag','bInsertPoints','TooltipString', tooltipstr);
                          
     hDataGui.bSwitch = uicontrol('Parent',hDataGui.fig,'Units','normalized','Callback','fDataGui(''Switch'',getappdata(0,''hDataGui''));',...
-                                'Position',[0.78 0.51 0.2 0.025],'String','Switch MT orientation','Tag','bDelete');
+                                'Position',[0.56 0.51 0.1 0.025],'String','Switch MT orientation','Tag','bDelete');
                             
     hDataGui.tFrame = uicontrol('Parent',hDataGui.fig,'Units','normalized','FontSize',10,'HorizontalAlignment','left',...
                              'Position',[0.85 0.96 0.05 0.02],'String','Frame:','Style','text','Tag','tFrame','BackgroundColor',c);
 
     hDataGui.tFrameValue = uicontrol('Parent',hDataGui.fig,'Units','normalized','FontSize',10,'HorizontalAlignment','right',...
                                   'Position',[0.9 0.96 0.05 0.02],'String','','Style','text','Tag','tFrameValue','BackgroundColor',c);
+                              
+                              %JochenK
+                              
+    tooltipstr=sprintf('Uses current options for kymographs.');                    
+    hDataGui.bKymo = uicontrol('Parent',hDataGui.fig,'Units','normalized','Callback','fDataGui(''Kymo'',getappdata(0,''hDataGui''));',...
+                                'Position',[0.875 0.51 0.075 0.025],'String','Kymograph','Tag','bKymo','TooltipString', tooltipstr);
+                            
+    tooltipstr=sprintf(['Tick to set the start and the end of the kymograph according to the current object.' ...
+    '\nDo not forget to change this value back afterwards if you want to have a kymograph of all frames afterwards (in the "Scan" panel).']);                        
+    hDataGui.cKymo = uicontrol('Parent',hDataGui.fig,'Units','normalized','TooltipString', tooltipstr,...
+                                'Position',[0.96 0.51 0.015 0.025],'String','','Style','checkbox','BackgroundColor',c,'Tag','cKymo','Value',0,'Enable','on');
+                            
+    tooltipstr='Zooms in on selection and only shows selected points in the table.';
+   
+    hDataGui.bZoomIn = uicontrol('Parent',hDataGui.fig,'TooltipString', tooltipstr,'Units','normalized','Callback','fDataGui(''ZoomIn'',getappdata(0,''hDataGui''));',...
+                             'Position',[0.235 0.510 0.1 0.025],'TooltipString', 'Only show selected points in table', 'String','Zoom selection','Tag','bZoomIn','UserData',0);    
+                              
+                              %end JochenK
 
     j = findjobj(hDataGui.fig,'class','label');
     set(j,'VerticalAlignment',1);
@@ -313,12 +331,99 @@ Check = false(size(Object.Results,1),1);
 setappdata(0,'hDataGui',hDataGui);
 setappdata(hDataGui.fig,'Object',Object);
 setappdata(hDataGui.fig,'Check',Check);
-try
+% try
     XAxisList(hDataGui);
-catch
-    delete(hDataGui.fig);
-    Create(Type,idx);
+% catch
+%     delete(hDataGui.fig);
+%     Create(Type,idx);
+% end
+
+function ZoomIn(hDataGui)
+%JochenK
+Object = getappdata(hDataGui.fig,'Object');
+Check=getappdata(hDataGui.fig,'Check');
+if sum(Check)
+    tabledata=[num2cell(true(sum(Check),1)) num2cell(Object.Results(Check==1,1:9)) getTags(Object.Results(Check==1,:))];
+    CreateTable(hDataGui,tabledata);
 end
+Draw(hDataGui,-1);
+
+
+function AlignColor(hDataGui) 
+%JochenK
+global Molecule;
+global Filament;
+hMainGui=getappdata(0,'hMainGui');
+OffsetMap = getappdata(hMainGui.fig,'OffsetMap');
+if ~isempty(OffsetMap)
+    Object = getappdata(hDataGui.fig,'Object');
+    Check = getappdata(hDataGui.fig,'Check');
+    Type=hDataGui.Type;
+    mode = ~get(hDataGui.cAligned, 'Value');
+    if strcmp(Type,'Molecule')
+        Object = fTransformCoord(Object,mode,0);
+        Molecule(hDataGui.idx)=Object;
+    else
+        Object = fTransformCoord(Object,mode,1);
+        Filament(hDataGui.idx)=Object;
+    end
+    CreateTable(hDataGui,[num2cell(Check) num2cell(Object.Results(:,1:9)) getTags(Object.Results)]);
+    setappdata(hDataGui.fig,'Object',Object);
+    [lXaxis,lYaxis]=CreatePlotList(Object,hDataGui.Type);
+    set(hDataGui.lXaxis,'String',lXaxis.list,'UserData',lXaxis);    
+    set(hDataGui.lYaxis,'UserData',lYaxis);    
+    set(hDataGui.lYaxis2,'UserData',lYaxis); 
+    Draw(hDataGui,0);
+    fRightPanel('UpdateKymoTracks',hMainGui);
+    ReturnFocus([],[]);
+else
+    set(hDataGui.cAligned, 'Value', ~get(hDataGui.cAligned, 'Value'));
+    setappdata(0,'hDataGui',hDataGui);
+end
+
+function Kymo(hDataGui)
+%JochenK
+Object = getappdata(hDataGui.fig,'Object');
+if strcmp(hDataGui.Type,'Molecule')==1
+    x = sort(Object.Results(:,3));
+    y = sort(Object.Results(:,4));
+    coords=double([[x(1) y(1)]; [x(end) y(end)]]./Object.PixelSize);
+    addsign=1;
+else
+    x = sortrows([[Object.PosStart(:,1); Object.PosEnd(:,1)] [Object.PosStart(:,2); Object.PosEnd(:,2)]],1);
+    y = sortrows([[Object.PosStart(:,2); Object.PosEnd(:,2)] [Object.PosStart(:,1); Object.PosEnd(:,1)]],1);
+    if abs(y(1,1)-x(1,2))>abs(y(end,1)-x(1,2))
+        coords=double([[x(end,1) y(1,1)]; [x(1,1) y(end,1)]]./Object.PixelSize);
+        addsign=-1;
+    else
+        coords=double([[x(1,1) y(1,1)]; [x(end,1) y(end,1)]]./Object.PixelSize);
+        addsign=1;
+    end
+end
+delta = coords(1,:) - coords(2,:);
+m=addsign*double(delta(2)/delta(1));
+addx=sqrt(25/(1+m^2));
+hMainGui=getappdata(0,'hMainGui');
+hMainGui.Scan = struct('X',[0 0],'Y',[0 0]);
+hMainGui.Scan.X = [coords(1,1)-addsign*addx coords(2,1)+addsign*addx];
+hMainGui.Scan.Y = [coords(1,2)-addx*m coords(2,2)+addx*m];
+hMainGui.KymoName = Object.Name;
+fRightPanel('NewScan',hMainGui);
+if strcmp(get(hMainGui.ToolBar.ToolChannels(5),'State'),'off')
+    stidx=hMainGui.Values.FrameIdx(1);
+    if stidx>length(hMainGui.Values.MaxIdx)-1
+        N = hMainGui.Values.MaxIdx(2);
+    else
+        N = hMainGui.Values.MaxIdx(stidx+1);
+    end
+else
+    N = max(hMainGui.Values.MaxIdx(2:end));
+end
+if get(hDataGui.cKymo,'Value')
+    set(hMainGui.RightPanel.pTools.eKymoStart,'String', num2str(max(1, round(Object.Results(1,1))-5)));
+    set(hMainGui.RightPanel.pTools.eKymoEnd,'String', num2str(min(N, round(Object.Results(end,1))+5)));
+end
+fRightPanel('ShowKymoGraph',getappdata(0,'hMainGui'))
 
 function Clear(h,~)
 set(h,'String','','Enable','on','ForegroundColor','k','HorizontalAlignment','left','ButtonDownFcn','')
@@ -470,6 +575,7 @@ function Export(hDataGui)
 fExportDataGui('Create',hDataGui.Type,hDataGui.idx);
 ReturnFocus([],[]);
     
+
 function tags = getTags(Results)
 t = fliplr(dec2bin(Results(:,end))=='1');
 tags = cell(size(t,1),1);
@@ -647,6 +753,9 @@ if x<length(XList.data)
         end
         set(hDataGui.aPlot,'TickDir','out','YTickMode','auto');
         SetLabels(hDataGui,XList,YList,YList2,x,y,y2);
+        if gcbo == hDataGui.bZoomIn
+            xy = {[min(XPlot(k))/xscale max(XPlot(k))/xscale] [min(YPlot{1}(k))/yscale(1) max(YPlot{1}(k))/yscale(1)]};
+        end
         if ~isempty(FilXY)
             XPlot=[FilXY{1} FilXY{2}];
             YPlot{n}=[FilXY{3} FilXY{4}];
@@ -664,12 +773,22 @@ else
     SetLabels(hDataGui,XList,YList,[],x,y,[]);
 end
 hold off;
-if xy{1}(2)~=1&&xy{2}(2)~=1 && ax==-1
+if gcbo == hDataGui.bZoomIn
+    x_total=hDataGui.Zoom.globalXY{1}(2)-hDataGui.Zoom.globalXY{1}(1);
+    y_total=hDataGui.Zoom.globalXY{2}(2)-hDataGui.Zoom.globalXY{2}(1);  
+    x_current=xy{1}(2)-xy{1}(1);
+    y_current=xy{2}(2)-xy{2}(1);   
+    hDataGui.Zoom.level = -log((x_current/x_total +  y_current/y_total)/2)*8;
+    hDataGui.Zoom.currentXY = xy;
     set(hDataGui.aPlot,{'xlim','ylim'},xy);
 else
-    hDataGui.Zoom.globalXY = get(hDataGui.aPlot,{'xlim','ylim'});
-    hDataGui.Zoom.currentXY = hDataGui.Zoom.globalXY;
-    hDataGui.Zoom.level = 0;
+    if xy{1}(2)~=1&&xy{2}(2)~=1 && ax==-1
+        set(hDataGui.aPlot,{'xlim','ylim'},xy);
+    else
+        hDataGui.Zoom.globalXY = get(hDataGui.aPlot,{'xlim','ylim'});
+        hDataGui.Zoom.currentXY = hDataGui.Zoom.globalXY;
+        hDataGui.Zoom.level = 0;
+    end
 end
 setappdata(0,'hDataGui',hDataGui);
 ReturnFocus([],[]);
@@ -1127,6 +1246,7 @@ if strcmp(hDataGui.Type,'Filament')==1
     setappdata(hDataGui.fig,'Check',Check);
     setappdata(hDataGui.fig,'Object',Object);
     Draw(hDataGui,0);
+    fRightPanel('UpdateKymoTracks',hMainGui); %JochenK
 end
 ReturnFocus([],[]);
 
@@ -1152,10 +1272,10 @@ if sum(Check)<length(Check)
     Object.Name=sprintf('New %s',Object.Name);
     if strcmp(hDataGui.Type,'Molecule')
         Molecule(length(Molecule)+1)=Object;
-        fRightPanel('UpdateList',hMainGui.RightPanel.pData.MolList,Molecule,hMainGui.RightPanel.pData.sMolList,hMainGui.Menu.ctListMol);
+        fRightPanel('UpdateList',hMainGui.RightPanel.pData,Molecule,hMainGui.Menu.ctListMol,hMainGui.Values.MaxIdx);%JochenK
     elseif strcmp(hDataGui.Type,'Filament')
         Filament(length(Filament)+1)=Object;
-        fRightPanel('UpdateList',hMainGui.RightPanel.pData.FilList,Filament,hMainGui.RightPanel.pData.sFilList,hMainGui.Menu.ctListFil);    
+        fRightPanel('UpdateList',hMainGui.RightPanel.pData,Filament,hMainGui.Menu.ctListFil,hMainGui.Values.MaxIdx);%JochenK  
     end
     DeletePoints(hDataGui);
     fShow('Tracks');
@@ -1166,6 +1286,7 @@ if sum(Check)<length(Check)
     end
     setappdata(hDataGui.fig,'Object',Object);
     set(hDataGui.bNext,'Enable','on');
+    fRightPanel('UpdateKymoTracks',hMainGui); %JochenK
 end
 ReturnFocus([],[]);
 
@@ -1178,7 +1299,6 @@ Drift=getappdata(hMainGui.fig,'Drift');
 if length(Drift)>=Object.Channel && ~isempty(Drift{Object.Channel})
     Drift = Drift{Object.Channel};
     Check = getappdata(hDataGui.fig,'Check');
-    
     if get(hDataGui.cDrift,'Value')==1
         t=-1;
     else
@@ -1233,16 +1353,16 @@ setappdata(hDataGui.fig,'Check',Check);
 Draw(hDataGui,-1);
 ReturnFocus([],[]);
 
-function SelectAll(hDataGui)
-data = get(hDataGui.tTable,'Data');
+function SelectAll(hDataGui) 
+%Changed to work with "ZoomIn" (JochenK)
+Object = getappdata(hDataGui.fig,'Object');
 if get(gcbo,'UserData')==1
-    Check = true(size(data,1),1);
+    Check = true(size(Object.Results,1),1);
 else
-    Check = false(size(data,1),1);
+    Check = false(size(Object.Results,1),1);
 end
-data(:,1) = num2cell(Check);
-CreateTable(hDataGui,data);
 setappdata(hDataGui.fig,'Check',Check);
+CreateTable(hDataGui,[num2cell(Check) num2cell(Object.Results(:,1:9)) getTags(Object.Results)]);
 Draw(hDataGui,-1);
 ReturnFocus([],[]);
 
@@ -1641,7 +1761,7 @@ elseif ~(Object.TformMat(3,3)==1)
     return;
 end
 answer = fInputDlg({'Enter starting frame','Enter last frame'},{num2str(Object.Results(1,1)),num2str(Object.Results(end,1))});
-if isnan(str2double(answer{1})) || isnan(str2double(answer{2}))
+if isempty(answer) || isnan(str2double(answer{1})) || isnan(str2double(answer{2}))
     fMsgDlg('Wrong frame input','error');
     return;
 end
@@ -1817,130 +1937,3 @@ if ~isempty(fitframes)
     drawnow
     Create(hDataGui.Type,hDataGui.idx);
 end
-
-
-% 
-% params=Config;
-% params.find_molecules=1;
-% params.find_beads=1;
-% if strcmp(Type,'Molecule')
-%     Object=Molecule(idx);
-%     params.find_molecules=0;
-%     if isempty(Object.Tags)
-%         Object.Tags=uint8(zeros(size(Object.Results,1),1));
-%     end
-% %     return %not implemented yet
-% else
-%     idx = min([idx length(Filament)]);
-%     idx = max([1 idx]);
-%     Object=Filament(idx);
-%     if isempty(Object.Tags)
-%         Object.Tags=uint8(zeros(size(Object.Results,1),2));
-%     end
-%     params.find_beads=0;
-% end
-% if Object.Drift
-%     warndlg('Not possible with Drift corrected tracks');
-%     return
-% end
-% if fitspecific==0
-%     missFrames=setdiff(Object.Results(1,1):Object.Results(end,1),Object.Results(:,1));
-% else
-%     missFrames=str2double(inputdlg('Enter frame to be tracked:'));
-%     if ~isempty(find(Object.Results(:,1)==missFrames));
-%         warndlg('Frame already tracked');
-%         return
-%     end
-% end
-% if length(Stack)==1
-%     params=setparams(params, 1);
-%     StackC=Stack{1};
-% else
-%     params=setparams(params, Object.Channel);
-%     StackC=Stack{Object.Channel};
-% end
-% params.fitmissing=1;
-% h=progressdlg('String','Fitting missing points','Min',0,'Max',length(missFrames),'Parent',hDataGui.fig,'cancel','on');
-% i=1;
-% nottracked=[];
-% for n=missFrames
-%     tmp = abs(Object.Results(:,1)-n);
-%     [framediff, nearestid] = min(tmp); %index of closest value
-%     if framediff==0
-%         return
-%     end
-%     if fitspecific==0 
-%         if Object.Results(nearestid,1)>n&&nearestid~=1
-%             useid=nearestid-1;
-%         else
-%             useid=nearestid;
-%         end
-%     else
-%         useframe=str2double(inputdlg('Enter frame to be taken as reference:','Reference Frame', 1, {num2str(Object.Results(nearestid,1), '%i')}));
-%         useid=find(Object.Results(:,1)==useframe);
-%     end
-%     if hDataGui.fitagain==1
-%         useid=nearestid+1;
-%     end
-%     [y,x] = size(StackC(:,:,1));
-%     bw_region = zeros(y,x);
-%     if strcmp(Type,'Molecule')&&fitspecific==0
-%         X = round(interp1([Object.Results(useid,1) Object.Results(useid+1,1)],[Object.Results(useid,3) Object.Results(useid+1,3)],n)/params.scale);
-%         Y = round(interp1([Object.Results(useid,1) Object.Results(useid+1,1)],[Object.Results(useid,4) Object.Results(useid+1,4)],n)/params.scale);
-%     elseif strcmp(Type,'Molecule')&&fitspecific==1
-%         X = round(Object.Results(useid,3)/params.scale);
-%         Y = round(Object.Results(useid,4)/params.scale);
-%     else
-%         X = round(Object.Data{useid}(:,1)/params.scale);
-%         Y = round(Object.Data{useid}(:,2)/params.scale);
-%     end
-%     k = X<1 | X>x | Y<1 | Y>y;
-%     X(k) = [];
-%     Y(k) = [];
-%     idx = Y + (X - 1).*y;
-%     bw_region(idx) = 1;
-%     SE = strel('disk', ceil(params.fwhm_estimate/2/params.scale) , 4);
-%     bw_region(:,:) = imdilate(bw_region(:,:),SE);
-%     params.bw_region = bw_region;
-%     newobj=ScanImage(StackC(:,:,n),params,n);
-%     if ~isempty(newobj)
-%         l_id=zeros(length(newobj.data),1);
-%         for m=1:length(newobj.data)
-%             [~,l_id(m)]=size(newobj.data{m});
-%         end
-%         [maxl, id] = max(l_id);
-%         if (maxl>5&&strcmp(Type,'Filament'))||strcmp(Type,'Molecule')
-%             [Object]=fInsertObj(Object, newobj, id, n);
-%         else
-%             nottracked=[nottracked n];
-%         end
-%     else
-%         nottracked=[nottracked n];
-%     end
-%     if isempty(h)
-%         break
-%     end
-%     h=progressdlg(i);
-%     i=i+1;
-% end
-% Check = false(size(Object.Results,1),1); 
-% tocheck=[setxor(nottracked, missFrames)'; alreadytracked];
-% for i=1:length(tocheck)
-%     Check(find(Object.Results(:,1)==tocheck(i)))=1;
-% end
-% Object.Results(:,5)=fDis(Object.Results(:,3:4));
-% setappdata(hDataGui.fig,'Check',Check);
-% setappdata(hDataGui.fig,'Object',Object);
-% if ~isempty(nottracked)
-%     button = questdlg(['not tracked:' num2str(nottracked) '. Approach from other side?']);
-%     if strcmp(button, 'Yes')
-%         hDataGui.fitagain=1;
-%         FitMissingPoints(getappdata(0,'hDataGui'), fitspecific, tocheck);
-%         hDataGui.fitagain=0;
-%     end
-% end
-% if strcmp(hDataGui.Type,'Molecule')==1
-%     Molecule(hDataGui.idx)=Object;
-% else
-%     Filament(hDataGui.idx)=Object;
-% end

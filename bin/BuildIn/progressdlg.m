@@ -98,7 +98,11 @@ function progFigure = progressdlg(varargin)
 
 
     % keep variables for next call of progressdlg 
+    global suppress_progressdlg %JochenK
     persistent p min max cancel progHandles showtime starttime;
+    if suppress_progressdlg
+        return
+    end
     message = 'Progress';
     value = 0;
     text = [];

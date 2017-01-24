@@ -181,12 +181,11 @@ global KymoTrackFil;
 global BackUp;
 Molecule = BackUp.Molecule;
 Filament = BackUp.Filament;
-h = [KymoTrackFil.PlotHandles KymoTrackMol.PlotHandles]; 
-delete(h(ishandle(h)));                                 
+fRightPanel('DeleteHandles');                             
 KymoTrackMol = BackUp.KymoTrackMol;
 KymoTrackFil = BackUp.KymoTrackFil;
-fRightPanel('UpdateList',hMainGui.RightPanel.pData.MolList,Molecule,hMainGui.RightPanel.pData.sMolList,hMainGui.Menu.ctListMol);
-fRightPanel('UpdateList',hMainGui.RightPanel.pData.FilList,Filament,hMainGui.RightPanel.pData.sFilList,hMainGui.Menu.ctListFil);
+fRightPanel('UpdateList',hMainGui.RightPanel.pData,Molecule,hMainGui.Menu.ctListMol,hMainGui.Values.MaxIdx);%JochenK
+fRightPanel('UpdateList',hMainGui.RightPanel.pData,Filament,hMainGui.Menu.ctListFil,hMainGui.Values.MaxIdx);%JochenK
 set(hMainGui.Menu.mUndo,'Enable','off');
 fShared('UpdateMenu',hMainGui);
 fShared('ReturnFocus');
@@ -257,8 +256,8 @@ else
     set(hMainGui.Menu.mFindNext,'Enable','off');
 end
 setappdata(0,'hMainGui',hMainGui);
-fRightPanel('UpdateList',hMainGui.RightPanel.pData.MolList,Molecule,hMainGui.RightPanel.pData.sMolList,hMainGui.Menu.ctListMol);
-fRightPanel('UpdateList',hMainGui.RightPanel.pData.FilList,Filament,hMainGui.RightPanel.pData.sFilList,hMainGui.Menu.ctListFil);
+fRightPanel('UpdateList',hMainGui.RightPanel.pData,Molecule,hMainGui.Menu.ctListMol,hMainGui.Values.MaxIdx);%JochenK
+fRightPanel('UpdateList',hMainGui.RightPanel.pData,Filament,hMainGui.Menu.ctListFil,hMainGui.Values.MaxIdx);%JochenK
 
 function FindNext(hMainGui)
 global Molecule;
@@ -357,8 +356,8 @@ if ~isempty(answer)
             end
         end
     end            
-    fRightPanel('UpdateList',hMainGui.RightPanel.pData.MolList,Molecule,hMainGui.RightPanel.pData.sMolList,hMainGui.Menu.ctListMol);
-    fRightPanel('UpdateList',hMainGui.RightPanel.pData.FilList,Filament,hMainGui.RightPanel.pData.sFilList,hMainGui.Menu.ctListFil);
+    fRightPanel('UpdateList',hMainGui.RightPanel.pData,Molecule,hMainGui.Menu.ctListMol,hMainGui.Values.MaxIdx);%JochenK
+    fRightPanel('UpdateList',hMainGui.RightPanel.pData,Filament,hMainGui.Menu.ctListFil,hMainGui.Values.MaxIdx);%JochenK
     setappdata(0,'hMainGui',hMainGui);
     fShow('Image');
 end
@@ -452,7 +451,7 @@ if ~isempty(NumDriftMol)
     for n = index{p}
         Molecule(n)=fShared('SelectOne',Molecule(n),KymoTrackMol,n,1);
     end
-    fRightPanel('UpdateList',hMainGui.RightPanel.pData.MolList,Molecule,hMainGui.RightPanel.pData.sMolList,hMainGui.Menu.ctListMol);
+    fRightPanel('UpdateList',hMainGui.RightPanel.pData,Molecule,hMainGui.Menu.ctListMol,hMainGui.Values.MaxIdx);%JochenK
     setappdata(0,'hMainGui',hMainGui);
 end
 
@@ -592,7 +591,7 @@ if ~isempty(tObj)
             end
         end
     end
-    fRightPanel('UpdateList',hMainGui.RightPanel.pData.MolList,Molecule,hMainGui.RightPanel.pData.sMolList,hMainGui.Menu.ctListMol);
+    fRightPanel('UpdateList',hMainGui.RightPanel.pData,Molecule,hMainGui.Menu.ctListMol,hMainGui.Values.MaxIdx);%JochenK
     fRightPanel('UpdateKymoTracks',hMainGui);
     fShow('Image');
     fShow('Tracks');

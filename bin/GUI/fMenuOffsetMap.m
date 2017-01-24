@@ -38,6 +38,7 @@ fShow('Tracks');
 function CreateOffsetMap
 global Molecule;
 global Filament;
+persistent IgnoreWarning
 hMainGui = getappdata(0,'hMainGui');
 set(hMainGui.Menu.mAlignChannels,'Checked','off');
 Molecule = fTransformCoord(Molecule,1,0);
@@ -56,6 +57,12 @@ for n = 1:max(Channel)
     if n>1
         Selected = [Molecule.Selected];
         if any(Selected==1)
+            if isempty(IgnoreWarning)
+                IgnoreWarning = questdlg('You have molecules selected. Unless you know what you are doing, it is best to not have any molecules selected when creating an offset map. Continue (Choice will be remembered)?', 'Warning', 'Yes','No','No' );
+            end
+            if strcmp(IgnoreWarning, 'No')
+                return
+            end
             hpoints = zeros(size(points{n}));
             k_select = find(Selected==1);
             idx1 = find(Channel(k_select)==1,1,'first');
@@ -139,7 +146,7 @@ hMainGui = getappdata(0,'hMainGui');
 set(hMainGui.Menu.mAlignChannels,'Checked','off');
 Molecule = fTransformCoord(Molecule,1,0);
 Filament = fTransformCoord(Filament,1,1);
-setappdata(hMainGui.fig,'OffsetMap',[]);
+setappdata(hMainGui.fig,'OffsetMap',[1 0 0;0 1 0;0 0 1]);
 fShared('UpdateMenu',hMainGui);        
 fShow('Image');
 fShow('Tracks');

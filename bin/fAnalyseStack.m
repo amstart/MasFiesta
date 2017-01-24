@@ -100,11 +100,14 @@ elseif ~isempty(strfind(Config.StackName,'.nd2'))
 else
     sName = Config.StackName;
 end
+filename = [sName '(' datestr(clock,'yyyymmddTHHMMSSFFF') ').mat']; %JochenK
 try
-    fData=[Config.Directory sName '(' datestr(clock,'yyyymmddTHHMMSSFFF') ').mat'];
+    PathName=Config.Directory;
+    fData=[PathName filename];
     save(fData,'Config');
 catch
-    fData=[DirCurrent sName '(' datestr(clock,'yyyymmddTHHMMSSFFF') ').mat'];
+    PathName=DirCurrent;
+    fData=[PathName filename];
     fMsgDlg(['Directory not accessible - File saved in FIESTA directory: ' DirCurrent],'warn');
     save(fData,'Config');
 end
@@ -209,7 +212,9 @@ disp(error_events)
 try
     save(fData,'-append','Objects');
 catch
-    fData=[DirCurrent sName '(' datestr(clock,'yyyymmddTHHMMSSFFF') ').mat'];
+    filename = [sName '(' datestr(clock,'yyyymmddTHHMMSSFFF') ').mat']; %JochenK
+    PathName=DirCurrent;
+    fData=[PathName filename];
     fMsgDlg(['Directory not accessible - File saved in FIESTA directory: ' DirCurrent],'warn');
     save(fData,'Objects','Config');
 end
@@ -229,7 +234,7 @@ if ~isempty(Objects) && Config.ConnectMol.NumberVerification>0 && Config.Connect
     Filament=fDefStructure(Filament,'Filament');
     nMolTrack=length(MolTrack);
 
-    nChannel = Config.TformChannel{1}(3,3);
+    nChannel = Config.TrackChannel;
     if length(Config.TformChannel)==1
         T = Config.TformChannel{1};
     else
@@ -351,9 +356,15 @@ if ~isempty(Objects) && Config.ConnectMol.NumberVerification>0 && Config.Connect
     try
         save(fData,'-append','Molecule','Filament');
     catch ME
-        fData=[DirCurrent sName '(' datestr(clock,'yyyymmddTHHMMSSFFF') ').mat'];
+        filename = [sName '(' datestr(clock,'yyyymmddTHHMMSSFFF') ').mat']; %JochenK
+        PathName=DirCurrent;
+        fData=[PathName filename];
         fMsgDlg(['Directory not accessible - File saved in FIESTA directory: ' DirCurrent],'warn');
         save(fData,'Molecule','Filament','Objects','Config');
+    end
+    try % JochenK
+        fMenuData('LoadTracks', filename, PathName);
+    catch
     end
     clear Molecule Filament Objects Config;
 end
