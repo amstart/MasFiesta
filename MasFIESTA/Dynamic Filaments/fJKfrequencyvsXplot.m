@@ -5,6 +5,8 @@ N = histcounts(ploteventends, edges);
 plotynew=N./sumy;
 plotynew(sumy==0) = 0;
 bar(edgesmid, plotynew, 'r');
+fError = sqrt(N)./sumy; %see https://www.bcube-dresden.de/wiki/Error_bars
+errorbar(edgesmid, plotynew, fError, '.');
 if any(plotynew==0)
     dummyvec = double(plotynew==0|isnan(plotynew));
     if max(plotynew) > 0

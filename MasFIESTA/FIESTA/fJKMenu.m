@@ -31,7 +31,7 @@ function fJKMenu
             setappdata(0,'hMainGui',hMainGui);
             return
         end
-        fJKMenuDiag.fig = dialog('Name','MoreFIESTA: Select which modules you want to use','toolbar','none','menu','none');
+        fJKMenuDiag.fig = dialog('Name','MásFIESTA: Select which modules you want to use','toolbar','none','menu','none');
         fJKMenuDiag.tMenu = uicontrol('Parent',fJKMenuDiag.fig,'Units','normalized','Position',[0.1 0.75 0.9 0.2],'Style','text', 'FontSize', 12,'HorizontalAlignment','left',...
             'String','This extension provides different modules which you can be used independently from each other. Full changelog can be found in the "Documentation" folder. For questions, contact:', 'TooltipString', ...
             ['There is some added utility at various points in the code which cannot be deactivated (commented with ''JochenK'').']); 

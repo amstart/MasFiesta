@@ -77,7 +77,7 @@ for n = 1:length(Objects)
                 segmentstart=m;
                 segmenti=segmenti+1;
             end
-            if autotags(m+1)~=tagnum&&d(segmentstart)>Options.eDisregard.val %tagged track creation
+            if autotags(m+1)~=tagnum&&d(segmentstart) %tagged track creation
                 autotags(m)=tagnum+0.9;
                 segtagauto(segmenti, 1:4)=[segmentstart m autotags(m) d(m)];
                 segmentstart=m+1;
@@ -89,7 +89,7 @@ for n = 1:length(Objects)
     segtagauto=segtagauto(~isnan(segtagauto(:,1)), :); %remove unused rows
     [segtagauto, autotags] = find_borders_and_pauses(segtagauto, autotags, v, t, d, Options);
     velocity=nan(size(segtagauto,1),1);
-    istype=false(size(segtagauto,1),1);
+    is_tagged=false(size(segtagauto,1),1);
     segtagauto=segtagauto(segtagauto(:,1)<segtagauto(:,2),:); %remove nonsense tracks
     for m=2:size(segtagauto,1)
         if segtagauto(m,1)==segtagauto(m-1,1)||segtagauto(m,2)==segtagauto(m-1,2)
@@ -101,6 +101,9 @@ for n = 1:length(Objects)
         starti = segtagauto(m,1);
         endi = segtagauto(m,2);
         if floor(segtagauto(m,3))~=tagnum  %remove points too close to seed (plus ends only)
+            if d(endi)<Options.eRescueCutoff.val %remove growing tracks ending below rescue threshold
+                continue
+            end
             if min(d(starti:endi))<Options.eDisregard.val
                 for id=starti:endi
                     if d(id)<Options.eDisregard.val
@@ -110,6 +113,10 @@ for n = 1:length(Objects)
                 Objects(n).Disregard = Objects(n).Disregard + t(lastid) - t(starti);
                 starti = lastid;
                 segtagauto(m,1) = lastid;
+            end
+        else %remove shrinking tracks starting below rescue threshold
+            if d(starti)<Options.eRescueCutoff.val
+                continue
             end
         end
         if starti==endi
@@ -135,12 +142,12 @@ for n = 1:length(Objects)
         end
         Tracks(track_id).end_first_subsegment = 0;
         Tracks(track_id).start_last_subsegment = 0;
-        istype(m)=floor(segtagauto(m,3))==tagnum;
+        is_tagged(m)=floor(segtagauto(m,3))==tagnum;
         [~, Tracks(track_id).minindex] = min(segvel);
-        if Options.eSubStart.val && istype(m)
+        if Options.eSubStart.val && is_tagged(m)
             Tracks(track_id).end_first_subsegment = FindSubsegments(segvel, 1, Options.eSubStart.val, Tracks(track_id).minindex);
         end
-        if Options.eSubEnd.val && istype(m)
+        if Options.eSubEnd.val && is_tagged(m)
             Tracks(track_id).start_last_subsegment = FindSubsegments(segvel, -1, Options.eSubEnd.val, Tracks(track_id).minindex);
         end
         Tracks(track_id).DistanceEventEnd=segd(end);
@@ -158,8 +165,8 @@ for n = 1:length(Objects)
         track_id=track_id+1;
     end
     Objects(n).SegTagAuto=segtagauto;
-    Objects(n).Velocity(1)=nanmean(velocity(~istype));
-    Objects(n).Velocity(2)=nanmean(velocity(istype));
+    Objects(n).Velocity(1)=nanmean(velocity(~is_tagged));
+    Objects(n).Velocity(2)=nanmean(velocity(is_tagged));
     progressdlg(n);
 end
 
