@@ -552,17 +552,17 @@ Mode=get(gcbo,'UserData');
 set(hMainGui.MidPanel.pNoData,'Visible','on')
 set(hMainGui.MidPanel.tNoData,'String','Loading Data...','Visible','on');
 set(hMainGui.MidPanel.pView,'Visible','off');
-if strcmp(Mode,'local')
-    LoadDir = fShared('GetLoadDir');
-else
-    DirServer = fShared('CheckServer');
-    if ~isempty(DirServer)
-        LoadDir = [DirServer 'Data' filesep];
-    else
-        return;
-    end
-end
 if nargin<2
+    if strcmp(Mode,'local')
+        LoadDir = fShared('GetLoadDir');
+    else
+        DirServer = fShared('CheckServer');
+        if ~isempty(DirServer)
+            LoadDir = [DirServer 'Data' filesep];
+        else
+            return;
+        end
+    end
     [FileName, PathName] = uigetfile({'*.mat','FIESTA Data(*.mat)'},'Load FIESTA Tracks',LoadDir,'MultiSelect','on');
     if ~iscell(FileName)
         FileName={FileName};
@@ -650,6 +650,13 @@ fJKLoadLink(FileName, PathName, @LoadTracks)
 function SaveLink()
 global Molecule;
 global Filament;
+persistent SaveWarning
+if isempty(SaveWarning)
+    CreateStruct.WindowStyle = 'modal';
+    CreateStruct.Interpreter = 'None';
+    questdlg('This will not save your actual data but just a shortcut of your currently open files (this won''t show again in this session)!', 'Careful', 'Ok', 'Don''t worry');
+    SaveWarning = 1;
+end
 LoadedFromFile = cell(length(Molecule) + length(Filament),1);
 LoadedFromPath = cell(length(Molecule) + length(Filament),1);
 for i = 1:length(Molecule)

@@ -70,10 +70,10 @@ hMenu.mClearObjects = uimenu('Parent',hMenu.mData,'Callback','fMenuData(''ClearO
                            'Label','Clear Objects','Tag','mClearObjects');
                        
 hMenu.mLoadLink = uimenu('Parent',hMenu.mData,'Callback','fMenuData(''LoadLink'');','Enable','on',...
-                           'Label','Load Link','Tag','mLoadLink','Separator','on');
+                           'Label','Load Shortcut','Tag','mLoadLink','Separator','on');
                        
 hMenu.mSaveLink = uimenu('Parent',hMenu.mData,'Callback','fMenuData(''SaveLink'');','Enable','on',...
-                           'Label','Save Link','Tag','mSaveLink'); 
+                           'Label','Generate Shortcut','Tag','mSaveLink'); 
                        
 hMenu.mExit = uimenu('Parent',hMenu.mData,'Callback','close all;',...
                      'Label','Exit','Tag','mExit','Accelerator','E','Separator','on');

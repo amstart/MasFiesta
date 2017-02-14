@@ -668,7 +668,7 @@ if ~strcmp(get(hMainGui.fig,'Pointer'),'watch')
                     elseif ~isempty(strfind(hMainGui.CursorMode,'Scan'))
                         fShared('DeleteScan',hMainGui);
                         hMainGui=getappdata(0,'hMainGui');
-                        set(get(hMainGui.RightPanel.pTools.pKymoGraph,'Children'),'Enable','off');         
+                        set(hMainGui.RightPanel.pTools.bShowKymoGraph,'Enable','off');         
                         hMainGui.Scan(1).X=cp(1);
                         hMainGui.Scan(1).Y=cp(2); 
                         hMainGui.Plots.Scan=line(cp(1),cp(2),'Color','white','LineStyle','-.','Tag','plotScan');
@@ -1538,8 +1538,8 @@ function hMainGui=DeleteTrackInfo(hMainGui)
 if ~isempty(hMainGui.Plots.TrackInfo)
     try
         delete(hMainGui.Plots.TrackInfo);
-    catch
-        delete(findobj(hMainGui.MidPanel.aView,'Tag','TrackInfo'));       
+        delete(findobj(hMainGui.MidPanel.aView,'Tag','TrackInfo'));  
+    catch %JochenK: Sometimes the TrackInfo doesnt get deleted properly
     end
     hMainGui.Plots.TrackInfo=[];
 end

@@ -776,9 +776,11 @@ hMainGui.Scan.uy=uy;
 hMainGui.Scan.InterpD=d;
 hMainGui.CursorMode='Normal';
 set(hMainGui.RightPanel.pTools.bLineScanExport,'Enable','on');
-set(get(hMainGui.RightPanel.pTools.pKymoGraph,'Children'),'Enable','on');
-if strcmp(get(hMainGui.Menu.mCorrectStack,'Checked'),'on')
+set(hMainGui.RightPanel.pTools.bShowKymoGraph,'Enable','on');
+if strcmp(get(hMainGui.Menu.mCorrectStack,'Checked'),'on') || isempty(getappdata(hMainGui.fig,'Drift')) %JochenK
     set(hMainGui.RightPanel.pTools.cKymoDrift,'Enable','off','Value',0);
+else
+    set(hMainGui.RightPanel.pTools.cKymoDrift,'Enable','on');
 end
 setappdata(0,'hMainGui',hMainGui);
 UpdateLineScan(hMainGui);
@@ -824,7 +826,7 @@ if ~isempty(plotScan)
         delete(plotScan);
         cla(hMainGui.RightPanel.pTools.aLineScan,'reset');
         set(hMainGui.RightPanel.pTools.bLineScanExport,'Enable','off');
-        set(get(hMainGui.RightPanel.pTools.pKymoGraph,'Children'),'Enable','off');
+        set(hMainGui.RightPanel.pTools.bShowKymoGraph,'Enable','off');
     end
     fToolBar('NormImage',hMainGui);
 else
@@ -1127,7 +1129,7 @@ for i=1:ListLength
     fgcolor=[1 1 1];
     enableText='inactive';    
     enable='on';    
-    bgcolor=get(slider,'Background');
+    bgcolor=[1.0000    0.9294    0.6275];
     try
         switch(List(i+ListBegin).Selected)
             case 2
@@ -1138,11 +1140,11 @@ for i=1:ListLength
                 fgcolor=[0 0 0];
                 ResultsLength = size(List(i+ListBegin).Results,1);
                 if List(i+ListBegin).Results(end,1)==ResultsLength %JochenK
-                    bgcolor=[0.8000 1 1];
+                    bgcolor=get(slider,'Background');
                     if nargin>3
                         if length(varargin{1})>=List(i+ListBegin).Channel+1
                             if varargin{1}(List(i+ListBegin).Channel+1)==ResultsLength
-                                bgcolor=[0.8000 1 0.80];
+                                bgcolor=[0.6784    0.8667    0.5569];
                             end
                         end
                     end

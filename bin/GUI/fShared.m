@@ -630,7 +630,7 @@ function DeleteScan(hMainGui)
 %hMainGui=getappdata(0,'hMainGui');
 if ~isempty(hMainGui.Scan)
     fRightPanel('DeleteScan',hMainGui);
-    set(get(hMainGui.RightPanel.pTools.pKymoGraph,'Children'),'Enable','off');                                                                             
+    set(hMainGui.RightPanel.pTools.bShowKymoGraph,'Enable','off');                                                                             
     set(hMainGui.RightPanel.pTools.aLineScan,'Visible','off');        
     set(hMainGui.RightPanel.pTools.pLineScan,'Visible','off');         
     set(hMainGui.MidPanel.aKymoGraph,'Visible','off');    
