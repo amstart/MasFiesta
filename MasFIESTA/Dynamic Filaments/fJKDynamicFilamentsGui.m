@@ -792,7 +792,7 @@ if FileName~=0
     if ~isfield(AllObjects, 'Filament')
         fJKLoadLink(FileName, PathName, @Load)
         try
-            LoadIntensityPerMAP('intensities.csv', PathName)
+            LoadIntensityPerMAP('intensities.txt', PathName)
         catch
             warning('Could not load intensity per MAP file');
         end
@@ -949,13 +949,14 @@ setappdata(0,'hDynamicFilamentsGui',hDynamicFilamentsGui);
 SetTable()
 
 function LoadIntensityPerMAP(FileName, PathName)
+%reads a table and matches values and associated objects
 hDynamicFilamentsGui = getappdata(0,'hDynamicFilamentsGui');
 Objects = getappdata(hDynamicFilamentsGui.fig,'Objects');
 LoadedFromPath = {Objects.LoadedFromPath};
-table = readtable([PathName FileName], 'Format', '%s%s%d', 'Delimiter',';');
+table = readtable([PathName FileName], 'Format', '%s%s%d', 'Delimiter','\t');
 for i = 1:length(table.Value)
     if strcmp(table.Moviefolder(i),'all')
-        changeobjects = cellfun(@(x) ~isempty(strfind(x, table.Folder(i))), LoadedFromPath);
+        changeobjects = cellfun(@(x) ~isempty(strfind(x, table.Folder{i})), LoadedFromPath);
         for id = find(changeobjects==1)
             Objects(id).Custom.IntensityPerMAP = double(table.Value(i));
         end
