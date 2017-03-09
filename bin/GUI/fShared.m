@@ -497,11 +497,12 @@ else
     set(hMainGui.RightPanel.pData.cIgnoreFil,'Enable','on');
     set(hMainGui.RightPanel.pData.cShowWholeFil,'Enable','on');
 end
-
 if isempty(Drift)
     set(hMainGui.Menu.mSaveDrift,'Enable','off');
+    set(hMainGui.RightPanel.pTools.cKymoDrift,'Enable','off','Value',0);
 else
     set(hMainGui.Menu.mSaveDrift,'Enable','on');
+    set(hMainGui.RightPanel.pTools.cKymoDrift,'Enable','on');
 end
 enable='off';
 if ~isempty(Objects)
