@@ -53,20 +53,20 @@ else
 end
 
 %compare local version with online version
-if ~strcmp( local_version , online_version ) && ~isempty(online_version)
-    button = questdlg({'There is FIESTA update available!','',['Do you want to update to version ' online_version ' now?']},'FIESTA Update','Yes','No','Yes');
-    if strcmp(button,'Yes')
-        [~,s] = urlread('http://www.bcube-dresden.de/fiesta/uploads/');
-        if s
-            version='latest';
-        else
-            t=warndlg({'Could not update FIESTA!','','Make sure that your internet is working.','','Support: ruhnow@bcube-dresden.de'},'FIESTA Warning','modal');
-            uiwait(t);  
-        end
-    else
-        version='';
-    end        
-end
+% if ~strcmp( local_version , online_version ) && ~isempty(online_version)
+%     button = questdlg({'There is FIESTA update available!','',['Do you want to update to version ' online_version ' now?']},'FIESTA Update','Yes','No','Yes');
+%     if strcmp(button,'Yes')
+%         [~,s] = urlread('http://www.bcube-dresden.de/fiesta/uploads/');
+%         if s
+%             version='latest';
+%         else
+%             t=warndlg({'Could not update FIESTA!','','Make sure that your internet is working.','','Support: ruhnow@bcube-dresden.de'},'FIESTA Warning','modal');
+%             uiwait(t);  
+%         end
+%     else
+%         version='';
+%     end        
+% end
 
 %check if FIESTA is the Library folder on Win and MacOS is available and correct
 if isempty(version)&&isdeployed

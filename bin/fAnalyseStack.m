@@ -103,6 +103,9 @@ end
 filename = [sName '(' datestr(clock,'yyyymmddTHHMMSSFFF') ').mat']; %JochenK
 try
     PathName=Config.Directory;
+    movie=strsplit(sName, '_');
+    PathName = [PathName movie{1} filesep];
+    mkdir(PathName)
     fData=[PathName filename];
     save(fData,'Config');
 catch

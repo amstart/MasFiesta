@@ -181,7 +181,7 @@ if ~isnan(value)
 end
 setappdata(0,'hMainGui',hMainGui);
 Update(hMainGui);
-
+    
 function eScale(hMainGui)
 global Config;
 h=gcbo;

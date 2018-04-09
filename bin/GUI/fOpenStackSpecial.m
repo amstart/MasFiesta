@@ -219,7 +219,7 @@ if strcmp(output.Mode,'rSeparateFiles')
         end
     end
 elseif strcmp(output.Mode,'rSequentialSplitting')
-    [FileName,PathName] = uigetfile({'*.stk;*.zvi;*.tif;*.tiff','Image Stacks (*.stk,*.nd2,*.tif,*.tiff)'},'Select the Stack',FiestaDir.Stack); %open dialog for *.stk files
+    [FileName,PathName] = uigetfile({'*.stk;*.zvi;*.nd2;*.tif;*.tiff','Image Stacks (*.stk,*.zvi,*.nd2,*.tif,*.tiff)'},'Select the Stack',FiestaDir.Stack); %open dialog for *.stk files
     if PathName~=0
         FiestaDir.Stack=PathName;
         output.Data = {FileName,PathName,get(hOpenSpecial.pSequential.mNumberChannels,'Value')+1,...

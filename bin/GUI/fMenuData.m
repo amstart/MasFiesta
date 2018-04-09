@@ -40,6 +40,14 @@ catch ME
     fMsgDlg({'FIESTA detected a problem during analysis','Error message:','',getReport(ME,'extended','hyperlinks','off')},'error');    
 end
 
+function OpenMetaData()
+OpenFile = [tempdir 'FIESTA_metadata.xml'];
+if isunix
+    system(['open ' OpenFile]);
+else
+    winopen(OpenFile);
+end
+
 function OpenStack(hMainGui, reopen)
 global Stack;
 global TimeInfo;
@@ -58,6 +66,25 @@ else
     PathName = Config.Directory{1};
 end
 if PathName~=0
+    %try
+        reader = bfGetReader([PathName FileName]);
+    	OMEdata = reader.getMetadataStore();
+        seriesMetadata = reader.getSeriesMetadata();
+        globalMetadata = reader.getGlobalMetadata();
+        javaMethod('merge', 'loci.formats.MetadataTools', ...
+               globalMetadata, seriesMetadata, 'Global ');
+        tmp = char(seriesMetadata);
+        tmp = strsplit(tmp, ',');
+        metaforall = cellfun(@(s) isempty(strfind(s, '#')), tmp);
+        tmp = tmp(metaforall);
+        Config.meta.exposure = tmp(cellfun(@(s) ~isempty(strfind(s, 'Global Exposure=')), tmp));
+        Config.meta.laserpower = tmp(cellfun(@(s) ~isempty(strfind(s, 'Global m_dMultiLaserLinePower')), tmp));
+        Config.meta.laserstatus = tmp(cellfun(@(s) ~isempty(strfind(s, 'Global m_bMultiLaser_LineUsedLineUsed')), tmp));
+        fid = fopen([tempdir 'FIESTA_OME.xml'], 'wt','n', 'UTF-8');
+        fprintf(fid, '%s', OMEdata);
+        fclose(fid);
+    %catch
+    %end
     Time = NaN;
     PixSize = [];
     if strcmpi(FileName(end-3:end),'.stk')
@@ -144,7 +171,7 @@ global TimeInfo;
 global Config;
 global Molecule;
 global Filament;
-global FiestaDir
+global FiestaDir;
 if isfield(Config, 'Mode') && strcmp(Config.Mode, 'Single') && gcbo ~= hMainGui.Menu.mOpenStackSpecial %JochenK
     OpenStack(hMainGui, 1);
     return
@@ -199,18 +226,37 @@ if ~isempty(fOpenStruct)
             Config.Directory{n}=PathName;
             Config.StackReadOptions = [];
             nFrames(n)=size(Stack{n},3);
+            if n>1
+                ratio = length(Stack{n-1})/length(Stack{n});
+                if ratio ~= 1
+                    Stack{n} = imresize(Stack{n}, ratio);
+                end
+            end
             if (isempty(TimeInfo{n}) && nFrames>1) || length(unique(TimeInfo{n}))<length(TimeInfo{n}) 
-                Config.Time(n) = str2double(fInputDlg('Creation time corrupt - Enter plane time difference in ms:','100'));  
-                if ~isnan(Config.Time(n))
-                    TimeInfo{n}=(0:nFrames-1)*Config.Time(n);
-                end          
+                if nFrames(n) == 2
+                    splitStack = questdlg('Only two frames here. Split into two channels? This will only work if you load this channel last.');
+                    if strcmp(splitStack, 'Yes')
+                        Stack{n+1} = Stack{n}(:,:,2);
+                        Stack{n} = Stack{n}(:,:,1);
+                        TimeInfo{n} = 0;
+                        TimeInfo{n+1} = 0;
+                        TformChannel{n+1} = [1 0 0; 0 1 0; 0 0 n+1];
+                        Config.Time(n:n+1) = NaN;
+                        nFrames(n:n+1) = 1;
+                    end
+                end
+                if ~strcmp(splitStack, 'Yes')
+                    Config.Time(n) = str2double(fInputDlg('Creation time corrupt - Enter plane time difference in ms:','100'));  
+                    if ~isnan(Config.Time(n))
+                        TimeInfo{n}=(0:nFrames-1)*Config.Time(n);
+                    end  
+                end
             else
                 Config.Time(n) = NaN;
                 if nFrames(n)==1
                     TimeInfo{n} = 0;
                 end
             end
-            nFrames(n) = size(Stack{n},3);
             if strcmpi(FileName(end-3:end),'.stk')
                 filetype{n} = 'MetaMorph';
             elseif strcmpi(FileName(end-3:end),'.nd2')
