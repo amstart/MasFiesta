@@ -62,27 +62,29 @@ set(hMainGui.MidPanel.pView,'Visible','off');
 if reopen == 0  %JochenK
     [FileName,PathName] = uigetfile({'*.stk;*.nd2;*.zvi;*.tif;*.tiff','Image Stacks (*.stk,*.nd2,*.zvi,*.tif,*.tiff)'},'Select the Stack',FiestaDir.Stack); %open dialog for *.stk files
 else
-    FileName = Config.StackName{1};
+    names = Config.StackName;
+    names = names(~cellfun(@(x) strcmp(x,'~'), names));
+    FileName = names{1};
     PathName = Config.Directory{1};
 end
 if PathName~=0
     %try
-        reader = bfGetReader([PathName FileName]);
-    	OMEdata = reader.getMetadataStore();
-        seriesMetadata = reader.getSeriesMetadata();
-        globalMetadata = reader.getGlobalMetadata();
-        javaMethod('merge', 'loci.formats.MetadataTools', ...
-               globalMetadata, seriesMetadata, 'Global ');
-        tmp = char(seriesMetadata);
-        tmp = strsplit(tmp, ',');
-        metaforall = cellfun(@(s) isempty(strfind(s, '#')), tmp);
-        tmp = tmp(metaforall);
-        Config.meta.exposure = tmp(cellfun(@(s) ~isempty(strfind(s, 'Global Exposure=')), tmp));
-        Config.meta.laserpower = tmp(cellfun(@(s) ~isempty(strfind(s, 'Global m_dMultiLaserLinePower')), tmp));
-        Config.meta.laserstatus = tmp(cellfun(@(s) ~isempty(strfind(s, 'Global m_bMultiLaser_LineUsedLineUsed')), tmp));
-        fid = fopen([tempdir 'FIESTA_OME.xml'], 'wt','n', 'UTF-8');
-        fprintf(fid, '%s', OMEdata);
-        fclose(fid);
+%         reader = bfGetReader([PathName FileName]);
+%     	OMEdata = reader.getMetadataStore();
+%         seriesMetadata = reader.getSeriesMetadata();
+%         globalMetadata = reader.getGlobalMetadata();
+%         javaMethod('merge', 'loci.formats.MetadataTools', ...
+%                globalMetadata, seriesMetadata, 'Global ');
+%         tmp = char(seriesMetadata);
+%         tmp = strsplit(tmp, ',');
+%         metaforall = cellfun(@(s) isempty(strfind(s, '#')), tmp);
+%         tmp = tmp(metaforall);
+%         Config.meta.exposure = tmp(cellfun(@(s) ~isempty(strfind(s, 'Global Exposure=')), tmp));
+%         Config.meta.laserpower = tmp(cellfun(@(s) ~isempty(strfind(s, 'Global m_dMultiLaserLinePower')), tmp));
+%         Config.meta.laserstatus = tmp(cellfun(@(s) ~isempty(strfind(s, 'Global m_bMultiLaser_LineUsedLineUsed')), tmp));
+%         fid = fopen([tempdir 'FIESTA_OME.xml'], 'wt','n', 'UTF-8');
+%         fprintf(fid, '%s', OMEdata);
+%         fclose(fid);
     %catch
     %end
     Time = NaN;
@@ -148,8 +150,7 @@ if PathName~=0
         hMainGui.Values.FrameIdx = [1 1];
         hMainGui.Values.MaxIdx = [1 size(Stack{1},3)];
         hMainGui.Values.PostSpecial = [];
-        set(hMainGui.Menu.mCorrectStack,'Checked','off');
-        set(hMainGui.Menu.mAlignChannels,'Enable','off','Checked','off');
+        SetControls(hMainGui);
         fMainGui('InitGui',hMainGui);
     end
 else
@@ -164,6 +165,13 @@ else
     end
 end
 set(hMainGui.fig,'Pointer','arrow');
+
+function SetControls(hMainGui)
+setappdata(hMainGui.fig,'Drift', []);
+setappdata(hMainGui.fig,'OffsetMap',[1 0 0;0 1 0;0 0 1]);
+set(hMainGui.Menu.mCorrectStack,'Checked','off', 'Enable', 'off');
+set(hMainGui.Menu.mAlignChannels,'Enable','off','Checked','off');
+set(hMainGui.RightPanel.pTools.cKymoDrift,'Value',0);
 
 function OpenStackSpecial(hMainGui, reopen)
 global Stack;
@@ -409,8 +417,7 @@ if ~isempty(fOpenStruct)
         hMainGui.Values.PixSize=Config.PixSize;
         hMainGui.Values.TformChannel = TformChannel;
         hMainGui.Values.PostSpecial = fOpenStruct.Optional;
-        set(hMainGui.Menu.mCorrectStack,'Checked','off');
-        set(hMainGui.Menu.mAlignChannels,'Checked','off');
+        SetControls(hMainGui);
         fMainGui('InitGui',hMainGui);
     end
 end
@@ -490,9 +497,7 @@ if FileName~=0
     hMainGui.Values.PixSize=Config.PixSize;
     hMainGui.Values.TformChannel = TformChannel;
     hMainGui.Values.PostSpecial = [];
-    set(hMainGui.Menu.mCorrectStack,'Checked','off');
-    set(hMainGui.Menu.mAlignChannels,'Checked','off');
-
+    SetControls(hMainGui);
     fMainGui('InitGui',hMainGui);
 end
 if ~isempty(Stack)||~isempty(Molecule)||~isempty(Filament)

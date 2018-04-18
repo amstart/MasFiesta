@@ -104,7 +104,11 @@ filename = [sName '(' datestr(clock,'yyyymmddTHHMMSSFFF') ').mat']; %JochenK
 try
     PathName=Config.Directory;
     movie=strsplit(sName, '_');
-    PathName = [PathName movie{1} filesep];
+    if length(movie{1})>3
+        PathName = [PathName movie{2} filesep];
+    else
+        PathName = [PathName movie{1} filesep];
+    end
     mkdir(PathName)
     fData=[PathName filename];
     save(fData,'Config');

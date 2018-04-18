@@ -121,8 +121,10 @@ for m = 1:length(Stack)
                 progressdlg(n/z*100);
             end
         end
-        set(hMainGui.Menu.mCorrectStack,'Checked','on');
-        set(hMainGui.Menu.mCorrectStack,'Enable','off');
+        if ~isempty(Drift)
+            set(hMainGui.RightPanel.pTools.cKymoDrift,'Value',1,'Enable','off');
+        end
+        set(hMainGui.Menu.mCorrectStack,'Checked','on', 'Enable','off');
         hMainGui.Values.TformChannel{m}=hMainGui.Values.TformChannel{1};
     end
     if strcmp(get(hMainGui.Menu.mCorrectStack,'Checked'),'on')

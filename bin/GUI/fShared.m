@@ -500,7 +500,7 @@ end
 if isempty(Drift)
     set(hMainGui.Menu.mSaveDrift,'Enable','off');
     set(hMainGui.RightPanel.pTools.cKymoDrift,'Enable','off','Value',0);
-else
+elseif ~get(hMainGui.RightPanel.pTools.cKymoDrift,'Value')
     set(hMainGui.Menu.mSaveDrift,'Enable','on');
     set(hMainGui.RightPanel.pTools.cKymoDrift,'Enable','on');
 end

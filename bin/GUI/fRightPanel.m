@@ -100,10 +100,10 @@ if isfield(hMainGui, 'KymoName') %JochenK
 else
    KymoName=fShared('GetSaveDir');
 end
-[FileName, PathName, FilterIndex] = uiputfile({'*.*','Both pdf and tif';'*.tif','TIFF-File (*.tif)';'*.pdf','Portable Document Format (*.pdf)'},'Save FIESTA Kymograph',KymoName); 
+[FileName, PathName, FilterIndex] = uiputfile({'*.*','Screenshot and tif';'*.tif','TIFF-File (*.tif)';'*.png','Screenshot (*.png)'},'Save FIESTA Kymograph',KymoName); 
 if FileName~=0
     fShared('SetSaveDir',PathName);
-    FileName = strrep(FileName, '.pdf', '');
+    FileName = strrep(FileName, '.png', '');
     FileName = strrep(FileName, '.tif', '');
     file = [PathName FileName];
     Image=hMainGui.KymoImage;
@@ -116,7 +116,8 @@ if FileName~=0
         end
     end
     if FilterIndex==1||FilterIndex==3
-        saveas(hMainGui.MidPanel.aKymoGraph, [file '.pdf'], 'pdf') %Save figure;
+        imageData = screencapture(hMainGui.fig);
+        imwrite(imageData,[file '.png']);
     end
     if get(hMainGui.RightPanel.pTools.cKymoLocation,'Value')==1
         set(hMainGui.MidPanel.pView,'Visible','on');
@@ -614,7 +615,8 @@ for k = stidx
 end
 progressdlg('String','Creating KymoGraph','Min',0,'Max',N,'Parent',hMainGui.fig);
 KymoGraph = zeros(N,length(d),length(stidx)); 
-if get(hMainGui.RightPanel.pTools.cKymoDrift,'Value')==1 && ~isempty(Drift)
+correctDrift = get(hMainGui.RightPanel.pTools.cKymoDrift,'Value') && ~isempty(Drift) && strcmp(get(hMainGui.RightPanel.pTools.cKymoDrift,'Enable'),'on');
+if correctDrift
     if get(hMainGui.RightPanel.pTools.mKymoMethod,'Value')==1
         for n = 1:N
             for k = stidx
@@ -777,9 +779,9 @@ hMainGui.Scan.InterpD=d;
 hMainGui.CursorMode='Normal';
 set(hMainGui.RightPanel.pTools.bLineScanExport,'Enable','on');
 set(hMainGui.RightPanel.pTools.bShowKymoGraph,'Enable','on');
-if strcmp(get(hMainGui.Menu.mCorrectStack,'Checked'),'on') || isempty(getappdata(hMainGui.fig,'Drift')) %JochenK
+if isempty(getappdata(hMainGui.fig,'Drift')) %JochenK
     set(hMainGui.RightPanel.pTools.cKymoDrift,'Enable','off','Value',0);
-else
+elseif ~get(hMainGui.RightPanel.pTools.cKymoDrift,'Value') && get(hMainGui.RightPanel.pTools.cKymoDrift,'Enable')==0
     set(hMainGui.RightPanel.pTools.cKymoDrift,'Enable','on');
 end
 setappdata(0,'hMainGui',hMainGui);
@@ -1180,7 +1182,7 @@ fShared('ReturnFocus');
 function UpdateQueue(mode)
 hMainGui=getappdata(0,'hMainGui');
 global Queue;
-if strcmp(mode,'Local');
+if strcmp(mode,'Local')
     hQueue=hMainGui.RightPanel.pQueue.LocList;
     slider=hMainGui.RightPanel.pQueue.sLocList;
     NewQueue=Queue;
