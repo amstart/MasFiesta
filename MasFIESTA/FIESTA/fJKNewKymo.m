@@ -19,7 +19,8 @@ for k = stidx
         divisor(k)=N/size(Stack{k},3);
     end
 end
-if get(hMainGui.RightPanel.pTools.cKymoDrift,'Value')==1 && ~isempty(Drift)
+correctDrift = get(hMainGui.RightPanel.pTools.cKymoDrift,'Value')==1 && ~isempty(Drift) && strcmp(get(hMainGui.RightPanel.pTools.cKymoDrift,'Enable'),'on');
+if correctDrift
     max_l_Drift=size(Drift{1},1);
     for k = stidx
         if isempty(Drift{k})
@@ -42,7 +43,7 @@ if isempty(OffsetMap) || strcmp(get(hMainGui.Menu.mCorrectStack,'Checked'),'on')
 else
     CorrectColor=1;
 end
-if get(hMainGui.RightPanel.pTools.cKymoDrift,'Value')==1 && ~isempty(Drift)
+if correctDrift
     if get(hMainGui.RightPanel.pTools.mKymoMethod,'Value')==1
         for k = stidx
             if k~=1 && CorrectColor && length(OffsetMap)>k-2 && 0

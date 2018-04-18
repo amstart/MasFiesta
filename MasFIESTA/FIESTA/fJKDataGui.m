@@ -2198,8 +2198,7 @@ if ~isempty(fitframes)
         bw_region = zeros(size(I));
         bw_region(fidx) = 1;
         SE = strel('disk', ceil(params.fwhm_estimate/2/params.scale) , 4);
-        bw_region(:,:,1) = imdilate(bw_region(:,:,1),SE);
-        params.bw_region = bw_region;
+        params.bw_region = imdilate(bw_region(:,:,1),SE);
         Obj = ScanImage(I,params,n);
         if ~isempty(Obj) && numel(Obj)<2
             if strcmp(Type,'Molecule') && isempty(Obj.data{1})
