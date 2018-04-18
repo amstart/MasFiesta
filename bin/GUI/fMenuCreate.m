@@ -473,7 +473,9 @@ hMenu.ListMol.Sort.frame = uimenu('Parent',hMenu.ListMol.mSort,'Callback','fShar
 
 hMenu.ListMol.Sort.channel = uimenu('Parent',hMenu.ListMol.mSort,'Callback','fShared(''Sort'',getappdata(0,''hMainGui''));',...
                                   'Label','channel','Tag','mc ','UserData',[1 4]);  
-                              
+
+hMenu.ListMol.Sort.visible = uimenu('Parent',hMenu.ListMol.mSort,'Callback','fShared(''Sort'',getappdata(0,''hMainGui''));',...
+                                  'Label','channel','Tag','mv ','UserData',[1 5]);  
                               %end JochenK
                             
 hMenu.ListMol.mSetDrift = uimenu('Parent',hMenu.ctListMol,'Callback','fShared(''SetDrift'',getappdata(0,''hMainGui''));',...
@@ -551,6 +553,8 @@ hMenu.ListFil.Sort.frame = uimenu('Parent',hMenu.ListFil.mSort,'Callback','fShar
 hMenu.ListFil.Sort.channel = uimenu('Parent',hMenu.ListFil.mSort,'Callback','fShared(''Sort'',getappdata(0,''hMainGui''));',...
                                   'Label','channel','Tag','mc ','UserData',[2 4]);           
                               
+hMenu.ListFil.Sort.visible = uimenu('Parent',hMenu.ListFil.mSort,'Callback','fShared(''Sort'',getappdata(0,''hMainGui''));',...
+                                  'Label','channel','Tag','mv ','UserData',[2 5]); 
                               %end JochenK
                             
 hMenu.ListFil.mMerge = uimenu('Parent',hMenu.ctListFil,'Callback','fShared(''MergeTracks'',getappdata(0,''hMainGui''));',...

@@ -113,6 +113,10 @@ if mode(1)==1
                 for i=1:length(Molecule)
                     orderval(i)=Molecule(i).Channel;
                 end
+            case 5
+                for i=1:length(Molecule)
+                    orderval(i)=Molecule(i).Visible;
+                end
         end
         if mode(2) > 0
             [~, order] = sort(orderval);
@@ -142,6 +146,10 @@ else
             case 4
                 for i=1:length(Filament)
                     orderval(i)=Filament(i).Channel;
+                end
+            case 5
+                for i=1:length(Filament)
+                    orderval(i)=Filament(i).Visible;
                 end
         end
         if mode(2) > 0
