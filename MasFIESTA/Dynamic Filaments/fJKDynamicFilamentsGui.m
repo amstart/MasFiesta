@@ -935,7 +935,7 @@ for i=1:length(NewObjects)
     NewObjects(i).Tags = [tags tiptags];
     NewObjects(i).DynResults = DynResults;
     NewObjects(i).SegTagAuto=[NaN NaN NaN NaN NaN];
-    NewObjects(i).Velocity=nan(2,7);
+    NewObjects(i).Velocity=nan(1,2);
     NewObjects(i).Duration = 0;
     NewObjects(i).Disregard = 0;
 end
@@ -1872,7 +1872,7 @@ hold on
 [type, AnalyzedTracks, ~]=SetType(Options.cPlotGrowingTracks.val);
 [~, type_id, track_type_id] = unique(type);
 [x_vec, y_vec] = get_plot_vectors(Options, AnalyzedTracks, 1:2);
-fJKscatterboxplot(x_vec, y_vec, track_type_id');
+fJKscatterboxplot(x_vec, y_vec, track_type_id', 0);
 xlabel(get_label(Options, 1));
 ylabel(get_label(Options, 0));
 Legend = type(type_id);

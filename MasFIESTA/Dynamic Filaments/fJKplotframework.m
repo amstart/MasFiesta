@@ -1,4 +1,4 @@
-function [f] = fJKplotframework(Tracks, type, plot_mode, events, Options)
+function [f] = fJKplotframework(Tracks, type, isfrequencyplot, events, Options)
 %plotmodes: 0: X vs Y plot, 1: Events along X during Y, 2: filament end plot
 additionalplots = 1;
 if additionalplots>1
@@ -7,9 +7,9 @@ if additionalplots>1
     figure(mainfig);
 end
 subplot = @(m,n,p) subtightplot (m, n, p, [0.08 0.11], [0.08 0.08], [0.08 0.02]);
-[label_x, label_y, DelTracks] = SetUpMode(plot_mode, events, [Tracks.PreviousEvent]', Options);
+[label_x, label_y, DelTracks] = SetUpMode(isfrequencyplot, events, [Tracks.PreviousEvent]', Options);
 [uniquetype, ~, idvec] = unique(type,'stable');
-if plot_mode == 1
+if isfrequencyplot == 1
     for i = 1:length(uniquetype)
         if ~any(events(idvec==i)) %find all types without events and remove their tracks
             DelTracks = DelTracks | idvec==i;
@@ -70,6 +70,7 @@ for j=1:ntypes    %Loop through all groups to be plotted, each group gets its ow
             end
         otherwise
             msgbox('that would be more than 12 plots! Try checking the "Only selected" checkbox');
+            return
     end
     hold on;
     correct_type=cellfun(@(x) strcmp(x, uniquetype(j)),type);
@@ -82,9 +83,9 @@ for j=1:ntypes    %Loop through all groups to be plotted, each group gets its ow
         figure(mainfig);
         axes(f);drawnow;
     end
-    switch plot_mode
+    switch isfrequencyplot
         case 0
-            [plot_x, plot_y, ~] = Get_Vectors(PlotTracks, events(correct_type), Options.mXReference.val, plot_mode, Options.cExclude.val);
+            [plot_x, plot_y, ~] = Get_Vectors(PlotTracks, events(correct_type), Options.mXReference.val, isfrequencyplot, Options.cExclude.val);
             point_info=cell(sum(correct_type),1);
             if Options.ZOK
                 color_mode = 1;
@@ -125,7 +126,7 @@ for j=1:ntypes    %Loop through all groups to be plotted, each group gets its ow
                 end
             end
         case 1
-            [plot_x, plot_y, ploteventends] = Get_Vectors(PlotTracks, events(correct_type), Options.mXReference.val, plot_mode, Options.cExclude.val);
+            [plot_x, plot_y, ploteventends] = Get_Vectors(PlotTracks, events(correct_type), Options.mXReference.val, isfrequencyplot, Options.cExclude.val);
             fJKfrequencyvsXplot(plot_x, plot_y, ploteventends, {Options.lPlot_XVar.str, Options.lPlot_YVar.str});
     end
     set(gca, 'FontSize', 16, 'LabelFontSizeMultiplier', 1.5);
@@ -135,13 +136,13 @@ for j=1:ntypes    %Loop through all groups to be plotted, each group gets its ow
 end
 
 
-function [plotx, ploty, ploteventends] = Get_Vectors(PlotTracks, plotevents, refmode, plot_mode, exclude)
+function [plotx, ploty, ploteventends] = Get_Vectors(PlotTracks, plotevents, refmode, isfrequencyplot, exclude)
 %plotx and ploty are vectors with all datapoints of the group to be plotted
 pr = length(PlotTracks);
 cellx=cell(pr,1);
 celly=cell(pr,1);
 ploteventends=nan(size(plotevents));
-if plot_mode == 1
+if isfrequencyplot
     switch refmode
         case {1,5}
         for k=1:pr
