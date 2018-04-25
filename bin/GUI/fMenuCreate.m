@@ -154,7 +154,7 @@ hMenu.mCorrectStack = uimenu('Parent',hMenu.mView,'Callback','fMenuView(''Correc
                             'Label','Correct Stack (Drift and/or Color Offset)','Tag','mCorrectStack','Separator','on','Checked', 'off'); 
                         
 hMenu.mKeepFrames = uimenu('Parent',hMenu.mView,'Callback','fMenuView(''KeepFrames'',getappdata(0,''hMainGui''));',...
-                          'Label','Keep Frames','Tag','mReloadStack','Enable','off'); 
+                          'Label','Split Stack/Keep Frames','Tag','mReloadStack','Enable','on'); 
                         
 hMenu.mReloadStack = uimenu('Parent',hMenu.mView,'Callback','fMenuData(''OpenStackSpecial'',getappdata(0,''hMainGui''),1);',...
                           'Label','Reload Stack','Tag','mReloadStack'); 

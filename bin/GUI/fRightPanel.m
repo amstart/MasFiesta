@@ -781,7 +781,7 @@ set(hMainGui.RightPanel.pTools.bLineScanExport,'Enable','on');
 set(hMainGui.RightPanel.pTools.bShowKymoGraph,'Enable','on');
 if isempty(getappdata(hMainGui.fig,'Drift')) %JochenK
     set(hMainGui.RightPanel.pTools.cKymoDrift,'Enable','off','Value',0);
-elseif ~get(hMainGui.RightPanel.pTools.cKymoDrift,'Value') && get(hMainGui.RightPanel.pTools.cKymoDrift,'Enable')==0
+elseif ~get(hMainGui.RightPanel.pTools.cKymoDrift,'Value') && strcmp(get(hMainGui.RightPanel.pTools.cKymoDrift,'Enable'), 'on')
     set(hMainGui.RightPanel.pTools.cKymoDrift,'Enable','on');
 end
 setappdata(0,'hMainGui',hMainGui);
