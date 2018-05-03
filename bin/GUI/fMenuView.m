@@ -16,13 +16,48 @@ function KeepFrames(hMainGui) %JochenK
 global Stack
 global TimeInfo
 channel = hMainGui.Values.FrameIdx(1);
-answer = fInputDlg({'Enter first and the last frames to keep in current channel (the others will be deleted for the session).','Enter last frame'},{int2str(1),int2str(hMainGui.Values.MaxIdx(channel+1))});
-firstframe = str2double(answer{1});
-lastframe = str2double(answer{2});
-Stack{channel} = Stack{channel}(:,:, firstframe:lastframe);
-TimeInfo{channel} = TimeInfo{channel}(firstframe:lastframe);
+answer = fQuestDlg('Do you want to keep every nth frame or do you want to keep a block?', 'Mode', {'nth', 'block'}, 'nth');
+answer2 = fQuestDlg('Move deleted frames to new channel?', 'New Channel', {'Yep', 'Nah'}, 'Yep');
+if strcmp(answer2, 'Yep')
+    keep = 1;
+else
+    keep = 0;
+end
+if strcmp(answer, 'nth')
+    answer = fInputDlg({'Enter start of interval.','Enter step size (n).'},{1,2});
+    start = str2double(answer{1});
+    step = str2double(answer{2});
+    if start == 1
+        start2 = 2;
+    else
+        start2 = 1;
+    end
+    if keep
+        Stack{end+1} = Stack{channel}(:,:, start2:step:end);
+        TimeInfo{end+1} = TimeInfo{channel}(start2:step:end);
+    end
+    Stack{channel} = Stack{channel}(:,:, start:step:end);
+    TimeInfo{channel} = TimeInfo{channel}(start:step:end);
+else
+    answer = fInputDlg({'Enter first and the last frames to keep in current channel (the others will be deleted for the session).','Enter last frame'},{int2str(1),int2str(hMainGui.Values.MaxIdx(channel+1))});
+    firstframe = str2double(answer{1});
+    lastframe = str2double(answer{2});
+    if keep
+        Stack{end+1} = Stack{channel}(:,:, [1:firstframe-1 lastframe+1:end]);
+        TimeInfo{end+1} = TimeInfo{channel}(:,:, [1:firstframe-1 lastframe+1:end]);
+    end
+    Stack{channel} = Stack{channel}(:,:, firstframe:lastframe);
+    TimeInfo{channel} = TimeInfo{channel}(firstframe:lastframe);
+end
 hMainGui.Values.MaxIdx(channel+1) = length(TimeInfo{channel});
+set(hMainGui.MidPanel.sFrame, 'Max', size(Stack{channel},3));
+fMidPanel('eFrame',hMainGui)
 setappdata(0,'hMainGui',hMainGui);
+if keep
+    hMainGui.Values.MaxIdx(end+1) = length(TimeInfo{end});
+    hMainGui.Values.TformChannel{end+1} = [1 0 0; 0 1 0; 0 0 1];
+    fMainGui('InitGui',hMainGui)
+end
 
 function CorrectStack
 global Stack;
