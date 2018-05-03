@@ -1,5 +1,5 @@
-function fJKscatterboxplot(plot_x, plot_y, point_info, color_mode)
-[middle, edgesmid, nelements, allpointsx, allpointsy] = histcounts2(plot_x, plot_y);
+function fJKscatterboxplot(plot_x, plot_y, point_info, color_mode, weights)
+[out, edgesmid, nelements, allpointsx, allpointsy] = histcounts2(plot_x, plot_y, weights);
 if color_mode == 0
     gscatter(plot_x, plot_y, point_info, [], 'o')
 else
@@ -26,13 +26,14 @@ set(b(:,:),'linewidth',1.5);
  set(h,'Color','red');
 for m=1:length(nelements)
     if nelements(m)>0
-        text(double(edgesmid(m)), middle(m), num2str(nelements(m)), 'HorizontalAlignment', 'center', 'FontSize', 18);
+%         text(double(edgesmid(m)), out(m,1), num2str(nelements(m)), 'HorizontalAlignment', 'center', 'FontSize', 18);
+        text(double(edgesmid(m)), out(m,2), num2str(out(m,2)), 'HorizontalAlignment', 'center', 'FontSize', 18);
     end
 end
 set(gca,'Color',[0.9 0.9 0.9]);
 % ylim([-600 0])
 
-function [middle, edgesmid, nelements, allpointsx, allpointsy] = histcounts2(plotx, ploty)
+function [out, edgesmid, nelements, allpointsx, allpointsy] = histcounts2(plotx, ploty, weights)
 %HISTCOUNTS2D Summary of this function goes here
 %   Detailed explanation goes here
 plotx=plotx(~isnan(plotx));
@@ -52,18 +53,27 @@ for m=1:length(xid)
         continue
     end
     if isempty(binvec{xid(m)})
-        binvec{xid(m)}=ploty(m);
+        binvec{xid(m)}=[ploty(m) weights(m)];
     else
-        binvec{xid(m)}=[binvec{xid(m)}; ploty(m)];
+        binvec{xid(m)}=[binvec{xid(m)}; [ploty(m) weights(m)]];
     end
 end
-middle=zeros(1,length(binvec));
+out=zeros(length(binvec),2);
 nelements=zeros(1,length(binvec));
 edgesmid=edges(1:end-1)+diff(edges)/2;
 for m=1:length(binvec)
-    middle(m)=nanmedian([binvec{m}]);
-    nelements(m)=length([binvec{m}]);
-    binedgevec{m}=repmat(edgesmid(m),length(binvec{m}),1);
+    if ~isempty(binvec{m})
+        values=binvec{m}(:,1);
+        weights=binvec{m}(:,2);
+        out(m,2)=wmean(values,weights);
+    else
+        values=[];
+        weights=[];
+    end
+    out(m,1)=nanmedian(values);
+    nelements(m)=length(values);
+    binedgevec{m}=repmat(edgesmid(m),length(values),1);
 end
 allpointsx=vertcat(binedgevec{:});
 allpointsy=vertcat(binvec{:});
+allpointsy=allpointsy(:,1);
