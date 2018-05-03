@@ -43,14 +43,14 @@ end
 version='';
 
 %get local version of FIESTA
-file_id = fopen([DirCurrent 'readme.txt'], 'r'); 
-if file_id ~= -1
-    index = fgetl(file_id);
-    local_version = index(66:74);
-    fclose(file_id); 
-else
-    local_version = '';
-end
+% file_id = fopen([DirCurrent 'readme.txt'], 'r'); 
+% if file_id ~= -1
+%     index = fgetl(file_id);
+%     local_version = index(66:74);
+%     fclose(file_id); 
+% else
+%      local_version = '';
+% end
 
 %compare local version with online version
 % if ~strcmp( local_version , online_version ) && ~isempty(online_version)
