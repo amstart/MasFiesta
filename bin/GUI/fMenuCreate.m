@@ -248,7 +248,8 @@ hMenu.mFreehandScan = uimenu('Parent',hMenu.mTools,'Callback','fMenuTools(''Scan
                          'Label','Freehand Line Scan','Tag','mFreehandScan');            
                      
 hMenu.mFilamentScan = uimenu('Parent',hMenu.mTools,'Callback','fMenuTools(''ScanFilament'',getappdata(0,''hMainGui''));','Enable','off',...
-                             'Label','Use Filament for Scan','Tag','mFilamentScan');     
+                             'Label','Use Filament for Scan','Tag','mFilamentScan');    
+                         
                      
 %create Statistics menu
 hMenu.mStats = uimenu('Parent',hMainGui.fig,'Label','Statistics','Tag','mStats');
@@ -286,6 +287,9 @@ hMenu.mBleachEvaluate = uimenu('Parent',hMenu.mStats,'Callback','fBleachEvaluate
                 
 hMenu.mFlowEvaluate = uimenu('Parent',hMenu.mStats,'Callback','fFlowEval;',...
                              'Label','Flow Evaluation','Tag','mFlowEvaluate');
+                         
+hMenu.mShowMissing = uimenu('Parent',hMenu.mStats,'Callback','fMenuStatistics(''ShowMissing'',getappdata(0,''hMainGui''));',...
+                             'Label','Show untracked frames (selected)','Tag','mShowMissing');   
                         
 %create Help menu
 hMenu.mHelp = uimenu('Parent',hMainGui.fig,'Label','Help','Tag','mHelp');

@@ -1934,9 +1934,12 @@ if length(X)==1
     X(1,2)=X;
     Y(1,2)=Y;
 end
-if ishandle(Object.PlotHandles(1,1))
-    set(Object.PlotHandles(1,1),'XData',X,'YData',Y);
-    drawnow;
+try
+    if ishandle(Object.PlotHandles(1,1))
+        set(Object.PlotHandles(1,1),'XData',X,'YData',Y);
+        drawnow;
+    end
+catch
 end
 if hDataGui.Extensions.JochenK.DynTags && strcmp(Type,'Filament')
     switch refpoint
