@@ -65,8 +65,11 @@ set(hMainGui.fig, 'CloseRequestFcn',@Exit);
 set(hMainGui.fig, 'ResizeFcn',@ResizeGUI);
 
 hMainGui=DefValues(hMainGui);
-
-Config=fLoadConfig(FiestaDir.AppData);
+try
+    Config=fLoadConfig(FiestaDir.AppData);
+catch
+    msgbox(FiestaDir.AppData);
+end
 
 hMainGui=DefStruct(hMainGui);
 
@@ -118,7 +121,7 @@ if isdeployed
         FiestaDir.AppData = '~/Library/Fiesta/';
         DirCurrent = '~/';
     else
-        FiestaDir.AppData = [ctfroot filesep 'FIESTA JochenK 1.0' filesep 'source' filesep];
+        FiestaDir.AppData = [DirCurrent 'AppData\'];%[ctfroot filesep 'FIESTA JochenK 1.0' filesep 'source' filesep];
     end 
 else
     FiestaDir.AppData = DirCurrent;
