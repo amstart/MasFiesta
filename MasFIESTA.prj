@@ -1,0 +1,529 @@
+<deployment-project plugin="plugin.ezdeploy" plugin-version="1.0">
+  <configuration build-checksum="2349024533" file="D:\MasFIESTA.prj" location="D:\" name="MasFIESTA" preferred-package-location="D:\MasFIESTA\for_redistribution" preferred-package-type="package.type.exe" target="target.ezdeploy.standalone" target-name="Application Compiler">
+    <param.appname>MasFiesta</param.appname>
+    <param.icon />
+    <param.icons />
+    <param.version>1.0</param.version>
+    <param.authnamewatermark>Jochen Krattenmacher</param.authnamewatermark>
+    <param.email>jochen.krattenmacher@web.de</param.email>
+    <param.company />
+    <param.summary />
+    <param.description />
+    <param.screenshot />
+    <param.guid />
+    <param.installpath.string>\MasFiesta\</param.installpath.string>
+    <param.installpath.combo>option.installpath.programfiles</param.installpath.combo>
+    <param.logo />
+    <param.install.notes />
+    <param.target.install.notes />
+    <param.intermediate>${PROJECT_ROOT}\MasFIESTA\for_testing</param.intermediate>
+    <param.files.only>${PROJECT_ROOT}\MasFIESTA\for_redistribution_files_only</param.files.only>
+    <param.output>${PROJECT_ROOT}\MasFIESTA\for_redistribution</param.output>
+    <param.logdir>${PROJECT_ROOT}\MasFIESTA</param.logdir>
+    <param.enable.clean.build>false</param.enable.clean.build>
+    <param.user.defined.mcr.options />
+    <param.embed.ctf>true</param.embed.ctf>
+    <param.target.type>subtarget.standalone</param.target.type>
+    <param.support.packages />
+    <param.web.mcr>false</param.web.mcr>
+    <param.package.mcr>true</param.package.mcr>
+    <param.no.mcr>false</param.no.mcr>
+    <param.web.mcr.name>MyAppInstaller_web</param.web.mcr.name>
+    <param.package.mcr.name>MasFIESTA</param.package.mcr.name>
+    <param.no.mcr.name>MyAppInstaller_app</param.no.mcr.name>
+    <param.windows.command.prompt>true</param.windows.command.prompt>
+    <param.create.log>false</param.create.log>
+    <param.log.file />
+    <unset>
+      <param.icon />
+      <param.icons />
+      <param.version />
+      <param.company />
+      <param.summary />
+      <param.description />
+      <param.screenshot />
+      <param.guid />
+      <param.installpath.string />
+      <param.installpath.combo />
+      <param.logo />
+      <param.target.install.notes />
+      <param.intermediate />
+      <param.files.only />
+      <param.output />
+      <param.logdir />
+      <param.enable.clean.build />
+      <param.user.defined.mcr.options />
+      <param.embed.ctf />
+      <param.target.type />
+      <param.support.packages />
+      <param.no.mcr />
+      <param.web.mcr.name />
+      <param.no.mcr.name />
+      <param.windows.command.prompt />
+      <param.create.log />
+      <param.log.file />
+    </unset>
+    <fileset.main>
+      <file>${PROJECT_ROOT}\MasFiesta\Fiesta.m</file>
+    </fileset.main>
+    <fileset.resources>
+      <file>${PROJECT_ROOT}\MasFiesta\.DS_Store</file>
+      <file>${PROJECT_ROOT}\MasFiesta\.gitignore</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\.DS_Store</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\BuildIn\.DS_Store</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\BuildIn\bfmatlab\.DS_Store</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\BuildIn\bfmatlab\bfCheckJavaMemory.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\BuildIn\bfmatlab\bfCheckJavaPath.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\BuildIn\bfmatlab\bfGetFileExtensions.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\BuildIn\bfmatlab\bfGetPlane.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\BuildIn\bfmatlab\bfGetReader.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\BuildIn\bfmatlab\bfInitLogging.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\BuildIn\bfmatlab\bfopen.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\BuildIn\bfmatlab\bfOpen3DVolume.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\BuildIn\bfmatlab\bfsave.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\BuildIn\bfmatlab\bfUpgradeCheck.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\BuildIn\bfmatlab\bioformats_package.jar</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\BuildIn\bfmatlab\createMinimalOMEXMLMetadata.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\BuildIn\bfmatlab\NEWS.rst</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\BuildIn\bfmatlab\private\is_octave.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\BuildIn\cpd_P.mexmaci64</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\BuildIn\cpd_Pcorrespondence.mexmaci64</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\BuildIn\cpd_rigid.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\BuildIn\dbscan.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\BuildIn\distance2curve.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\BuildIn\fAlignFilament.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\BuildIn\fCalcDrift.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\BuildIn\fConvertObjects.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\BuildIn\fDis.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\BuildIn\fGetRefPoint.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\BuildIn\fGetServerQueue.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\BuildIn\fGetStackFrame.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\BuildIn\findjobj.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\BuildIn\fInputDlg.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\BuildIn\fLoad.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\BuildIn\fLoadConfig.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\BuildIn\fMsgDlg.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\BuildIn\fPlaceFig.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\BuildIn\fProgressDialog.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\BuildIn\fQuestDlg.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\BuildIn\fReadND2.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\BuildIn\fStackRead.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\BuildIn\fTransformCoord.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\BuildIn\GetAxesAspectRatio.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\BuildIn\getChannels.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\BuildIn\getChIdx.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\BuildIn\getFrameIdx.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\BuildIn\getwarp.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\BuildIn\ghostscript.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\BuildIn\gscript.mexmaci64</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\BuildIn\Likelihood2D.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\BuildIn\maximize.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\BuildIn\multi.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\BuildIn\nearestpoint.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\BuildIn\openhelp.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\BuildIn\parallelprogressdlg.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\BuildIn\progressdlg.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\BuildIn\ps2pdf.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\BuildIn\quickwarp.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\BuildIn\StackRead.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\BuildIn\uacrun.mexw32</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\BuildIn\uacrun.mexw64</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\BuildIn\uiinspect.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\fAnalyseStack.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\fFeatureConnect.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\GUI\.DS_Store</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\GUI\About.jpg</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\GUI\fAboutGui.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\GUI\fBleachEvaluate.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\GUI\fConfigGui.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\GUI\fDataGui.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\GUI\fDefStructure.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\GUI\fExportDataGui.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\GUI\fExportViewGui.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\GUI\fFlowEval.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\GUI\fKymoEval.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\GUI\fLeftPanel.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\GUI\fLeftPanelCreate.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\GUI\fMainGui.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\GUI\fMenuContext.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\GUI\fMenuCreate.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\GUI\fMenuData.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\GUI\fMenuEdit.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\GUI\fMenuOffsetMap.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\GUI\fMenuOptions.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\GUI\fMenuStatistics.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\GUI\fMenuTools.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\GUI\fMenuView.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\GUI\fMergeGui.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\GUI\fMidPanel.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\GUI\fMidPanelCreate.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\GUI\fOpenStackSpecial.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\GUI\fPathStatsGui.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\GUI\fRightPanel.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\GUI\fRightPanelCreate.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\GUI\fShared.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\GUI\fShow.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\GUI\fSpeckleEval.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\GUI\fToolBar.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\GUI\fToolBarCreate.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\GUI\fVelocityStatsGui.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\imageprocessing\.DS_Store</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\imageprocessing\@double_error\.DS_Store</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\imageprocessing\@double_error\abs.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\imageprocessing\@double_error\atan.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\imageprocessing\@double_error\atan2.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\imageprocessing\@double_error\average.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\imageprocessing\@double_error\ceil.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\imageprocessing\@double_error\char.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\imageprocessing\@double_error\cos.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\imageprocessing\@double_error\display.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\imageprocessing\@double_error\double.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\imageprocessing\@double_error\double_error.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\imageprocessing\@double_error\end.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\imageprocessing\@double_error\eq.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\imageprocessing\@double_error\fix.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\imageprocessing\@double_error\floor.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\imageprocessing\@double_error\ge.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\imageprocessing\@double_error\gt.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\imageprocessing\@double_error\horzcat.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\imageprocessing\@double_error\isnumeric.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\imageprocessing\@double_error\le.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\imageprocessing\@double_error\length.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\imageprocessing\@double_error\lt.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\imageprocessing\@double_error\max.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\imageprocessing\@double_error\mean.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\imageprocessing\@double_error\min.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\imageprocessing\@double_error\minus.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\imageprocessing\@double_error\mod.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\imageprocessing\@double_error\mtimes.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\imageprocessing\@double_error\ne.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\imageprocessing\@double_error\norm.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\imageprocessing\@double_error\numel.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\imageprocessing\@double_error\plus.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\imageprocessing\@double_error\power.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\imageprocessing\@double_error\prod.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\imageprocessing\@double_error\rdivide.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\imageprocessing\@double_error\real.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\imageprocessing\@double_error\repmat.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\imageprocessing\@double_error\reshape.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\imageprocessing\@double_error\round.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\imageprocessing\@double_error\sin.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\imageprocessing\@double_error\size.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\imageprocessing\@double_error\sqrt.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\imageprocessing\@double_error\subsasgn.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\imageprocessing\@double_error\subsref.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\imageprocessing\@double_error\sum.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\imageprocessing\@double_error\tan.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\imageprocessing\@double_error\times.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\imageprocessing\@double_error\transpose.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\imageprocessing\@double_error\uminus.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\imageprocessing\@double_error\uplus.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\imageprocessing\@double_error\vertcat.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\imageprocessing\debug\PlotOrientations.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\imageprocessing\debug\PlotPoints.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\imageprocessing\debug\PlotRect.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\imageprocessing\debug\PlotTubules.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\imageprocessing\debug\ShowResults.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\imageprocessing\debug\STKread.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\imageprocessing\debug\ViewStack.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\imageprocessing\findInterjectingFitboxes.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\imageprocessing\FineScan.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\imageprocessing\Fit2D\.DS_Store</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\imageprocessing\Fit2D\@Model2DFilamentEnd\.DS_Store</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\imageprocessing\Fit2D\@Model2DFilamentEnd\evaluate.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\imageprocessing\Fit2D\@Model2DFilamentEnd\getParameter.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\imageprocessing\Fit2D\@Model2DFilamentEnd\Model2DFilamentEnd.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\imageprocessing\Fit2D\@Model2DFilamentEnd\subsref.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\imageprocessing\Fit2D\@Model2DFilamentEnd\transformResult.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\imageprocessing\Fit2D\@Model2DFilamentMiddle\.DS_Store</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\imageprocessing\Fit2D\@Model2DFilamentMiddle\evaluate.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\imageprocessing\Fit2D\@Model2DFilamentMiddle\getParameter.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\imageprocessing\Fit2D\@Model2DFilamentMiddle\Model2DFilamentMiddle.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\imageprocessing\Fit2D\@Model2DFilamentMiddle\subsref.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\imageprocessing\Fit2D\@Model2DFilamentMiddle\transformResult.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\imageprocessing\Fit2D\@Model2DFilamentMiddleBend\.DS_Store</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\imageprocessing\Fit2D\@Model2DFilamentMiddleBend\evaluate.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\imageprocessing\Fit2D\@Model2DFilamentMiddleBend\getParameter.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\imageprocessing\Fit2D\@Model2DFilamentMiddleBend\Model2DFilamentMiddleBend.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\imageprocessing\Fit2D\@Model2DFilamentMiddleBend\subsref.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\imageprocessing\Fit2D\@Model2DFilamentMiddleBend\transformResult.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\imageprocessing\Fit2D\@Model2DGaussPlus2Rings\evaluate.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\imageprocessing\Fit2D\@Model2DGaussPlus2Rings\getParameter.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\imageprocessing\Fit2D\@Model2DGaussPlus2Rings\Model2DGaussPlus2Rings.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\imageprocessing\Fit2D\@Model2DGaussPlus2Rings\subsref.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\imageprocessing\Fit2D\@Model2DGaussPlus2Rings\transformResult.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\imageprocessing\Fit2D\@Model2DGaussPlusRing\.DS_Store</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\imageprocessing\Fit2D\@Model2DGaussPlusRing\evaluate.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\imageprocessing\Fit2D\@Model2DGaussPlusRing\getParameter.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\imageprocessing\Fit2D\@Model2DGaussPlusRing\Model2DGaussPlusRing.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\imageprocessing\Fit2D\@Model2DGaussPlusRing\subsref.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\imageprocessing\Fit2D\@Model2DGaussPlusRing\transformResult.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\imageprocessing\Fit2D\@Model2DGaussStretched\.DS_Store</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\imageprocessing\Fit2D\@Model2DGaussStretched\evaluate.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\imageprocessing\Fit2D\@Model2DGaussStretched\getParameter.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\imageprocessing\Fit2D\@Model2DGaussStretched\Model2DGaussStretched.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\imageprocessing\Fit2D\@Model2DGaussStretched\subsref.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\imageprocessing\Fit2D\@Model2DGaussStretched\transformResult.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\imageprocessing\Fit2D\@Model2DGaussSymmetric\.DS_Store</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\imageprocessing\Fit2D\@Model2DGaussSymmetric\evaluate.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\imageprocessing\Fit2D\@Model2DGaussSymmetric\getParameter.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\imageprocessing\Fit2D\@Model2DGaussSymmetric\Model2DGaussSymmetric.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\imageprocessing\Fit2D\@Model2DGaussSymmetric\subsref.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\imageprocessing\Fit2D\@Model2DGaussSymmetric\transformResult.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\imageprocessing\Fit2D\@Model2DShortFilament\.DS_Store</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\imageprocessing\Fit2D\@Model2DShortFilament\evaluate.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\imageprocessing\Fit2D\@Model2DShortFilament\getParameter.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\imageprocessing\Fit2D\@Model2DShortFilament\Model2DShortFilament.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\imageprocessing\Fit2D\@Model2DShortFilament\subsref.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\imageprocessing\Fit2D\@Model2DShortFilament\transformResult.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\imageprocessing\Fit2D\@ModelNeg2DGaussPlusRing\evaluate.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\imageprocessing\Fit2D\@ModelNeg2DGaussPlusRing\getParameter.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\imageprocessing\Fit2D\@ModelNeg2DGaussPlusRing\ModelNeg2DGaussPlusRing.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\imageprocessing\Fit2D\@ModelNeg2DGaussPlusRing\subsref.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\imageprocessing\Fit2D\@ModelNeg2DGaussPlusRing\transformResult.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\imageprocessing\Fit2D\CoD2String.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\imageprocessing\Fit2D\Fit2D.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\imageprocessing\Fit2D\GaussianStrip.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\imageprocessing\Fit2D\GaussianStripBend.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\imageprocessing\Fit2D\HalfPlane.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\imageprocessing\Fit2D\ModelManager\GetModelChar.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\imageprocessing\getClusters.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\imageprocessing\Image2Binary.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\imageprocessing\imlogfile.txt</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\imageprocessing\InterpolateData.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\imageprocessing\Log.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\imageprocessing\NormMatrix.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\imageprocessing\rectintersect.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\imageprocessing\RoughScan.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\imageprocessing\ScanImage.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\bin\imageprocessing\ScanVideo.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\documentation\.DS_Store</file>
+      <file>${PROJECT_ROOT}\MasFiesta\documentation\datastructure.pdf</file>
+      <file>${PROJECT_ROOT}\MasFiesta\documentation\documentation.pdf</file>
+      <file>${PROJECT_ROOT}\MasFiesta\documentation\Manual.docx</file>
+      <file>${PROJECT_ROOT}\MasFiesta\documentation\MasFiesta Features.rtf</file>
+      <file>${PROJECT_ROOT}\MasFiesta\documentation\Workflow dynamic microtubules.docx</file>
+      <file>${PROJECT_ROOT}\MasFiesta\documentation\workflow.pdf</file>
+      <file>${PROJECT_ROOT}\MasFiesta\FIESTA Academic License.pdf</file>
+      <file>${PROJECT_ROOT}\MasFiesta\fiesta.ini</file>
+      <file>${PROJECT_ROOT}\MasFiesta\fiestastatus\frame1.mat</file>
+      <file>${PROJECT_ROOT}\MasFiesta\fiestastatus\frame10.mat</file>
+      <file>${PROJECT_ROOT}\MasFiesta\fiestastatus\frame100.mat</file>
+      <file>${PROJECT_ROOT}\MasFiesta\fiestastatus\frame11.mat</file>
+      <file>${PROJECT_ROOT}\MasFiesta\fiestastatus\frame12.mat</file>
+      <file>${PROJECT_ROOT}\MasFiesta\fiestastatus\frame13.mat</file>
+      <file>${PROJECT_ROOT}\MasFiesta\fiestastatus\frame14.mat</file>
+      <file>${PROJECT_ROOT}\MasFiesta\fiestastatus\frame15.mat</file>
+      <file>${PROJECT_ROOT}\MasFiesta\fiestastatus\frame16.mat</file>
+      <file>${PROJECT_ROOT}\MasFiesta\fiestastatus\frame17.mat</file>
+      <file>${PROJECT_ROOT}\MasFiesta\fiestastatus\frame18.mat</file>
+      <file>${PROJECT_ROOT}\MasFiesta\fiestastatus\frame19.mat</file>
+      <file>${PROJECT_ROOT}\MasFiesta\fiestastatus\frame2.mat</file>
+      <file>${PROJECT_ROOT}\MasFiesta\fiestastatus\frame20.mat</file>
+      <file>${PROJECT_ROOT}\MasFiesta\fiestastatus\frame21.mat</file>
+      <file>${PROJECT_ROOT}\MasFiesta\fiestastatus\frame22.mat</file>
+      <file>${PROJECT_ROOT}\MasFiesta\fiestastatus\frame23.mat</file>
+      <file>${PROJECT_ROOT}\MasFiesta\fiestastatus\frame24.mat</file>
+      <file>${PROJECT_ROOT}\MasFiesta\fiestastatus\frame25.mat</file>
+      <file>${PROJECT_ROOT}\MasFiesta\fiestastatus\frame26.mat</file>
+      <file>${PROJECT_ROOT}\MasFiesta\fiestastatus\frame27.mat</file>
+      <file>${PROJECT_ROOT}\MasFiesta\fiestastatus\frame28.mat</file>
+      <file>${PROJECT_ROOT}\MasFiesta\fiestastatus\frame29.mat</file>
+      <file>${PROJECT_ROOT}\MasFiesta\fiestastatus\frame3.mat</file>
+      <file>${PROJECT_ROOT}\MasFiesta\fiestastatus\frame30.mat</file>
+      <file>${PROJECT_ROOT}\MasFiesta\fiestastatus\frame31.mat</file>
+      <file>${PROJECT_ROOT}\MasFiesta\fiestastatus\frame32.mat</file>
+      <file>${PROJECT_ROOT}\MasFiesta\fiestastatus\frame33.mat</file>
+      <file>${PROJECT_ROOT}\MasFiesta\fiestastatus\frame34.mat</file>
+      <file>${PROJECT_ROOT}\MasFiesta\fiestastatus\frame35.mat</file>
+      <file>${PROJECT_ROOT}\MasFiesta\fiestastatus\frame36.mat</file>
+      <file>${PROJECT_ROOT}\MasFiesta\fiestastatus\frame37.mat</file>
+      <file>${PROJECT_ROOT}\MasFiesta\fiestastatus\frame38.mat</file>
+      <file>${PROJECT_ROOT}\MasFiesta\fiestastatus\frame39.mat</file>
+      <file>${PROJECT_ROOT}\MasFiesta\fiestastatus\frame4.mat</file>
+      <file>${PROJECT_ROOT}\MasFiesta\fiestastatus\frame40.mat</file>
+      <file>${PROJECT_ROOT}\MasFiesta\fiestastatus\frame41.mat</file>
+      <file>${PROJECT_ROOT}\MasFiesta\fiestastatus\frame42.mat</file>
+      <file>${PROJECT_ROOT}\MasFiesta\fiestastatus\frame43.mat</file>
+      <file>${PROJECT_ROOT}\MasFiesta\fiestastatus\frame44.mat</file>
+      <file>${PROJECT_ROOT}\MasFiesta\fiestastatus\frame45.mat</file>
+      <file>${PROJECT_ROOT}\MasFiesta\fiestastatus\frame46.mat</file>
+      <file>${PROJECT_ROOT}\MasFiesta\fiestastatus\frame47.mat</file>
+      <file>${PROJECT_ROOT}\MasFiesta\fiestastatus\frame48.mat</file>
+      <file>${PROJECT_ROOT}\MasFiesta\fiestastatus\frame49.mat</file>
+      <file>${PROJECT_ROOT}\MasFiesta\fiestastatus\frame5.mat</file>
+      <file>${PROJECT_ROOT}\MasFiesta\fiestastatus\frame50.mat</file>
+      <file>${PROJECT_ROOT}\MasFiesta\fiestastatus\frame51.mat</file>
+      <file>${PROJECT_ROOT}\MasFiesta\fiestastatus\frame52.mat</file>
+      <file>${PROJECT_ROOT}\MasFiesta\fiestastatus\frame53.mat</file>
+      <file>${PROJECT_ROOT}\MasFiesta\fiestastatus\frame54.mat</file>
+      <file>${PROJECT_ROOT}\MasFiesta\fiestastatus\frame55.mat</file>
+      <file>${PROJECT_ROOT}\MasFiesta\fiestastatus\frame56.mat</file>
+      <file>${PROJECT_ROOT}\MasFiesta\fiestastatus\frame57.mat</file>
+      <file>${PROJECT_ROOT}\MasFiesta\fiestastatus\frame58.mat</file>
+      <file>${PROJECT_ROOT}\MasFiesta\fiestastatus\frame59.mat</file>
+      <file>${PROJECT_ROOT}\MasFiesta\fiestastatus\frame6.mat</file>
+      <file>${PROJECT_ROOT}\MasFiesta\fiestastatus\frame60.mat</file>
+      <file>${PROJECT_ROOT}\MasFiesta\fiestastatus\frame61.mat</file>
+      <file>${PROJECT_ROOT}\MasFiesta\fiestastatus\frame62.mat</file>
+      <file>${PROJECT_ROOT}\MasFiesta\fiestastatus\frame63.mat</file>
+      <file>${PROJECT_ROOT}\MasFiesta\fiestastatus\frame64.mat</file>
+      <file>${PROJECT_ROOT}\MasFiesta\fiestastatus\frame65.mat</file>
+      <file>${PROJECT_ROOT}\MasFiesta\fiestastatus\frame66.mat</file>
+      <file>${PROJECT_ROOT}\MasFiesta\fiestastatus\frame67.mat</file>
+      <file>${PROJECT_ROOT}\MasFiesta\fiestastatus\frame68.mat</file>
+      <file>${PROJECT_ROOT}\MasFiesta\fiestastatus\frame69.mat</file>
+      <file>${PROJECT_ROOT}\MasFiesta\fiestastatus\frame7.mat</file>
+      <file>${PROJECT_ROOT}\MasFiesta\fiestastatus\frame70.mat</file>
+      <file>${PROJECT_ROOT}\MasFiesta\fiestastatus\frame71.mat</file>
+      <file>${PROJECT_ROOT}\MasFiesta\fiestastatus\frame72.mat</file>
+      <file>${PROJECT_ROOT}\MasFiesta\fiestastatus\frame73.mat</file>
+      <file>${PROJECT_ROOT}\MasFiesta\fiestastatus\frame74.mat</file>
+      <file>${PROJECT_ROOT}\MasFiesta\fiestastatus\frame75.mat</file>
+      <file>${PROJECT_ROOT}\MasFiesta\fiestastatus\frame76.mat</file>
+      <file>${PROJECT_ROOT}\MasFiesta\fiestastatus\frame77.mat</file>
+      <file>${PROJECT_ROOT}\MasFiesta\fiestastatus\frame78.mat</file>
+      <file>${PROJECT_ROOT}\MasFiesta\fiestastatus\frame79.mat</file>
+      <file>${PROJECT_ROOT}\MasFiesta\fiestastatus\frame8.mat</file>
+      <file>${PROJECT_ROOT}\MasFiesta\fiestastatus\frame80.mat</file>
+      <file>${PROJECT_ROOT}\MasFiesta\fiestastatus\frame81.mat</file>
+      <file>${PROJECT_ROOT}\MasFiesta\fiestastatus\frame82.mat</file>
+      <file>${PROJECT_ROOT}\MasFiesta\fiestastatus\frame83.mat</file>
+      <file>${PROJECT_ROOT}\MasFiesta\fiestastatus\frame84.mat</file>
+      <file>${PROJECT_ROOT}\MasFiesta\fiestastatus\frame85.mat</file>
+      <file>${PROJECT_ROOT}\MasFiesta\fiestastatus\frame86.mat</file>
+      <file>${PROJECT_ROOT}\MasFiesta\fiestastatus\frame87.mat</file>
+      <file>${PROJECT_ROOT}\MasFiesta\fiestastatus\frame88.mat</file>
+      <file>${PROJECT_ROOT}\MasFiesta\fiestastatus\frame89.mat</file>
+      <file>${PROJECT_ROOT}\MasFiesta\fiestastatus\frame9.mat</file>
+      <file>${PROJECT_ROOT}\MasFiesta\fiestastatus\frame90.mat</file>
+      <file>${PROJECT_ROOT}\MasFiesta\fiestastatus\frame91.mat</file>
+      <file>${PROJECT_ROOT}\MasFiesta\fiestastatus\frame92.mat</file>
+      <file>${PROJECT_ROOT}\MasFiesta\fiestastatus\frame93.mat</file>
+      <file>${PROJECT_ROOT}\MasFiesta\fiestastatus\frame94.mat</file>
+      <file>${PROJECT_ROOT}\MasFiesta\fiestastatus\frame95.mat</file>
+      <file>${PROJECT_ROOT}\MasFiesta\fiestastatus\frame96.mat</file>
+      <file>${PROJECT_ROOT}\MasFiesta\fiestastatus\frame97.mat</file>
+      <file>${PROJECT_ROOT}\MasFiesta\fiestastatus\frame98.mat</file>
+      <file>${PROJECT_ROOT}\MasFiesta\fiestastatus\frame99.mat</file>
+      <file>${PROJECT_ROOT}\MasFiesta\FiestaUpdater.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\gpl-3.0.txt</file>
+      <file>${PROJECT_ROOT}\MasFiesta\logfile.txt</file>
+      <file>${PROJECT_ROOT}\MasFiesta\MasFiesta-extension\.DS_Store</file>
+      <file>${PROJECT_ROOT}\MasFiesta\MasFiesta-extension\.gitignore</file>
+      <file>${PROJECT_ROOT}\MasFiesta\MasFiesta-extension\FromFileExchange\colorspace.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\MasFiesta-extension\FromFileExchange\distinguishable_colors.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\MasFiesta-extension\FromFileExchange\getAllFiles.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\MasFiesta-extension\FromFileExchange\hexsingle2num.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\MasFiesta-extension\FromFileExchange\license colorspace.txt</file>
+      <file>${PROJECT_ROOT}\MasFiesta\MasFiesta-extension\FromFileExchange\license distinguishable_colors.txt</file>
+      <file>${PROJECT_ROOT}\MasFiesta\MasFiesta-extension\FromFileExchange\license hexsingle2num.txt</file>
+      <file>${PROJECT_ROOT}\MasFiesta\MasFiesta-extension\FromFileExchange\license linspecer.txt</file>
+      <file>${PROJECT_ROOT}\MasFiesta\MasFiesta-extension\FromFileExchange\license nanfastsmooth.txt</file>
+      <file>${PROJECT_ROOT}\MasFiesta\MasFiesta-extension\FromFileExchange\license subtightplot.txt</file>
+      <file>${PROJECT_ROOT}\MasFiesta\MasFiesta-extension\FromFileExchange\linept2.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\MasFiesta-extension\FromFileExchange\linspecer.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\MasFiesta-extension\FromFileExchange\linspecer_modified.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\MasFiesta-extension\FromFileExchange\nanfastsmooth.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\MasFiesta-extension\FromFileExchange\num2clip.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\MasFiesta-extension\FromFileExchange\ScreenCapture\ImageSelection.class</file>
+      <file>${PROJECT_ROOT}\MasFiesta\MasFiesta-extension\FromFileExchange\ScreenCapture\ImageSelection.java</file>
+      <file>${PROJECT_ROOT}\MasFiesta\MasFiesta-extension\FromFileExchange\ScreenCapture\license.txt</file>
+      <file>${PROJECT_ROOT}\MasFiesta\MasFiesta-extension\FromFileExchange\ScreenCapture\screencapture.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\MasFiesta-extension\FromFileExchange\ScreenCapture\ScreenCapture.png</file>
+      <file>${PROJECT_ROOT}\MasFiesta\MasFiesta-extension\FromFileExchange\subtightplot.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\MasFiesta-extension\FromFileExchange\wmean.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\MasFiesta-extension\MasFIESTA\Dynamic Filaments\filament end cftool session.sfit</file>
+      <file>${PROJECT_ROOT}\MasFiesta\MasFiesta-extension\MasFIESTA\Dynamic Filaments\fJKDynamicFilamentsGui.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\MasFiesta-extension\MasFIESTA\Dynamic Filaments\fJKfrequencyvsXplot.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\MasFiesta-extension\MasFIESTA\Dynamic Filaments\fJKplotframework.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\MasFiesta-extension\MasFIESTA\Dynamic Filaments\fJKscatterboxplot.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\MasFiesta-extension\MasFIESTA\Dynamic Filaments\fJKSegment.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\MasFiesta-extension\MasFIESTA\Dynamic Filaments\JKextract_image_parameter.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\MasFiesta-extension\MasFIESTA\Dynamic Filaments\num2clip_jochen.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\MasFiesta-extension\MasFIESTA\FIESTA\fJKAmplitudeStatsGui.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\MasFiesta-extension\MasFIESTA\FIESTA\fJKConvertTags.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\MasFiesta-extension\MasFIESTA\FIESTA\fJKDataGui.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\MasFiesta-extension\MasFIESTA\FIESTA\fJKDynamicUtility.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\MasFiesta-extension\MasFIESTA\FIESTA\fJKfloat2tags.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\MasFiesta-extension\MasFIESTA\FIESTA\fJKMenu.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\MasFiesta-extension\MasFIESTA\FIESTA\fJKNewKymo.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\MasFiesta-extension\MasFIESTA\FIESTA\fJKtags2float.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\MasFiesta-extension\MasFIESTA\fitting functions\FitErf.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\MasFiesta-extension\MasFIESTA\fitting functions\FitErfGFP.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\MasFiesta-extension\MasFIESTA\fJKGetRefData.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\MasFiesta-extension\MasFIESTA\fJKPlotIntensity.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\MasFiesta-extension\MasFIESTA\fJKread_custom_data.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\MasFiesta-extension\MasFIESTA\license.txt</file>
+      <file>${PROJECT_ROOT}\MasFiesta\MasFiesta-extension\MasFIESTA\ScanFuns\batch_kymo_data.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\MasFiesta-extension\MasFIESTA\ScanFuns\batch_rename.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\MasFiesta-extension\MasFIESTA\ScanFuns\batch_single_channel.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\MasFiesta-extension\MasFIESTA\ScanFuns\batch_tip_circles.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\MasFiesta-extension\MasFIESTA\ScanFuns\fJKLoadLink.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\MasFiesta-extension\MasFIESTA\ScanFuns\help_CorrectObject.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\MasFiesta-extension\MasFIESTA\ScanFuns\help_CorrectStack.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\MasFiesta-extension\MasFIESTA\ScanFuns\help_fit_error_function.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\MasFiesta-extension\MasFIESTA\ScanFuns\help_get_full_intensities.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\MasFiesta-extension\MasFIESTA\ScanFuns\help_get_tip_intensities.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\MasFiesta-extension\MasFIESTA\ScanFuns\help_get_tip_kymo.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\MasFiesta-extension\MasFIESTA\ScanFuns\help_get_tip_points.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\MasFiesta-extension\MasFIESTA\ScanFuns\help_GetStack.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\MasFiesta-extension\MasFIESTA\ScanFuns\JKScanFiles.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\MasFiesta-extension\MasFIESTA\select_filaments.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\MasFiesta-extension\MasFIESTA\uigetffast.m</file>
+      <file>${PROJECT_ROOT}\MasFiesta\readme.txt</file>
+    </fileset.resources>
+    <fileset.package />
+    <fileset.depfun />
+    <build-deliverables>
+      <file location="${PROJECT_ROOT}\MasFIESTA\for_testing" name="MasFiesta.exe" optional="false">D:\MasFIESTA\for_testing\MasFiesta.exe</file>
+      <file location="${PROJECT_ROOT}\MasFIESTA\for_testing" name="splash.png" optional="false">D:\MasFIESTA\for_testing\splash.png</file>
+      <file location="${PROJECT_ROOT}\MasFIESTA\for_testing" name="readme.txt" optional="true">D:\MasFIESTA\for_testing\readme.txt</file>
+    </build-deliverables>
+    <workflow />
+    <matlab>
+      <root>C:\Program Files\MATLAB\R2016a</root>
+      <toolboxes>
+        <toolbox name="fixedpoint" />
+        <toolbox name="matlabcoder" />
+        <toolbox name="matlabhdlcoder" />
+        <toolbox name="embeddedcoder" />
+      </toolboxes>
+      <toolbox>
+        <fixedpoint>
+          <enabled>true</enabled>
+        </fixedpoint>
+      </toolbox>
+      <toolbox>
+        <matlabcoder>
+          <enabled>true</enabled>
+        </matlabcoder>
+      </toolbox>
+      <toolbox>
+        <matlabhdlcoder>
+          <enabled>true</enabled>
+        </matlabhdlcoder>
+      </toolbox>
+      <toolbox>
+        <embeddedcoder>
+          <enabled>true</enabled>
+        </embeddedcoder>
+      </toolbox>
+    </matlab>
+    <platform>
+      <unix>false</unix>
+      <mac>false</mac>
+      <windows>true</windows>
+      <win2k>false</win2k>
+      <winxp>false</winxp>
+      <vista>false</vista>
+      <linux>false</linux>
+      <solaris>false</solaris>
+      <osver>6.2</osver>
+      <os32>false</os32>
+      <os64>true</os64>
+      <arch>win64</arch>
+      <matlab>true</matlab>
+    </platform>
+  </configuration>
+</deployment-project>
