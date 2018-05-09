@@ -121,7 +121,7 @@ if isdeployed
         FiestaDir.AppData = '~/Library/Fiesta/';
         DirCurrent = '~/';
     else
-        FiestaDir.AppData = [DirCurrent 'AppData\'];%[ctfroot filesep 'FIESTA JochenK 1.0' filesep 'source' filesep];
+        FiestaDir.AppData = DirCurrent;%[ctfroot filesep 'FIESTA JochenK 1.0' filesep 'source' filesep];
     end 
 else
     FiestaDir.AppData = DirCurrent;
