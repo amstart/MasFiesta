@@ -452,16 +452,8 @@ if FileName~=0
         if isempty(strfind(file,'.tif'))
             file = [file '.tif'];
         end
-        progressdlg(0,'Saving Stack');
-        N = size(Stack{1},3);
-        for n=1:N
-            if n==1
-                imwrite(Stack{1}(:,:,n),file,'tiff','Compression','none','WriteMode','overwrite');
-            else
-                imwrite(Stack{1}(:,:,n),file,'tiff','Compression','none','WriteMode','append');
-            end
-            waitbar(n/N*100)
-        end
+        answer = inputdlg('Channel?');
+        bfsave(Stack{str2double(answer)},file,'BigTiff', true, 'dimensionOrder', 'XYTCZ');
     end
 end
 
