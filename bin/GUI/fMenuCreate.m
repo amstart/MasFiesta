@@ -249,7 +249,7 @@ hMenu.mFreehandScan = uimenu('Parent',hMenu.mTools,'Callback','fMenuTools(''Scan
                      
 hMenu.mFilamentScan = uimenu('Parent',hMenu.mTools,'Callback','fMenuTools(''ScanFilament'',getappdata(0,''hMainGui''));','Enable','off',...
                              'Label','Use Filament for Scan','Tag','mFilamentScan');    
-                         
+                                                  
                      
 %create Statistics menu
 hMenu.mStats = uimenu('Parent',hMainGui.fig,'Label','Statistics','Tag','mStats');
@@ -287,9 +287,22 @@ hMenu.mBleachEvaluate = uimenu('Parent',hMenu.mStats,'Callback','fBleachEvaluate
                 
 hMenu.mFlowEvaluate = uimenu('Parent',hMenu.mStats,'Callback','fFlowEval;',...
                              'Label','Flow Evaluation','Tag','mFlowEvaluate');
+                        
+                  
+%create Misc menu
+hMenu.mMisc = uimenu('Parent',hMainGui.fig,'Label','Misc','Tag','mMisc');
+
+hMenu.mShowMissing = uimenu('Parent',hMenu.mMisc,'Callback','fMenuTools(''ShowMissing'',getappdata(0,''hMainGui''));',...
+                             'Label','Show untracked frames (selected)','Tag','mShowMissing', 'Separator','on');   
                          
-hMenu.mShowMissing = uimenu('Parent',hMenu.mStats,'Callback','fMenuStatistics(''ShowMissing'',getappdata(0,''hMainGui''));',...
-                             'Label','Show untracked frames (selected)','Tag','mShowMissing');   
+hMenu.mJoinNearby = uimenu('Parent',hMenu.mMisc,'Callback','fMenuTools(''JoinNearby'',getappdata(0,''hMainGui''));',...
+                             'Label','Join close Molecules','Tag','mJoinNearby');   
+
+%create Extensions menu
+hMenu.mExtensions = uimenu('Parent',hMainGui.fig,'Label','Extensions','Tag','mExtensions');
+
+hMenu.mJochenK = uimenu('Parent',hMenu.mExtensions,'Label','MásFIESTA','Tag','mJochenK','Callback','fJKMenu');
+
                         
 %create Help menu
 hMenu.mHelp = uimenu('Parent',hMainGui.fig,'Label','Help','Tag','mHelp');
@@ -304,11 +317,7 @@ hMenu.mHowToFil = uimenu('Parent',hMenu.mHelp,'Label','How to track filaments','
 
 hMenu.mAbout = uimenu('Parent',hMenu.mHelp,'Callback','fAboutGui(getappdata(0,''hMainGui''));',...
                       'Label','About FIESTA','Tag','mAbout','Separator','on');
-                  
-%create Extensions menu
-hMenu.mExtensions = uimenu('Parent',hMainGui.fig,'Label','Extensions','Tag','mExtensions');
 
-hMenu.mJochenK = uimenu('Parent',hMenu.mExtensions,'Label','MásFIESTA','Tag','mJochenK','Callback','fJKMenu');
 
 %create region context menu
 hMenu.ctRegion = uicontextmenu('Parent',hMainGui.fig);

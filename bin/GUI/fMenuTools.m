@@ -20,7 +20,59 @@ switch func
         ScanFreehand(varargin{1});      
     case 'ShowKymoGraph'
         ShowKymoGraph(varargin{1});   
+    case 'ShowMissing'
+        ShowMissing(varargin{1});  
+    case 'JoinNearby'
+        JoinNearby(varargin{1});  
 end
+
+function ShowMissing(hMainGui)
+global Molecule
+global Filament
+if length(hMainGui.Values.FrameIdx)>2
+    n = hMainGui.Values.FrameIdx(1)+1;
+else
+    n = 2;
+end
+allframes = 1:hMainGui.Values.MaxIdx(n);
+trackedframes = [];
+for i=1:length(Molecule)
+    if Molecule(i).Selected
+        trackedframes = vertcat(trackedframes, Molecule(i).Results(:,1));
+    end
+end
+for i=1:length(Filament)
+    if Filament(i).Selected
+        trackedframes = vertcat(trackedframes, Filament(i).Results(:,1));
+    end
+end
+uitable1 = dialog('WindowStyle','normal');
+uitable('Parent', uitable1, 'Data',setxor(allframes, trackedframes)); drawnow;
+
+function JoinNearby(hMainGui)
+global Molecule
+answer = inputdlg('Look for Molecules in which radius?');
+NewSet = Molecule;
+delete = false(1, length(Molecule));
+for i=1:length(Molecule)
+    for j=1:length(Molecule)
+        if i~=j && ~delete(i)
+            p1 = mean(Molecule(i).Results(:,3:4),1);
+            p2 = mean(Molecule(j).Results(:,3:4),1);
+            if CalcDistance(p1,p2) < str2double(answer)
+                NewResults = vertcat(Molecule(i).Results, Molecule(j).Results);
+                if max(sum(NewResults(:,1)==NewResults(:,1)')) > 1
+                    continue
+                end
+                NewSet(i).Results = sortrows(NewResults);
+                delete(j) = true;
+            end
+        end
+    end
+end
+NewSet(delete) = [];
+Molecule = NewSet;
+fRightPanel('UpdateList',hMainGui.RightPanel.pData,Molecule,hMainGui.Menu.ctListMol,hMainGui.Values.MaxIdx);
 
 function MeasureLine(hMainGui)
 fRightPanel('ToolsMeasurePanel',hMainGui);

@@ -77,6 +77,9 @@ for m = 1:length(Stack)
     if length(Drift)<m
         Drift{m} = [];
     end
+%     if correct_first_frame
+%         Stack{m} = cat(3, ones(size(Stack{m}(:,:,1))),Stack{m});
+%     end
     if (m==1 && ~isempty(Drift{m})) || (m>1 && (~isempty(Drift{m}) || ~all(hMainGui.Values.TformChannel{1}(:)==hMainGui.Values.TformChannel{m}(:))))
         [y,x,z] = size(Stack{m}); 
         T = hMainGui.Values.TformChannel{m};

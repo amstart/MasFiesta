@@ -9,32 +9,7 @@ switch func
         cObj = CountObjects(varargin{1});
     case 'AlignFilament'
         AlignFilament;
-    case 'ShowMissing'
-        ShowMissing(varargin{1});  
 end
-
-function ShowMissing(hMainGui)
-global Molecule
-global Filament
-if length(hMainGui.Values.FrameIdx)>2
-    n = hMainGui.Values.FrameIdx(1)+1;
-else
-    n = 2;
-end
-allframes = 1:hMainGui.Values.MaxIdx(n);
-trackedframes = [];
-for i=1:length(Molecule)
-    if Molecule(i).Selected
-        trackedframes = vertcat(trackedframes, Molecule(i).Results(:,1));
-    end
-end
-for i=1:length(Filament)
-    if Filament(i).Selected
-        trackedframes = vertcat(trackedframes, Filament(i).Results(:,1));
-    end
-end
-uitable1 = dialog('WindowStyle','normal');
-uitable('Parent', uitable1, 'Data',setxor(allframes, trackedframes));
 
 function AlignFilament
 global Molecule
