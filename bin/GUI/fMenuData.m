@@ -105,7 +105,7 @@ if PathName~=0
     FiestaDir.Stack=PathName;
     if strcmp(get(hMainGui.Menu.mSaveLoadDir,'Checked'),'on') %JochenK
         underscores = strfind(FileName, '_');
-        if exist([FiestaDir.Stack FileName(1:underscores(1)-1)], 'dir')
+        if ~isempty(underscores) && exist([FiestaDir.Stack FileName(1:underscores(1)-1)], 'dir')
             FiestaDir.Load = [FiestaDir.Stack FileName(1:underscores(1)-1)];
             FiestaDir.Save = [FiestaDir.Stack FileName(1:underscores(1)-1)];
         elseif isempty(strfind(FiestaDir.Load, FiestaDir.Stack))
