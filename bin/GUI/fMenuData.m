@@ -436,8 +436,8 @@ function SaveStack
 global Stack;
 global TimeInfo; %#ok<NUSED>
 global FiestaDir
-msgbox('DO NOT overwrite your original stack because you will lose Metadata (Time data for example).', 'modal');
-[FileName,PathName,FilterSpec] = uiputfile({'*.mat','MATLAB-File (*.mat)';'*.tif','Multilayer TIFF-Files (*.tif)'},'Save Stack',FiestaDir.Stack); %open dialog for *.stk files 
+answer = inputdlg('Channel? (Note: Do not overwrite your original data, you will lose metadata)', 'Enter Channel #', 1, {'1'});
+[FileName,PathName,FilterSpec] = uiputfile({'*.tif','Multilayer TIFF-Files (*.tif)';'*.mat','MATLAB-File (*.mat)'},'Save Stack',FiestaDir.Stack); %open dialog for *.stk files 
 if FileName~=0
     if FilterSpec==1
         progressdlg('Title','Saving Stack','String','Writing stack to MATLAB file','Indeterminate','on');
@@ -452,7 +452,6 @@ if FileName~=0
         if isempty(strfind(file,'.tif'))
             file = [file '.tif'];
         end
-        answer = inputdlg('Channel?');
         bfsave(Stack{str2double(answer)},file,'BigTiff', true, 'dimensionOrder', 'XYTCZ');
     end
 end
