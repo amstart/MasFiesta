@@ -196,15 +196,15 @@ global Stack;
 y=size(Stack{1},1);
 x=size(Stack{1},2);
 z=size(Stack{1},3);
-c=numel(Stack);
+color_index=numel(Stack);
 
 Config.FirstTFrame=1;
 Config.FirstCFrame=1;
 Config.LastFrame=z;
 
-if c>1
+if color_index>1
     set(hMainGui.ToolBar.ToolChannels,'Visible','off','State','off');
-    set(hMainGui.ToolBar.ToolChannels([1:c 5]),'Visible','on');
+    set(hMainGui.ToolBar.ToolChannels([1:min(color_index,4) 5]),'Visible','on');
     set(hMainGui.ToolBar.ToolChannels(1),'State','on');
     set(hMainGui.ToolBar.ToolColors,'Visible','on');
 else
@@ -223,9 +223,9 @@ hMainGui.Values.Thresh = [];
 hMainGui.Values.RelThresh = [];
 hMainGui.Values.StackColor = [];
 
-MaxImage = zeros(y,x,c);
-AverageImage = zeros(y,x,c);
-for n = 1:c
+MaxImage = zeros(y,x,color_index);
+AverageImage = zeros(y,x,color_index);
+for n = 1:color_index
     %find Max and Min Values for Stack
     PixMin = squeeze(min(min(Stack{n})));
     PixMax = squeeze(max(max(Stack{n})));

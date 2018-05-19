@@ -377,10 +377,12 @@ if gcbo ~= hMergeGui.bDel
     for n = 1:nData
         k = find( Objects( Data(n,1) ).Results(:,1) == Data(n,2),1 );
         Results(n,:) = Objects( Data(n,1) ).Results(k,:);
-        TrackingResults{n} = Objects(Data(n,1)).TrackingResults{k};
-        if strcmp(hMergeGui.Mode,'Filament')
-            PosCenter(n,:) = Objects( Data(n,1) ).PosCenter(k,:);
-            ObjData{n} = Objects(Data(n,1)).Data{k};
+        if ~isempty(Objects(Data(n,1)).TrackingResults{1})
+            TrackingResults{n} = Objects(Data(n,1)).TrackingResults{k};
+            if strcmp(hMergeGui.Mode,'Filament')
+                PosCenter(n,:) = Objects( Data(n,1) ).PosCenter(k,:);
+                ObjData{n} = Objects(Data(n,1)).Data{k};
+            end
         end
     end
     Results(:,6) = fDis( Results(:,3:5) );

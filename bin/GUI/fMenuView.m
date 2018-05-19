@@ -10,6 +10,8 @@ switch func
         ColorOverlay;
     case 'CorrectStack'
         CorrectStack;
+    case 'SplitIntoChannels'
+        SplitIntoChannels(varargin{:});
 end
 
 function KeepFrames(hMainGui) %JochenK
@@ -58,6 +60,20 @@ if keep
     hMainGui.Values.TformChannel{end+1} = [1 0 0; 0 1 0; 0 0 1];
     fMainGui('InitGui',hMainGui)
 end
+
+function SplitIntoChannels(hMainGui)
+global Stack
+global TimeInfo
+for i=1:size(Stack{1},3)
+    Stack{end+1} = Stack{1}(:,:,i);
+    TimeInfo{end+1} = 0;
+    hMainGui.Values.MaxIdx(i+1) = 1;
+    hMainGui.Values.TformChannel{i+1} = [1 0 0; 0 1 0; 0 0 1];
+end
+hMainGui.Values.MaxIdx = length(Stack);
+Stack{1} = Stack{1}(:,:,1);
+fMainGui('InitGui',hMainGui)
+
 
 function CorrectStack
 global Stack;

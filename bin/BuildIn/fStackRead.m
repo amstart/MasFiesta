@@ -231,9 +231,9 @@ else
     N = fix(N/sum(Block))*max(Block);
 end
 idxStack = zeros(1,length(Block));
-NperChannel = fix(N/sum(Block)).*(Block)*ones(1,nChannels);
+NperChannel = ceil(N/sum(Block)).*(Block)*ones(1,nChannels);
 sBlock = sum(Block);
-cBlock = [0 cumsum(Block(1:end-1))]; 
+cBlock = [0 cumsum(Block(1:end-1))']; 
 TimeInfo = cell(1,nChannels);
 Stack = cell(1,nChannels);   
 for n = 1:nChannels
@@ -258,9 +258,9 @@ for n = 1:N
     try
         Img = reshape(fread(file,x*y,type),x,y)';
         if numel(idxStack)>1
-            r = n - fix((n-1)/sBLock)*sBlock;
+            r = n - fix((n-1)/sBlock)*sBlock;
             idx = sum(r>cBlock)+1;
-            if isemtpy(idx)
+            if isempty(idx)
                 idx = nChannels;
             end
             idxStack(idx) = idxStack(idx)+1;

@@ -155,6 +155,9 @@ hMenu.mCorrectStack = uimenu('Parent',hMenu.mView,'Callback','fMenuView(''Correc
                         
 hMenu.mKeepFrames = uimenu('Parent',hMenu.mView,'Callback','fMenuView(''KeepFrames'',getappdata(0,''hMainGui''));',...
                           'Label','Split Stack/Keep Frames','Tag','mReloadStack','Enable','on'); 
+                      
+hMenu.mSplitIntoChannels = uimenu('Parent',hMenu.mView,'Callback','fMenuView(''SplitIntoChannels'',getappdata(0,''hMainGui''));',...
+                          'Label','Split frames into channels','Tag','mSplitIntoChannels','Enable','on'); 
                         
 hMenu.mReloadStack = uimenu('Parent',hMenu.mView,'Callback','fMenuData(''OpenStackSpecial'',getappdata(0,''hMainGui''),1);',...
                           'Label','Reload Stack','Tag','mReloadStack'); 

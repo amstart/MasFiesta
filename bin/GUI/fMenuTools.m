@@ -54,6 +54,8 @@ global Molecule
 answer = inputdlg('Look for Molecules in which radius?');
 NewSet = Molecule;
 delete = false(1, length(Molecule));
+handle = progressdlg('String','Looking for close Molecules','Min',0,'Max',length(Molecule),'Parent',hMainGui.fig);
+aborted = false;
 for i=1:length(Molecule)
     for j=1:length(Molecule)
         if i~=j && ~delete(i)
@@ -69,10 +71,20 @@ for i=1:length(Molecule)
             end
         end
     end
+    progressdlg(i);
+    if isempty(handle)
+        aborted = true;
+        break
+    end
 end
 NewSet(delete) = [];
-Molecule = NewSet;
+if ~aborted
+    Molecule = NewSet;
+end
 fRightPanel('UpdateList',hMainGui.RightPanel.pData,Molecule,hMainGui.Menu.ctListMol,hMainGui.Values.MaxIdx);
+fRightPanel('UpdateKymoTracks',hMainGui);
+fShow('Image');
+fShow('Tracks');
 
 function MeasureLine(hMainGui)
 fRightPanel('ToolsMeasurePanel',hMainGui);
