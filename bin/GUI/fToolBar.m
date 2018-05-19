@@ -158,14 +158,14 @@ global Stack;
 global Config;
 global Molecule;
 global Filament;
-if nCh == 4 && length(Stack)>4
-    answer = inputdlg('Which channel?');
-    nCh = str2double(answer{1});
-end
 if ~isempty(Stack)
     hMainGui=getappdata(0,'hMainGui');
     set(hMainGui.ToolBar.ToolChannels(1:4),'State','off');
     set(hMainGui.ToolBar.ToolChannels(nCh),'State','on');
+    if nCh == 4 && length(Stack)>4
+        answer = inputdlg('Which channel?');
+        nCh = str2double(answer{1});
+    end
     hMainGui.Values.FrameIdx(1) = nCh;
     nColor = hMainGui.Values.StackColor(nCh);
     set(hMainGui.ToolBar.ToolColors,'State','off');

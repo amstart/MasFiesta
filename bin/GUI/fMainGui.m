@@ -235,9 +235,8 @@ for n = 1:color_index
     hMainGui.Values.MinStack(n)=mean(PixMin);
 
     hMainGui.Values.MaxRelThresh(n)=2000;
-
-    hMainGui.Values.ScaleMin(n)=round(mean(PixMin));
-    hMainGui.Values.ScaleMax(n)=round(mean(PixMax));
+    middleframe = ceil(size(Stack{n},3)/3);
+    [hMainGui.Values.ScaleMin(n), hMainGui.Values.ScaleMax(n)] = autoadjust(Stack{n}(:,:,middleframe));
     hMainGui.Values.Thresh(n)=min([round(mean2(Stack{n}(:,:,1))+5*std2(Stack{n}(:,:,1))) hMainGui.Values.PixMax(n)]);
     hMainGui.Values.RelThresh(n)=200;
     
