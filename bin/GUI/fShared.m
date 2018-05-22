@@ -115,6 +115,10 @@ if mode(1)==1
                 end
             case 5
                 for i=1:length(Molecule)
+                    orderval(i)=Molecule(i).Selected;
+                end
+            case 6
+                for i=1:length(Molecule)
                     orderval(i)=Molecule(i).Visible;
                 end
         end
@@ -149,11 +153,17 @@ else
                 end
             case 5
                 for i=1:length(Filament)
+                    orderval(i)=Filament(i).Selected;
+                end
+            case 6
+                for i=1:length(Filament)
                     orderval(i)=Filament(i).Visible;
                 end
         end
-        if mode(2) > 0
+        if 5 >= mode(2) > 0
             [~, order] = sort(orderval);
+        elseif mode(2) > 4
+            [~, order] = sort(orderval, 'descend');
         elseif mode(2) < 0
             [~, order] = sort({Filament.File});
         else
