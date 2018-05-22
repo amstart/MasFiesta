@@ -436,7 +436,12 @@ function SaveStack
 global Stack;
 global TimeInfo; %#ok<NUSED>
 global FiestaDir
-answer = inputdlg('Channel? (Note: Do not overwrite your original data, you will lose metadata)', 'Enter Channel #', 1, {'1'});
+if length(Stack)>1
+    answer = inputdlg('Channel? (Note: Do not overwrite your original data, you will lose metadata)', 'Enter Channel #', 1, {'1'});
+    channel = str2double(answer);
+else
+    channel = 1;
+end
 [FileName,PathName,FilterSpec] = uiputfile({'*.tif','Multilayer TIFF-Files (*.tif)';'*.mat','MATLAB-File (*.mat)'},'Save Stack',FiestaDir.Stack); %open dialog for *.stk files 
 if FileName~=0
     if FilterSpec==1
@@ -452,7 +457,7 @@ if FileName~=0
         if isempty(strfind(file,'.tif'))
             file = [file '.tif'];
         end
-        bfsave(Stack{str2double(answer)},file,'BigTiff', true, 'dimensionOrder', 'XYTCZ');
+        bfsave(Stack{channel},file,'BigTiff', true, 'dimensionOrder', 'XYTCZ');
     end
 end
 

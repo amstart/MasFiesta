@@ -83,7 +83,9 @@ for i = 1:size(plotmat,1)
 end
 plotmat(delete,:)=[];
 selection = false(length(objects), 3);
-edges = [-20 0 10 20 30 40 50 100 150 200 250 300 350 400 450 500];
+edges = [-20 0 50 100 150 200 250 300 350 400 450 500];
+% edges = [0 10 20 30 40 50];
+% edges = [0 5 10 15 20 25];
 edgesmid=edges(1:end-1)+diff(edges)/2;
 allframes = [objects.Frame];
 allchannels = [objects.Channel];
@@ -97,7 +99,7 @@ for i = 1:3
 end
 figure(1)
 bar(edgesmid, N', 'Stacked')
-legend('in flush 1', 'seen first time', 'reappearing')
+legend('in flush 1', 'seen first time', 'reappearing within 1 \mum')
 
 % interest = 21;
 % figure
