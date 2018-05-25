@@ -6,8 +6,8 @@
 %         Molecule(i).Results(:,1) = Molecule(i).Results(:,1)+str2double(answer{1});
 %     end
 % end
-% global Molecule;
-% objects=Molecule;
+global Molecule;
+objects=Molecule;
 flushinframes = [17 2 127 5 20];
 frames = zeros(length(objects),1);
 names = cell(length(objects),1);

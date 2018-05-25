@@ -1,5 +1,5 @@
 % answer = inputdlg('Look for objectss in which radius?');
-objects = Molecule;
+% objects = Molecule;
 % handle = progressdlg('String','Looking for close objectss','Min',0,'Max',length(objects));
 delete = false(length(objects),1);
 flushinframes = [17 2 127 5 20];
@@ -72,7 +72,7 @@ for i = startpoints' %subtract coordinates of the starting point from each chain
     altermat = vertcat(altermat, [datamat(second_timers, 1:5) datamat(second_timers, 6:9)...
         - repmat(to_subtract, length(second_timers), 1) repmat(i,length(second_timers), 1) ]);
 end
-plotmat = [mainmat; altermat];
+plotmat = [mainmat];
 delete = false(size(plotmat,1),1);
 for i = 1:size(plotmat,1)
     if diff(plotmat(i,4:5))>1 && i>1
@@ -83,24 +83,31 @@ for i = 1:size(plotmat,1)
 end
 plotmat(delete,:)=[];
 selection = false(length(objects), 3);
-edges = [-20 0 50 100 150 200 250 300 350 400 450 500];
+% edges = [-20 0 50 100 150 200 250 300 350 400 450 500];
 % edges = [0 10 20 30 40 50];
-% edges = [0 5 10 15 20 25];
+edges = [0:5:500];
 edgesmid=edges(1:end-1)+diff(edges)/2;
 allframes = [objects.Frame];
 allchannels = [objects.Channel];
-[~,ia,~] = unique(plotmat(:,2));
+seenReappearing = unique(plotmat(:,2));
 selection(:, 1) = allchannels==1; %patches in flush 1
-selection(ia, 3) = true; %reappearing patches
+selection(seenReappearing, 3) = true; %reappearing patches
 selection(:, 2) = ~selection(:, 1) & ~selection(:, 3);
 N = zeros(1,length(edgesmid));
 for i = 1:3
     [N(i,:),edges,bin] = histcounts(allframes(selection(:,i)), edges);
 end
 figure(1)
-bar(edgesmid, N', 'Stacked')
+bar(edgesmid*0.8, N', 'Stacked')
+title('Occurrence of tau patches on microtubules');
 legend('in flush 1', 'seen first time', 'reappearing within 1 \mum')
-
+ylabel('count');
+xlabel('first occurrence of patch (relative to first flushin frame) [s]');
+figure(2)
+histogram(plotmat(:,3));
+title('Distance to closest patch seen before within 1 \mum radius');
+ylabel('count');
+xlabel('distance to last patch in region [nm]');
 % interest = 21;
 % figure
 % hold on

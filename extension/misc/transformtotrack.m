@@ -1,18 +1,9 @@
-% columns = 'B:P';
-% file = 'X:\jochen\180412.xlsx';
-% [~, worksheets] = xlsfinfo(file);
-% % worksheets = {'19_400x_75mM_2min_shrink'};
-% objects = struct([]);
-% for sheet = worksheets
-%     objects(end+1).Results = xlsread(file,sheet{1},columns);
-%     objects(end).File = sheet{1};
-% end
 pr = length(objects);
 cellx=cell(pr,1);
 celly=cell(pr,1);
 weights=cell(pr,1);
 point_info=cell(pr,1);
-for k=4:4
+for k=1:length(objects)
     tmp = objects(k).Results;
     tmp = tmp(~isnan(tmp(:,end)),:);
     tmp2=tmp(:,1);

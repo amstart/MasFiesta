@@ -445,6 +445,12 @@ end
 [FileName,PathName,FilterSpec] = uiputfile({'*.tif','Multilayer TIFF-Files (*.tif)';'*.mat','MATLAB-File (*.mat)'},'Save Stack',FiestaDir.Stack); %open dialog for *.stk files 
 if FileName~=0
     if FilterSpec==1
+        file = [PathName FileName];
+        if isempty(strfind(file,'.tif'))
+            file = [file '.tif'];
+        end
+        bfsave(Stack{channel},file,'BigTiff', true, 'dimensionOrder', 'XYTCZ');
+    else
         progressdlg('Title','Saving Stack','String','Writing stack to MATLAB file','Indeterminate','on');
         file = [PathName FileName];
         if isempty(strfind(file,'.mat'))
@@ -452,12 +458,6 @@ if FileName~=0
         end
         save(file,'Stack','TimeInfo');
         progressdlg('close');
-    else
-        file = [PathName FileName];
-        if isempty(strfind(file,'.tif'))
-            file = [file '.tif'];
-        end
-        bfsave(Stack{channel},file,'BigTiff', true, 'dimensionOrder', 'XYTCZ');
     end
 end
 
