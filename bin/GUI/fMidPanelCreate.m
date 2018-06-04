@@ -42,7 +42,7 @@ hMidPanel.cCoupleChannels = uicontrol('Parent',hMidPanel.pFrame,'Style','checkbo
                                    
 hMidPanel.sFrame = uicontrol('Parent',hMidPanel.pFrame,'Style','slider','Units','normalized',...
                              'Position',[.07 .05 .86 .9],'Tag','sFrame','Enable','off','BusyAction','cancel',...
-                             'Callback','fMidPanel(''sFrame'',getappdata(0,''hMainGui''));');
+                             'Callback','fMidPanel(''sFrame'',getappdata(0,''hMainGui''));','ButtonDownFcn',@sFrameDrag);
 
 hMidPanel.pInfo = uipanel('Parent',hMainGui.fig,'Units','normalized','Bordertype','beveledout',...
                           'Position',[.1 0 .68 .026],'Tag','pInfo','Visible','on','BackgroundColor',c); 
@@ -55,3 +55,29 @@ hMidPanel.tInfoImage = uicontrol('Parent',hMidPanel.pInfo,'Units','normalized','
                        
 hMidPanel.tInfoCoord = uicontrol('Parent',hMidPanel.pInfo,'Units','normalized','Style','text','Fontsize',12,...
                                 'Position',[0.55 0 0.4 0.95],'Tag','tInfoCoord','String','','HorizontalAlignment','left','BackgroundColor',c);                       
+                            
+addlistener(hMidPanel.sFrame, 'Value', 'PostSet',@sFrameDrag);
+
+function sFrameDrag(~,event)
+if strcmp(event.EventName,'PostSet')
+    hMainGui = getappdata(0,'hMainGui');
+    idx = round(get(event.AffectedObject,'Value'));
+    if length(hMainGui.Values.FrameIdx)>2
+        n = hMainGui.Values.FrameIdx(1)+1;
+    else
+        n = 2;
+    end
+    if idx~=hMainGui.Values.FrameIdx(n)
+        if idx<1
+            hMainGui.Values.FrameIdx(n)=1;
+        elseif idx>hMainGui.Values.MaxIdx(n)
+            hMainGui.Values.FrameIdx(n)=hMainGui.Values.MaxIdx(n);
+        else
+            hMainGui.Values.FrameIdx(n)=idx;
+        end
+        hMainGui.Values.FrameIdx = real(hMainGui.Values.FrameIdx);
+        setappdata(0,'hMainGui',hMainGui);
+        set(hMainGui.MidPanel.eFrame,'String',int2str(hMainGui.Values.FrameIdx(n)));
+        fMidPanel('Update',hMainGui);
+    end
+end
