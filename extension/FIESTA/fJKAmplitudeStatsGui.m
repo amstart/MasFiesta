@@ -94,10 +94,12 @@ hAmplitudeStatsGui.aEquation = axes('Parent',hAmplitudeStatsGui.pOptions,'Units'
                               
 hAmplitudeStatsGui.tMedian = uicontrol('Parent',hAmplitudeStatsGui.pOptions, 'String', 'Median:', 'Style','text','Units','normalized','HorizontalAlignment','left', 'Position',[0.05 0.3 0.225 0.125],'BackgroundColor',c);
 hAmplitudeStatsGui.tMean = uicontrol('Parent',hAmplitudeStatsGui.pOptions, 'String', 'Mean:', 'Style','text','Units','normalized','HorizontalAlignment','left', 'Position',[0.05 0.175 0.225 0.125],'BackgroundColor',c);
-                              
+hAmplitudeStatsGui.tSum = uicontrol('Parent',hAmplitudeStatsGui.pOptions, 'String', 'Sum:', 'Style','text','Units','normalized','HorizontalAlignment','left', 'Position',[0.05 0.05 0.225 0.125],'BackgroundColor',c);
+
 hAmplitudeStatsGui.eMedian = uicontrol('Parent',hAmplitudeStatsGui.pOptions, 'String', '', 'Style','edit','Units','normalized', 'Position',[0.3 0.3 0.175 0.125],'BackgroundColor','white');
 hAmplitudeStatsGui.eMean = uicontrol('Parent',hAmplitudeStatsGui.pOptions, 'String', '', 'Style','edit','Units','normalized', 'Position',[0.3 0.175 0.175 0.125],'BackgroundColor','white');
-
+hAmplitudeStatsGui.eSum = uicontrol('Parent',hAmplitudeStatsGui.pOptions, 'String', '', 'Style','edit','Units','normalized', 'Position',[0.3 0.05 0.175 0.125],'BackgroundColor','white');
+                           
 % ShowEquation(hAmplitudeStatsGui)
 
 hAmplitudeStatsGui.pResultsPanel = uipanel('Parent',hAmplitudeStatsGui.fig,'Position',[0.025 0.08 0.95 0.445],'Tag','PlotPanel','BackgroundColor','white');
@@ -256,7 +258,7 @@ amplength = cell(1,length(Objects));
 time = cell(1,length(Objects));
 if get(hAmplitudeStatsGui.mData, 'Value') == 1
     column = 7;
-    Units.str = '\mum';
+    Units.str = 'nm';
 else
     column = 8;
     Units.str = 'AU';
@@ -264,7 +266,7 @@ end
 for n = 1:length(Objects)
     amplength{n}=[];
     time{n}=[];
-    if size(Objects(n).Results,1)>1
+    if size(Objects(n).Results,1)>0
         amplength{n} = Objects(n).Results(:,column)';
         time{n} = Objects(n).Results(:,2)';
     end
@@ -280,12 +282,12 @@ Data.time=time;
 allamplength = cell2mat(Data.amplength);
 set(hAmplitudeStatsGui.eMedian, 'String', int2str(median(allamplength)));
 set(hAmplitudeStatsGui.eMean, 'String', int2str(mean(allamplength)));
+set(hAmplitudeStatsGui.eSum, 'String', int2str(sum(allamplength)));
 setappdata(hAmplitudeStatsGui.fig,'Data',Data);
 setappdata(hAmplitudeStatsGui.fig,'Units',Units);
 Draw(hAmplitudeStatsGui)
 
 function Draw(hAmplitudeStatsGui)
-Objects = getappdata(hAmplitudeStatsGui.fig,'Objects');
 Data = getappdata(hAmplitudeStatsGui.fig,'Data');
 Units = getappdata(hAmplitudeStatsGui.fig,'Units');
 nObject = get(hAmplitudeStatsGui.lSelection,'Value');
