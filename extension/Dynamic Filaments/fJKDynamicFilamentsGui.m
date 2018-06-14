@@ -18,8 +18,6 @@ switch func
         SetMenu(varargin{:}); 
     case 'Save'
         Save;   
-    case 'LoadFolder'
-        LoadFolder(varargin{:});
     case 'Delete'
         Delete;
     case 'Legend'
@@ -30,8 +28,8 @@ switch func
         Export;   
     case 'Update'
         Update;  
-    case 'Draw'
-        Draw(varargin{:});
+    case 'DF.Draw'
+        DF.Draw(varargin{:});
     case 'Quicksave'
         Quicksave(varargin{:});
     case 'OpenInfo'
@@ -274,7 +272,7 @@ hDynamicFilamentsGui.eSmoothX = uicontrol('Parent',hDynamicFilamentsGui.pOptions
 tooltipstr=sprintf(['Affects how the current MT is plotted in the panels to the right (distance, intensity and velocity are smoothed).\n'...
     'Applies a walking average to the Y-Variable (number indicates over how many points). 1 = no smoothing. Only has effect on "X vs Y" and "Events along X during Y" plots.\n Uses "nanfastsmooth" (google it).']);
                                      
-hDynamicFilamentsGui.eSmoothY = uicontrol('Parent',hDynamicFilamentsGui.pOptions,'Style','edit','Units','normalized','Callback','fJKDynamicFilamentsGui(''Draw'',getappdata(0,''hDynamicFilamentsGui''));',...
+hDynamicFilamentsGui.eSmoothY = uicontrol('Parent',hDynamicFilamentsGui.pOptions,'Style','edit','Units','normalized','Callback','fJKDynamicFilamentsGui(''DF.Draw'',getappdata(0,''hDynamicFilamentsGui''));',...
                                          'Position',[0.4 0.53 .05 .04],'Tag','eSmoothY','Fontsize',10,'TooltipString', tooltipstr,...
                                          'UserData', 'kernel width','String','1','BackgroundColor','white','HorizontalAlignment','center');  
 
@@ -406,7 +404,7 @@ tooltipstr=sprintf(['Shows the track indices (the index of the track within the 
                                      
 hDynamicFilamentsGui.cshowTrackN = uicontrol('Parent',hDynamicFilamentsGui.fig,'Style','checkbox','Units','normalized',...
                                          'Position',[.38 .75 .015 .02],'Tag','cshowTrackN','Fontsize',10,'TooltipString', tooltipstr,...
-                                         'String','','BackgroundColor',c,'HorizontalAlignment','center','Callback','fJKDynamicFilamentsGui(''Draw'',getappdata(0,''hDynamicFilamentsGui''));');
+                                         'String','','BackgroundColor',c,'HorizontalAlignment','center','Callback','fJKDynamicFilamentsGui(''DF.Draw'',getappdata(0,''hDynamicFilamentsGui''));');
                                      
 hDynamicFilamentsGui.bSave = uicontrol('Parent',hDynamicFilamentsGui.fig,'Style','pushbutton','Units','normalized',...
                               'Position',[.025 .005 .06 .05],'Tag','bSave','Fontsize',12,...
@@ -418,7 +416,7 @@ hDynamicFilamentsGui.bLoad = uicontrol('Parent',hDynamicFilamentsGui.fig,'Style'
 
 hDynamicFilamentsGui.bLoadFolder = uicontrol('Parent',hDynamicFilamentsGui.fig,'Style','pushbutton','Units','normalized',...
                               'Position',[.18 .005 .05 .05],'Tag','bLoadFolder','Fontsize',12,...
-                              'String','Load Folder','Callback','fJKDynamicFilamentsGui(''LoadFolder'');');     
+                              'String','Load Folder','Callback','DF.LoadFolder();');     
                           
 hDynamicFilamentsGui.bLoadOptions = uicontrol('Parent',hDynamicFilamentsGui.fig,'Style','pushbutton','Units','normalized',...
                               'Position',[.232 .03 .05 .023],'Tag','bLoadOptions','Fontsize',12,...
@@ -572,13 +570,13 @@ elseif gcbo == hDynamicFilamentsGui.bDoPlot
 elseif gcbo == hDynamicFilamentsGui.bUpdatePlots
     UpdatePlot(hDynamicFilamentsGui);
 elseif gcbo == hDynamicFilamentsGui.lPlot_XVar
-    Draw(hDynamicFilamentsGui);
+    DF.Draw(hDynamicFilamentsGui);
 elseif gcbo == hDynamicFilamentsGui.lPlot_YVar
-    Draw(hDynamicFilamentsGui);
+    DF.Draw(hDynamicFilamentsGui);
 elseif gcbo == hDynamicFilamentsGui.lMethod_TrackValue
-    Draw(hDynamicFilamentsGui);
+    DF.Draw(hDynamicFilamentsGui);
 elseif gcbo == hDynamicFilamentsGui.lMethod_TrackValueY
-    Draw(hDynamicFilamentsGui);
+    DF.Draw(hDynamicFilamentsGui);
 else %when the GUI is initialized or bSegment button is pressed
     [Objects, Tracks] = fJKSegment(Options);
     setappdata(hDynamicFilamentsGui.fig,'Tracks', Tracks);
@@ -797,36 +795,6 @@ for i = 1:length(table.Value)
 end
 setappdata(hDynamicFilamentsGui.fig,'Objects',Objects);
 setappdata(0,'hDynamicFilamentsGui',hDynamicFilamentsGui);
-
-function LoadFolder(varargin)
-global CurrentDir
-hDynamicFilamentsGui = getappdata(0,'hDynamicFilamentsGui');
-% answer = questdlg('Use link file or open all .mat files within folder which say "dynamics"?', 'Method', 'Link','Folder','Link' );
-try
-    folder = uigetdir(CurrentDir, 'Select the folder');
-catch 
-    folder = uigetdir('','Select the folder');
-end
-CurrentDir = folder;
-if folder~=0
-    fileList = getAllFiles(folder);
-    fileList = fileList(~cellfun(@isempty, strfind(fileList, '.mat'))); %only mat files
-    fileList = fileList(~cellfun(@isempty, strfind(fileList, 'dynamics'))|~cellfun(@isempty, strfind(fileList, 'Dynamics'))); %only dynamics
-    numfiles = length(fileList);
-    progressdlg('String','Loading Files','Min',0,'Max',numfiles,'Parent',hDynamicFilamentsGui.fig);
-    for i = 1:numfiles
-        [PathName, FileName, ext] = fileparts(char(fileList(i)));
-        Load([filesep FileName ext],PathName);
-        progressdlg(i);
-    end
-    UpdateOptions();
-end
-%     try
-%         [FileLink, folder] = uigetfile({'*.mat','MAT-File (*.mat)';},'Load Link',CurrentDir);
-%     catch
-%         [FileLink, folder] = uigetfile({'*.mat','MAT-File (*.mat)';},'Load Link');        
-%     end
-
 
 function Legend
 str=sprintf(['For the table:\nColumn 0: MT index\nColumn 1: MT name\n' ...
