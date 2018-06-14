@@ -1,13 +1,13 @@
 function LoadFolder(varargin)
-global CurrentDir
+global DFDir
 hDynamicFilamentsGui = getappdata(0,'hDynamicFilamentsGui');
 % answer = questdlg('Use link file or open all .mat files within folder which say "dynamics"?', 'Method', 'Link','Folder','Link' );
 try
-    folder = uigetdir(CurrentDir, 'Select the folder');
+    folder = uigetdir(DFDir, 'Select the folder');
 catch 
     folder = uigetdir('','Select the folder');
 end
-CurrentDir = folder;
+DFDir = folder;
 if folder~=0
     fileList = getAllFiles(folder);
     fileList = fileList(~cellfun(@isempty, strfind(fileList, '.mat'))); %only mat files
@@ -22,7 +22,7 @@ if folder~=0
     UpdateOptions();
 end
 %     try
-%         [FileLink, folder] = uigetfile({'*.mat','MAT-File (*.mat)';},'Load Link',CurrentDir);
+%         [FileLink, folder] = uigetfile({'*.mat','MAT-File (*.mat)';},'Load Link',DFDir);
 %     catch
 %         [FileLink, folder] = uigetfile({'*.mat','MAT-File (*.mat)';},'Load Link');        
 %     end

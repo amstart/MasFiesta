@@ -12,13 +12,18 @@ Selected=Selected(Selected>0&Selected<length(Objects)+1);
 eSmoothY=str2double(get(hDynamicFilamentsGui.eSmoothY, 'String'));
 if ~isempty(Objects)&&~isempty(Selected)
     Object = Objects(Selected(1));
-    track_id=Object.SegTagAuto(:,5);
+    if hDynamicFilamentsGui.complicated
+        cutoff=Options.eRescueCutoff.val;
+        track_id=Object.SegTagAuto(:,5);
+    else
+        cutoff=nan;
+        track_id=Object.TrackIds;
+    end
     track_id=track_id(track_id>0);
     tracks=Tracks(track_id);
     [c1_vec, c2_vec] = DF.get_plot_vectors(Options, tracks, [1 2]);
     set(hDynamicFilamentsGui.fig, 'Name',['Dynamics: ' Object.Name '  (' Object.Comments ')']);
     modevents=mod(Object.SegTagAuto(Object.SegTagAuto(:,5)>0,3),1);
-    cutoff=Options.eRescueCutoff.val;
     if ~isempty(track_id)
     hold(hDynamicFilamentsGui.aVelPlot,'on');
     hold(hDynamicFilamentsGui.aIPlot,'on');
@@ -27,7 +32,11 @@ if ~isempty(Objects)&&~isempty(Selected)
     for i=1:length(tracks)
         segtrack=tracks(i).Data;
         tseg=segtrack(:,1);
-        pauses=find(segtrack(:,5)==8);
+        if hDynamicFilamentsGui.complicated
+            pauses=find(segtrack(:,5)==8);
+        else
+            pauses = [];
+        end
         if eSmoothY == 1
             dseg=segtrack(:,2);
             c2seg=segtrack(:, Options.lPlot_YVar.val);
@@ -61,7 +70,7 @@ if ~isempty(Objects)&&~isempty(Selected)
                 plot(hDynamicFilamentsGui.aPlot,t0,max(dseg)+d0/10,'LineStyle', 'none', 'Marker', '*', 'MarkerEdgeColor',c);
             end
         end
-        plot(hDynamicFilamentsGui.aPlot,tseg,tracks(i).Velocity(end).*(tseg-t0)+d0,'b-.');
+%         plot(hDynamicFilamentsGui.aPlot,tseg,tracks(i).Velocity(end).*(tseg-t0)+d0,'b-.');
         plot(hDynamicFilamentsGui.aIPlot,tseg,repmat(c1_vec(i), 1, length(tseg)),'b-.');
         plot(hDynamicFilamentsGui.aVelPlot,tseg,repmat(c2_vec(i), 1, length(tseg)),'b-.');
         plot(hDynamicFilamentsGui.aPlot,tseg,dseg,'Color', c);
