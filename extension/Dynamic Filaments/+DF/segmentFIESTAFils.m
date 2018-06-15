@@ -1,4 +1,4 @@
-function [Objects, Tracks] = fJKSegment(Options)
+function [Objects, Tracks] = SegmentFils(Options)
 hDynamicFilamentsGui = getappdata(0,'hDynamicFilamentsGui');
 Tracks=struct('Name', [], 'File', [], 'Type', [], 'Data', [NaN NaN NaN NaN], 'Velocity', nan(2,1), ...
     'Event', [NaN], 'DistanceEventEnd', [NaN]);  %these are required for the SetTable function to work upon startup
@@ -66,7 +66,7 @@ for n = 1:length(Objects)
     segmentstart=1;
     segmenti=1;
     segtagauto=nan(30,4);
-    v=CalcVelocity([t d]);
+    v=DF.CalcVelocity([t d]);
     tagstocheck=1:length(d);
     for m=tagstocheck(2:end-1)
         if autotags(m)==tagnum
@@ -227,21 +227,6 @@ for m=1:size(segtagauto,1) %crop/extend end of tracks
     end
 end
 
-function vel=CalcVelocity(track)
-%the major aim here is to match GFP intensity data with velocity data. If
-%the frame of the GFP intensity is taken after the corresponding microtubule frame, the
-%velocity of that microtubule frame should be computed with the help of the
-%next frame, as the corresponding GFP frame lies between those two
-%frames.
-nData=size(track,1);
-if nData>1
-    vel=nan(nData,1);
-    for i=1:nData-1
-       vel(i)=(track(i+1,2)-track(i,2))/(track(i+1,1)-track(i,1));
-    end
-else
-    vel=nan(size(track,1),1);
-end
 
 function [borderindex] = FindSubsegments(velocity, step, bordervalue, minindex)
 if step > 0

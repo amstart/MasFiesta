@@ -18,10 +18,6 @@ switch func
         SetMenu(varargin{:}); 
     case 'Save'
         Save;   
-    case 'Load'
-        Load(varargin{:});
-    case 'LoadFolder'
-        LoadFolder(varargin{:});
     case 'Delete'
         Delete;
     case 'Legend'
@@ -32,8 +28,8 @@ switch func
         Export;   
     case 'Update'
         Update;  
-    case 'Draw'
-        Draw(varargin{:});
+    case 'DF.Draw'
+        DF.Draw(varargin{:});
     case 'Quicksave'
         Quicksave(varargin{:});
     case 'OpenInfo'
@@ -51,7 +47,7 @@ switch func
 end
 
 function Create(varargin)
-global CurrentDir
+global DFDir
 if nargin == 0
     h=findobj('Tag','hDynamicFilamentsGui');
     close(h)
@@ -64,7 +60,7 @@ if nargin == 0
         set(hDynamicFilamentsGui.fig,'Color',[236 233 216]/255);
     end
     try
-        CurrentDir = 'Z:\Data\Jochen';
+        DFDir = 'Y:\Jochen';
     catch
     end
 else
@@ -73,6 +69,9 @@ else
     delete(children);
     Quicksave(1);
 end
+
+answer = questdlg('Want it complicated for dynamic filaments?');
+hDynamicFilamentsGui.complicated = strcmp(answer, 'Yes');
 
 c = get(hDynamicFilamentsGui.fig,'Color');
                   
@@ -88,7 +87,7 @@ hDynamicFilamentsGui.aVelPlot = axes('Parent',hDynamicFilamentsGui.pVelPlotPanel
 
 hDynamicFilamentsGui.aIPlot = axes('Parent',hDynamicFilamentsGui.pIPlotPanel,'Units','normalized','OuterPosition',[0 0 1 1],'Tag','aIPlot','TickDir','in');
 
-hDynamicFilamentsGui.lSelection = uicontrol('Parent',hDynamicFilamentsGui.fig,'Units','normalized','BackgroundColor',[1 1 1],'Callback','fJKDynamicFilamentsGui(''Draw'',getappdata(0,''hDynamicFilamentsGui''));',...
+hDynamicFilamentsGui.lSelection = uicontrol('Parent',hDynamicFilamentsGui.fig,'Units','normalized','BackgroundColor',[1 1 1],'Callback','DF.Draw(getappdata(0,''hDynamicFilamentsGui''));',...
                                    'Position',[0.025 0.6 0.35 0.39],'String','','Style','listbox','Value',1,'Tag','lSelection','min',0,'max',10);
                     
 hDynamicFilamentsGui.bLegend = uicontrol('Parent',hDynamicFilamentsGui.fig,'Units','normalized','Callback','fJKDynamicFilamentsGui(''Legend'');',...
@@ -146,113 +145,118 @@ hDynamicFilamentsGui.bRefreshGui = uicontrol('Parent',hDynamicFilamentsGui.pOpti
 tooltipstr = 'Segments the currently loaded MTs according to the given parameters.';       
                                
 hDynamicFilamentsGui.bSegment = uicontrol('Parent',hDynamicFilamentsGui.pOptions,'Units','normalized','Callback',@UpdateOptions, 'FontSize', 15,...
-                                   'Position',[0.65 0.85 0.12 0.05],'String','Segment','Style','pushbutton','Tag','bSegment','TooltipString', tooltipstr);    
+                                   'Position',[0.65 0.85 0.15 0.05],'String','Segment','Style','pushbutton','Tag','bSegment','TooltipString', tooltipstr);    
+                               
+if hDynamicFilamentsGui.complicated
+    
                              
-tooltipstr=sprintf(['Minimum distance filament has to shrink in order for it to count as a catastrophe. To determine where shrinking segments are to be found.\n' ...
-    'Only if the MT monotonously shrinks that distance it can be considered a shrinking segment (other condition see edit box to the right).']);
+    tooltipstr=sprintf(['Minimum distance filament has to shrink in order for it to count as a catastrophe. To determine where shrinking segments are to be found.\n' ...
+        'Only if the MT monotonously shrinks that distance it can be considered a shrinking segment (other condition see edit box to the right).']);
 
-hDynamicFilamentsGui.tMinDist = uicontrol('Parent',hDynamicFilamentsGui.pOptions,'Units','normalized','BackgroundColor',c,...
-                             'Position',[0.05 0.825 0.3 0.125],'String','Min Shrinkage Distance:','Style','text','Tag','tIntensity','HorizontalAlignment','left');  
-                        
-hDynamicFilamentsGui.eMinDist = uicontrol('Parent',hDynamicFilamentsGui.pOptions,'TooltipString', tooltipstr, 'Units','normalized',...
-                                'Position',[.3 0.9 .1 .05],'String','400','Style','edit','Fontsize',10,'BackgroundColor','white',...
-                                'UserData', 'nm', 'Tag','eMinDist','Value',0,'Enable','on'); 
-                            
-tooltipstr=sprintf(['Maximum rebound. To determine where shrinking segments are to be found.\n' ...
-    'The bigger this fraction, the more small shrinkage segments you will "discover" due to noise in the data.']);
-                                     
-hDynamicFilamentsGui.eMaxRebound = uicontrol('Parent',hDynamicFilamentsGui.pOptions,'Style','edit','Units','normalized',...
-                                         'Position',[.45 0.9 .1 .05],'Tag','eMaxRebound','Fontsize',10,'TooltipString', tooltipstr,...
-                                         'UserData', '1', 'String','0.25','BackgroundColor','white','HorizontalAlignment','center');  
-                              
-hDynamicFilamentsGui.tMaxTimeDiff = uicontrol('Parent',hDynamicFilamentsGui.pOptions,'Units','normalized','BackgroundColor',c,...
-                             'Position',[0.05 0.775 0.3 0.125],'String','Max time difference:','Style','text','Tag','tMaxTimeDiff','HorizontalAlignment','left');  
+    hDynamicFilamentsGui.tMinDist = uicontrol('Parent',hDynamicFilamentsGui.pOptions,'Units','normalized','BackgroundColor',c,...
+                                 'Position',[0.05 0.825 0.3 0.125],'String','Min Shrinkage Distance:','Style','text','Tag','tIntensity','HorizontalAlignment','left');  
 
-tooltipstr=sprintf(['If two points are further apart in time than this value [in seconds] they are not joined into one track but seperated.\n' ...
-     'This only works at borders of segments. If a shrinkage segment follows a growth segment, a catastrophe will be assumed in between, but this shrinkage track will not show up in plots with references to start.']);
-    
-hDynamicFilamentsGui.eMaxTimeDiff = uicontrol('Parent',hDynamicFilamentsGui.pOptions,'Style','edit','Units','normalized',...
-                                         'Position',[.3 0.85 .1 .05],'Tag','eMaxTimeDiff','Fontsize',10,'TooltipString', tooltipstr,...
-                                         'UserData', 's','String','20','BackgroundColor','white','HorizontalAlignment','center');    
-                                     
-    
-hDynamicFilamentsGui.tBorders = uicontrol('Parent',hDynamicFilamentsGui.pOptions,'Units','normalized','BackgroundColor',c,...
- 'Position',[0.05 0.725 0.225 0.125],'String','Track borders:','Style','text','Tag','tVelocityCutoff','HorizontalAlignment','left'); 
+    hDynamicFilamentsGui.eMinDist = uicontrol('Parent',hDynamicFilamentsGui.pOptions,'TooltipString', tooltipstr, 'Units','normalized',...
+                                    'Position',[.3 0.9 .1 .05],'String','400','Style','edit','Fontsize',10,'BackgroundColor','white',...
+                                    'UserData', 'nm', 'Tag','eMinDist','Value',0,'Enable','on'); 
 
-tooltipstr=sprintf(['Max step size. To determine the borders of a shrinking segment.\n' ...
-    'If a step is above this threshold, the track is terminated (starts from point with minimum velocity outwards).\n' ...
-    'Important: The track is not terminated if the condition of the next edit box is fulfilled (see tooltip) \n' ...
-    'Effects can be seen in the plots of each track (just try it). The higher this value, the longer the tracks.']);
+    tooltipstr=sprintf(['Maximum rebound. To determine where shrinking segments are to be found.\n' ...
+        'The bigger this fraction, the more small shrinkage segments you will "discover" due to noise in the data.']);
 
-hDynamicFilamentsGui.eMinXChange = uicontrol('Parent',hDynamicFilamentsGui.pOptions,'Style','edit','Units','normalized',...
-                                         'Position',[0.3 0.8 .1 .05],'Tag','eMinXChange','Fontsize',10,'TooltipString', tooltipstr,...
-                                         'UserData', 'nm','String','0','BackgroundColor','white','HorizontalAlignment','center');  
-                                     
-tooltipstr=sprintf(['Min step factor. To determine the borders of a shrinking segment.\n' ...
-    'If a step in question times the factor given in this box is completely offset by the next step, the track is not terminated at that step.\n' ...
-    'The bigger this number, the shorter the tracks.']);
-    
-hDynamicFilamentsGui.eMinXFactor = uicontrol('Parent',hDynamicFilamentsGui.pOptions,'Style','edit','Units','normalized',...
-                                         'Position',[.45 0.8 .1 .05],'Tag','eMinXFactor','Fontsize',10,'TooltipString', tooltipstr,...
-                                         'UserData', '1','String','4','BackgroundColor','white','HorizontalAlignment','center');            
-                                     
-hDynamicFilamentsGui.tIntensity = uicontrol('Parent',hDynamicFilamentsGui.pOptions,'Units','normalized','BackgroundColor',c,...
-                             'Position',[0.05 0.675 0.225 0.125],'String','Pixels from end:','Style','text','Tag','tIntensity','HorizontalAlignment','left');   
-                         
-tooltipstr = 'How many pixels from MT end to evaluate for GFP intensity calculation. Only applies to intensity/MAP count plots.';
-hDynamicFilamentsGui.eIevalLength = uicontrol('Parent',hDynamicFilamentsGui.pOptions,'TooltipString', tooltipstr, 'Units','normalized',...
-                                'Position',[.3 .75 .1 .05],'String','7','Style','edit','Fontsize',10,...
-                                'UserData', 'pixels','BackgroundColor','white','Tag','eIevalLength','Value',0,'Enable','on');            
+    hDynamicFilamentsGui.eMaxRebound = uicontrol('Parent',hDynamicFilamentsGui.pOptions,'Style','edit','Units','normalized',...
+                                             'Position',[.45 0.9 .1 .05],'Tag','eMaxRebound','Fontsize',10,'TooltipString', tooltipstr,...
+                                             'UserData', '1', 'String','0.25','BackgroundColor','white','HorizontalAlignment','center');  
 
-hDynamicFilamentsGui.tSubsegments = uicontrol('Parent',hDynamicFilamentsGui.pOptions,'Units','normalized','BackgroundColor',c,...
-                             'Position',[0.05 0.625 0.225 0.125],'String','Subsegmenting:','Style','text','Tag','tIntensity','HorizontalAlignment','left');
-                         
-tooltipstr = sprintf('Border of the first subsegment. The first point with a velocity higher than x%% of the maximum velocity is part of the middle segment.\n Set to 0 to save computation time.');
-hDynamicFilamentsGui.eSubStart = uicontrol('Parent',hDynamicFilamentsGui.pOptions,'TooltipString', tooltipstr, 'Units','normalized',...
-                                'Position',[.3 .7 .1 .05],'String','0','Style','edit',...
-                                'UserData', '1','Fontsize',10,'BackgroundColor','white','Tag','eSubStart','Value',0,'Enable','on');            
-% tooltipstr = '.';
-% hDynamicFilamentsGui.eSubMiddle = uicontrol('Parent',hDynamicFilamentsGui.pOptions,'TooltipString', tooltipstr, 'Units','normalized',...
-%                                 'Position',[.4 .7 .1 .05],'String','10','Style','edit','Fontsize',10,'BackgroundColor','white','Tag','eIevalLength','Value',0,'Enable','on');            
-tooltipstr = sprintf('Border of the last subsegment. The first point (backwards) with a velocity higher than x%% of the maximum velocity is part of the middle segment.\n Set to 0 to save computation time.');
-hDynamicFilamentsGui.eSubEnd = uicontrol('Parent',hDynamicFilamentsGui.pOptions,'TooltipString', tooltipstr, 'Units','normalized',...
-                                'Position',[.45 .7 .1 .05],'String','0','Style','edit','Fontsize',10,...
-                                'UserData', '1','BackgroundColor','white','Tag','eSubEnd','Value',0,'Enable','on');            
-                            
-tooltipstr=sprintf(['Shrinking segments ending below this value are considered rescues (except if at end of movie).\n Growing tracks ending, shrinking tracks starting below this distance are discarded.\n' ...
-    'Red line in rescue plot and the track plot (if within y limits)']);
-                             
-hDynamicFilamentsGui.tCutoffs = uicontrol('Parent',hDynamicFilamentsGui.pOptions,'Units','normalized','BackgroundColor',c,...
- 'Position',[0.05 0.575 0.65 0.125],'String','Cutoffs:','Style','text','Tag','tRescueCutoff','HorizontalAlignment','left'); 
-                                     
-hDynamicFilamentsGui.eRescueCutoff = uicontrol('Parent',hDynamicFilamentsGui.pOptions,'Style','edit','Units','normalized','Callback','fJKDynamicFilamentsGui(''SetTable'');',...
-                                         'Position',[.3 .65 .1 .05],'Tag','eRescueCutoff','Fontsize',10, 'TooltipString', tooltipstr,...
-                                         'UserData', 'nm', 'String','314','BackgroundColor','white','HorizontalAlignment','center');          
+    hDynamicFilamentsGui.tMaxTimeDiff = uicontrol('Parent',hDynamicFilamentsGui.pOptions,'Units','normalized','BackgroundColor',c,...
+                                 'Position',[0.05 0.775 0.3 0.125],'String','Max time difference:','Style','text','Tag','tMaxTimeDiff','HorizontalAlignment','left');  
 
-tooltipstr = sprintf(['Within this distance to the seed, points are not considered for growth segments (all points between first and last occurence of points within this range in nm).' ...
-    '']);
-hDynamicFilamentsGui.eDisregard = uicontrol('Parent',hDynamicFilamentsGui.pOptions,'TooltipString', tooltipstr, 'Units','normalized',...
-                                'Position',[.45 .65 .1 .05],'String','157','Style','edit','Fontsize',10,'BackgroundColor','white','Tag','eDisregard',...
-                                'UserData', 'nm','Value',0,'Enable','on');          
-                                     
-% tooltipstr=sprintf(['Detects rescues within a shrinking segment. A rescue is given if a MT grows during shrinking (the surrounding steps are below the max step size).\nThese catastrophes are not considered for the catastrophe frequency plots!!!']);
-%                            
-% hDynamicFilamentsGui.cDoubleCat = uicontrol('Parent',hDynamicFilamentsGui.pOptions,'Style','checkbox','Units','normalized',...
-%                                          'Position',[.6 0.65 .4 .1],'Tag','cDoubleCat','Fontsize',10,'TooltipString', tooltipstr,...
-%                                          'String','Catas after rescues','BackgroundColor',c,'HorizontalAlignment','center'); 
-                                     
-tooltipstr=sprintf('Tagged with 8 in the tag4/tag7 field');
-                                     
-hDynamicFilamentsGui.cIncludeUnclearPoints = uicontrol('Parent',hDynamicFilamentsGui.pOptions,'Style','checkbox','Units','normalized',...
-                                         'Position',[.75 .75 .25 .05],'Tag','cIncludeUnclearPoints','Fontsize',10,'TooltipString', tooltipstr,...
-                                         'String','Include unclear points','BackgroundColor',c,'HorizontalAlignment','center');       
+    tooltipstr=sprintf(['If two points are further apart in time than this value [in seconds] they are not joined into one track but seperated.\n' ...
+         'This only works at borders of segments. If a shrinkage segment follows a growth segment, a catastrophe will be assumed in between, but this shrinkage track will not show up in plots with references to start.']);
 
-tooltipstr=sprintf('Include points where the MT tip is not in a configuration according to its type. \n Tags in the tag5/tag8 field (0=according to type, 15=one MT less, 1=one MT more, 14=close to template tip');  
-                                     
-hDynamicFilamentsGui.cIncludeNonTypePoints = uicontrol('Parent',hDynamicFilamentsGui.pOptions,'Style','checkbox','Units','normalized',...
-                                         'Position',[.75 .7 .25 .05],'Fontsize',10,'TooltipString', tooltipstr, 'Tag', 'cIncludeNonTypePoints',...
-                                         'String','Include non-type datapoints','BackgroundColor',c,'HorizontalAlignment','center');       
-                                     
+    hDynamicFilamentsGui.eMaxTimeDiff = uicontrol('Parent',hDynamicFilamentsGui.pOptions,'Style','edit','Units','normalized',...
+                                             'Position',[.3 0.85 .1 .05],'Tag','eMaxTimeDiff','Fontsize',10,'TooltipString', tooltipstr,...
+                                             'UserData', 's','String','20','BackgroundColor','white','HorizontalAlignment','center');    
+
+
+    hDynamicFilamentsGui.tBorders = uicontrol('Parent',hDynamicFilamentsGui.pOptions,'Units','normalized','BackgroundColor',c,...
+     'Position',[0.05 0.725 0.225 0.125],'String','Track borders:','Style','text','Tag','tVelocityCutoff','HorizontalAlignment','left'); 
+
+    tooltipstr=sprintf(['Max step size. To determine the borders of a shrinking segment.\n' ...
+        'If a step is above this threshold, the track is terminated (starts from point with minimum velocity outwards).\n' ...
+        'Important: The track is not terminated if the condition of the next edit box is fulfilled (see tooltip) \n' ...
+        'Effects can be seen in the plots of each track (just try it). The higher this value, the longer the tracks.']);
+
+    hDynamicFilamentsGui.eMinXChange = uicontrol('Parent',hDynamicFilamentsGui.pOptions,'Style','edit','Units','normalized',...
+                                             'Position',[0.3 0.8 .1 .05],'Tag','eMinXChange','Fontsize',10,'TooltipString', tooltipstr,...
+                                             'UserData', 'nm','String','0','BackgroundColor','white','HorizontalAlignment','center');  
+
+    tooltipstr=sprintf(['Min step factor. To determine the borders of a shrinking segment.\n' ...
+        'If a step in question times the factor given in this box is completely offset by the next step, the track is not terminated at that step.\n' ...
+        'The bigger this number, the shorter the tracks.']);
+
+    hDynamicFilamentsGui.eMinXFactor = uicontrol('Parent',hDynamicFilamentsGui.pOptions,'Style','edit','Units','normalized',...
+                                             'Position',[.45 0.8 .1 .05],'Tag','eMinXFactor','Fontsize',10,'TooltipString', tooltipstr,...
+                                             'UserData', '1','String','4','BackgroundColor','white','HorizontalAlignment','center');            
+
+    hDynamicFilamentsGui.tIntensity = uicontrol('Parent',hDynamicFilamentsGui.pOptions,'Units','normalized','BackgroundColor',c,...
+                                 'Position',[0.05 0.675 0.225 0.125],'String','Pixels from end:','Style','text','Tag','tIntensity','HorizontalAlignment','left');   
+
+    tooltipstr = 'How many pixels from MT end to evaluate for GFP intensity calculation. Only applies to intensity/MAP count plots.';
+    hDynamicFilamentsGui.eIevalLength = uicontrol('Parent',hDynamicFilamentsGui.pOptions,'TooltipString', tooltipstr, 'Units','normalized',...
+                                    'Position',[.3 .75 .1 .05],'String','7','Style','edit','Fontsize',10,...
+                                    'UserData', 'pixels','BackgroundColor','white','Tag','eIevalLength','Value',0,'Enable','on');            
+
+    hDynamicFilamentsGui.tSubsegments = uicontrol('Parent',hDynamicFilamentsGui.pOptions,'Units','normalized','BackgroundColor',c,...
+                                 'Position',[0.05 0.625 0.225 0.125],'String','Subsegmenting:','Style','text','Tag','tIntensity','HorizontalAlignment','left');
+
+    tooltipstr = sprintf('Border of the first subsegment. The first point with a velocity higher than x%% of the maximum velocity is part of the middle segment.\n Set to 0 to save computation time.');
+    hDynamicFilamentsGui.eSubStart = uicontrol('Parent',hDynamicFilamentsGui.pOptions,'TooltipString', tooltipstr, 'Units','normalized',...
+                                    'Position',[.3 .7 .1 .05],'String','0','Style','edit',...
+                                    'UserData', '1','Fontsize',10,'BackgroundColor','white','Tag','eSubStart','Value',0,'Enable','on');            
+    % tooltipstr = '.';
+    % hDynamicFilamentsGui.eSubMiddle = uicontrol('Parent',hDynamicFilamentsGui.pOptions,'TooltipString', tooltipstr, 'Units','normalized',...
+    %                                 'Position',[.4 .7 .1 .05],'String','10','Style','edit','Fontsize',10,'BackgroundColor','white','Tag','eIevalLength','Value',0,'Enable','on');            
+    tooltipstr = sprintf('Border of the last subsegment. The first point (backwards) with a velocity higher than x%% of the maximum velocity is part of the middle segment.\n Set to 0 to save computation time.');
+    hDynamicFilamentsGui.eSubEnd = uicontrol('Parent',hDynamicFilamentsGui.pOptions,'TooltipString', tooltipstr, 'Units','normalized',...
+                                    'Position',[.45 .7 .1 .05],'String','0','Style','edit','Fontsize',10,...
+                                    'UserData', '1','BackgroundColor','white','Tag','eSubEnd','Value',0,'Enable','on');            
+
+    tooltipstr=sprintf(['Shrinking segments ending below this value are considered rescues (except if at end of movie).\n Growing tracks ending, shrinking tracks starting below this distance are discarded.\n' ...
+        'Red line in rescue plot and the track plot (if within y limits)']);
+
+    hDynamicFilamentsGui.tCutoffs = uicontrol('Parent',hDynamicFilamentsGui.pOptions,'Units','normalized','BackgroundColor',c,...
+     'Position',[0.05 0.575 0.65 0.125],'String','Cutoffs:','Style','text','Tag','tRescueCutoff','HorizontalAlignment','left'); 
+
+    hDynamicFilamentsGui.eRescueCutoff = uicontrol('Parent',hDynamicFilamentsGui.pOptions,'Style','edit','Units','normalized','Callback','fJKDynamicFilamentsGui(''SetTable'');',...
+                                             'Position',[.3 .65 .1 .05],'Tag','eRescueCutoff','Fontsize',10, 'TooltipString', tooltipstr,...
+                                             'UserData', 'nm', 'String','314','BackgroundColor','white','HorizontalAlignment','center');          
+
+    tooltipstr = sprintf(['Within this distance to the seed, points are not considered for growth segments (all points between first and last occurence of points within this range in nm).' ...
+        '']);
+    hDynamicFilamentsGui.eDisregard = uicontrol('Parent',hDynamicFilamentsGui.pOptions,'TooltipString', tooltipstr, 'Units','normalized',...
+                                    'Position',[.45 .65 .1 .05],'String','157','Style','edit','Fontsize',10,'BackgroundColor','white','Tag','eDisregard',...
+                                    'UserData', 'nm','Value',0,'Enable','on');          
+
+    % tooltipstr=sprintf(['Detects rescues within a shrinking segment. A rescue is given if a MT grows during shrinking (the surrounding steps are below the max step size).\nThese catastrophes are not considered for the catastrophe frequency plots!!!']);
+    %                            
+    % hDynamicFilamentsGui.cDoubleCat = uicontrol('Parent',hDynamicFilamentsGui.pOptions,'Style','checkbox','Units','normalized',...
+    %                                          'Position',[.6 0.65 .4 .1],'Tag','cDoubleCat','Fontsize',10,'TooltipString', tooltipstr,...
+    %                                          'String','Catas after rescues','BackgroundColor',c,'HorizontalAlignment','center'); 
+
+    tooltipstr=sprintf('Tagged with 8 in the tag4/tag7 field');
+
+    hDynamicFilamentsGui.cIncludeUnclearPoints = uicontrol('Parent',hDynamicFilamentsGui.pOptions,'Style','checkbox','Units','normalized',...
+                                             'Position',[.75 .75 .25 .05],'Tag','cIncludeUnclearPoints','Fontsize',10,'TooltipString', tooltipstr,...
+                                             'String','Include unclear points','BackgroundColor',c,'HorizontalAlignment','center');       
+
+    tooltipstr=sprintf('Include points where the MT tip is not in a configuration according to its type. \n Tags in the tag5/tag8 field (0=according to type, 15=one MT less, 1=one MT more, 14=close to template tip');  
+
+    hDynamicFilamentsGui.cIncludeNonTypePoints = uicontrol('Parent',hDynamicFilamentsGui.pOptions,'Style','checkbox','Units','normalized',...
+                                             'Position',[.75 .7 .25 .05],'Fontsize',10,'TooltipString', tooltipstr, 'Tag', 'cIncludeNonTypePoints',...
+                                             'String','Include non-type datapoints','BackgroundColor',c,'HorizontalAlignment','center');       
+                                         
+end
+
 hDynamicFilamentsGui.tMethod_TrackValue = uicontrol('Parent',hDynamicFilamentsGui.pOptions,'Units','normalized','BackgroundColor',c,...
                              'Position',[0.05 0.5 0.29 0.125],'String','Determine track value by:','Style','text','Tag','tVelocity','HorizontalAlignment','left');     
 
@@ -276,7 +280,7 @@ hDynamicFilamentsGui.eSmoothX = uicontrol('Parent',hDynamicFilamentsGui.pOptions
 tooltipstr=sprintf(['Affects how the current MT is plotted in the panels to the right (distance, intensity and velocity are smoothed).\n'...
     'Applies a walking average to the Y-Variable (number indicates over how many points). 1 = no smoothing. Only has effect on "X vs Y" and "Events along X during Y" plots.\n Uses "nanfastsmooth" (google it).']);
                                      
-hDynamicFilamentsGui.eSmoothY = uicontrol('Parent',hDynamicFilamentsGui.pOptions,'Style','edit','Units','normalized','Callback','fJKDynamicFilamentsGui(''Draw'',getappdata(0,''hDynamicFilamentsGui''));',...
+hDynamicFilamentsGui.eSmoothY = uicontrol('Parent',hDynamicFilamentsGui.pOptions,'Style','edit','Units','normalized','Callback','fJKDynamicFilamentsGui(''DF.Draw'',getappdata(0,''hDynamicFilamentsGui''));',...
                                          'Position',[0.4 0.53 .05 .04],'Tag','eSmoothY','Fontsize',10,'TooltipString', tooltipstr,...
                                          'UserData', 'kernel width','String','1','BackgroundColor','white','HorizontalAlignment','center');  
 
@@ -408,7 +412,7 @@ tooltipstr=sprintf(['Shows the track indices (the index of the track within the 
                                      
 hDynamicFilamentsGui.cshowTrackN = uicontrol('Parent',hDynamicFilamentsGui.fig,'Style','checkbox','Units','normalized',...
                                          'Position',[.38 .75 .015 .02],'Tag','cshowTrackN','Fontsize',10,'TooltipString', tooltipstr,...
-                                         'String','','BackgroundColor',c,'HorizontalAlignment','center','Callback','fJKDynamicFilamentsGui(''Draw'',getappdata(0,''hDynamicFilamentsGui''));');
+                                         'String','','BackgroundColor',c,'HorizontalAlignment','center','Callback','fJKDynamicFilamentsGui(''DF.Draw'',getappdata(0,''hDynamicFilamentsGui''));');
                                      
 hDynamicFilamentsGui.bSave = uicontrol('Parent',hDynamicFilamentsGui.fig,'Style','pushbutton','Units','normalized',...
                               'Position',[.025 .005 .06 .05],'Tag','bSave','Fontsize',12,...
@@ -416,11 +420,11 @@ hDynamicFilamentsGui.bSave = uicontrol('Parent',hDynamicFilamentsGui.fig,'Style'
                           
 hDynamicFilamentsGui.bLoad = uicontrol('Parent',hDynamicFilamentsGui.fig,'Style','pushbutton','Units','normalized',...
                               'Position',[.1 .005 .06 .05],'Tag','bLoad','Fontsize',12,...
-                              'String','Load File','Callback','fJKDynamicFilamentsGui(''Load'');');         
+                              'String','Load File','Callback','DF.Load();');         
 
 hDynamicFilamentsGui.bLoadFolder = uicontrol('Parent',hDynamicFilamentsGui.fig,'Style','pushbutton','Units','normalized',...
                               'Position',[.18 .005 .05 .05],'Tag','bLoadFolder','Fontsize',12,...
-                              'String','Load Folder','Callback','fJKDynamicFilamentsGui(''LoadFolder'');');     
+                              'String','Load Folder','Callback','DF.LoadFolder();');     
                           
 hDynamicFilamentsGui.bLoadOptions = uicontrol('Parent',hDynamicFilamentsGui.fig,'Style','pushbutton','Units','normalized',...
                               'Position',[.232 .03 .05 .023],'Tag','bLoadOptions','Fontsize',12,...
@@ -459,21 +463,24 @@ if nargin == 0
     set(hDynamicFilamentsGui.fig,'Visible','on');
     Objects = fDefStructure([], 'Filament');                                
     setappdata(hDynamicFilamentsGui.fig,'Objects',Objects);
-    setappdata(0,'hDynamicFilamentsGui',hDynamicFilamentsGui);
-else
-    setappdata(0,'hDynamicFilamentsGui',hDynamicFilamentsGui);
 end
+if hDynamicFilamentsGui.complicated
+    hDynamicFilamentsGui.Segment = @DF.segmentFIESTAFils;
+else
+    hDynamicFilamentsGui.Segment = @DF.segmentPatches;
+end
+setappdata(0,'hDynamicFilamentsGui',hDynamicFilamentsGui);
 UpdateOptions()
 
 function LoadOptions(varargin)
-global CurrentDir
+global DFDir
 hDynamicFilamentsGui = getappdata(0,'hDynamicFilamentsGui');
 try
-    [FileName, PathName] = uigetfile({'*.mat','MAT-File (*.mat)';},'Load Options',CurrentDir);
+    [FileName, PathName] = uigetfile({'*.mat','MAT-File (*.mat)';},'Load Options',DFDir);
 catch
     [FileName, PathName] = uigetfile({'*.mat','MAT-File (*.mat)';},'Load Options');        
 end
-CurrentDir=PathName;
+DFDir=PathName;
 Options = load([PathName FileName], 'Options');
 Options = Options.Options;
 children = get(hDynamicFilamentsGui.pOptions, 'Children');
@@ -492,13 +499,13 @@ for i = 1:length(children)
         end
     end
 end
-[Objects, Tracks] = fJKSegment(Options);
+[Objects, Tracks] = hDynamicFilamentsGui.Segment(Options);
 setappdata(hDynamicFilamentsGui.fig,'Tracks', Tracks);
 setappdata(hDynamicFilamentsGui.fig,'Objects',Objects);
 SetTable();
 
 function UpdateOptions(varargin)
-global CurrentDir
+global DFDir
 var_units = {'s', 'nm', 'nm/s', '1', '', '1'};
 var_names = {'time', 'location', 'velocity', 'Ase1 count', 'auto tags', 'frames'};
 hDynamicFilamentsGui = getappdata(0,'hDynamicFilamentsGui');
@@ -554,7 +561,7 @@ end
 setappdata(hDynamicFilamentsGui.fig,'Options',Options);
 if gcbo == hDynamicFilamentsGui.bSaveOptions
     try
-        [FileName, PathName] = uiputfile({'*.mat','MAT-File (*.mat)';},'Save Options' ,CurrentDir);
+        [FileName, PathName] = uiputfile({'*.mat','MAT-File (*.mat)';},'Save Options' ,DFDir);
     catch
         [FileName, PathName] = uiputfile({'*.mat','MAT-File (*.mat)';},'Save Options');
     end
@@ -574,23 +581,23 @@ elseif gcbo == hDynamicFilamentsGui.bDoPlot
 elseif gcbo == hDynamicFilamentsGui.bUpdatePlots
     UpdatePlot(hDynamicFilamentsGui);
 elseif gcbo == hDynamicFilamentsGui.lPlot_XVar
-    Draw(hDynamicFilamentsGui);
+    DF.Draw(hDynamicFilamentsGui);
 elseif gcbo == hDynamicFilamentsGui.lPlot_YVar
-    Draw(hDynamicFilamentsGui);
+    DF.Draw(hDynamicFilamentsGui);
 elseif gcbo == hDynamicFilamentsGui.lMethod_TrackValue
-    Draw(hDynamicFilamentsGui);
+    DF.Draw(hDynamicFilamentsGui);
 elseif gcbo == hDynamicFilamentsGui.lMethod_TrackValueY
-    Draw(hDynamicFilamentsGui);
+    DF.Draw(hDynamicFilamentsGui);
 else %when the GUI is initialized or bSegment button is pressed
-    [Objects, Tracks] = fJKSegment(Options);
+    [Objects, Tracks] = hDynamicFilamentsGui.Segment(Options);
     setappdata(hDynamicFilamentsGui.fig,'Tracks', Tracks);
     setappdata(hDynamicFilamentsGui.fig,'Objects',Objects);
 end
-SetTable();
+DF.SetTable();
 
 
 function Quicksave(varargin)
-global CurrentDir
+global DFDir
 persistent QuicksaveDir
 if nargin>0
     QuicksaveDir = [];
@@ -598,7 +605,7 @@ if nargin>0
 end
 if isempty(QuicksaveDir)
     try
-        QuicksaveDir = uigetdir(CurrentDir, 'Select the quicksave folder (choice will be remembered until you refresh the GUI).');
+        QuicksaveDir = uigetdir(DFDir, 'Select the quicksave folder (choice will be remembered until you refresh the GUI).');
     catch 
         QuicksaveDir = uigetdir('','Select the quicksave folder (choice will be remembered until you refresh the GUI).');
     end
@@ -774,179 +781,6 @@ SetTable();
 catch
 end
 
-function Load(varargin)
-global CurrentDir
-if nargin > 0
-    FileName = varargin{1};
-    PathName = varargin{2};
-else
-    try
-        [FileName, PathName] = uigetfile({'*.mat','MAT-File (*.mat)';},'Load Objects',CurrentDir);
-    catch
-        [FileName, PathName] = uigetfile({'*.mat','MAT-File (*.mat)';},'Load Objects');        
-    end
-    CurrentDir=PathName;
-end
-if FileName~=0
-    AllObjects = load([PathName FileName], 'Filament');
-    if ~isfield(AllObjects, 'Filament')
-        fJKLoadLink(FileName, PathName, @Load)
-        try
-            LoadIntensityPerMAP('intensities.txt', PathName)
-        catch
-            warning('Could not load intensity per MAP file');
-        end
-    else
-        AllObjects = AllObjects.Filament;
-        NewObjects = select_filaments(AllObjects, 1);
-        answer = [];
-        if ~all([NewObjects.Drift])
-            answer = questdlg('Some Filaments had not been drift-corrected. Continue anyway?', 'Warning', 'Yes','No','Yes' );
-            if strcmp(answer, 'No')
-                return
-            end
-        end
-        aligned = 1;
-        driftcorrected = 1;
-        RefObjects = AllObjects([AllObjects.Channel]>1);
-        if ~isempty(answer)
-            for RefObject = RefObjects;
-                if RefObject.TformMat(3,3)==1;
-                    aligned = 0;
-                end
-                if RefObject.Drift==0;
-                    driftcorrected = 0;
-                end
-            end
-            if ~aligned
-                answer = questdlg('Some Reference-Filaments had not been color-aligned. Continue anyway?', 'Warning', 'Yes','No','Yes' );
-                if strcmp(answer, 'Yes')
-                    if ~driftcorrected
-                        answer = questdlg('Some Reference-Filaments had not been drift-corrected. Continue anyway?', 'Warning', 'Yes','No','Yes' );
-                        if strcmp(answer, 'No')
-                            return
-                        end
-                    end
-                else
-                    return
-                end
-            end
-        end
-        PrepareFils(NewObjects, RefObjects, PathName, FileName);
-    end
-end
-
-function PrepareFils(NewObjects, RefObjects, PathName, FileName)
-hDynamicFilamentsGui = getappdata(0,'hDynamicFilamentsGui');
-ref = get(hDynamicFilamentsGui.cUsePosEnd, 'Value')*2+1;
-fieldnames = {'Selected','Channel','TformMat','Color','PathData', 'Visible', 'PlotHandles', 'Data', 'TrackingResults'};
-NewObjects = rmfield(NewObjects,fieldnames);
-str=cell(length(NewObjects),1);
-deleteobjects = false(length(NewObjects), 1);
-external_intensity_name = get(hDynamicFilamentsGui.eLoadIntensityFile, 'String');
-has_external_intensity = 0;
-if ~strcmp(external_intensity_name, '')
-    try
-        ExtIntensity = load([PathName external_intensity_name '.mat']);
-        if isfield(ExtIntensity, 'intensities')
-            has_external_intensity = 1;
-        end
-    catch
-    end
-end
-for i=1:length(NewObjects)
-    NewObjects(i).CustomData = [];
-    if has_external_intensity
-        NewObjects(i).Custom.Intensity = ExtIntensity.intensities{i};
-        NewObjects(i).Custom.type_intensity = external_intensity_name;
-    else
-        if isfield(NewObjects(i).Custom, 'Intensity')
-            NewObjects(i).Custom.type_intensity = 'From File';
-        else
-            NewObjects(i).Custom.type_intensity = 'None';
-        end
-    end
-    str{i}=NewObjects(i).Name;
-    typecomment=strfind(NewObjects(i).Comments,'type:');
-    if ~isempty(typecomment)
-        restcomment=NewObjects(i).Comments(typecomment+5:end);
-        space=strfind(restcomment(1:end),' ');
-        if isempty(space)
-            space=length(restcomment(1:end))+1;
-        end
-        NewObjects(i).Type=restcomment(1:space(1)-1);
-        if strcmp(NewObjects(i).Type, 'unknown')
-            deleteobjects(i) = 1;
-        end
-        if ~isempty(strfind(NewObjects(i).Comments, '--'))
-            deleteobjects(i) = 1;
-        end
-        if strcmp(NewObjects(i).Type(end), 'A')
-            NewObjects(i).Type = [NewObjects(i).Type(1:end-1) ' +Ase1'];
-        else
-            NewObjects(i).Type = [NewObjects(i).Type ' -Ase1'];
-        end
-    else
-        NewObjects(i).Type='n/a';
-    end
-    NewObjects(i).LoadedFromPath = PathName;
-    NewObjects(i).LoadedFromFile = FileName;
-end
-if ~get(hDynamicFilamentsGui.cAllowUnknownTypes, 'Value') % deletes MTs with unknown type
-    NewObjects(deleteobjects) = [];
-end
-for i=1:length(NewObjects)
-    tags = fJKfloat2tags(NewObjects(i).Results(:,end));
-    if ref==1
-        tiptags = tags(:,7);
-        tags = tags(:,6);
-    else
-        tiptags = tags(:,10);
-        tags = tags(:,9);
-    end
-    catastrophes = tags==10;
-    rescues = tags==15;
-    if ~get(hDynamicFilamentsGui.cAllowWithoutReference, 'Value')
-        refcomment=strfind(NewObjects(i).Comments,'ref:');
-        if ~isempty(refcomment)
-            RefPos=fJKGetRefData(NewObjects(i), ref, tags==11, RefObjects);
-        else
-            RefPos=nan;
-        end
-    else
-        RefPos=fJKGetRefData(NewObjects(i), ref, tags==11, RefObjects);
-    end
-    if isnan(RefPos)
-        DynResults = [nan nan nan 1];
-    else
-        deleted_rows = [];
-        DynResults = [NewObjects(i).Results(:,1:2) RefPos (1:size(RefPos,1))'];
-        for m=length(tags):-1:1
-            if tags(m)==9||isnan(RefPos(m))
-                deleted_rows = [deleted_rows m];
-                DynResults(m,:) = [];
-                tags(m) = [];
-                tiptags(m) = [];
-            end
-        end
-    end
-    NewObjects(i).Deleted_Rows = deleted_rows;
-    NewObjects(i).CatRes = [sum(catastrophes) sum(rescues)];
-    NewObjects(i).Tags = [tags tiptags];
-    NewObjects(i).DynResults = DynResults;
-    NewObjects(i).SegTagAuto=[NaN NaN NaN NaN NaN];
-    NewObjects(i).Velocity=nan(1,2);
-    NewObjects(i).Duration = 0;
-    NewObjects(i).Disregard = 0;
-end
-OldObjects = getappdata(hDynamicFilamentsGui.fig,'Objects');
-if ~isempty(OldObjects)
-    NewObjects = [OldObjects NewObjects];
-end
-setappdata(hDynamicFilamentsGui.fig,'Objects',NewObjects);
-set(hDynamicFilamentsGui.cUsePosEnd, 'Enable', 'off');
-setappdata(0,'hDynamicFilamentsGui',hDynamicFilamentsGui);
-SetTable()
 
 function LoadIntensityPerMAP(FileName, PathName)
 %reads a table and matches values and associated objects
@@ -972,36 +806,6 @@ for i = 1:length(table.Value)
 end
 setappdata(hDynamicFilamentsGui.fig,'Objects',Objects);
 setappdata(0,'hDynamicFilamentsGui',hDynamicFilamentsGui);
-
-function LoadFolder(varargin)
-global CurrentDir
-hDynamicFilamentsGui = getappdata(0,'hDynamicFilamentsGui');
-% answer = questdlg('Use link file or open all .mat files within folder which say "dynamics"?', 'Method', 'Link','Folder','Link' );
-try
-    folder = uigetdir(CurrentDir, 'Select the folder');
-catch 
-    folder = uigetdir('','Select the folder');
-end
-CurrentDir = folder;
-if folder~=0
-    fileList = getAllFiles(folder);
-    fileList = fileList(~cellfun(@isempty, strfind(fileList, '.mat'))); %only mat files
-    fileList = fileList(~cellfun(@isempty, strfind(fileList, 'dynamics'))|~cellfun(@isempty, strfind(fileList, 'Dynamics'))); %only dynamics
-    numfiles = length(fileList);
-    progressdlg('String','Loading Files','Min',0,'Max',numfiles,'Parent',hDynamicFilamentsGui.fig);
-    for i = 1:numfiles
-        [PathName, FileName, ext] = fileparts(char(fileList(i)));
-        Load([filesep FileName ext],PathName);
-        progressdlg(i);
-    end
-    UpdateOptions();
-end
-%     try
-%         [FileLink, folder] = uigetfile({'*.mat','MAT-File (*.mat)';},'Load Link',CurrentDir);
-%     catch
-%         [FileLink, folder] = uigetfile({'*.mat','MAT-File (*.mat)';},'Load Link');        
-%     end
-
 
 function Legend
 str=sprintf(['For the table:\nColumn 0: MT index\nColumn 1: MT name\n' ...
@@ -1034,34 +838,6 @@ switch get(hDynamicFilamentsGui.lChoosePlot, 'Value')
         set(hDynamicFilamentsGui.lSubsegment, 'Visible', 'off');
 end
 
-function SetTable()
-hDynamicFilamentsGui = getappdata(0,'hDynamicFilamentsGui');
-cutoff=str2double(get(hDynamicFilamentsGui.eRescueCutoff, 'String'));
-Objects = getappdata(hDynamicFilamentsGui.fig,'Objects');
-Tracks = getappdata(hDynamicFilamentsGui.fig,'Tracks');
-for n=1:length(Tracks)
-    if abs(Tracks(n).Event-4.9)<0.1 && Tracks(n).DistanceEventEnd<cutoff
-        Tracks(n).TypeTag = [Tracks(n).Type ' tag4'];
-    end
-end
-str=cell(length(Objects),1);
-for n = 1:length(Objects) 
-    velocity=Objects(n).Velocity;
-    if isempty(strfind(Objects(n).Comments, '+'))
-        hascomments=' ';
-    else
-        hascomments='+';
-    end
-    segtagauto=Objects(n).SegTagAuto;
-    nResAuto=sum(abs(segtagauto(:,3)-4.85)<0.1&segtagauto(:,4)>cutoff);%to get 4.8 (stops of shrinkages not captured) and 4.9
-    nCatAuto=sum(abs(segtagauto(:,3)-1.85)<0.1|abs(segtagauto(:,3)-4.8)<0.1); %to get 1.8 (catastrophes not captured) and 1.9
-    str{n}=[num2str(n) ' ' Objects(n).Name hascomments ' ' num2str(Objects(n).CatRes(1)) '|' num2str(nCatAuto) '    ' num2str(Objects(n).CatRes(2)) '|' num2str(nResAuto) ...
-        '    ' num2str(velocity(1), '%2.2f') '    ' num2str(velocity(2), '%2.1f') '    ' Objects(n).Type '    ' Objects(n).File(1:end-4) '    ' Objects(n).Custom.type_intensity];
-end
-setappdata(hDynamicFilamentsGui.fig,'Tracks', Tracks);
-Draw(hDynamicFilamentsGui);
-set(hDynamicFilamentsGui.lSelection, 'String', str);
-set(hDynamicFilamentsGui.lSelection, 'Value', max(1,min(get(hDynamicFilamentsGui.lSelection, 'Value'),length(str))));
 
 function SurfPlot()
 hDynamicFilamentsGui = getappdata(0,'hDynamicFilamentsGui');
@@ -1150,118 +926,6 @@ if ~isempty(Objects)&&~isempty(Selected)
     end
     xlabel('time [s]');
 end
-
-function Draw(hDynamicFilamentsGui)
-Options = getappdata(hDynamicFilamentsGui.fig,'Options');
-showTrackN=get(hDynamicFilamentsGui.cshowTrackN,'Value');
-cla(hDynamicFilamentsGui.aPlot, 'reset');
-cla(hDynamicFilamentsGui.aVelPlot, 'reset');
-cla(hDynamicFilamentsGui.aIPlot, 'reset');
-tagnum=4;
-Tracks = getappdata(hDynamicFilamentsGui.fig,'Tracks');
-Objects = getappdata(hDynamicFilamentsGui.fig,'Objects');
-Selected=get(hDynamicFilamentsGui.lSelection,'Value');
-Selected=Selected(Selected>0&Selected<length(Objects)+1);
-eSmoothY=str2double(get(hDynamicFilamentsGui.eSmoothY, 'String'));
-if ~isempty(Objects)&&~isempty(Selected)
-    Object = Objects(Selected(1));
-    track_id=Object.SegTagAuto(:,5);
-    track_id=track_id(track_id>0);
-    tracks=Tracks(track_id);
-    [c1_vec, c2_vec] = get_plot_vectors(Options, tracks, [1 2]);
-    set(hDynamicFilamentsGui.fig, 'Name',['Dynamics: ' Object.Name '  (' Object.Comments ')']);
-    modevents=mod(Object.SegTagAuto(Object.SegTagAuto(:,5)>0,3),1);
-    cutoff=Options.eRescueCutoff.val;
-    if ~isempty(track_id)
-    hold(hDynamicFilamentsGui.aVelPlot,'on');
-    hold(hDynamicFilamentsGui.aIPlot,'on');
-    hold(hDynamicFilamentsGui.aPlot,'on');
-    axes(hDynamicFilamentsGui.aPlot);
-    for i=1:length(tracks)
-        segtrack=tracks(i).Data;
-        tseg=segtrack(:,1);
-        pauses=find(segtrack(:,5)==8);
-        if eSmoothY == 1
-            dseg=segtrack(:,2);
-            c2seg=segtrack(:, Options.lPlot_YVar.val);
-            c1seg=segtrack(:, Options.lPlot_XVar.val);
-        else
-            dseg=nanfastsmooth(segtrack(:,2), eSmoothY);
-            c2seg=nanfastsmooth(segtrack(:,Options.lPlot_YVar.val), eSmoothY);
-            c1seg=nanfastsmooth(segtrack(:,Options.lPlot_XVar.val), eSmoothY);
-        end
-        d0=round(nanmean(segtrack(:,2)));
-        t0=segtrack(round(size(segtrack,1)/2),1);
-        if showTrackN
-            text(double(t0),double(max(segtrack(:,2))),num2str(track_id(i)));
-        end
-        plot(hDynamicFilamentsGui.aPlot,tseg(pauses),dseg(pauses),'LineStyle', 'none', 'Marker', 'x', 'MarkerEdgeColor','c');
-        if floor(tracks(i).Event)==tagnum
-            c='r';
-            if size(dseg,1) < str2double(get(hDynamicFilamentsGui.eMinLength, 'String'))
-                c=[0.7 0.7 0.7];
-            end
-            if modevents(i)>0.85&&dseg(end)>cutoff
-                plot(hDynamicFilamentsGui.aPlot,tseg(end),dseg(end),'LineStyle', 'none', 'Marker', '*', 'MarkerEdgeColor',c);
-            elseif modevents(i)>0.7&&dseg(end)>cutoff
-                plot(hDynamicFilamentsGui.aPlot,t0,max(dseg)+d0/10,'LineStyle', 'none', 'Marker', '*', 'MarkerEdgeColor',c);
-            end
-        else
-            c='k';
-            if modevents(i)>0.85
-                plot(hDynamicFilamentsGui.aPlot,tseg(end),dseg(end),'LineStyle', 'none', 'Marker', '*', 'MarkerEdgeColor',c);
-            elseif modevents(i)>0.7
-                plot(hDynamicFilamentsGui.aPlot,t0,max(dseg)+d0/10,'LineStyle', 'none', 'Marker', '*', 'MarkerEdgeColor',c);
-            end
-        end
-        plot(hDynamicFilamentsGui.aPlot,tseg,tracks(i).Velocity(end).*(tseg-t0)+d0,'b-.');
-        plot(hDynamicFilamentsGui.aIPlot,tseg,repmat(c1_vec(i), 1, length(tseg)),'b-.');
-        plot(hDynamicFilamentsGui.aVelPlot,tseg,repmat(c2_vec(i), 1, length(tseg)),'b-.');
-        plot(hDynamicFilamentsGui.aPlot,tseg,dseg,'Color', c);
-        if tracks(i).end_first_subsegment
-            plot(hDynamicFilamentsGui.aPlot,tseg(tracks(i).end_first_subsegment),dseg(tracks(i).end_first_subsegment),'LineStyle', 'none', 'Marker', 'd', 'MarkerEdgeColor',c);
-        end
-        if tracks(i).start_last_subsegment
-            plot(hDynamicFilamentsGui.aPlot,tseg(tracks(i).start_last_subsegment+1),dseg(tracks(i).start_last_subsegment+1),'LineStyle', 'none', 'Marker', 's', 'MarkerEdgeColor',c);
-        end
-        plot(hDynamicFilamentsGui.aVelPlot,tseg,c2seg,'Color', c);
-        plot(hDynamicFilamentsGui.aIPlot,tseg,c1seg,'Color', c);
-    end
-    xy=get(hDynamicFilamentsGui.aPlot,{'xlim','ylim'});
-    if xy{2}(1)<cutoff&&xy{2}(2)>cutoff
-        plot(hDynamicFilamentsGui.aPlot,[xy{1}(1) xy{1}(2)] , [cutoff cutoff], 'r-')
-    end
-    set(hDynamicFilamentsGui.aPlot,{'xlim','ylim'},xy);
-    legend(hDynamicFilamentsGui.aPlot,'off');
-    xlabel(hDynamicFilamentsGui.aPlot,'time [s]');
-    ylabel(hDynamicFilamentsGui.aPlot,'distance to seed [nm]'); 
-    xlabel(hDynamicFilamentsGui.aVelPlot,'time [s]');
-    ylabel(hDynamicFilamentsGui.aIPlot, [Options.lPlot_XVar.print ' [' Options.lPlot_XVar.str ']']); 
-    xlabel(hDynamicFilamentsGui.aIPlot,'time [s]');
-    ylabel(hDynamicFilamentsGui.aVelPlot, [Options.lPlot_YVar.print ' [' Options.lPlot_YVar.str ']']); 
-    zoom(hDynamicFilamentsGui.aPlot, 'on');
-    zoom(hDynamicFilamentsGui.aVelPlot, 'on');
-    zoom(hDynamicFilamentsGui.aIPlot, 'on');
-    linkaxes([hDynamicFilamentsGui.aPlot,hDynamicFilamentsGui.aIPlot, hDynamicFilamentsGui.aVelPlot],'x')
-    end
-    for i=2:length(Selected)
-        Object = Objects(Selected(i));
-        tmp=Object.SegTagAuto(:,5);
-        track_id=[track_id; tmp(tmp>0)];
-    end
-    for i=1:length(Tracks)
-        if ismember(i,track_id)
-            Tracks(i).Selected=1;
-        else
-            Tracks(i).Selected=0;
-        end
-    end
-    if isempty(tracks)
-        text(0.2,0.5,'No data available for current object. You might need to press "Segment".','Parent',hDynamicFilamentsGui.aPlot,'FontWeight','bold','FontSize',16);
-    end
-end
-setappdata(hDynamicFilamentsGui.fig,'Tracks', Tracks);
-setappdata(0,'hDynamicFilamentsGui',hDynamicFilamentsGui);
 
 function OpenInfo
 hDynamicFilamentsGui = getappdata(0,'hDynamicFilamentsGui');
@@ -1380,7 +1044,9 @@ else
     set(f, 'Name',[plotstr{ChosenPlot} str], 'Tag', 'Plot', 'UserData', ChosenPlot);
     switch ChosenPlot
         case 3
-            EventPlot(Options.lGroup.val, Options.eRescueCutoff.val);
+            if hDynamicFilamentsGui.complicated
+                EventPlot(Options.lGroup.val, Options.eRescueCutoff.val);
+            end
         case 4
             BoxPlot(Options);
         case 5
@@ -1515,7 +1181,7 @@ function [type, Tracks, event]=SetType(PlotGrowingTags) %PlotGrowingTags is need
 if PlotGrowingTags 
     plottag = 1;
 else
-    plottag = 4; %this is a code (see fJKSegment.m))
+    plottag = 4; %this is a code (see DF.SegmentFIESTAFils.m))
 end
 hDynamicFilamentsGui = getappdata(0,'hDynamicFilamentsGui');
 Options = getappdata(hDynamicFilamentsGui.fig,'Options');
@@ -1549,27 +1215,29 @@ distance_event_end=[Tracks.DistanceEventEnd];
 file={Tracks.File};
 track_id=1:length(type);
 for i=1:length(type)
-    if floor(event(i))~=plottag || size(Tracks(i).Data, 1) < Options.eMinLength.val
-        track_id(i)=0;
-        continue
-    end
-    if Options.cPlotGrowingTracks.val == 1 && Tracks(i).Duration < Options.eMinDuration.val
-        track_id(i)=0;
-        continue
-    end
-    if OnlyWithIntensity
-        if Tracks(i).HasIntensity==0
+    if hDynamicFilamentsGui.complicated
+        if floor(event(i))~=plottag || size(Tracks(i).Data, 1) < Options.eMinLength.val
             track_id(i)=0;
             continue
         end
-    end
-    if OnlyWithCustomData
-        if Tracks(i).HasCustomData==0
+        if Options.cPlotGrowingTracks.val == 1 && Tracks(i).Duration < Options.eMinDuration.val
             track_id(i)=0;
             continue
         end
+        if OnlyWithIntensity
+            if Tracks(i).HasIntensity==0
+                track_id(i)=0;
+                continue
+            end
+        end
+        if OnlyWithCustomData
+            if Tracks(i).HasCustomData==0
+                track_id(i)=0;
+                continue
+            end
+        end
+        type{i}=[type{i} ' tag' num2str(event(i))];
     end
-    type{i}=[type{i} ' tag' num2str(event(i))];
     type{i}=strrep(type{i}, 'single400', 'single');
     type{i}=strrep(type{i}, '4.8', '4');
     type{i}=strrep(type{i}, '4.9', '4');
@@ -1599,17 +1267,19 @@ for i=1:length(type)
             type{i} = 'everything';
     end
     type{i}=[prepend type{i}];
-    if (distance_event_end(i)>Options.eRescueCutoff.val||floor(event(i))~=4)&&abs(mod(event(i),1)-0.85)<0.1
-        if abs(mod(event(i),1)-0.85)<0.1
-            event(i)=2; %events which had not been recorded
+    if hDynamicFilamentsGui.complicated
+        if (distance_event_end(i)>Options.eRescueCutoff.val||floor(event(i))~=4)&&abs(mod(event(i),1)-0.85)<0.1
+            if abs(mod(event(i),1)-0.85)<0.1
+                event(i)=2; %events which had not been recorded
+            else
+                event(i)=1;
+            end
+            if Options.cPlotEventsAsSeperateTypes.val
+                type{i}=[type{i} '*'];
+            end
         else
-            event(i)=1;
+            event(i)=0;
         end
-        if Options.cPlotEventsAsSeperateTypes.val
-            type{i}=[type{i} '*'];
-        end
-    else
-        event(i)=0;
     end
 end
 track_id=track_id(logical(track_id));
@@ -1757,37 +1427,6 @@ else
     label=[title ' (' methodstr ')' ' [' unit ']'];
 end
 
-function [x_vec, y_vec] = get_plot_vectors(Options, Tracks, xy)
-vector = cell(1,2);
-selected_vars = [Options.lPlot_XVar.val, Options.lPlot_YVar.val];
-selected_methods = [Options.lMethod_TrackValue.val, Options.lMethod_TrackValueY.val];
-for m = xy
-    vector{m} = nan(length(Tracks),1);
-    for n = 1:length(Tracks) % {'median', 'mean', 'end-start', 'minimum', 'maximum', 'standard dev', 'linear fit (only for velocity) or sum (only for MAP count)'}
-        switch selected_methods(m)
-            case 1
-                vector{m}(n) = nanmedian(Tracks(n).Data(:,selected_vars(m)));
-            case 2
-                vector{m}(n) = nanmean(Tracks(n).Data(:,selected_vars(m)));
-            case 3
-                vector{m}(n) = Tracks(n).Data(end,selected_vars(m)) - Tracks(n).Data(1,selected_vars(m));
-            case 4
-                vector{m}(n) = min(Tracks(n).Data(:,selected_vars(m)));
-            case 5
-                vector{m}(n) = max(Tracks(n).Data(:,selected_vars(m)));
-            case 6
-                vector{m}(n) = nanstd(Tracks(n).Data(:,selected_vars(m)));
-            case 7
-                if selected_vars(m) == 3
-                    vector{m}(n) = Tracks(n).Velocity;
-                else
-                    vector{m}(n) = nansum(Tracks(n).Data(:,selected_vars(m)));
-                end
-        end
-    end
-end
-x_vec = vector{1};
-y_vec = vector{2};
 
 function AgainstOtherMTTracksPlot(Options)
 button = fQuestDlg('Against which tracks of the same MT?','Which tracks?',...
@@ -1822,8 +1461,8 @@ elseif ~Options.cPlotGrowingTracks.val && ChoseGrowTracks
     labels = {'Track Value (Shrinking): ', 'Same MT Track(s) Mean Values (Growing): '};
 end
 [~, type_id, track_type_id] = unique(type);
-[x_vec, ~] = get_plot_vectors(Options, AnalyzedTracks, 1);
-[~, other_y_vecs] = get_plot_vectors(Options, AnalyzedOtherTracks, 2);
+[x_vec, ~] = DF.get_plot_vectors(Options, AnalyzedTracks, 1);
+[~, other_y_vecs] = DF.get_plot_vectors(Options, AnalyzedOtherTracks, 2);
 MT_indices = [AnalyzedOtherTracks.MTIndex];
 track_indices = [AnalyzedOtherTracks.TrackIndex];
 y_vec = nan(size(x_vec));
@@ -1871,7 +1510,7 @@ function TrackXYPlot(Options)
 hold on
 [type, AnalyzedTracks, ~]=SetType(Options.cPlotGrowingTracks.val);
 [~, type_id, track_type_id] = unique(type);
-[x_vec, y_vec] = get_plot_vectors(Options, AnalyzedTracks, 1:2);
+[x_vec, y_vec] = DF.get_plot_vectors(Options, AnalyzedTracks, 1:2);
 fJKscatterboxplot(x_vec, y_vec, track_type_id', 0);
 xlabel(get_label(Options, 1));
 ylabel(get_label(Options, 0));
@@ -1985,7 +1624,7 @@ fJKplotframework(Tracks, type, 0, events, Options);
 function BoxPlot(Options)
 hold on;
 [type, AnalyzedTracks, ~]=SetType(Options.cPlotGrowingTracks.val);
-[x_vec, ~] = get_plot_vectors(Options, AnalyzedTracks, 1);
+[x_vec, ~] = DF.get_plot_vectors(Options, AnalyzedTracks, 1);
 if isempty(x_vec)
     text(0.3,0.5,'No data or path available for any objects','Parent','FontWeight','bold','FontSize',16);
     set('Visible','off');

@@ -881,7 +881,7 @@ for idx=kObj
         KymoTrackObj(nTrack).Name=Objects(idx).Name;
         KymoTrackObj(nTrack).Index=idx;        
         KymoTrackObj(nTrack).Track=KymoTrack;        
-        KymoTrackObj(nTrack).PlotHandles(1,1) = line(KymoTrack(:,2),KymoTrack(:,1),'Visible','off','Tag','pKymoTracks');
+        KymoTrackObj(nTrack).PlotHandles(1,1) = line(KymoTrack(:,2),KymoTrack(:,1),'Color',Objects(idx).Color,'Visible','off','Tag','pKymoTracks');
         if Objects(idx).Visible
             set(KymoTrackObj(nTrack).PlotHandles(1,1),'Visible','on');
         end
