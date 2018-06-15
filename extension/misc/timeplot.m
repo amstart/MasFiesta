@@ -6,7 +6,7 @@ ytext = mean(yl)*1.7;
 for i = 1:length(flushins)
     if i>1
         text(t(flushins(i)), ytext, labels{i});
-        plot([t(flushins(i)) t(flushins(i))], [yl(1) yl(2)], 'Color', 'red'); drawnow;
+        plot([t(flushins(i)) t(flushins(i))], [yl(1) yl(2)], 'r-'); drawnow;
     else
         text(t(flushins(i)), mean(yl)*1.5, labels{i});
     end

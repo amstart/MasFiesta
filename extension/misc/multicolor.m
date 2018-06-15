@@ -1,28 +1,34 @@
-region{1} = 8:8+24;
-region{2} = 72:72+21;
-region{3} = 100:111;
-regionnames = {'patch 1', 'patch 2', 'bg'};
+region{1} = [8:8+24 72:72+21];
+region{2} = 100:111;
+regionnames = {'patched', 'nonpatched'};
 % bgcolor{1} = 1000; %mCherry
 % bgcolor{2} = 3850; %GFP
-kymo{1} = GFP-1000;
-kymo{2} = mCherry-3850;
+kymo{1} = mC;
+kymo{2} = GFP;
+bg = [mean(mCherry_background,2) mean(GFP_background,2)];
 kymonames = {'mCherry', 'GFP'};
 for i = 1:2
-    for k = 1:3
-        average{i,k} = mean(kymo{i}(:,region{k}),2);
+    for k = 1:2
+        average{i,k} = mean(kymo{i}(:,region{k}),2) - bg(:,i);
     end
 end
 figure
 hold on
 name = {};
 for i = 1:2
-    for k = 1:3
-        plot(average{i,k});
+    yyaxis left
+    if i == 2
+        yyaxis right
+    end
+    for k = 1:2
+        plot(average{i,k}(1:60,:));
         name = {name [kymonames{i} regionnames{k}]};
     end
 end
-legend({'GFP patch 1', 'GFP patch 2', 'GFP bg', 'mC patch 1', 'mC patch 2', 'mC bg'});
-ylabel('average intensity [counts]');
+legend({'tau-mCherry in patch', 'tau-mCherry not in patch', 'tau-GFP in patch', 'tau-GFP not in patch'});
+ylabel('average GFP intensity [counts]');
+yyaxis left
+ylabel('average mCherry intensity [counts]');
 xlabel('time [s]');
 t = 1:size(kymo{1},1)*2.2;
 timeplot(t, [1 3], {'109nm tau-mCherry', '117nm tau-GFP'})

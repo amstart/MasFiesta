@@ -1,7 +1,7 @@
 function fJKscatterboxplot(plot_x, plot_y, point_info, color_mode, weights)
 [out, edgesmid, nelements, allpointsx, allpointsy] = histcounts2(plot_x, plot_y, weights);
 if color_mode == 0
-    gscatter(plot_x, plot_y, point_info, [], 'o')
+%     gscatter(plot_x, plot_y, point_info, [], 'o')
 else
     colormap(linspecer_modified);
     scatter(plot_x, plot_y, 500, point_info, 'o');
@@ -26,8 +26,9 @@ set(b(:,:),'linewidth',1.5);
  set(h,'Color','red');
 for m=1:length(nelements)
     if nelements(m)>0
+        text(double(edgesmid(m)), 100, num2str(nelements(m)), 'HorizontalAlignment', 'center', 'FontSize', 18);
 %         text(double(edgesmid(m)), out(m,1), num2str(nelements(m)), 'HorizontalAlignment', 'center', 'FontSize', 18);
-        text(double(edgesmid(m)), out(m,2), num2str(out(m,2)), 'HorizontalAlignment', 'center', 'FontSize', 18);
+        text(double(edgesmid(m)), 80, num2str(out(m,2), 3), 'HorizontalAlignment', 'center', 'FontSize', 18);
     end
 end
 set(gca,'Color',[0.9 0.9 0.9]);
