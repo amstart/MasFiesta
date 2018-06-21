@@ -8,66 +8,11 @@ hMainGui=getappdata(0,'hMainGui');
 error_events=[];
 abort=0;
 
-params.bw_region = Config.Region;
-params.dynamicfil = 0;
-if isfield(Config,'DynamicFil')
-    params.dynamicfil = Config.DynamicFil;
-    if Config.DynamicFil
-        [y,x] = size(params.bw_region);
-        bw_region = zeros(y,x,10);
-        orig_region = params.bw_region;
-    end
+try
+    params = setparams(Config);
+catch
+    params = 'connected objects';
 end
-if isfield(Config,'TformChannel')
-    params.transform = Config.TformChannel;
-end
-
-params.bead_model=Config.Model;
-params.max_beads_per_region=Config.MaxFunc;
-params.scale=Config.PixSize;
-params.ridge_model = 'quadratic';
-
-params.find_molecules=1;
-params.find_beads=1;
-
-if Config.OnlyTrackMol==1
-    params.find_molecules=0;
-end
-if Config.OnlyTrackFil==1
-    params.find_beads=0;
-end
-params.include_data = Config.OnlyTrack.IncludeData;
-params.area_threshold=Config.Threshold.Area;
-params.height_threshold=Config.Threshold.Height;   
-params.fwhm_estimate=Config.Threshold.FWHM;
-if isempty(Config.BorderMargin)
-    params.border_margin = 2 * Config.Threshold.FWHM / params.scale / (2*sqrt(2*log(2)));
-else
-    params.border_margin = Config.BorderMargin;
-end
-
-if isempty(Config.ReduceFitBox)
-    params.reduce_fit_box = 1;
-else
-    params.reduce_fit_box = Config.ReduceFitBox;
-end
-
-params.focus_correction = Config.FilFocus;
-params.min_cod=Config.Threshold.Fit;
-params.threshold = Config.Threshold.Value;
-if length(Config.Threshold.Filter)==1
-    [params.binary_image_processing,params.background_filter] = strtok(Config.Threshold.Filter{1},'+');
-else
-    params.binary_image_processing = [];
-    params.background_filter=Config.Threshold.Filter;
-end
-params.display = 1;
-
-params.options = optimset( 'Display', 'off','UseParallel','never');
-params.options.MaxFunEvals = []; 
-params.options.MaxIter = [];
-params.options.TolFun = [];
-params.options.TolX = [];
 
 if ~isempty(TimeInfo) && ~isempty(TimeInfo{1}) 
     params.creation_time_vector = (TimeInfo{1}-TimeInfo{1}(1))/1000;
@@ -116,12 +61,17 @@ catch
     PathName=DirCurrent;
     fData=[PathName filename];
     fMsgDlg(['Directory not accessible - File saved in FIESTA directory: ' DirCurrent],'warn');
-    save(fData,'Config');
+    try
+        save(fData,'Config');
+    catch
+        fData = [fData{:}];
+        save(fData,'Config');
+    end
 end
 
 filestr = [FiestaDir.AppData 'logfile.txt'];
 logfile = fopen(filestr,'w');
-if Config.FirstTFrame>0
+if Config.FirstTFrame>0 && ~isnan(JobNr)
     FramesT = Config.LastFrame-Config.FirstTFrame+1;
     if JobNr>0
         params.display = 0;
@@ -226,140 +176,7 @@ catch
     save(fData,'Objects','Config');
 end
 if ~isempty(Objects) && Config.ConnectMol.NumberVerification>0 && Config.ConnectFil.NumberVerification>0
-    try
-        [MolTrack,FilTrack,abort]=fFeatureConnect(Objects,Config,JobNr);     
-    catch ME
-        save(fData,'ME','-append');
-        return;
-    end
-    if abort==1
-        return
-    end
-    Molecule=[];
-    Filament=[];
-    Molecule=fDefStructure(Molecule,'Molecule');
-    Filament=fDefStructure(Filament,'Filament');
-    nMolTrack=length(MolTrack);
-
-    nChannel = Config.TrackChannel;
-    if length(Config.TformChannel)==1
-        T = Config.TformChannel{1};
-    else
-        T = Config.TformChannel{nChannel};
-    end
-    
-    T(3,3) = 1;
-   
-    for n = 1:nMolTrack
-        nData=size(MolTrack{n},1);
-        Molecule(n).Name = ['Molecule ' num2str(n)];
-        Molecule(n).File = Config.StackName;
-        Molecule(n).Comments = '';
-        Molecule(n).Selected = 0;
-        Molecule(n).Visible = true;    
-        Molecule(n).Drift = 0;            
-        Molecule(n).PixelSize = Config.PixSize;  
-        Molecule(n).Channel = nChannel;
-        Molecule(n).TformMat = T;
-        Molecule(n).Color = [0 0 1];
-        for j = 1:nData
-            f = MolTrack{n}(j,1);
-            m = MolTrack{n}(j,2);
-            Molecule(n).Results(j,1) = single(f);
-            Molecule(n).Results(j,2) = Objects{f}.time;
-            Molecule(n).Results(j,3) = Objects{f}.center_x(m);
-            Molecule(n).Results(j,4) = Objects{f}.center_y(m);
-            Molecule(n).Results(j,5) = NaN;
-            Molecule(n).Results(j,7) = Objects{f}.width(1,m);
-            Molecule(n).Results(j,8) = Objects{f}.height(1,m);                
-            Molecule(n).Results(j,9) = single(sqrt((Objects{f}.com_x(2,m))^2+(Objects{f}.com_y(2,m))^2));                        
-            if size(Objects{f}.data{m},2)==1
-                Molecule(n).Results(j,9:10) = Objects{f}.data{m}';                
-                Molecule(n).Results(j,11) = single(mod(Objects{f}.orientation(1,m),2*pi));                
-                Molecule(n).Type = 'stretched';
-                Molecule(n).Results(j,12) = 0; 
-            elseif size(Objects{f}.data{m},2)==3
-                Molecule(n).Results(j,9:11) = Objects{f}.data{m}(1,:);                
-                Molecule(n).Type = 'ring1';
-                Molecule(n).Results(j,12) = 0; 
-            else
-                Molecule(n).Type = 'symmetric';
-                Molecule(n).Results(j,10) = 0; 
-            end
-            if Config.OnlyTrack.IncludeData == 1
-                Molecule(n).TrackingResults{j} = Objects{f}.points{m};
-            else
-                Molecule(n).TrackingResults{j} = [];
-            end       
-            
-        end
-        Molecule(n).Results(:,6) = fDis(Molecule(n).Results(:,3:5));
-    end
-    if ~isempty(Stack)
-        sStack=size(Stack{1});
-    end
-    nFilTrack=length(FilTrack);
-    for n = nFilTrack:-1:1
-        nData=size(FilTrack{n},1);
-        Filament(n).Name = ['Filament ' num2str(n)];
-        Filament(n).File = Config.StackName;
-        Filament(n).Comments = '';
-        Filament(n).Selected=0;
-        Filament(n).Visible=true;    
-        Filament(n).Drift=0;    
-        Filament(n).PixelSize = Config.PixSize;   
-        Filament(n).Channel = nChannel;
-        Filament(n).TformMat = T;
-        Filament(n).Color=[0 0 1];
-        for j=1:nData
-            f = FilTrack{n}(j,1);
-            m = FilTrack{n}(j,2);
-            Filament(n).Results(j,1) = single(f);
-            Filament(n).Results(j,2) = Objects{f}.time;
-            Filament(n).Results(j,3) = Objects{f}.center_x(m);
-            Filament(n).Results(j,4) = Objects{f}.center_y(m);
-            Filament(n).Results(j,5) = NaN;
-            Filament(n).Results(j,7) = Objects{f}.length(1,m);
-            Filament(n).Results(j,8) = Objects{f}.height(1,m);                
-            Filament(n).Results(j,9) = single(mod(Objects{f}.orientation(1,m),2*pi));
-            Filament(n).Results(j,10) = 0;
-            Filament(n).Data{j} = [Objects{f}.data{m}(:,1:2) ones(size(Objects{f}.data{m},1),1)*NaN Objects{f}.data{m}(:,3:end)];
-            Filament(n).PosCenter(j,1:3)=[Filament(n).Results(j,3:4) NaN];  
-            if Config.OnlyTrack.IncludeData == 1
-                Filament(n).TrackingResults{j} = Objects{f}.points{m};
-            else
-                Filament(n).TrackingResults{j} =[];
-            end       
-        end
-        
-        Filament(n) = fAlignFilament(Filament(n),Config);
-        
-        if Config.ConnectFil.DisregardEdge && ~isempty(Stack)                                          
-            xv = [5 5 sStack(2)-4 sStack(2)-4]*Config.PixSize;
-            yv = [5 sStack(1)-4 sStack(1)-4 5]*Config.PixSize;            
-            X=Filament(n).PosStart(:,1);
-            Y=Filament(n).PosStart(:,2);
-            IN = inpolygon(X,Y,xv,yv);
-            Filament(n).Results(~IN,:)=[];            
-            Filament(n).PosStart(~IN,:)=[];
-            Filament(n).PosCenter(~IN,:)=[];
-            Filament(n).PosEnd(~IN,:)=[];
-            Filament(n).Data(~IN)=[];            
-            X=Filament(n).PosEnd(:,1);
-            Y=Filament(n).PosEnd(:,2);
-            IN = inpolygon(X,Y,xv,yv);
-            Filament(n).Results(~IN,:)=[];
-            Filament(n).PosStart(~IN,:)=[];
-            Filament(n).PosCenter(~IN,:)=[];
-            Filament(n).PosEnd(~IN,:)=[]; 
-            Filament(n).Data(~IN)=[];
-            if isempty(Filament(n).Results)
-                Filament(n)=[];
-            else
-                Filament(n).Results(:,6) = fDis(Filament(n).Results(:,3:5));
-            end
-        end
-    end
+    [Filament, Molecule] = fConnectObjects(Objects, Config, JobNr, Stack);
     try
         save(fData,'-append','Molecule','Filament');
     catch ME
@@ -379,3 +196,65 @@ end
 function fSave(dirStatus,frame)
 fname = [dirStatus 'frame' int2str(frame) '.mat'];
 save(fname,'frame');
+
+function params = setparams(Config)
+params.bw_region = Config.Region;
+params.dynamicfil = 0;
+if isfield(Config,'DynamicFil')
+    params.dynamicfil = Config.DynamicFil;
+    if Config.DynamicFil
+        [y,x] = size(params.bw_region);
+        bw_region = zeros(y,x,10);
+        orig_region = params.bw_region;
+    end
+end
+if isfield(Config,'TformChannel')
+    params.transform = Config.TformChannel;
+end
+
+params.bead_model=Config.Model;
+params.max_beads_per_region=Config.MaxFunc;
+params.scale=Config.PixSize;
+params.ridge_model = 'quadratic';
+
+params.find_molecules=1;
+params.find_beads=1;
+
+if Config.OnlyTrackMol==1
+    params.find_molecules=0;
+end
+if Config.OnlyTrackFil==1
+    params.find_beads=0;
+end
+params.include_data = Config.OnlyTrack.IncludeData;
+params.area_threshold=Config.Threshold.Area;
+params.height_threshold=Config.Threshold.Height;   
+params.fwhm_estimate=Config.Threshold.FWHM;
+if isempty(Config.BorderMargin)
+    params.border_margin = 2 * Config.Threshold.FWHM / params.scale / (2*sqrt(2*log(2)));
+else
+    params.border_margin = Config.BorderMargin;
+end
+
+if isempty(Config.ReduceFitBox)
+    params.reduce_fit_box = 1;
+else
+    params.reduce_fit_box = Config.ReduceFitBox;
+end
+
+params.focus_correction = Config.FilFocus;
+params.min_cod=Config.Threshold.Fit;
+params.threshold = Config.Threshold.Value;
+if length(Config.Threshold.Filter)==1
+    [params.binary_image_processing,params.background_filter] = strtok(Config.Threshold.Filter{1},'+');
+else
+    params.binary_image_processing = [];
+    params.background_filter=Config.Threshold.Filter;
+end
+params.display = 1;
+
+params.options = optimset( 'Display', 'off','UseParallel','never');
+params.options.MaxFunEvals = []; 
+params.options.MaxIter = [];
+params.options.TolFun = [];
+params.options.TolX = [];

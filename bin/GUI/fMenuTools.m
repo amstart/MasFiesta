@@ -48,6 +48,8 @@ for i=1:length(Filament)
 end
 uitable1 = dialog('WindowStyle','normal');
 uitable('Parent', uitable1, 'Data',setxor(allframes, trackedframes)); drawnow;
+figure
+histogram(trackedframes,[allframes allframes(end)+1])
 
 function JoinNearby(hMainGui)
 global Molecule

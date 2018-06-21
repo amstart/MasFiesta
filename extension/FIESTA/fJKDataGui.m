@@ -2236,7 +2236,7 @@ if ~isempty(fitframes)
                 if Config.OnlyTrack.IncludeData == 1
                     Object.TrackingResults = [Object.TrackingResults(1:s) Obj.points{1} Object.TrackingResults(e:end)];
                 else
-                    Object.TrackingResults = [Object.TrackingResults(1:s) cell(1,1) Object.TrackingResults(e:end)];
+                    Object.TrackingResults = [];
                 end  
             elseif strcmp(Type,'Filament') && ~isempty(Obj.data{1})
                 Check = [Check(1:s); 1; Check(e:end)];
@@ -2260,7 +2260,7 @@ if ~isempty(fitframes)
                 if Config.OnlyTrack.IncludeData == 1
                     Object.TrackingResults = [Object.TrackingResults(1:s) Obj.points{1} Object.TrackingResults(e:end)];
                 else
-                    Object.TrackingResults = [Object.TrackingResults(1:s) cell(1,1) Object.TrackingResults(e:end)];
+                    Object.TrackingResults = [];
                 end  
             end
         end

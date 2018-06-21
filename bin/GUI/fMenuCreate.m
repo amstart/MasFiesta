@@ -69,6 +69,9 @@ hMenu.mSaveObjects = uimenu('Parent',hMenu.mData,'Callback','fMenuData(''SaveObj
 hMenu.mClearObjects = uimenu('Parent',hMenu.mData,'Callback','fMenuData(''ClearObjects'',getappdata(0,''hMainGui''));','Enable','off',...
                            'Label','Clear Objects','Tag','mClearObjects');
                        
+hMenu.mConnectObjects = uimenu('Parent',hMenu.mData,'Callback','fMenuData(''ConnectObjects'',getappdata(0,''hMainGui''));','Enable','on',...
+                           'Label','Connect Objects','Tag','mConnectObjects');
+                       
 hMenu.mLoadLink = uimenu('Parent',hMenu.mData,'Callback','fMenuData(''LoadLink'');','Enable','on',...
                            'Label','Load Shortcut','Tag','mLoadLink','Separator','on');
                        

@@ -1,6 +1,8 @@
 function fMenuData(func,varargin)
 try
 switch func
+    case 'ConnectObjects'
+        ConnectObjects(varargin{1});
     case 'LoadLink'
         LoadLink;
     case 'SaveLink'
@@ -1066,6 +1068,20 @@ if FileName~=0
     save(file,'Objects','-v6');
     set(hMainGui.fig,'Pointer','arrow');    
 end
+
+function ConnectObjects(hMainGui)
+global Objects;
+global Config;
+global Stack;
+global Filament;
+global Molecule;
+newConfig = Config;
+newConfig.TformChannel = hMainGui.Values.TformChannel;
+newConfig.TrackChannel = hMainGui.Values.FrameIdx(1);
+fAnalyseStack(Stack,[],newConfig,nan,Objects)
+% [Filament, Molecule] = fConnectObjects(Objects, newConfig, 0, Stack);
+% fRightPanel('UpdateList',hMainGui.RightPanel.pData,Molecule,hMainGui.Menu.ctListMol,hMainGui.Values.MaxIdx);%JochenK
+% fRightPanel('UpdateList',hMainGui.RightPanel.pData,Filament,hMainGui.Menu.ctListFil,hMainGui.Values.MaxIdx);%JochenK
 
 function ClearObjects(hMainGui)
 global Objects;
