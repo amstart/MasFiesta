@@ -62,7 +62,7 @@ set(hMainGui.MidPanel.pNoData,'Visible','on')
 set(hMainGui.MidPanel.tNoData,'String','Loading Stack...','Visible','on');
 set(hMainGui.MidPanel.pView,'Visible','off');
 if reopen == 0  %JochenK
-    [FileName,PathName] = uigetfile({'*.stk;*.nd2;*.zvi;*.tif;*.tiff','Image Stacks (*.stk,*.nd2,*.zvi,*.tif,*.tiff)'},'Select the Stack',FiestaDir.Stack); %open dialog for *.stk files
+    [FileName,PathName] = uigetfile({'*.stk;*.nd2;*.zvi;*.tif;*.tiff','Image Stacks (*.stk,*.nd2,*.zvi,*.tif,*.tiff)'},'Select the Stack',FiestaDir.Stack, 'MultiSelect', 'on'); %open dialog for *.stk files
 else
     names = Config.StackName;
     names = names(~cellfun(@(x) strcmp(x,'~'), names));
@@ -115,13 +115,41 @@ if PathName~=0
             FiestaDir.Save = FiestaDir.Stack;
         end
     end
-    f=[PathName FileName];
     try
-        if strcmp(filetype,'ND2')||strcmp(filetype,'ZVI')
-            [Stack,TimeInfo,PixSize]=fReadND2(f); 
+        if iscell(FileName)
+            N = length(FileName);
         else
-            [Stack,TimeInfo,PixSize]=fStackRead(f);
+            f=[PathName FileName];
+            N = 1;
         end
+        start = 1;
+        for n = 1:N
+            if iscell(FileName)
+                f=[PathName FileName{n}];
+            end
+            bfdata = bfopen(f);
+            stackfile = bfdata{1};
+            stackfile = stackfile(:,1);
+            for i = start:length(stackfile)+start-1
+                index = i-start+1;
+                Stack{1}(:,:,i) = stackfile{index};
+            end
+            omeMeta = bfdata{1, 4};
+            PixSize = double(omeMeta.getPixelsPhysicalSizeY(0).value(ome.units.UNITS.NANOMETER));
+            for i = start:length(stackfile)+start-1
+                index = i-start+1;
+                TimeInfo{1}(i) = double(omeMeta.getPlaneDeltaT(0,index-1).value(ome.units.UNITS.MILLISECOND));
+            end
+            start = i+1;
+        end
+        if iscell(FileName)
+            FileName = [FileName{:}];
+        end
+%         if strcmp(filetype,'ND2')||strcmp(filetype,'ZVI')
+%             [Stack,TimeInfo,PixSize]=fReadND2(f); 
+%         else
+%             [Stack,TimeInfo,PixSize]=fStackRead(f);
+%         end
     catch ME   
         fMsgDlg(ME.message,'error');
         failed=1;

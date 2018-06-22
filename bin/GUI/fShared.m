@@ -369,23 +369,33 @@ if nMol>0
                 DisZ=zeros(n,1);
                 for j=1:n
                     [~,k2]=min(abs(j-R_Index));
-                    DisX(j)=R_X(k2(1))-R_X(1);
-                    DisY(j)=R_Y(k2(1))-R_Y(1);
-                    DisZ(j)=R_Z(k2(1))-R_Z(1);
+                    if R_X(k2(1))-R_X(1) == 0
+                        DisX(j)=nan;
+                        DisY(j)=nan;
+                        DisZ(j)=nan;
+                    else
+                        DisX(j)=R_X(k2(1))-R_X(1);
+                        DisY(j)=R_Y(k2(1))-R_Y(1);
+                        DisZ(j)=R_Z(k2(1))-R_Z(1);
+                    end
                 end
                 X(:,p)=DisX;
                 Y(:,p)=DisY;
                 Z(:,p)=DisZ;
                 p=p+1;
             end
-            drift_x=mean(X,2);
-            drift_y=mean(Y,2);
-            drift_z=mean(Z,2);
-            drift_dx=std(X,0,2);
-            drift_dy=std(Y,0,2);
-            drift_dz=std(Z,0,2);
+            drift_x=nanmean(X,2);
+            drift_y=nanmean(Y,2);
+            drift_z=nanmean(Z,2);
+            drift_dx=nanstd(X,0,2);
+            drift_dy=nanstd(Y,0,2);
+            drift_dz=nanstd(Z,0,2);
             Drift{m}=[F' drift_x drift_y drift_z drift_dx drift_dy drift_dz];
         end
+    end
+    for m=1:length(Drift)
+        Drift{m}(isnan(Drift{m})) = 0;
+        Drift{m}(:,all(~Drift{m})) = nan;
     end
     setappdata(hMainGui.fig,'Drift',Drift);
     UpdateMenu(hMainGui);
