@@ -135,10 +135,18 @@ if PathName~=0
                 Stack{1}(:,:,i) = stackfile{index};
             end
             omeMeta = bfdata{1, 4};
-            PixSize = double(omeMeta.getPixelsPhysicalSizeY(0).value(ome.units.UNITS.NANOMETER));
-            for i = start:length(stackfile)+start-1
-                index = i-start+1;
-                TimeInfo{1}(i) = double(omeMeta.getPlaneDeltaT(0,index-1).value(ome.units.UNITS.MILLISECOND));
+            try
+                PixSize = double(omeMeta.getPixelsPhysicalSizeY(0).value(ome.units.UNITS.NANOMETER));
+            catch
+                PixSize = [];
+            end
+            try
+                for i = start:length(stackfile)+start-1
+                    index = i-start+1;
+                    TimeInfo{1}(i) = double(omeMeta.getPlaneDeltaT(0,index-1).value(ome.units.UNITS.MILLISECOND));
+                end
+            catch
+                TimeInfo{1} = [];
             end
             start = i+1;
         end
