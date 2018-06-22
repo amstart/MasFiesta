@@ -1,5 +1,5 @@
 <deployment-project plugin="plugin.ezdeploy" plugin-version="1.0">
-  <configuration file="D:\MasFiesta\MasFIESTA.prj" location="D:\MasFiesta" name="MasFIESTA" target="target.ezdeploy.standalone" target-name="Application Compiler">
+  <configuration file="D:\MasFiesta\MasFIESTA.prj" location="D:\MasFiesta" name="MasFIESTA" preferred-package-location="D:\MasFiesta\MasFIESTA\for_redistribution" preferred-package-type="package.type.exe" target="target.ezdeploy.standalone" target-name="Application Compiler">
     <param.appname>MasFiesta</param.appname>
     <param.icon />
     <param.icons />
@@ -293,12 +293,23 @@
       <file>${PROJECT_ROOT}\documentation\Manual.docx</file>
       <file>${PROJECT_ROOT}\documentation\MasFiesta Features.rtf</file>
       <file>${PROJECT_ROOT}\documentation\Workflow dynamic microtubules.docx</file>
+      <file>${PROJECT_ROOT}\extension\autoadjust.m</file>
       <file>${PROJECT_ROOT}\extension\CalcDistance.m</file>
+      <file>${PROJECT_ROOT}\extension\Dynamic Filaments\+DF\CalcVelocity.m</file>
+      <file>${PROJECT_ROOT}\extension\Dynamic Filaments\+DF\Draw.m</file>
+      <file>${PROJECT_ROOT}\extension\Dynamic Filaments\+DF\get_plot_vectors.m</file>
+      <file>${PROJECT_ROOT}\extension\Dynamic Filaments\+DF\Load.m</file>
+      <file>${PROJECT_ROOT}\extension\Dynamic Filaments\+DF\loadFIESTAfile.m</file>
+      <file>${PROJECT_ROOT}\extension\Dynamic Filaments\+DF\LoadFolder.m</file>
+      <file>${PROJECT_ROOT}\extension\Dynamic Filaments\+DF\loadROI.m</file>
+      <file>${PROJECT_ROOT}\extension\Dynamic Filaments\+DF\PrepareFils.m</file>
+      <file>${PROJECT_ROOT}\extension\Dynamic Filaments\+DF\segmentFIESTAFils.m</file>
+      <file>${PROJECT_ROOT}\extension\Dynamic Filaments\+DF\segmentPatches.m</file>
+      <file>${PROJECT_ROOT}\extension\Dynamic Filaments\+DF\SetTable.m</file>
       <file>${PROJECT_ROOT}\extension\Dynamic Filaments\fJKDynamicFilamentsGui.m</file>
       <file>${PROJECT_ROOT}\extension\Dynamic Filaments\fJKfrequencyvsXplot.m</file>
       <file>${PROJECT_ROOT}\extension\Dynamic Filaments\fJKplotframework.m</file>
       <file>${PROJECT_ROOT}\extension\Dynamic Filaments\fJKscatterboxplot.m</file>
-      <file>${PROJECT_ROOT}\extension\Dynamic Filaments\fJKSegment.m</file>
       <file>${PROJECT_ROOT}\extension\Dynamic Filaments\JKextract_image_parameter.m</file>
       <file>${PROJECT_ROOT}\extension\Dynamic Filaments\num2clip_jochen.m</file>
       <file>${PROJECT_ROOT}\extension\FIESTA\fJKAmplitudeStatsGui.m</file>
@@ -314,6 +325,9 @@
       <file>${PROJECT_ROOT}\extension\fJKGetRefData.m</file>
       <file>${PROJECT_ROOT}\extension\fJKPlotIntensity.m</file>
       <file>${PROJECT_ROOT}\extension\fJKread_custom_data.m</file>
+      <file>${PROJECT_ROOT}\extension\misc\firstoccurences.m</file>
+      <file>${PROJECT_ROOT}\extension\misc\plot_distance.m</file>
+      <file>${PROJECT_ROOT}\extension\misc\transformtotrack.m</file>
       <file>${PROJECT_ROOT}\extension\ScanFuns\batch_kymo_data.m</file>
       <file>${PROJECT_ROOT}\extension\ScanFuns\batch_rename.m</file>
       <file>${PROJECT_ROOT}\extension\ScanFuns\batch_single_channel.m</file>
@@ -432,15 +446,30 @@
       <file>${PROJECT_ROOT}\fiestastatus\frame98.mat</file>
       <file>${PROJECT_ROOT}\fiestastatus\frame99.mat</file>
       <file>${PROJECT_ROOT}\FiestaUpdater.m</file>
+      <file>${PROJECT_ROOT}\FromFileExchange\boundedline\boundedline\boundedline.m</file>
+      <file>${PROJECT_ROOT}\FromFileExchange\boundedline\boundedline\outlinebounds.m</file>
+      <file>${PROJECT_ROOT}\FromFileExchange\boundedline\catuneven\catuneven.m</file>
+      <file>${PROJECT_ROOT}\FromFileExchange\boundedline\Inpaint_nans\doc\methods_of_inpaint_nans.m</file>
+      <file>${PROJECT_ROOT}\FromFileExchange\boundedline\Inpaint_nans\inpaint_nans.m</file>
+      <file>${PROJECT_ROOT}\FromFileExchange\boundedline\Inpaint_nans\inpaint_nans_bc.m</file>
+      <file>${PROJECT_ROOT}\FromFileExchange\boundedline\Inpaint_nans\inpaint_nans_demo.m</file>
+      <file>${PROJECT_ROOT}\FromFileExchange\boundedline\Inpaint_nans\test\test_main.m</file>
+      <file>${PROJECT_ROOT}\FromFileExchange\boundedline\README.m</file>
+      <file>${PROJECT_ROOT}\FromFileExchange\boundedline\README.md</file>
+      <file>${PROJECT_ROOT}\FromFileExchange\boundedline\singlepatch\singlepatch.m</file>
+      <file>${PROJECT_ROOT}\FromFileExchange\ciplot.m</file>
       <file>${PROJECT_ROOT}\FromFileExchange\colorspace.m</file>
       <file>${PROJECT_ROOT}\FromFileExchange\distinguishable_colors.m</file>
       <file>${PROJECT_ROOT}\FromFileExchange\getAllFiles.m</file>
+      <file>${PROJECT_ROOT}\FromFileExchange\herrorbar.m</file>
       <file>${PROJECT_ROOT}\FromFileExchange\hexsingle2num.m</file>
+      <file>${PROJECT_ROOT}\FromFileExchange\ipf.m</file>
       <file>${PROJECT_ROOT}\FromFileExchange\linept2.m</file>
       <file>${PROJECT_ROOT}\FromFileExchange\linspecer.m</file>
       <file>${PROJECT_ROOT}\FromFileExchange\linspecer_modified.m</file>
       <file>${PROJECT_ROOT}\FromFileExchange\nanfastsmooth.m</file>
       <file>${PROJECT_ROOT}\FromFileExchange\num2clip.m</file>
+      <file>${PROJECT_ROOT}\FromFileExchange\peakfit.m</file>
       <file>${PROJECT_ROOT}\FromFileExchange\ScreenCapture\screencapture.m</file>
       <file>${PROJECT_ROOT}\FromFileExchange\subtightplot.m</file>
       <file>${PROJECT_ROOT}\FromFileExchange\wmean.m</file>
