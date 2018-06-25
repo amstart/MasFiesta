@@ -91,14 +91,18 @@ if PathName~=0
     %end
     Time = NaN;
     PixSize = [];
-    if strcmpi(FileName(end-3:end),'.stk')
-        filetype = 'MetaMorph';
-    elseif strcmpi(FileName(end-3:end),'.nd2')
-        filetype = 'ND2';
-    elseif strcmpi(FileName(end-3:end),'.zvi')
-        filetype = 'ZVI';
-    else
-        filetype = 'TIFF';
+    try
+        if strcmpi(FileName(end-3:end),'.stk')
+            filetype = 'MetaMorph';
+        elseif strcmpi(FileName(end-3:end),'.nd2')
+            filetype = 'ND2';
+        elseif strcmpi(FileName(end-3:end),'.zvi')
+            filetype = 'ZVI';
+        else
+            filetype = 'TIFF';
+        end
+    catch
+        filetype = 'multiple files';
     end
     set(hMainGui.fig,'Pointer','watch');   
     CloseStack(hMainGui);

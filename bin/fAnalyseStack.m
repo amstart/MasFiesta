@@ -64,8 +64,14 @@ catch
     try
         save(fData,'Config');
     catch
-        fData = [fData{:}];
-        save(fData,'Config');
+        try
+            underscores = strfind(a,'_');
+            fData = [sName(1:underscores(1)) 'all(' datestr(clock,'yyyymmddTHHMMSSFFF') ').mat'];
+            save(fData,'Config');
+        catch
+            fData = ['all(' datestr(clock,'yyyymmddTHHMMSSFFF') ').mat'];
+            save(fData,'Config');
+        end
     end
 end
 
