@@ -125,6 +125,7 @@
       <file>${PROJECT_ROOT}\bin\BuildIn\uacrun.mexw64</file>
       <file>${PROJECT_ROOT}\bin\BuildIn\uiinspect.m</file>
       <file>${PROJECT_ROOT}\bin\fAnalyseStack.m</file>
+      <file>${PROJECT_ROOT}\bin\fConnectObjects.m</file>
       <file>${PROJECT_ROOT}\bin\fFeatureConnect.m</file>
       <file>${PROJECT_ROOT}\bin\GUI\About.jpg</file>
       <file>${PROJECT_ROOT}\bin\GUI\fAboutGui.m</file>
