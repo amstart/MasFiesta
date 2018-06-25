@@ -474,9 +474,9 @@
       <file>${PROJECT_ROOT}\FromFileExchange\ScreenCapture\screencapture.m</file>
       <file>${PROJECT_ROOT}\FromFileExchange\subtightplot.m</file>
       <file>${PROJECT_ROOT}\FromFileExchange\wmean.m</file>
-      <file>${PROJECT_ROOT}\MasFIESTA.prj</file>
     </fileset.resources>
     <fileset.package>
+      <file>D:\AppData</file>
       <file>${PROJECT_ROOT}\fiesta.ini</file>
       <file>${PROJECT_ROOT}\readme.txt</file>
     </fileset.package>
