@@ -263,11 +263,13 @@ else
     column = 8;
     Units.str = 'AU';
 end
+%amplength{n} = Objects(n).Results(:,column)';
 for n = 1:length(Objects)
     amplength{n}=[];
     time{n}=[];
     if size(Objects(n).Results,1)>0
-        amplength{n} = Objects(n).Results(:,column)';
+        amplength{n} = 2*pi*(Objects(n).Results(:,7)/Objects(n).PixelSize/(2*sqrt(2*log(2)))).^2.*Objects(n).Results(:,8);
+        amplength{n} = amplength{n}';
         time{n} = Objects(n).Results(:,2)';
     end
 end    
