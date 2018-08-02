@@ -278,7 +278,7 @@ if ~isempty(fOpenStruct)
             Config.StackReadOptions = [];
             nFrames(n)=size(Stack{n},3);
             if n>1
-                ratio = length(Stack{n-1})/length(Stack{n});
+                ratio = size(Stack{n-1},1)/size(Stack{n},1);
                 if ratio ~= 1
                     Stack{n} = imresize(Stack{n}, ratio);
                 end
