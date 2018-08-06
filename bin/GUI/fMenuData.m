@@ -145,10 +145,11 @@ if PathName~=0
                 PixSize = [];
             end
             try
-                for i = start:length(stackfile)+start-1
-                    index = i-start+1;
-                    TimeInfo{1}(i) = double(omeMeta.getPlaneDeltaT(0,index-1).value(ome.units.UNITS.MILLISECOND));
-                end
+                TimeInfo{1}(start:length(stackfile)+start-1) = start:length(stackfile)+start-1;
+%                 for i = start:length(stackfile)+start-1
+%                     index = i-start+1;
+%                     TimeInfo{1}(i) = double(omeMeta.getPlaneDeltaT(0,index-1).value(ome.units.UNITS.MILLISECOND));
+%                 end
             catch
                 TimeInfo{1} = [];
             end
@@ -277,7 +278,7 @@ if ~isempty(fOpenStruct)
             Config.StackReadOptions = [];
             nFrames(n)=size(Stack{n},3);
             if n>1
-                ratio = length(Stack{n-1})/length(Stack{n});
+                ratio = size(Stack{n-1},1)/size(Stack{n},1);
                 if ratio ~= 1
                     Stack{n} = imresize(Stack{n}, ratio);
                 end
