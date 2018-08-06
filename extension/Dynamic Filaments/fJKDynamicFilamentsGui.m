@@ -1,6 +1,6 @@
 function fJKDynamicFilamentsGui(func,varargin)
 if nargin == 0 || any(ishandle(func))
-    Create;
+    DF.createGui(varargin{:});
     return
 end
 switch func
@@ -11,7 +11,7 @@ switch func
     case 'DeletePlots'
         DeletePlots;
     case 'Create'
-        Create(varargin{:});
+        DF.createGui(varargin{:});
     case 'SetTable'
         SetTable;           
     case 'SetMenu'
@@ -46,435 +46,9 @@ switch func
         CustomPlot;
 end
 
-function Create(varargin)
-global DFDir
-if nargin == 0
-    h=findobj('Tag','hDynamicFilamentsGui');
-    close(h)
-
-    hDynamicFilamentsGui.fig = figure('Units','normalized','WindowStyle','normal','DockControls','on','IntegerHandle','off','Name','Average Velocity',...
-                          'NumberTitle','off','Position',[0.1 0.1 0.8 0.8],'HandleVisibility','callback','Tag','hDynamicFilamentsGui',...
-                          'Visible','off','Resize','on','Renderer', 'painters');
-
-    if ispc
-        set(hDynamicFilamentsGui.fig,'Color',[236 233 216]/255);
-    end
-    try
-        DFDir = 'Y:\Jochen';
-    catch
-    end
-else
-    hDynamicFilamentsGui=getappdata(0,'hDynamicFilamentsGui');
-    children=get(hDynamicFilamentsGui.fig, 'Children');
-    delete(children);
-    Quicksave(1);
-end
-
-answer = questdlg('Want it complicated for dynamic filaments?');
-hDynamicFilamentsGui.complicated = strcmp(answer, 'Yes');
-
-c = get(hDynamicFilamentsGui.fig,'Color');
-                  
-hDynamicFilamentsGui.pPlotPanel = uipanel('Parent',hDynamicFilamentsGui.fig,'Position',[0.4 0.6 0.575 0.395],'Tag','PlotPanel','BackgroundColor','white');
-
-hDynamicFilamentsGui.aPlot = axes('Parent',hDynamicFilamentsGui.pPlotPanel,'Units','normalized','OuterPosition',[0 0 1 1],'Tag','aPlot','TickDir','in');
-
-hDynamicFilamentsGui.pVelPlotPanel = uipanel('Parent',hDynamicFilamentsGui.fig,'Position',[0.4 .005 0.575 0.3],'Tag','VelPlotPanel','BackgroundColor','white');
-
-hDynamicFilamentsGui.pIPlotPanel = uipanel('Parent',hDynamicFilamentsGui.fig,'Position',[0.4 .305 0.575 0.295],'Tag','VelPlotPanel','BackgroundColor','white');
-
-hDynamicFilamentsGui.aVelPlot = axes('Parent',hDynamicFilamentsGui.pVelPlotPanel,'Units','normalized','OuterPosition',[0 0 1 1],'Tag','VelPlot','TickDir','in');
-
-hDynamicFilamentsGui.aIPlot = axes('Parent',hDynamicFilamentsGui.pIPlotPanel,'Units','normalized','OuterPosition',[0 0 1 1],'Tag','aIPlot','TickDir','in');
-
-hDynamicFilamentsGui.lSelection = uicontrol('Parent',hDynamicFilamentsGui.fig,'Units','normalized','BackgroundColor',[1 1 1],'Callback','DF.Draw(getappdata(0,''hDynamicFilamentsGui''));',...
-                                   'Position',[0.025 0.6 0.35 0.39],'String','','Style','listbox','Value',1,'Tag','lSelection','min',0,'max',10);
-                    
-hDynamicFilamentsGui.bLegend = uicontrol('Parent',hDynamicFilamentsGui.fig,'Units','normalized','Callback','fJKDynamicFilamentsGui(''Legend'');',...
-                                   'Position',[0.025 0.57 0.05 0.025],'String','Legend','Style','pushbutton','Tag','bLegend');      
-                               
-tooltipstr=sprintf(['Order objects by...']);
-
-hDynamicFilamentsGui.lSortFilaments = uicontrol('Parent',hDynamicFilamentsGui.fig,'Units','normalized','Callback','fJKDynamicFilamentsGui(''SortFilaments'',getappdata(0,''hDynamicFilamentsGui''));',...
-                            'Position',[0.1 0.565 0.05 0.025],'Fontsize',10,'BackgroundColor','white','String',{'By Date','By Type', 'Order As Loaded'},'Value',3,'Style','popupmenu','Tag','lSortFilaments','Enable','on','TooltipString', tooltipstr);   
-                        
-hDynamicFilamentsGui.bSelectAll = uicontrol('Parent',hDynamicFilamentsGui.fig,'Style','pushbutton','Units','normalized',...
-                              'Position',[.17 0.57 0.05 .025],'Tag','bSelectAll','Fontsize',10,...
-                              'String','Select All','Callback','fJKDynamicFilamentsGui(''Select'');');   
-                          
-hDynamicFilamentsGui.bIntoWorkSpace = uicontrol('Parent',hDynamicFilamentsGui.fig,'Style','pushbutton','Units','normalized',...
-                              'Position',[.25 0.57 0.05 .025],'Tag','bSelectAll','Fontsize',10,...
-                              'String','Into Workspace','Callback','fJKDynamicFilamentsGui(''Workspace'');');   
-                          
-hDynamicFilamentsGui.bDelete = uicontrol('Parent',hDynamicFilamentsGui.fig,'Style','pushbutton','Units','normalized',...
-                              'Position',[.325 0.57 0.05 .025],'Tag','bDelete','Fontsize',10,...
-                              'String','Delete Selected','Callback','fJKDynamicFilamentsGui(''Delete'');');    
-                          
-hDynamicFilamentsGui.bCustom = uicontrol('Parent',hDynamicFilamentsGui.fig,'Units','normalized','Callback','fJKDynamicFilamentsGui(''CustomPlot'');',...
-                                   'Position',[0.9775 0.9 0.02 0.03],'String','custom','Style','pushbutton','Tag','bCustomPlot');   
-                          
-hDynamicFilamentsGui.bSurf = uicontrol('Parent',hDynamicFilamentsGui.fig,'Units','normalized','Callback','fJKDynamicFilamentsGui(''SurfPlot'');',...
-                                   'Position',[0.9775 0.8 0.02 0.03],'String','surf','Style','pushbutton','Tag','bSurf');   
-                          
-hDynamicFilamentsGui.bTIF = uicontrol('Parent',hDynamicFilamentsGui.fig,'Units','normalized','Callback','fJKDynamicFilamentsGui(''OpenInfo'');',...
-                                   'Position',[0.9775 0.7 0.02 0.03],'String','tif','Style','pushbutton','Tag','bTIF');   
-                               
-hDynamicFilamentsGui.bPDF = uicontrol('Parent',hDynamicFilamentsGui.fig,'Units','normalized','Callback','fJKDynamicFilamentsGui(''OpenInfo'');',...
-                                   'Position',[0.9775 0.6 0.02 0.03],'String','pdf','Style','pushbutton','Tag','bTIF');   
-                               
-hDynamicFilamentsGui.bTXT = uicontrol('Parent',hDynamicFilamentsGui.fig,'Units','normalized','Callback','fJKDynamicFilamentsGui(''OpenInfo'');',...
-                                   'Position',[0.9775 0.5 0.02 0.03],'String','doc','Style','pushbutton','Tag','btxt'); 
-                               
-hDynamicFilamentsGui.bLOCATION = uicontrol('Parent',hDynamicFilamentsGui.fig,'Units','normalized','Callback','fJKDynamicFilamentsGui(''OpenInfo'');',...
-                                   'Position',[0.9775 0.4 0.02 0.03],'String','max','Style','pushbutton','Tag','bLOCATION');   
-                               
-hDynamicFilamentsGui.bFOLDER = uicontrol('Parent',hDynamicFilamentsGui.fig,'Units','normalized','Callback','fJKDynamicFilamentsGui(''OpenInfo'');',...
-                                   'Position',[0.9775 0.3 0.02 0.03],'String','folder','Style','pushbutton','Tag','bFOLDER');   
-                               
-hDynamicFilamentsGui.bFIESTA = uicontrol('Parent',hDynamicFilamentsGui.fig,'Units','normalized','Callback','fJKDynamicFilamentsGui(''OpenInfo'');',...
-                                   'Position',[0.9775 0.2 0.02 0.03],'String','FIESTA','Style','pushbutton','Tag','bFIESTA'); 
-     
-hDynamicFilamentsGui.pOptions = uipanel('Parent',hDynamicFilamentsGui.fig,'Units','normalized','Title','Options',...
-                             'Position',[0.025 0.07 0.35 0.5],'Tag','pOptions','BackgroundColor',c);
-                         
-tooltipstr = 'Useful for development and first thing you should try if the GUI appears to be broken.';        
-                         
-hDynamicFilamentsGui.bRefreshGui = uicontrol('Parent',hDynamicFilamentsGui.pOptions,'Units','normalized','Callback','fJKDynamicFilamentsGui(''Create'', 1);',...
-                                   'Position',[0.8 0.93 0.12 0.05],'String','Refresh GUI','Style','pushbutton','Tag','bRefreshGui','TooltipString', tooltipstr);  
-                               
-tooltipstr = 'Segments the currently loaded MTs according to the given parameters.';       
-                               
-hDynamicFilamentsGui.bSegment = uicontrol('Parent',hDynamicFilamentsGui.pOptions,'Units','normalized','Callback',@UpdateOptions, 'FontSize', 15,...
-                                   'Position',[0.65 0.85 0.15 0.05],'String','Segment','Style','pushbutton','Tag','bSegment','TooltipString', tooltipstr);    
-                               
-if hDynamicFilamentsGui.complicated
-    
-                             
-    tooltipstr=sprintf(['Minimum distance filament has to shrink in order for it to count as a catastrophe. To determine where shrinking segments are to be found.\n' ...
-        'Only if the MT monotonously shrinks that distance it can be considered a shrinking segment (other condition see edit box to the right).']);
-
-    hDynamicFilamentsGui.tMinDist = uicontrol('Parent',hDynamicFilamentsGui.pOptions,'Units','normalized','BackgroundColor',c,...
-                                 'Position',[0.05 0.825 0.3 0.125],'String','Min Shrinkage Distance:','Style','text','Tag','tIntensity','HorizontalAlignment','left');  
-
-    hDynamicFilamentsGui.eMinDist = uicontrol('Parent',hDynamicFilamentsGui.pOptions,'TooltipString', tooltipstr, 'Units','normalized',...
-                                    'Position',[.3 0.9 .1 .05],'String','400','Style','edit','Fontsize',10,'BackgroundColor','white',...
-                                    'UserData', 'nm', 'Tag','eMinDist','Value',0,'Enable','on'); 
-
-    tooltipstr=sprintf(['Maximum rebound. To determine where shrinking segments are to be found.\n' ...
-        'The bigger this fraction, the more small shrinkage segments you will "discover" due to noise in the data.']);
-
-    hDynamicFilamentsGui.eMaxRebound = uicontrol('Parent',hDynamicFilamentsGui.pOptions,'Style','edit','Units','normalized',...
-                                             'Position',[.45 0.9 .1 .05],'Tag','eMaxRebound','Fontsize',10,'TooltipString', tooltipstr,...
-                                             'UserData', '1', 'String','0.25','BackgroundColor','white','HorizontalAlignment','center');  
-
-    hDynamicFilamentsGui.tMaxTimeDiff = uicontrol('Parent',hDynamicFilamentsGui.pOptions,'Units','normalized','BackgroundColor',c,...
-                                 'Position',[0.05 0.775 0.3 0.125],'String','Max time difference:','Style','text','Tag','tMaxTimeDiff','HorizontalAlignment','left');  
-
-    tooltipstr=sprintf(['If two points are further apart in time than this value [in seconds] they are not joined into one track but seperated.\n' ...
-         'This only works at borders of segments. If a shrinkage segment follows a growth segment, a catastrophe will be assumed in between, but this shrinkage track will not show up in plots with references to start.']);
-
-    hDynamicFilamentsGui.eMaxTimeDiff = uicontrol('Parent',hDynamicFilamentsGui.pOptions,'Style','edit','Units','normalized',...
-                                             'Position',[.3 0.85 .1 .05],'Tag','eMaxTimeDiff','Fontsize',10,'TooltipString', tooltipstr,...
-                                             'UserData', 's','String','20','BackgroundColor','white','HorizontalAlignment','center');    
-
-
-    hDynamicFilamentsGui.tBorders = uicontrol('Parent',hDynamicFilamentsGui.pOptions,'Units','normalized','BackgroundColor',c,...
-     'Position',[0.05 0.725 0.225 0.125],'String','Track borders:','Style','text','Tag','tVelocityCutoff','HorizontalAlignment','left'); 
-
-    tooltipstr=sprintf(['Max step size. To determine the borders of a shrinking segment.\n' ...
-        'If a step is above this threshold, the track is terminated (starts from point with minimum velocity outwards).\n' ...
-        'Important: The track is not terminated if the condition of the next edit box is fulfilled (see tooltip) \n' ...
-        'Effects can be seen in the plots of each track (just try it). The higher this value, the longer the tracks.']);
-
-    hDynamicFilamentsGui.eMinXChange = uicontrol('Parent',hDynamicFilamentsGui.pOptions,'Style','edit','Units','normalized',...
-                                             'Position',[0.3 0.8 .1 .05],'Tag','eMinXChange','Fontsize',10,'TooltipString', tooltipstr,...
-                                             'UserData', 'nm','String','0','BackgroundColor','white','HorizontalAlignment','center');  
-
-    tooltipstr=sprintf(['Min step factor. To determine the borders of a shrinking segment.\n' ...
-        'If a step in question times the factor given in this box is completely offset by the next step, the track is not terminated at that step.\n' ...
-        'The bigger this number, the shorter the tracks.']);
-
-    hDynamicFilamentsGui.eMinXFactor = uicontrol('Parent',hDynamicFilamentsGui.pOptions,'Style','edit','Units','normalized',...
-                                             'Position',[.45 0.8 .1 .05],'Tag','eMinXFactor','Fontsize',10,'TooltipString', tooltipstr,...
-                                             'UserData', '1','String','4','BackgroundColor','white','HorizontalAlignment','center');            
-
-    hDynamicFilamentsGui.tIntensity = uicontrol('Parent',hDynamicFilamentsGui.pOptions,'Units','normalized','BackgroundColor',c,...
-                                 'Position',[0.05 0.675 0.225 0.125],'String','Pixels from end:','Style','text','Tag','tIntensity','HorizontalAlignment','left');   
-
-    tooltipstr = 'How many pixels from MT end to evaluate for GFP intensity calculation. Only applies to intensity/MAP count plots.';
-    hDynamicFilamentsGui.eIevalLength = uicontrol('Parent',hDynamicFilamentsGui.pOptions,'TooltipString', tooltipstr, 'Units','normalized',...
-                                    'Position',[.3 .75 .1 .05],'String','7','Style','edit','Fontsize',10,...
-                                    'UserData', 'pixels','BackgroundColor','white','Tag','eIevalLength','Value',0,'Enable','on');            
-
-    hDynamicFilamentsGui.tSubsegments = uicontrol('Parent',hDynamicFilamentsGui.pOptions,'Units','normalized','BackgroundColor',c,...
-                                 'Position',[0.05 0.625 0.225 0.125],'String','Subsegmenting:','Style','text','Tag','tIntensity','HorizontalAlignment','left');
-
-    tooltipstr = sprintf('Border of the first subsegment. The first point with a velocity higher than x%% of the maximum velocity is part of the middle segment.\n Set to 0 to save computation time.');
-    hDynamicFilamentsGui.eSubStart = uicontrol('Parent',hDynamicFilamentsGui.pOptions,'TooltipString', tooltipstr, 'Units','normalized',...
-                                    'Position',[.3 .7 .1 .05],'String','0','Style','edit',...
-                                    'UserData', '1','Fontsize',10,'BackgroundColor','white','Tag','eSubStart','Value',0,'Enable','on');            
-    % tooltipstr = '.';
-    % hDynamicFilamentsGui.eSubMiddle = uicontrol('Parent',hDynamicFilamentsGui.pOptions,'TooltipString', tooltipstr, 'Units','normalized',...
-    %                                 'Position',[.4 .7 .1 .05],'String','10','Style','edit','Fontsize',10,'BackgroundColor','white','Tag','eIevalLength','Value',0,'Enable','on');            
-    tooltipstr = sprintf('Border of the last subsegment. The first point (backwards) with a velocity higher than x%% of the maximum velocity is part of the middle segment.\n Set to 0 to save computation time.');
-    hDynamicFilamentsGui.eSubEnd = uicontrol('Parent',hDynamicFilamentsGui.pOptions,'TooltipString', tooltipstr, 'Units','normalized',...
-                                    'Position',[.45 .7 .1 .05],'String','0','Style','edit','Fontsize',10,...
-                                    'UserData', '1','BackgroundColor','white','Tag','eSubEnd','Value',0,'Enable','on');            
-
-    tooltipstr=sprintf(['Shrinking segments ending below this value are considered rescues (except if at end of movie).\n Growing tracks ending, shrinking tracks starting below this distance are discarded.\n' ...
-        'Red line in rescue plot and the track plot (if within y limits)']);
-
-    hDynamicFilamentsGui.tCutoffs = uicontrol('Parent',hDynamicFilamentsGui.pOptions,'Units','normalized','BackgroundColor',c,...
-     'Position',[0.05 0.575 0.65 0.125],'String','Cutoffs:','Style','text','Tag','tRescueCutoff','HorizontalAlignment','left'); 
-
-    hDynamicFilamentsGui.eRescueCutoff = uicontrol('Parent',hDynamicFilamentsGui.pOptions,'Style','edit','Units','normalized','Callback','fJKDynamicFilamentsGui(''SetTable'');',...
-                                             'Position',[.3 .65 .1 .05],'Tag','eRescueCutoff','Fontsize',10, 'TooltipString', tooltipstr,...
-                                             'UserData', 'nm', 'String','314','BackgroundColor','white','HorizontalAlignment','center');          
-
-    tooltipstr = sprintf(['Within this distance to the seed, points are not considered for growth segments (all points between first and last occurence of points within this range in nm).' ...
-        '']);
-    hDynamicFilamentsGui.eDisregard = uicontrol('Parent',hDynamicFilamentsGui.pOptions,'TooltipString', tooltipstr, 'Units','normalized',...
-                                    'Position',[.45 .65 .1 .05],'String','157','Style','edit','Fontsize',10,'BackgroundColor','white','Tag','eDisregard',...
-                                    'UserData', 'nm','Value',0,'Enable','on');          
-
-    % tooltipstr=sprintf(['Detects rescues within a shrinking segment. A rescue is given if a MT grows during shrinking (the surrounding steps are below the max step size).\nThese catastrophes are not considered for the catastrophe frequency plots!!!']);
-    %                            
-    % hDynamicFilamentsGui.cDoubleCat = uicontrol('Parent',hDynamicFilamentsGui.pOptions,'Style','checkbox','Units','normalized',...
-    %                                          'Position',[.6 0.65 .4 .1],'Tag','cDoubleCat','Fontsize',10,'TooltipString', tooltipstr,...
-    %                                          'String','Catas after rescues','BackgroundColor',c,'HorizontalAlignment','center'); 
-
-    tooltipstr=sprintf('Tagged with 8 in the tag4/tag7 field');
-
-    hDynamicFilamentsGui.cIncludeUnclearPoints = uicontrol('Parent',hDynamicFilamentsGui.pOptions,'Style','checkbox','Units','normalized',...
-                                             'Position',[.75 .75 .25 .05],'Tag','cIncludeUnclearPoints','Fontsize',10,'TooltipString', tooltipstr,...
-                                             'String','Include unclear points','BackgroundColor',c,'HorizontalAlignment','center');       
-
-    tooltipstr=sprintf('Include points where the MT tip is not in a configuration according to its type. \n Tags in the tag5/tag8 field (0=according to type, 15=one MT less, 1=one MT more, 14=close to template tip');  
-
-    hDynamicFilamentsGui.cIncludeNonTypePoints = uicontrol('Parent',hDynamicFilamentsGui.pOptions,'Style','checkbox','Units','normalized',...
-                                             'Position',[.75 .7 .25 .05],'Fontsize',10,'TooltipString', tooltipstr, 'Tag', 'cIncludeNonTypePoints',...
-                                             'String','Include non-type datapoints','BackgroundColor',c,'HorizontalAlignment','center');       
-                                         
-end
-
-hDynamicFilamentsGui.tMethod_TrackValue = uicontrol('Parent',hDynamicFilamentsGui.pOptions,'Units','normalized','BackgroundColor',c,...
-                             'Position',[0.05 0.5 0.29 0.125],'String','Determine track value by:','Style','text','Tag','tVelocity','HorizontalAlignment','left');     
-
-hDynamicFilamentsGui.lMethod_TrackValue = uicontrol('Parent',hDynamicFilamentsGui.pOptions,'Units','normalized','Callback',@UpdateOptions,...
-                            'Position',[0.3 0.5 0.3 0.125],'BackgroundColor','white','String',{'median', 'mean', 'end-start', 'minimum', 'maximum', 'standard dev', 'sum or linear fit (only for velocity)'},...
-                            'Value',1,'Style','popupmenu','Tag','lMethod_TrackValue','Enable','on');   
-                        
-hDynamicFilamentsGui.lMethod_TrackValueY = uicontrol('Parent',hDynamicFilamentsGui.pOptions,'Units','normalized','Callback',@UpdateOptions,...
-                            'Position',[0.65 0.5 0.3 0.125],'BackgroundColor','white','String',{'median', 'mean', 'end-start', 'minimum', 'maximum', 'standard dev', 'linear fit (only for velocity) or sum (only for MAP count)'},...
-                            'Value',1,'Style','popupmenu','Tag','lMethod_TrackValueY','Enable','on');   
-                        
-tooltipstr=sprintf(['Applies a walking average to the X-Variable (number indicates over how many points). 1 = no smoothing. Only has effect on "X vs Y" and "Events along X during Y" plots.\n Uses "nanfastsmooth" (google it).']);
-    
-hDynamicFilamentsGui.tSmooth = uicontrol('Parent',hDynamicFilamentsGui.pOptions,'Units','normalized','BackgroundColor',c,...
- 'Position',[0.05 0.45 0.225 0.125],'String','Smooth:','Style','text','Tag','tSmooth','HorizontalAlignment','left'); 
-
-hDynamicFilamentsGui.eSmoothX = uicontrol('Parent',hDynamicFilamentsGui.pOptions,'Style','edit','Units','normalized',...
-                                         'Position',[0.3 0.53 .05 .04],'Tag','eSmoothX','Fontsize',10,'TooltipString', tooltipstr,...
-                                         'UserData', 'kernel width','String','1','BackgroundColor','white','HorizontalAlignment','center');  
-                                     
-tooltipstr=sprintf(['Affects how the current MT is plotted in the panels to the right (distance, intensity and velocity are smoothed).\n'...
-    'Applies a walking average to the Y-Variable (number indicates over how many points). 1 = no smoothing. Only has effect on "X vs Y" and "Events along X during Y" plots.\n Uses "nanfastsmooth" (google it).']);
-                                     
-hDynamicFilamentsGui.eSmoothY = uicontrol('Parent',hDynamicFilamentsGui.pOptions,'Style','edit','Units','normalized','Callback','fJKDynamicFilamentsGui(''DF.Draw'',getappdata(0,''hDynamicFilamentsGui''));',...
-                                         'Position',[0.4 0.53 .05 .04],'Tag','eSmoothY','Fontsize',10,'TooltipString', tooltipstr,...
-                                         'UserData', 'kernel width','String','1','BackgroundColor','white','HorizontalAlignment','center');  
-
-hDynamicFilamentsGui.tChoosePlot = uicontrol('Parent',hDynamicFilamentsGui.pOptions,'Units','normalized','BackgroundColor',c,...
-                             'Position',[0.05 0.4 0.225 0.125],'String','Plot:','Style','text','Tag','tChoosePlot','HorizontalAlignment','left');     
-hDynamicFilamentsGui.bUpdatePlots = uicontrol('Parent',hDynamicFilamentsGui.pOptions,'Units','normalized','Callback',@UpdateOptions,...
-                                   'Position',[0.15 0.45 0.12 0.05],'String','Update All','Style','pushbutton','Tag','bUpdatePlots');     
-                               
-tooltipstr=sprintf(['Set the X variable.']); %lPlot_XVar and lPlot_YVar are set in UpdateOptions()
-                               
-hDynamicFilamentsGui.lPlot_XVar = uicontrol('Parent',hDynamicFilamentsGui.pOptions,'Units','normalized','Callback',@UpdateOptions,...
-                            'Position',[0.3 0.4 0.2 0.125],'BackgroundColor','white', 'TooltipString', tooltipstr,'Style','popupmenu','Tag','lPlot_XVar','Enable','on');
-                       
-
-tooltipstr=sprintf(['Set the Y variable and plot (Either "X vs Y" or "Events along X during Y" have to be selected below).']);
-                        
-hDynamicFilamentsGui.lPlot_YVar = uicontrol('Parent',hDynamicFilamentsGui.pOptions,'Units','normalized','Callback',@UpdateOptions,...
-                            'Position',[0.55 0.4 0.2 0.125],'BackgroundColor','white', 'TooltipString', tooltipstr,'Style','popupmenu','Tag','lPlot_YVar','Enable','on');
-
-          
-hDynamicFilamentsGui.lChoosePlot = uicontrol('Parent',hDynamicFilamentsGui.pOptions,'Units','normalized','Callback','fJKDynamicFilamentsGui(''SetMenu'',getappdata(0,''hDynamicFilamentsGui''));', 'Value', 3,...
-                            'Position',[0.3 0.35 0.3 0.125],'BackgroundColor','white','TooltipString', tooltipstr,'Style','popupmenu','Tag','lChoosePlot','Enable','on', ...
-                            'String',{'X vs Y', 'Events along X during Y', 'Events', 'Box(X)', 'X vs Y (Tracks)', 'Dataset (rough)', 'Shape of Filament End', 'Plot X against Y of tracks of same MT', 'MAP vs distance weighted velocity'});
-                        
-hDynamicFilamentsGui.bDoPlot = uicontrol('Parent',hDynamicFilamentsGui.pOptions,'Units','normalized','Callback',@UpdateOptions,...
-                                   'Position',[0.65 0.4 0.12 0.05],'String','Plot','Style','pushbutton', 'FontSize', 15); 
-                               
-hDynamicFilamentsGui.bDeletePlots = uicontrol('Parent',hDynamicFilamentsGui.pOptions,'Units','normalized','Callback','fJKDynamicFilamentsGui(''DeletePlots'');',...
-                                   'Position',[0.8 0.45 0.12 0.05],'String','Close All','Style','pushbutton'); 
-                               
-tooltipstr=sprintf(['When you have a plot open you can conveniently save it pressing "s".']);
-                               
-hDynamicFilamentsGui.tQuickInfo = uicontrol('Parent',hDynamicFilamentsGui.pOptions,'Units','normalized','BackgroundColor',c, 'TooltipString', tooltipstr,...
-                             'Position',[0.8 0.4 0.65 0.03],'String','Save fig pressing "s"','Style','text','Tag','tIntensity','HorizontalAlignment','left');   
-                         
-hDynamicFilamentsGui.tSubsegment = uicontrol('Parent',hDynamicFilamentsGui.pOptions,'Units','normalized','BackgroundColor',c,...
-                             'Position',[0.05 0.275 0.225 0.125],'String','Select segment(s):','Style','text','Tag','tChoosePlot','HorizontalAlignment','left');    
-                         
-hDynamicFilamentsGui.lSubsegment = uicontrol('Parent',hDynamicFilamentsGui.pOptions,'Units','normalized',...
-                            'Position',[0.3 0.29 0.3 0.125],'BackgroundColor','white','String',{'All','Beginning','Middle','End', 'Beginning and Middle', 'Middle and End', 'Middle to End'}, ...
-                            'Style','popupmenu','Enable','on', 'Value', 1, 'Tag', 'lSubsegment');   
-
-         
-hDynamicFilamentsGui.tPlotRef = uicontrol('Parent',hDynamicFilamentsGui.pOptions,'Units','normalized','BackgroundColor',c,...
-                             'Position',[0.05 0.225 0.225 0.125],'String','x axis reference:','Style','text','Tag','tChoosePlot','HorizontalAlignment','left');    
-                         
-hDynamicFilamentsGui.mXReference = uicontrol('Parent',hDynamicFilamentsGui.pOptions,'Units','normalized',...
-                            'Position',[0.3 0.24 0.3 0.125],'BackgroundColor','white','String',{'No reference','To start (after events only)','To end (before events only)','To median', 'To track velocity (velocity only)','To start (all tracks)','To end (all tracks)'}, ...
-                            'Style','popupmenu','Tag','mXReference','Enable','on', 'Value', 1); 
-                        
-tooltipstr=sprintf('Only plots data from selected Filaments (does not work for all plots).');
-                                
-hDynamicFilamentsGui.cOnlySelected = uicontrol('Parent',hDynamicFilamentsGui.pOptions,'Style','checkbox','Units','normalized',...
-                                         'Position',[0.65 0.35 0.15 0.05],'Tag','cOnlySelected','Fontsize',10,'TooltipString', tooltipstr,...
-                                         'String','Only Selected','BackgroundColor',c,'HorizontalAlignment','center', 'Value', 0);  
-                                     
-tooltipstr=sprintf('Plots a legend (does not work for all plots).');
-                                
-hDynamicFilamentsGui.cLegend = uicontrol('Parent',hDynamicFilamentsGui.pOptions,'Style','checkbox','Units','normalized', 'Tag', 'cLegend',...
-                                         'Position',[0.65 0.3 0.15 0.05],'Fontsize',10,'TooltipString', tooltipstr,...
-                                         'String','Legend','BackgroundColor',c,'HorizontalAlignment','center', 'Value', 1);  
-                                     
-tooltipstr=sprintf('Groups points of tracks which come from the same microtubule into one color and one legend entry.');
-                                
-hDynamicFilamentsGui.cGroupIntoMTs = uicontrol('Parent',hDynamicFilamentsGui.pOptions,'Style','checkbox','Units','normalized', 'Tag', 'cGroupIntoMTs',...
-                                         'Position',[0.65 0.25 0.15 0.05],'Fontsize',10,'TooltipString', tooltipstr,...
-                                         'String','Group Tracks','BackgroundColor',c,'HorizontalAlignment','center', 'Value', 1);  
-
-tooltipstr=sprintf('Plots data from untagged (growing) tracks.');
-                                
-hDynamicFilamentsGui.cPlotGrowingTracks = uicontrol('Parent',hDynamicFilamentsGui.pOptions,'Style','checkbox','Units','normalized',...
-                                         'Position',[0.85 0.35 0.2 0.05],'Tag','cPlotGrowingTracks','Fontsize',10,'TooltipString', tooltipstr,...
-                                         'String','Growing','BackgroundColor',c,'HorizontalAlignment','center', 'Value', 0);  
-                        
-hDynamicFilamentsGui.tGroup = uicontrol('Parent',hDynamicFilamentsGui.pOptions,'Units','normalized','BackgroundColor',c,...
-                             'Position',[0.05 0.175 0.225 0.125],'String','Grouping:','Style','text','Tag','tChoosePlot','HorizontalAlignment','left');    
-        
-tooltipstr=sprintf(['Type&Day&Experiment is only necessary if there are experiments with the same movie number on different days.\n Month/Year only considered for Type&Day.']);
-
-hDynamicFilamentsGui.lGroup = uicontrol('Parent',hDynamicFilamentsGui.pOptions,'Units','normalized','Style','popupmenu','Tag','lGroup','TooltipString', tooltipstr,...
-                             'Position',[0.3 0.19 0.3 0.125],'BackgroundColor','white','String',{'Type','Type&Day','Type&Day&Experiment', 'Pool everything'}, 'Value',2);
-                        
-tooltipstr=sprintf(['Distinguishes between tracks (marked with *) with and without event in the end.']);
-                                                    
-hDynamicFilamentsGui.cPlotEventsAsSeperateTypes = uicontrol('Parent',hDynamicFilamentsGui.pOptions,'Style','checkbox','Units','normalized',...
-                                         'Position',[.8 .3 .4 .05],'Tag','cPlotEventsAsSeperateTypes','Fontsize',10,'TooltipString', tooltipstr,...
-                                         'String','Distinguish events','BackgroundColor',c,'HorizontalAlignment','center', 'Value', 0); 
-                                     
-tooltipstr=sprintf(['Excludes first and last points of tracks for plots.']);
-                                                                                         
-hDynamicFilamentsGui.cExclude = uicontrol('Parent',hDynamicFilamentsGui.pOptions,'Style','checkbox','Units','normalized',...
-                                         'Position',[.65 .175 .4 .05],'Tag','cExclude','Fontsize',10,'TooltipString', tooltipstr,...
-                                         'String','Exclude borders','BackgroundColor',c,'HorizontalAlignment','center', 'Value', 0);  
-                
-hDynamicFilamentsGui.tStat = uicontrol('Parent',hDynamicFilamentsGui.pOptions,'Units','normalized','BackgroundColor',c,...
-                             'Position',[0.05 0.1 0.225 0.125],'String','Additional Plots:','Style','text','Tag','tChoosePlot','HorizontalAlignment','left');    
-        
-tooltipstr=sprintf(['Not functional yet']);
-
-hDynamicFilamentsGui.lAdditionalPlots = uicontrol('Parent',hDynamicFilamentsGui.pOptions,'Units','normalized','Style','popupmenu','Tag','lAdditionalPlots','TooltipString', tooltipstr,...
-                             'Position',[0.3 0.125 0.3 0.125],'BackgroundColor','white','String',{'None','QQ'}, 'Value',1);
-                                         
-tooltipstr=sprintf(['Takes out tracks with less points than given in the box.']);
-                             
-hDynamicFilamentsGui.tMinLength = uicontrol('Parent',hDynamicFilamentsGui.pOptions,'Units','normalized','BackgroundColor',c,...
- 'Position',[0.05 0.025 0.65 0.125],'String','Min Length:','Style','text','Tag','tRescueCutoff','HorizontalAlignment','left'); 
-                                     
-hDynamicFilamentsGui.eMinLength = uicontrol('Parent',hDynamicFilamentsGui.pOptions,'Style','edit','Units','normalized',...
-                                         'Position',[.3 .1 .1 .05],'Tag','eMinLength','Fontsize',10, 'TooltipString', tooltipstr,...
-                                         'UserData', 'nm', 'String','2','BackgroundColor','white','HorizontalAlignment','center'); 
-                                     
-tooltipstr=sprintf(['Takes out tracks with less [seconds] duration than given in the box (growth tracks only).']);
-                                     
-hDynamicFilamentsGui.eMinDuration = uicontrol('Parent',hDynamicFilamentsGui.pOptions,'Style','edit','Units','normalized',...
-                                         'Position',[.45 .1 .1 .05],'Tag','eMinDuration','Fontsize',10, 'TooltipString', tooltipstr,...
-                                         'UserData', 's', 'String','15','BackgroundColor','white','HorizontalAlignment','center');    
-                                     
-tooltipstr=sprintf(['Bin width [nm] for plots which show distance weighted values (instead of frame weighted).']);
-
-hDynamicFilamentsGui.tDistanceWeight = uicontrol('Parent',hDynamicFilamentsGui.pOptions,'Units','normalized','BackgroundColor',c,...
- 'Position',[0.75 0.025 0.65 0.125],'String','Dist bins:','Style','text','Tag','tRescueCutoff','HorizontalAlignment','left'); 
-                                     
-hDynamicFilamentsGui.eDistanceWeight = uicontrol('Parent',hDynamicFilamentsGui.pOptions,'Style','edit','Units','normalized',...
-                                         'Position',[.89 .1 .1 .05],'Tag','eDistanceWeight','Fontsize',10, 'TooltipString', tooltipstr,...
-                                         'UserData', 'nm', 'String','20','BackgroundColor','white','HorizontalAlignment','center');                  
-
-                                     
-tooltipstr=sprintf(['Shows the track indices (the index of the track within the track structure, see code).']);
-                                     
-hDynamicFilamentsGui.cshowTrackN = uicontrol('Parent',hDynamicFilamentsGui.fig,'Style','checkbox','Units','normalized',...
-                                         'Position',[.38 .75 .015 .02],'Tag','cshowTrackN','Fontsize',10,'TooltipString', tooltipstr,...
-                                         'String','','BackgroundColor',c,'HorizontalAlignment','center','Callback','fJKDynamicFilamentsGui(''DF.Draw'',getappdata(0,''hDynamicFilamentsGui''));');
-                                     
-hDynamicFilamentsGui.bSave = uicontrol('Parent',hDynamicFilamentsGui.fig,'Style','pushbutton','Units','normalized',...
-                              'Position',[.025 .005 .06 .05],'Tag','bSave','Fontsize',12,...
-                              'String','Save Links','Callback','fJKDynamicFilamentsGui(''Save'');');      
-                          
-hDynamicFilamentsGui.bLoad = uicontrol('Parent',hDynamicFilamentsGui.fig,'Style','pushbutton','Units','normalized',...
-                              'Position',[.1 .005 .06 .05],'Tag','bLoad','Fontsize',12,...
-                              'String','Load File','Callback','DF.Load();');         
-
-hDynamicFilamentsGui.bLoadFolder = uicontrol('Parent',hDynamicFilamentsGui.fig,'Style','pushbutton','Units','normalized',...
-                              'Position',[.18 .005 .05 .05],'Tag','bLoadFolder','Fontsize',12,...
-                              'String','Load Folder','Callback','DF.LoadFolder();');     
-                          
-hDynamicFilamentsGui.bLoadOptions = uicontrol('Parent',hDynamicFilamentsGui.fig,'Style','pushbutton','Units','normalized',...
-                              'Position',[.232 .03 .05 .023],'Tag','bLoadOptions','Fontsize',12,...
-                              'String','Load Options','Callback',@LoadOptions);     
-                          
-hDynamicFilamentsGui.bSaveOptions = uicontrol('Parent',hDynamicFilamentsGui.fig,'Style','pushbutton','Units','normalized',...
-                              'Position',[.232 .005 .05 .023],'Tag','bSaveOptions','Fontsize',12,...
-                              'String','Save Options','Callback',@UpdateOptions);     
-                          
-hDynamicFilamentsGui.pLoadOptions = uipanel('Parent',hDynamicFilamentsGui.fig,'Units','normalized','Title','What to load',...
-                             'Position',[0.3 0.005 0.1 0.12],'Tag','pLoadOptions','BackgroundColor',c);
-                          
-hDynamicFilamentsGui.cAllowUnknownTypes = uicontrol('Parent',hDynamicFilamentsGui.pLoadOptions,'Units','normalized',...
-                             'Position',[0.01 .85 1 0.2],'BackgroundColor',c,'Style','checkbox','Tag','cAllowUnknownTypes','String','Import tracks with ''unknown'' type');  
-                          
-hDynamicFilamentsGui.cAllowWithoutReference = uicontrol('Parent',hDynamicFilamentsGui.pLoadOptions,'Units','normalized',...
-                             'Position',[0.01 .7 1 0.2],'BackgroundColor',c,'Style','checkbox','Tag','cAllowWithoutReference','String','Allow tracks without reference');  
-
-hDynamicFilamentsGui.cUsePosEnd = uicontrol('Parent',hDynamicFilamentsGui.pLoadOptions,'Units','normalized',...
-                            'Position',[0.01 .55 1 0.2],'BackgroundColor',c,'String','Use PosEnd instead of PosStart','Style','checkbox','Tag','cUsePosEnd','Enable','on');
-                        
-                                     
-tooltipstr=sprintf(['If you have the intensities in extra files within the same folder as the original file, provide the filename here to load them (without .mat)']);
-                                     
-hDynamicFilamentsGui.eLoadIntensityFile = uicontrol('Parent',hDynamicFilamentsGui.pLoadOptions,'Style','edit','Units','normalized',...
-                                         'Position',[.1 .3 0.8 .2],'Tag','eLoadIntensityFile','Fontsize',10, 'TooltipString', tooltipstr,...
-                                         'UserData', '.mat', 'String','','BackgroundColor','white','HorizontalAlignment','center');  
-                                            
-tooltipstr=sprintf(['If you have custom data you can add it to your objects here']);
-                                     
-hDynamicFilamentsGui.bAppendCustomData = uicontrol('Parent',hDynamicFilamentsGui.pLoadOptions,'Units','normalized','Callback', @AddCustomData,...
-                                         'Position',[.1 .05 0.8 .2],'Tag','bAppendCustomData','Fontsize',10, 'TooltipString', tooltipstr,...
-                                         'String','Append Custom Data','BackgroundColor',c,'HorizontalAlignment','center');    
-
-if nargin == 0                                                                
-    set(hDynamicFilamentsGui.fig,'Visible','on');
-    Objects = fDefStructure([], 'Filament');                                
-    setappdata(hDynamicFilamentsGui.fig,'Objects',Objects);
-end
-if hDynamicFilamentsGui.complicated
-    hDynamicFilamentsGui.Segment = @DF.segmentFIESTAFils;
-else
-    hDynamicFilamentsGui.Segment = @DF.segmentPatches;
-end
-setappdata(0,'hDynamicFilamentsGui',hDynamicFilamentsGui);
-UpdateOptions()
-
 function LoadOptions(varargin)
 global DFDir
-hDynamicFilamentsGui = getappdata(0,'hDynamicFilamentsGui');
+hDFGui = getappdata(0,'hDFGui');
 try
     [FileName, PathName] = uigetfile({'*.mat','MAT-File (*.mat)';},'Load Options',DFDir);
 catch
@@ -483,8 +57,8 @@ end
 DFDir=PathName;
 Options = load([PathName FileName], 'Options');
 Options = Options.Options;
-children = get(hDynamicFilamentsGui.pOptions, 'Children');
-children = vertcat(children, get(hDynamicFilamentsGui.pLoadOptions, 'Children'));
+children = get(hDFGui.pOptions, 'Children');
+children = vertcat(children, get(hDFGui.pLoadOptions, 'Children'));
 for i = 1:length(children)
     if isfield(Options, get(children(i), 'tag'))
         switch get(children(i), 'Style')
@@ -499,100 +73,9 @@ for i = 1:length(children)
         end
     end
 end
-[Objects, Tracks] = hDynamicFilamentsGui.Segment(Options);
-setappdata(hDynamicFilamentsGui.fig,'Tracks', Tracks);
-setappdata(hDynamicFilamentsGui.fig,'Objects',Objects);
-SetTable();
-
-function UpdateOptions(varargin)
-global DFDir
-var_units = {'s', 'nm', 'nm/s', '1', '', '1'};
-var_names = {'time', 'location', 'velocity', 'Ase1 count', 'auto tags', 'frames'};
-hDynamicFilamentsGui = getappdata(0,'hDynamicFilamentsGui');
-Objects = getappdata(hDynamicFilamentsGui.fig,'Objects');
-if ~isempty(Objects)
-    Objects = Objects(1);
-    if ~isempty(Objects.CustomData)
-        for customfield = fields(Objects.CustomData)'
-            if  ~isempty(Objects.CustomData.(customfield{1}).plot_options)
-                var_units = {var_units{:} Objects.CustomData.(customfield{1}).plot_options{2,:}};
-                var_names = {var_names{:} Objects.CustomData.(customfield{1}).plot_options{1,:}};
-            end
-        end
-    end
-end
-set(hDynamicFilamentsGui.lPlot_XVar, 'UserData', var_units ,'String', var_names, 'Value', min(length(var_names), get(hDynamicFilamentsGui.lPlot_XVar, 'Value')));
-set(hDynamicFilamentsGui.lPlot_YVar, 'UserData', var_units ,'String', var_names, 'Value', min(length(var_names), get(hDynamicFilamentsGui.lPlot_YVar, 'Value')));
-children = get(hDynamicFilamentsGui.pOptions, 'Children');
-children = vertcat(children, get(hDynamicFilamentsGui.pLoadOptions, 'Children'));
-Options = struct;
-for i = 1:length(children)
-    if isfield(Options, get(children(i), 'tag'))
-        error('Field already exists. Check for tag fields with same name of your uicontrols');
-    end
-    tagname = get(children(i), 'tag');
-    switch get(children(i), 'Style')
-        case 'checkbox'
-            Options.(tagname).val = get(children(i), 'value');
-            Options.(tagname).str = '';
-            Options.(tagname).print = int2str(Options.(tagname).val);
-        case 'popupmenu'
-            Options.(tagname).val = get(children(i), 'value');
-            strings = get(children(i), 'string');
-            Options.(tagname).print = strings{min(Options.(tagname).val, length(strings))};
-            try %currently used for units
-                userdata = get(children(i), 'UserData');
-                Options.(tagname).str = userdata{Options.(tagname).val};
-            catch
-            end
-        case 'edit'
-            Options.(tagname).val = str2double(get(children(i), 'string'));
-            if isnan(Options.(tagname).val)
-                Options.(tagname).str = get(children(i), 'string');
-                Options.(tagname).print = get(children(i), 'string');
-            else
-                Options.(tagname).str = get(children(i), 'UserData');
-                Options.(tagname).print = [num2str(Options.(tagname).val,3) '[' get(children(i), 'UserData') ']'];
-            end
-        otherwise
-            continue
-    end
-end
-setappdata(hDynamicFilamentsGui.fig,'Options',Options);
-if gcbo == hDynamicFilamentsGui.bSaveOptions
-    try
-        [FileName, PathName] = uiputfile({'*.mat','MAT-File (*.mat)';},'Save Options' ,DFDir);
-    catch
-        [FileName, PathName] = uiputfile({'*.mat','MAT-File (*.mat)';},'Save Options');
-    end
-    if FileName~=0
-        file = [PathName FileName];
-        if isempty(strfind(file,'.mat'))
-            file = [file '.mat'];
-        end
-        save(file,'Options');
-        try
-            fShared('SetSaveDir',PathName);
-        catch
-        end
-    end
-elseif gcbo == hDynamicFilamentsGui.bDoPlot
-    ChoosePlot();
-elseif gcbo == hDynamicFilamentsGui.bUpdatePlots
-    UpdatePlot(hDynamicFilamentsGui);
-elseif gcbo == hDynamicFilamentsGui.lPlot_XVar
-    DF.Draw(hDynamicFilamentsGui);
-elseif gcbo == hDynamicFilamentsGui.lPlot_YVar
-    DF.Draw(hDynamicFilamentsGui);
-elseif gcbo == hDynamicFilamentsGui.lMethod_TrackValue
-    DF.Draw(hDynamicFilamentsGui);
-elseif gcbo == hDynamicFilamentsGui.lMethod_TrackValueY
-    DF.Draw(hDynamicFilamentsGui);
-else %when the GUI is initialized or bSegment button is pressed
-    [Objects, Tracks] = hDynamicFilamentsGui.Segment(Options);
-    setappdata(hDynamicFilamentsGui.fig,'Tracks', Tracks);
-    setappdata(hDynamicFilamentsGui.fig,'Objects',Objects);
-end
+[Objects, Tracks] = hDFGui.Segment(Options);
+setappdata(hDFGui.fig,'Tracks', Tracks);
+setappdata(hDFGui.fig,'Objects',Objects);
 DF.SetTable();
 
 
@@ -623,8 +106,8 @@ end
 
 
 function AddCustomData(varargin)
-hDynamicFilamentsGui = getappdata(0,'hDynamicFilamentsGui');
-Objects = getappdata(hDynamicFilamentsGui.fig,'Objects');
+hDFGui = getappdata(0,'hDFGui');
+Objects = getappdata(hDFGui.fig,'Objects');
 LoadedFromPath = {Objects.LoadedFromPath};
 [unique_paths, ~, MT_index] = unique(LoadedFromPath, 'stable');
 filename = inputdlg('Filename (without .mat)? You will find the data under Object.Custom.<filename>', 'Filename?', 1, {'pixelkymo_GFP'});
@@ -667,8 +150,8 @@ for m=1:length(unique_paths)
     catch
     end
 end
-setappdata(hDynamicFilamentsGui.fig,'Objects',Objects);
-UpdateOptions();
+setappdata(hDFGui.fig,'Objects',Objects);
+DF.updateOptions();
 
 function [matrix] = ReadTFIData(Object, customfield, Options)
 data = Object.CustomData.(customfield{1}).Data;
@@ -716,8 +199,8 @@ for m = 1:length(kymo_data)
 end
 
 function Save
-hDynamicFilamentsGui = getappdata(0,'hDynamicFilamentsGui');
-Objects = getappdata(hDynamicFilamentsGui.fig,'Objects');
+hDFGui = getappdata(0,'hDFGui');
+Objects = getappdata(hDFGui.fig,'Objects');
 LoadedFromFile = {Objects.LoadedFromFile};
 LoadedFromPath = {Objects.LoadedFromPath};
 tmp = cell(size(LoadedFromFile));
@@ -745,22 +228,22 @@ if FileName~=0
 end
 
 function Select
-hDynamicFilamentsGui = getappdata(0,'hDynamicFilamentsGui');
-Objects = getappdata(hDynamicFilamentsGui.fig,'Objects');
-set(hDynamicFilamentsGui.lSelection,'Value', 1:length(Objects));
-SetTable();
+hDFGui = getappdata(0,'hDFGui');
+Objects = getappdata(hDFGui.fig,'Objects');
+set(hDFGui.lSelection,'Value', 1:length(Objects));
+DF.SetTable();
 
 function Workspace
-hDynamicFilamentsGui = getappdata(0,'hDynamicFilamentsGui');
-selected = get(hDynamicFilamentsGui.lSelection,'Value');
+hDFGui = getappdata(0,'hDFGui');
+selected = get(hDFGui.lSelection,'Value');
 selected = unique(selected);
-Objects = getappdata(hDynamicFilamentsGui.fig,'Objects');
+Objects = getappdata(hDFGui.fig,'Objects');
 Objects = Objects(selected);
 assignin('base', 'Objects', Objects)
-Tracks = getappdata(hDynamicFilamentsGui.fig,'Tracks');
+Tracks = getappdata(hDFGui.fig,'Tracks');
 selected_tracks = [];
 for m = 1:length(Objects)
-    selected_tracks = vertcat(selected_tracks, Objects(m).SegTagAuto(:,5));
+    selected_tracks = vertcat(selected_tracks, Objects(m).TrackIds);
 end
 selected_tracks = unique(selected_tracks);
 Tracks = Tracks(selected_tracks(logical(selected_tracks)));
@@ -768,24 +251,21 @@ assignin('base', 'Tracks', Tracks)
 'workspace updated'
 
 function Delete
-hDynamicFilamentsGui = getappdata(0,'hDynamicFilamentsGui');
-Objects = getappdata(hDynamicFilamentsGui.fig,'Objects');
-selected=get(hDynamicFilamentsGui.lSelection,'Value');
+hDFGui = getappdata(0,'hDFGui');
+Objects = getappdata(hDFGui.fig,'Objects');
+selected=get(hDFGui.lSelection,'Value');
 keep=setxor(selected, 1:length(Objects));
 keep = keep(keep<=length(Objects));
 Objects = Objects(keep);
-setappdata(hDynamicFilamentsGui.fig,'Objects',Objects);
-setappdata(0,'hDynamicFilamentsGui',hDynamicFilamentsGui);
-try
-SetTable();
-catch
-end
+setappdata(hDFGui.fig,'Objects',Objects);
+setappdata(0,'hDFGui',hDFGui);
+DF.SetTable();
 
 
 function LoadIntensityPerMAP(FileName, PathName)
 %reads a table and matches values and associated objects
-hDynamicFilamentsGui = getappdata(0,'hDynamicFilamentsGui');
-Objects = getappdata(hDynamicFilamentsGui.fig,'Objects');
+hDFGui = getappdata(0,'hDFGui');
+Objects = getappdata(hDFGui.fig,'Objects');
 LoadedFromPath = {Objects.LoadedFromPath};
 table = readtable([PathName FileName], 'Format', '%s%s%d', 'Delimiter','\t');
 for i = 1:length(table.Value)
@@ -804,8 +284,8 @@ for i = 1:length(table.Value)
         end
     end
 end
-setappdata(hDynamicFilamentsGui.fig,'Objects',Objects);
-setappdata(0,'hDynamicFilamentsGui',hDynamicFilamentsGui);
+setappdata(hDFGui.fig,'Objects',Objects);
+setappdata(0,'hDFGui',hDFGui);
 
 function Legend
 str=sprintf(['For the table:\nColumn 0: MT index\nColumn 1: MT name\n' ...
@@ -825,25 +305,25 @@ str=sprintf(['For the table:\nColumn 0: MT index\nColumn 1: MT name\n' ...
 msgbox(str,'Legend');
 
 
-function SetMenu(hDynamicFilamentsGui)
-switch get(hDynamicFilamentsGui.lChoosePlot, 'Value')
+function SetMenu(hDFGui)
+switch get(hDFGui.lChoosePlot, 'Value')
     case {1,2}
-        set(hDynamicFilamentsGui.mXReference, 'Visible', 'on');
-        set(hDynamicFilamentsGui.lSubsegment, 'Visible', 'on');
+        set(hDFGui.mXReference, 'Visible', 'on');
+        set(hDFGui.lSubsegment, 'Visible', 'on');
     case 7
-        set(hDynamicFilamentsGui.mXReference, 'Visible', 'off');
-        set(hDynamicFilamentsGui.lSubsegment, 'Visible', 'on');
+        set(hDFGui.mXReference, 'Visible', 'off');
+        set(hDFGui.lSubsegment, 'Visible', 'on');
     otherwise
-        set(hDynamicFilamentsGui.mXReference, 'Visible', 'off');
-        set(hDynamicFilamentsGui.lSubsegment, 'Visible', 'off');
+        set(hDFGui.mXReference, 'Visible', 'off');
+        set(hDFGui.lSubsegment, 'Visible', 'off');
 end
 
 
 function SurfPlot()
-hDynamicFilamentsGui = getappdata(0,'hDynamicFilamentsGui');
-Objects = getappdata(hDynamicFilamentsGui.fig,'Objects');
-Options = getappdata(hDynamicFilamentsGui.fig,'Options');
-Selected=get(hDynamicFilamentsGui.lSelection,'Value');
+hDFGui = getappdata(0,'hDFGui');
+Objects = getappdata(hDFGui.fig,'Objects');
+Options = getappdata(hDFGui.fig,'Options');
+Selected=get(hDFGui.lSelection,'Value');
 Selected=Selected(Selected>0&Selected<length(Objects)+1);
 if ~isempty(Objects)&&~isempty(Selected)
     Object = Objects(Selected(1));
@@ -902,12 +382,12 @@ if ~isempty(Objects)&&~isempty(Selected)
 end
 
 function CustomPlot()
-hDynamicFilamentsGui = getappdata(0,'hDynamicFilamentsGui');
-var_units = get(hDynamicFilamentsGui.lPlot_XVar, 'UserData');
-var_names = get(hDynamicFilamentsGui.lPlot_XVar, 'String');
-Tracks = getappdata(hDynamicFilamentsGui.fig,'Tracks');
-Objects = getappdata(hDynamicFilamentsGui.fig,'Objects');
-Selected=get(hDynamicFilamentsGui.lSelection,'Value');
+hDFGui = getappdata(0,'hDFGui');
+var_units = get(hDFGui.lPlot_XVar, 'UserData');
+var_names = get(hDFGui.lPlot_XVar, 'String');
+Tracks = getappdata(hDFGui.fig,'Tracks');
+Objects = getappdata(hDFGui.fig,'Objects');
+Selected=get(hDFGui.lSelection,'Value');
 Selected=Selected(Selected>0&Selected<length(Objects)+1);
 if ~isempty(Objects)&&~isempty(Selected)
     Object = Objects(Selected(1));
@@ -928,16 +408,16 @@ if ~isempty(Objects)&&~isempty(Selected)
 end
 
 function OpenInfo
-hDynamicFilamentsGui = getappdata(0,'hDynamicFilamentsGui');
-Objects = getappdata(hDynamicFilamentsGui.fig,'Objects');
-Selected=get(hDynamicFilamentsGui.lSelection,'Value');
+hDFGui = getappdata(0,'hDFGui');
+Objects = getappdata(hDFGui.fig,'Objects');
+Selected=get(hDFGui.lSelection,'Value');
 Selected=Selected(Selected>0&Selected<length(Objects)+1);
 Object = Objects(Selected(1));
-if gcbo == hDynamicFilamentsGui.bTIF
+if gcbo == hDFGui.bTIF
     OpenFile = [Object.LoadedFromPath Object.Name '.tif'];
-elseif gcbo == hDynamicFilamentsGui.bPDF
+elseif gcbo == hDFGui.bPDF
     OpenFile = [Object.LoadedFromPath Object.Name '.pdf'];
-elseif gcbo == hDynamicFilamentsGui.bTXT
+elseif gcbo == hDFGui.bTXT
     seps = strfind(Object.LoadedFromPath, filesep);
     dirData = dir(Object.LoadedFromPath(1:seps(end-1)));      %  Get the data for the current directory
     dirIndex = [dirData.isdir];  %  Find the index for directories
@@ -952,11 +432,11 @@ elseif gcbo == hDynamicFilamentsGui.bTXT
         errordlg(['No file containing ''Protocol'' in its filename has been found in ' Object.LoadedFromPath(1:seps(end-1))])
         return
     end
-elseif gcbo == hDynamicFilamentsGui.bLOCATION
+elseif gcbo == hDFGui.bLOCATION
     OpenFile = [Object.LoadedFromPath 'maximum' '.tif'];
-elseif gcbo == hDynamicFilamentsGui.bFOLDER
+elseif gcbo == hDFGui.bFOLDER
     OpenFile = Object.LoadedFromPath;
-elseif gcbo == hDynamicFilamentsGui.bFIESTA
+elseif gcbo == hDFGui.bFIESTA
     fMenuData('LoadTracks', Object.LoadedFromFile, Object.LoadedFromPath);
     return
 end
@@ -970,7 +450,7 @@ catch
     errordlg(['File ' OpenFile ' is not available. Maybe the file you are looking for has a different filename/folder or it hasnt been generated yet?']);
 end
 
-function UpdatePlot(hDynamicFilamentsGui)
+function UpdatePlot(hDFGui)
 h=findobj('Tag','Plot');
 userdatacell=get(h, 'UserData');
 delete(h);
@@ -982,28 +462,28 @@ for userdata=userdatacell'
         userdatafixed=max(userdata,1);
         if userdatafixed > 10
             if userdatafixed > 99
-                set(hDynamicFilamentsGui.lChoosePlot, 'Value', 2);
+                set(hDFGui.lChoosePlot, 'Value', 2);
                 userdatafixed = userdatafixed-100;
             else
-                set(hDynamicFilamentsGui.lChoosePlot, 'Value', 1);
+                set(hDFGui.lChoosePlot, 'Value', 1);
             end
-            set(hDynamicFilamentsGui.lPlot_XVar, 'Value', floor(userdatafixed/10));
-            set(hDynamicFilamentsGui.lPlot_YVar, 'Value', mod(userdatafixed,10));
+            set(hDFGui.lPlot_XVar, 'Value', floor(userdatafixed/10));
+            set(hDFGui.lPlot_YVar, 'Value', mod(userdatafixed,10));
         else
-            set(hDynamicFilamentsGui.lChoosePlot, 'Value', userdatafixed);
+            set(hDFGui.lChoosePlot, 'Value', userdatafixed);
         end
         ChoosePlot();
     end
 end
-set(hDynamicFilamentsGui.lChoosePlot, 'Value', 3);
+set(hDFGui.lChoosePlot, 'Value', 3);
 
 function DeletePlots
 h=findobj('Tag','Plot');
 delete(h);
 
 function ChoosePlot()
-hDynamicFilamentsGui = getappdata(0,'hDynamicFilamentsGui');
-Options = getappdata(hDynamicFilamentsGui.fig,'Options');
+hDFGui = getappdata(0,'hDFGui');
+Options = getappdata(hDFGui.fig,'Options');
 f=figure;
 str = [' - '];
 optionfields = fields(Options);
@@ -1018,14 +498,14 @@ for field = optionfields'
 end
 uicontrol(f, 'Style', 'text', 'String',str(4:end), 'Units','norm', 'Position', [0.1 0.98 0.9 0.02]);
 set(f,'WindowKeyPressFcn','fJKDynamicFilamentsGui(''Quicksave'');');
-ChosenPlot = get(hDynamicFilamentsGui.lChoosePlot, 'Value');
+ChosenPlot = get(hDFGui.lChoosePlot, 'Value');
 if ChosenPlot < 3
     XStr = Options.lPlot_XVar.print;
     YStr = Options.lPlot_YVar.print;
     XVar = Options.lPlot_XVar.val;
     YVar = Options.lPlot_YVar.val;
     if ChosenPlot == 1
-        varnames = get(hDynamicFilamentsGui.lPlot_XVar, 'String');
+        varnames = get(hDFGui.lPlot_XVar, 'String');
         [Options.ZVar,Options.ZOK] = listdlg('ListString', varnames, 'SelectionMode', 'single');
         if Options.ZOK
             Options.ZVarName = varnames{Options.ZVar};
@@ -1040,11 +520,11 @@ if ChosenPlot < 3
         PrepareXYData(1 , Options);
     end
 else
-    plotstr = get(hDynamicFilamentsGui.lChoosePlot, 'String');
+    plotstr = get(hDFGui.lChoosePlot, 'String');
     set(f, 'Name',[plotstr{ChosenPlot} str], 'Tag', 'Plot', 'UserData', ChosenPlot);
     switch ChosenPlot
         case 3
-            if hDynamicFilamentsGui.complicated
+            if hDFGui.complicated
                 EventPlot(Options.lGroup.val, Options.eRescueCutoff.val);
             end
         case 4
@@ -1052,7 +532,7 @@ else
         case 5
             TrackXYPlot(Options);
         case 6
-            DataPlot(hDynamicFilamentsGui);
+            DataPlot(hDFGui);
         case 7
             answer = questdlg('Format intensity into error function shape?', 'Option', 'Yes','No','Yes' );
             if strcmp(answer, 'Yes')
@@ -1060,7 +540,7 @@ else
             else
                 has_err_fun_format = 0;
             end
-            FilamentEndPlot(hDynamicFilamentsGui, has_err_fun_format);
+            FilamentEndPlot(hDFGui, has_err_fun_format);
         case 8
             AgainstOtherMTTracksPlot(Options);
         case 9
@@ -1183,8 +663,8 @@ if PlotGrowingTags
 else
     plottag = 4; %this is a code (see DF.SegmentFIESTAFils.m))
 end
-hDynamicFilamentsGui = getappdata(0,'hDynamicFilamentsGui');
-Options = getappdata(hDynamicFilamentsGui.fig,'Options');
+hDFGui = getappdata(0,'hDFGui');
+Options = getappdata(hDFGui.fig,'Options');
 if ~isempty(strfind(Options.lPlot_XVar.print, 'Ase1')) || ~isempty(strfind(Options.lPlot_YVar.print, 'Ase1'))
     OnlyWithIntensity = 1;
 else
@@ -1195,10 +675,10 @@ if Options.lPlot_XVar.val > 6 || Options.lPlot_YVar.val > 6
 else
     OnlyWithCustomData = 0;
 end
-Tracks = getappdata(hDynamicFilamentsGui.fig,'Tracks');
+Tracks = getappdata(hDFGui.fig,'Tracks');
 if Options.cOnlySelected.val
-    Objects = getappdata(hDynamicFilamentsGui.fig,'Objects');
-    selected=get(hDynamicFilamentsGui.lSelection,'Value');
+    Objects = getappdata(hDFGui.fig,'Objects');
+    selected=get(hDFGui.lSelection,'Value');
     selected=unique(selected);
     selected=selected(logical(selected));
     Objects = Objects(selected);
@@ -1215,7 +695,7 @@ distance_event_end=[Tracks.DistanceEventEnd];
 file={Tracks.File};
 track_id=1:length(type);
 for i=1:length(type)
-    if hDynamicFilamentsGui.complicated
+    if hDFGui.mode == 2
         if floor(event(i))~=plottag || size(Tracks(i).Data, 1) < Options.eMinLength.val
             track_id(i)=0;
             continue
@@ -1267,7 +747,7 @@ for i=1:length(type)
             type{i} = 'everything';
     end
     type{i}=[prepend type{i}];
-    if hDynamicFilamentsGui.complicated
+    if hDFGui.mode == 2
         if (distance_event_end(i)>Options.eRescueCutoff.val||floor(event(i))~=4)&&abs(mod(event(i),1)-0.85)<0.1
             if abs(mod(event(i),1)-0.85)<0.1
                 event(i)=2; %events which had not been recorded
@@ -1304,10 +784,10 @@ Tracks=Tracks(track_id);
 % end
 
 function SortFilaments()
-hDynamicFilamentsGui=getappdata(0,'hDynamicFilamentsGui');
+hDFGui=getappdata(0,'hDFGui');
 months = {'JanFebMarAprMayJunJulAugSepOctNovDec'};
-Objects = getappdata(hDynamicFilamentsGui.fig,'Objects');
-mode=get(hDynamicFilamentsGui.lSortFilaments,'Value');
+Objects = getappdata(hDFGui.fig,'Objects');
+mode=get(hDFGui.lSortFilaments,'Value');
 if ~isempty(Objects)
     orderstr=cell(length(Objects),1);
     switch mode
@@ -1335,8 +815,8 @@ if ~isempty(Objects)
     end
     Objects = Objects(order);
 end
-setappdata(hDynamicFilamentsGui.fig,'Objects',Objects);
-UpdateOptions();
+setappdata(hDFGui.fig,'Objects',Objects);
+DF.updateOptions();
 
 function EventPlot(group, cutoff)
 subplot = @(m,n,p) subtightplot (m, n, p, [0.08 0.08], [0.08 0.08], [0.08 0.02]);
@@ -1521,8 +1001,8 @@ hold off
 function [middlex, middley, middlez] = histcounts2(plotx, ploty, plotz)
 %HISTCOUNTS2D Summary of this function goes here
 %   Detailed explanation goes here
-hDynamicFilamentsGui=getappdata(0,'hDynamicFilamentsGui');
-binwidth=str2double(get(hDynamicFilamentsGui.eDistanceWeight, 'String'));
+hDFGui=getappdata(0,'hDFGui');
+binwidth=str2double(get(hDFGui.eDistanceWeight, 'String'));
 plotx=plotx(~isnan(plotx));
 limits=[min(plotx) max(plotx)];
 span=ceil((limits(2)-limits(1))/binwidth)*(binwidth);
@@ -1567,9 +1047,9 @@ Options.lPlot_YVar.str = '1';
 fJKplotframework(Tracks, type, 0, events, Options);
 
 
-function FilamentEndPlot(hDynamicFilamentsGui, has_err_fun_format)
-Options = getappdata(hDynamicFilamentsGui.fig,'Options');
-Objects = getappdata(hDynamicFilamentsGui.fig,'Objects');
+function FilamentEndPlot(hDFGui, has_err_fun_format)
+Options = getappdata(hDFGui.fig,'Options');
+Objects = getappdata(hDFGui.fig,'Objects');
 answer = questdlg('Rhodamine/GFP?', 'Channel?', 'Rhodamine','GFP','Rhodamine' );
 if strcmp(answer, 'GFP')
     kymo_field = 'pixelkymo_GFP';
@@ -1651,12 +1131,12 @@ else
 end
 hold off
 
-function DataPlot(hDynamicFilamentsGui)
-Objects = getappdata(hDynamicFilamentsGui.fig,'Objects');
-Options = getappdata(hDynamicFilamentsGui.fig,'Options');
+function DataPlot(hDFGui)
+Objects = getappdata(hDFGui.fig,'Objects');
+Options = getappdata(hDFGui.fig,'Options');
 hasvelocity=nan(length(Objects),1);
 group=cell(length(Objects),1);
-grouping=get(hDynamicFilamentsGui.lGroup, 'Value');
+grouping=get(hDFGui.lGroup, 'Value');
 for n = 1:length(Objects) 
     group{n} = Objects(n).Type;
     switch Options.lGroup.val

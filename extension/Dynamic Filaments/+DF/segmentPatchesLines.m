@@ -1,7 +1,7 @@
-function [Objects, Tracks] = segmentPatches(Options)
+function [Objects, Tracks] = segmentPatchesLines(Options)
 %PREPAREPATCHES Summary of this function goes here
 %   Detailed explanation goes here
-hDynamicFilamentsGui = getappdata(0,'hDynamicFilamentsGui');
+hDynamicFilamentsGui = getappdata(0,'hDFGui');
 Tracks=struct('Name', [], 'File', [], 'Type', [], 'Data', [NaN NaN NaN NaN], 'Velocity', nan(2,1), ...
     'Event', [NaN], 'DistanceEventEnd', [NaN]);  %these are required for the SetTable function to work upon startup
 Objects = getappdata(hDynamicFilamentsGui.fig,'Objects');

@@ -1,9 +1,9 @@
 function [Objects, Tracks] = SegmentFils(Options)
-hDynamicFilamentsGui = getappdata(0,'hDynamicFilamentsGui');
+hDFGui = getappdata(0,'hDFGui');
 Tracks=struct('Name', [], 'File', [], 'Type', [], 'Data', [NaN NaN NaN NaN], 'Velocity', nan(2,1), ...
     'Event', [NaN], 'DistanceEventEnd', [NaN]);  %these are required for the SetTable function to work upon startup
 tagnum=4;
-Objects = getappdata(hDynamicFilamentsGui.fig,'Objects');
+Objects = getappdata(hDFGui.fig,'Objects');
 track_id=1;
 progressdlg('String','Creating Tracks','Min',0,'Max',length(Objects));
 for n = 1:length(Objects) 
@@ -164,6 +164,7 @@ for n = 1:length(Objects)
         Tracks(track_id).HasCustomData = has_custom_data;
         track_id=track_id+1;
     end
+    Objects(n).TrackIds = segtagauto(:,5);
     Objects(n).SegTagAuto=segtagauto;
     Objects(n).Velocity(1)=nanmean(velocity(~is_tagged));
     Objects(n).Velocity(2)=nanmean(velocity(is_tagged));
