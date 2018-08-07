@@ -127,6 +127,13 @@ if PathName~=0
             N = 1;
         end
         start = 1;
+        try
+            t_diff_miliseconds = csvread([PathName 't_diff_miliseconds.txt']);
+            foundtime = 1;
+        catch
+            foundtime = 0;
+            warning('no t_diff_miliseconds.txt found, using frame number as time');
+        end
         for n = 1:N
             if iscell(FileName)
                 f=[PathName FileName{n}];
@@ -145,11 +152,15 @@ if PathName~=0
                 PixSize = [];
             end
             try
+                if ~foundtime
                 TimeInfo{1}(start:length(stackfile)+start-1) = start:length(stackfile)+start-1;
-%                 for i = start:length(stackfile)+start-1
-%                     index = i-start+1;
-%                     TimeInfo{1}(i) = double(omeMeta.getPlaneDeltaT(0,index-1).value(ome.units.UNITS.MILLISECOND));
-%                 end
+                else
+                for i = start:length(stackfile)+start-1
+                    index = i-start+1;
+                    TimeInfo{1}(i) = t_diff_miliseconds(n) + ...
+                    double(omeMeta.getPlaneDeltaT(0,index-1).value(ome.units.UNITS.MILLISECOND));
+                end
+                end
             catch
                 TimeInfo{1} = [];
             end
