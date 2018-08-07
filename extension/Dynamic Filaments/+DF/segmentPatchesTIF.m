@@ -24,7 +24,34 @@ for n = 1:length(Objects)
     [~,maxid] = max(t);
     inside = d(start)-d(end);
     direction = tdiff(find(tdiff,1,'first'));
+    tags = ones(size(t));
+    if tdiff(1) == 0
+        tags(1:find(abs(tdiff)>0,1,'first')-1) = 0;
+    end
+    if tdiff(end) == 0
+        tags(find(abs(tdiff)>0,1,'last'):end) = 0;
+    end
+%     todo = 1:length(tdiff);
+    isgrowing = 1;
     for f = 1:length(tdiff)
+%         if ~todo(f)
+%             continue
+%         end
+        if f>1 && ddiff(f)==0
+            tags(f+1)=1+tags(f);
+        end
+        if tags(f+1)>maxpause && f < length(tdiff)
+            if isgrowing
+                auto = vertcat(auto, [start f+2-maxpause nan]);
+                start = f + 1;
+                isgrowing = 0;
+            else
+                start = f+1;
+                continue
+            end
+        else
+            isgrowing = 1;
+        end
         if tdiff(f)*direction < 0
             auto = vertcat(auto, [start f nan]);
             direction = -direction;
@@ -36,18 +63,21 @@ for n = 1:length(Objects)
     for m=1:size(auto, 1)
         segt = t(auto(m,1):auto(m,2));
         segd = d(auto(m,1):auto(m,2));
+        segtags = tags(auto(m,1):auto(m,2));
         if t(auto(m,1)) > t(auto(m,2))
             segt = flipud(segt);
             segd = flipud(segd);
+            segtags = flipud(segtags);
             auto(m,1:2) = [auto(m,2) auto(m,1)];
         end
-        if strcmp(Objects(n).Type, 'flushout')
-            startend = find(diff(segt),1,'first'):find(diff(segt),1,'last');
-        else
-            startend = 1:find(diff(segt),1,'last');
-        end
-        segt = segt(startend);
-        segd = segd(startend);
+%         if strcmp(Objects(n).Type, 'flushout')
+%             startend = find(diff(segt),1,'first'):find(diff(segt),1,'last');
+%         else
+%             startend = 1:find(diff(segt),1,'last');
+%         end
+%         segt = segt(startend);
+%         segd = segd(startend);
+%         segtags = segtags(startend);
         if isempty(segt)
             ['empty:' Objects(n).Name ' ' num2str(t(auto(m,1):auto(m,2))')]
             auto(m,3) = 0;
@@ -66,7 +96,7 @@ for n = 1:length(Objects)
         Tracks(track_id).start_last_subsegment = 0;
         [~, Tracks(track_id).minindex] = min(segvel);
         Tracks(track_id).DistanceEventEnd=segd(end);
-        Tracks(track_id).Data=[segt segd segvel tags];
+        Tracks(track_id).Data=[segt segd segvel segtags];
         Tracks(track_id).XEventStart=Tracks(track_id).Data(1,:);
         Tracks(track_id).XEventEnd=Tracks(track_id).Data(end,:);
         Tracks(track_id).Event=nan;
