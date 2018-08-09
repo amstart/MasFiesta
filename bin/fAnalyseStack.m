@@ -64,12 +64,14 @@ catch
     try
         save(fData,'Config');
     catch
+        filename = ['all(' datestr(clock,'yyyymmddTHHMMSSFFF') ').mat'];
         try
-            underscores = strfind(a,'_');
-            fData = [sName(1:underscores(1)) 'all(' datestr(clock,'yyyymmddTHHMMSSFFF') ').mat'];
+            underscores = strfind(sName,'_');
+            PathName = sName(1:underscores(1));
+            fData = [PathName filename];
             save(fData,'Config');
         catch
-            fData = ['all(' datestr(clock,'yyyymmddTHHMMSSFFF') ').mat'];
+            fData = filename;
             save(fData,'Config');
         end
     end
