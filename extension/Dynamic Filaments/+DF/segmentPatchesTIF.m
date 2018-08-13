@@ -31,26 +31,11 @@ for n = 1:length(Objects)
     if tdiff(end) == 0
         tags(find(abs(tdiff)>0,1,'last'):end) = 0;
     end
-%     todo = 1:length(tdiff);
-    isgrowing = 1;
+    tdiffcurrent = 0;
+    tdiffaim = 3+17*rand();
     for f = 1:length(tdiff)
-%         if ~todo(f)
-%             continue
-%         end
         if f>1 && ddiff(f)==0
             tags(f+1)=1+tags(f);
-        end
-        if tags(f+1)>maxpause && f < length(tdiff)
-            if isgrowing
-                auto = vertcat(auto, [start f+2-maxpause nan]);
-                start = f + 1;
-                isgrowing = 0;
-            else
-                start = f+1;
-                continue
-            end
-        else
-            isgrowing = 1;
         end
         if tdiff(f)*direction < 0
             auto = vertcat(auto, [start f nan]);
