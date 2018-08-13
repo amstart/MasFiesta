@@ -22,6 +22,10 @@ track_id=Object.TrackIds;
 eSmoothY=str2double(get(hDFGui.eSmoothY, 'String'));
 
 track_id=track_id(track_id>0);
+if isempty(track_id)
+    text(0.2,0.5,'No tracks available for current object.','Parent',hDFGui.aPlot,'FontWeight','bold','FontSize',16);
+    return
+end
 tracks=Tracks(track_id);
 [c1_vec, c2_vec] = DF.get_plot_vectors(Options, tracks, [1 2]);
 
@@ -32,9 +36,10 @@ hold(hDFGui.aIPlot,'on');
 hold(hDFGui.aPlot,'on');
 axes(hDFGui.aPlot);
 c = 'k';
+tcol = 4;
 for i=1:length(tracks)
     segtrack=tracks(i).Data;
-    tseg=segtrack(:,1);
+    tseg=segtrack(:,tcol);
     if eSmoothY == 1
         dseg=segtrack(:,2);
         c2seg=segtrack(:, Options.lPlot_YVar.val);
@@ -45,7 +50,7 @@ for i=1:length(tracks)
         c1seg=nanfastsmooth(segtrack(:,Options.lPlot_XVar.val), eSmoothY);
     end
     d0=round(nanmean(segtrack(:,2)));
-    t0=segtrack(round(size(segtrack,1)/2),1);
+    t0=segtrack(round(size(segtrack,1)/2),tcol);
     if get(hDFGui.cshowTrackN,'Value');
         text(double(t0),double(max(segtrack(:,2))),num2str(track_id(i)));
     end
@@ -74,7 +79,7 @@ end
 for i=2:length(Selected)
     Object = Objects(Selected(i));
     tmp=Object.TrackIds;
-    track_id=[track_id; tmp(tmp>0)];
+    trackid=[track_id tmp(tmp>0)];
 end
 for i=1:length(Tracks)
     if ismember(i,track_id)
