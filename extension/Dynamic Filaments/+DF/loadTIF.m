@@ -14,6 +14,7 @@ for i = 1:count
         filename = FileName;
     end
     data = csvread([PathName 'flushs.csv']);
+    time = csvread([PathName 'time.txt'])./1000;
     pfile = imread([PathName filename])>0;
     pfile(data(:,2),:) = 0;
     tflushs = data(:,1:2)';
@@ -40,9 +41,10 @@ for i = 1:count
         Objects(index).Concentration = data(ceil(first_positive/2),3);
         Objects(index).KCl = data(ceil(first_positive/2),4);
         Objects(index).Comments = '';
-        Objects(index).Results = [results(:,1) results];
+        Objects(index).Results = [results(:,1) time(results(:,1)) results(:,2)];
         Objects(index).Velocity = nan;
         Objects(index).TrackIds = [];
+        Objects(index).CustomData = [];
         index = index + 1;
     end
 end
