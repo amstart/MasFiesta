@@ -42,15 +42,15 @@ for i = 1:count
         Objects(index).Comments = '';
         Objects(index).Results = [results(:,1) results];
         Objects(index).Velocity = nan;
-        Objects(index).CustomData = [];
         Objects(index).TrackIds = [];
         index = index + 1;
     end
 end
 hDFGui = getappdata(0,'hDFGui');
 OldObjects = getappdata(hDFGui.fig,'Objects');
+
 if ~isempty(OldObjects)
-    Objects = [OldObjects Objects];
+    Objects = catstruc(OldObjects, Objects);
 end
 setappdata(hDFGui.fig,'Objects',Objects);
 set(hDFGui.cUsePosEnd, 'Enable', 'off');
