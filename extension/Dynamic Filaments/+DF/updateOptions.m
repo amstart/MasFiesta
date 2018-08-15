@@ -71,7 +71,7 @@ if gcbo == hDFGui.bSaveOptions
         end
     end
 elseif gcbo == hDFGui.bDoPlot
-    ChoosePlot();
+    fJKDynamicFilamentsGui('ChoosePlot');
 elseif gcbo == hDFGui.bUpdatePlots
     UpdatePlot(hDFGui);
 elseif gcbo == hDFGui.lPlot_XVar
