@@ -8,14 +8,20 @@ Objects = getappdata(hDynamicFilamentsGui.fig,'Objects');
 track_id=1;
 progressdlg('String','Creating Tracks','Min',0,'Max',length(Objects));
 maxpause = 10;
-for n = 1:length(Objects) 
+for n = 1:length(Objects)
+    Objects(n).TrackIds = [];
     Objects(n).Duration = 0;
     Objects(n).Disregard = 0;
+    if isempty(Objects(n).Results)
+        continue
+    end
     d = Objects(n).Results(:,3);
     t = Objects(n).Results(:,2);
-    [~, minid] = min(t);
-    id = findmiddle(t,minid);
+    oldframes = Objects(n).Results(:,1);
+%     [~, minid] = min(oldframes);
+    id = shifttomiddle(oldframes,n);
     t = circshift(t, [-id 0]);
+    frames = circshift(oldframes, [-id 0]);
     d = circshift(d, [-id 0]);
     tdiff = diff(t);
     ddiff = diff(d);
@@ -24,46 +30,56 @@ for n = 1:length(Objects)
     [~,maxid] = max(t);
     inside = d(start)-d(end);
     direction = tdiff(find(tdiff,1,'first'));
-    tags = ones(size(t));
-    if tdiff(1) == 0
-        tags(1:find(abs(tdiff)>0,1,'first')-1) = 0;
-    end
-    if tdiff(end) == 0
-        tags(find(abs(tdiff)>0,1,'last'):end) = 0;
-    end
-%     todo = 1:length(tdiff);
-    isgrowing = 1;
+    tags = zeros(size(t));%4==nucleation/separation
+    tdiffmin = 3;
+    tdiffcurrent = 0;
+    tdiffaim = tdiffmin+50*rand();
+    justsetverylast = 0;
     for f = 1:length(tdiff)
-%         if ~todo(f)
-%             continue
-%         end
-        if f>1 && ddiff(f)==0
-            tags(f+1)=1+tags(f);
+        if justsetverylast
+            justsetverylast = 0;
+            start = f + 1;
+            continue
         end
-        if tags(f+1)>maxpause && f < length(tdiff)
-            if isgrowing
-                auto = vertcat(auto, [start f+2-maxpause nan]);
-                start = f + 1;
-                isgrowing = 0;
+        tdiffcurrent = tdiffcurrent + tdiff(f);
+        justsetlast = 0;
+        if frames(f+1)==Objects(n).LastFrame
+            auto = vertcat(auto, [start f+1 1 d(f) frames(f)]);
+            direction = -direction;
+            justsetverylast = 1;
+            justsetlast = 1;
+        elseif tdiff(f)*direction < 0
+            auto = vertcat(auto, [start f+1 4 d(f) frames(f)]);
+            direction = -direction;
+            justsetlast = 1;
+        elseif abs(tdiffcurrent) > tdiffaim
+            auto = vertcat(auto, [start f+1 2 d(f) frames(f)]);
+        elseif f == length(tdiff)
+            if t(end)-t(start) == 0
+                auto(end,2:5) = [f+1 -1 d(f) frames(f)];
             else
-                start = f+1;
-                continue
+                auto = vertcat(auto, [start f+1 -1 d(f) frames(f)]);
             end
         else
-            isgrowing = 1;
+            continue
         end
-        if tdiff(f)*direction < 0
-            auto = vertcat(auto, [start f nan]);
-            direction = -direction;
-            start = f + 1;
-        elseif f == length(tdiff)
-            auto = vertcat(auto, [start f+1 nan]);
-        end
+        start = f + 1;
+        tdiffcurrent = 0;
+        tdiffaim = tdiffmin+17*rand();
+%         if justsetlast && abs(auto(end))==1%remove too short segments
+%             if abs(diff(t(auto(end, 1:2))))<tdiffmin
+%                 if size(auto,1)>1
+%                     auto(end-1, 2) = auto(end, 2);
+%                     auto(end,:) = [];
+%                 end
+%             end
+%         end
     end
+    velocity = [];
     for m=1:size(auto, 1)
         segt = t(auto(m,1):auto(m,2));
         segd = d(auto(m,1):auto(m,2));
-        segtags = tags(auto(m,1):auto(m,2));
+        segtags = frames(auto(m,1):auto(m,2));
         if t(auto(m,1)) > t(auto(m,2))
             segt = flipud(segt);
             segd = flipud(segd);
@@ -83,11 +99,17 @@ for n = 1:length(Objects)
             auto(m,3) = 0;
             continue
         end
-        auto(m,3) = track_id;
+        if Objects(n).isflushin && m == size(auto,1)
+            segt = vertcat(t(1),segt);
+            segd = vertcat(d(1),segd);
+            segtags = vertcat(frames(1),segtags);
+        end
+        Objects(n).TrackIds=[Objects(n).TrackIds track_id];
         segvel=DF.CalcVelocity([segt segd]); %why, see Calcvelocity()
         Tracks(track_id).Name=Objects(n).Name;
         Tracks(track_id).MTIndex = n;
         Tracks(track_id).TrackIndex= m;
+        Tracks(track_id).GlobalTrackIndex= track_id;
         Tracks(track_id).File=Objects(n).File;
         Tracks(track_id).Type=Objects(n).Type;
         Tracks(track_id).Duration=segt(end)-segt(1);
@@ -101,20 +123,37 @@ for n = 1:length(Objects)
         Tracks(track_id).XEventEnd=Tracks(track_id).Data(end,:);
         Tracks(track_id).Event=nan;
         Tracks(track_id).HasIntensity=0;
-        tmp_fit = polyfit(segt,segd,1);
-        velocity(m) = abs(tmp_fit(1));
+%         tmp_fit = polyfit(segt,segd,1);
+        velocity(m) = abs((segd(end)-segd(1))/(segt(end)-segt(1)));
         Tracks(track_id).Velocity=velocity(m);
         Tracks(track_id).Selected=0;
         Tracks(track_id).HasCustomData = nan;
         track_id=track_id+1;
     end
-    auto(auto(:,3)==0,:) = [];
-    Objects(n).TrackIds=auto(:,3);
+% %     auto(auto(:,6)==0,:) = [];
+%     Objects(n).TrackIds=auto(:,6);
     Objects(n).Velocity=nanmean(velocity);
+    Objects(n).auto=[auto velocity'];
     progressdlg(n);
 end
 
-function middle = findmiddle(t,id)
+function shiftby = shifttomiddle(data,n)
+minval = min(data);
+vec = data==minval;
+if sum(vec)==2 && vec(1) == vec(end)
+    shiftby = 0;
+    return
+end
+N = 11;
+vec = movmean(vec([(end-floor(N./2)+1):end 1:end 1:(ceil(N./2)-1)]), N, 'Endpoints', 'discard');
+N = 5;
+vec = movmean(vec([(end-floor(N./2)+1):end 1:end 1:(ceil(N./2)-1)]), N, 'Endpoints', 'discard');
+N=3;
+vec = movmean(vec([(end-floor(N./2)+1):end 1:end 1:(ceil(N./2)-1)]), N, 'Endpoints', 'discard');
+[~, shiftby] = max(vec);
+
+
+function middle = findmiddle(t,id, n)
 isatend = 0;
 if id==1 && t(end)-t(id)==0
     tmp = t-t(id);
