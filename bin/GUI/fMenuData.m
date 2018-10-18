@@ -122,18 +122,21 @@ if PathName~=0
     try
         if iscell(FileName)
             N = length(FileName);
+            try
+                t_diff_miliseconds = csvread([PathName 't_diff_miliseconds.txt']);
+                foundtime = 1;
+            catch
+                t_diff_miliseconds = 0;
+                foundtime = 0;
+                warning('no t_diff_miliseconds.txt found, using frame number as time');
+            end
         else
+            t_diff_miliseconds = 0;
+            foundtime = 1;
             f=[PathName FileName];
             N = 1;
         end
         start = 1;
-        try
-            t_diff_miliseconds = csvread([PathName 't_diff_miliseconds.txt']);
-            foundtime = 1;
-        catch
-            foundtime = 0;
-            warning('no t_diff_miliseconds.txt found, using frame number as time');
-        end
         for n = 1:N
             if iscell(FileName)
                 f=[PathName FileName{n}];
@@ -222,7 +225,8 @@ set(hMainGui.fig,'Pointer','arrow');
 
 function SetControls(hMainGui)
 setappdata(hMainGui.fig,'Drift', []);
-setappdata(hMainGui.fig,'OffsetMap',[1 0 0;0 1 0;0 0 1]);
+OffsetMap.T = [1 0 0;0 1 0;0 0 1];
+setappdata(hMainGui.fig,'OffsetMap',OffsetMap);
 set(hMainGui.Menu.mCorrectStack,'Checked','off', 'Enable', 'off');
 set(hMainGui.Menu.mAlignChannels,'Enable','off','Checked','off');
 set(hMainGui.RightPanel.pTools.cKymoDrift,'Value',0);
@@ -889,6 +893,7 @@ global Filament;
 persistent SaveWithCustomField
 [FileName, PathName] = uiputfile({'*.mat','MAT-files (*.mat)'},'Save FIESTA Tracks',fShared('GetSaveDir'));
 if FileName ~= 0
+    SaveWithCustomField = 0;
     if isempty(SaveWithCustomField)
         SaveWithCustomField = questdlg('Save with the custom field (you will have to remove it manually if you want to open the file in vanilla FIESTA)?', 'Choice will be remembered', 'Yes','No','Yes' );
     end
@@ -901,8 +906,11 @@ if FileName ~= 0
         Filament([Filament.Selected] ~= 1) = [];
     end
     if strcmp(SaveWithCustomField, 'No')
-        Molecule = rmfield(Molecule, 'Custom');
-        Filament = rmfield(Filament, 'Custom');
+        try
+            Molecule = rmfield(Molecule, 'Custom');
+            Filament = rmfield(Filament, 'Custom');
+        catch
+        end
     end
     set(gcf,'Pointer','watch');    
     fShared('SetSaveDir',PathName);
