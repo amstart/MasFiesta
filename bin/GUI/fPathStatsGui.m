@@ -70,9 +70,9 @@ if strcmp(button,'Filament')
 else
     PathFilSelect =[];
 end
-PathMol = Molecule(MolSelect==1);
-PathMol = rmfield(PathMol,'Type');
-PathFil = Filament(FilSelect==1);
+PathMol = Molecule;
+PathMol = rmfield(PathMol,{'Type', 'Custom'});
+PathFil = Filament;
 PathFil = rmfield(PathFil,{'PosStart','PosCenter','PosEnd','Data'});
 PathStats = [PathMol PathFil];
 Index = [ find(MolSelect==1) find(FilSelect==1)*1i ];
