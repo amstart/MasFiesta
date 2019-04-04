@@ -120,26 +120,26 @@ if FileName~=0
         imwrite(imageData,[file '.png']);
     end
     if get(hMainGui.RightPanel.pTools.cKymoLocation,'Value')==1
-        set(hMainGui.MidPanel.pView,'Visible','on');
-        set(hMainGui.MidPanel.pKymoGraph,'Visible','off');
         if ~exist([PathName 'locations'], 'dir')
           mkdir([PathName 'locations']);
         end
         saveas(hMainGui.MidPanel.aView, [PathName 'locations' filesep FileName '.jpg'], 'jpg') %Save figure;
-        set(hMainGui.MidPanel.pView,'Visible','off');
-        set(hMainGui.MidPanel.pKymoGraph,'Visible','on');
     end
 end
 fShared('ReturnFocus');
 
 function ExportScan(hMainGui)
-global Stack;
 global Config;
-[FileName, PathName, FilterIndex] = uiputfile({'*.jpg','JPG-File (*.jpg)';'*.txt','TXT-File (*.txt)'},fShared('GetSaveDir'));
+if isfield(hMainGui, 'KymoName') %JochenK
+   KymoName=[fShared('GetSaveDir') hMainGui.KymoName];
+else
+   KymoName=fShared('GetSaveDir');
+end
+[FileName, PathName, FilterIndex] = uiputfile({'*.csv','csv-File (*.csv)';'*.txt','TXT-File (*.txt)';'*.jpg','JPG-File (*.jpg)'},'Save scan',KymoName);
 if PathName~=0
     fShared('SetSaveDir',PathName);
     set(hMainGui.fig,'Pointer','watch');   
-    if FilterIndex==1
+    if FilterIndex==3
         if isempty(strfind(FileName,'.jpg'))
             file=sprintf('%s/%s.jpg',PathName,FileName);
         else
@@ -153,15 +153,21 @@ if PathName~=0
             file=sprintf('%s/%s',PathName,FileName);
         end
     end
+    if FilterIndex==1
+        if isempty(strfind(FileName,'.csv'))
+            file=sprintf('%s/%s.csv',PathName,FileName);
+        else
+            file=sprintf('%s/%s',PathName,FileName);
+        end
+    end
     if hMainGui.Values.FrameIdx<1
         f=round(get(hMainGui.MidPanel.sFrame,'Value'));
     else
         f=hMainGui.Values.FrameIdx;
     end
-    Z = interp2(double(Stack{f}),hMainGui.Scan.InterpX,hMainGui.Scan.InterpY);
-    I = mean(Z,1);
-    D = hMainGui.Scan.InterpD;
-    if FilterIndex==1
+    I = hMainGui.Scan.I;
+    D = hMainGui.Scan.InterpD*hMainGui.Values.PixSize/1000;
+    if FilterIndex==3
         h=figure('PaperUnits','centimeter','Visible','off','PaperType','A4','PaperPositionMode','manual','PaperPosition',[0 0 29.7 21]);
         plot(D,I,'b-');
         xlabel('Intensity vs. Distance in um');
@@ -172,9 +178,17 @@ if PathName~=0
         fprintf(fh,'%s - Frame: %d\n',Config.StackName,f);
         fprintf(fh,'Distance[um]\tIntensity[counts]\n');
         for j=1:length(D)
-            fprintf(fh,'%f\t%f\n',D(j),I(j));
+            fprintf(fh,'%f\t%f\n',D(j),I(1,j));
         end
         fclose(fh);
+    elseif FilterIndex==1
+        csvwrite(file, [D I']);
+    end
+    if get(hMainGui.RightPanel.pTools.cKymoLocation,'Value')==1
+        if ~exist([PathName 'locations'], 'dir')
+          mkdir([PathName 'locations']);
+        end
+        saveas(hMainGui.MidPanel.aView, [PathName 'locations' filesep FileName '.jpg'], 'jpg') %Save figure;
     end
     setappdata(0,'hMainGui',hMainGui);
     set(hMainGui.fig,'Pointer','arrow');       
@@ -453,7 +467,7 @@ for i=0.5:0.5:l
     str=[' ' str]; %#ok<AGROW>
 end
 
-function UpdateLineScan(hMainGui)
+function hMainGui = UpdateLineScan(hMainGui)
 global Stack
 stidx=hMainGui.Values.FrameIdx(1);
 if length(hMainGui.Values.FrameIdx)>2
@@ -489,6 +503,12 @@ else
             Image = double(Stack{stidx}(:,:,idx));
     end
 end
+if (strcmp(get(hMainGui.Menu.mAlignChannels,'Checked'),'on')&&strcmp(get(hMainGui.Menu.mAlignChannels,'Enable'),'on'))||(strcmp(get(hMainGui.ToolBar.ToolThreshImage,'State'),'on')&&~isempty(hMainGui.Values.PostSpecial)&&~strcmp(get(hMainGui.ToolBar.ToolChannels(5),'State'),'on'))
+    for n = 2:size(Image,3)
+        T = hMainGui.Values.TformChannel{n};
+        Image(:,:,n) = quickwarp(Image(:,:,n),T,0);
+    end
+end
 for n = 1:size(Image,3)
     Z = interp2(double(Image(:,:,n)),hMainGui.Scan.InterpX,hMainGui.Scan.InterpY);
     I(n,:) = mean(Z,1);
@@ -510,7 +530,7 @@ end
 xlim([0 max(hMainGui.Scan.InterpD*hMainGui.Values.PixSize/1000)]);
 xlabel(['Distance [' char(956) 'm]']);
 ylabel('Intensity [counts]');
-setappdata(0,'hMainGui',hMainGui);
+hMainGui.Scan.I = I;
 
 function NewKymoGraph(hMainGui)
 global Stack;
@@ -785,7 +805,7 @@ elseif ~get(hMainGui.RightPanel.pTools.cKymoDrift,'Value') && strcmp(get(hMainGu
     set(hMainGui.RightPanel.pTools.cKymoDrift,'Enable','on');
 end
 setappdata(0,'hMainGui',hMainGui);
-UpdateLineScan(hMainGui);
+hMainGui = UpdateLineScan(hMainGui);
 AllToolsOff(hMainGui);
 fToolBar('Cursor',hMainGui);
 

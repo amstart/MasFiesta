@@ -938,7 +938,11 @@ if isempty(FileName) || iscell(FileName)
                     fMsgDlg(message,'error');
                 end
             end
-            addConfig.Time = Config.Time(n);
+            try
+                addConfig.Time = Config.Time(n);
+            catch
+                addConfig.Time = Config.Time(1);
+            end
             addConfig.OnlyTrackMol=0;
             addConfig.OnlyTrackFil=0;
             if addConfig.OnlyTrack.MolFull==1

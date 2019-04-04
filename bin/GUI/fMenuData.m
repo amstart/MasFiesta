@@ -224,12 +224,12 @@ end
 set(hMainGui.fig,'Pointer','arrow');
 
 function SetControls(hMainGui)
-setappdata(hMainGui.fig,'Drift', []);
-OffsetMap.T = [1 0 0;0 1 0;0 0 1];
-setappdata(hMainGui.fig,'OffsetMap',OffsetMap);
-set(hMainGui.Menu.mCorrectStack,'Checked','off', 'Enable', 'off');
-set(hMainGui.Menu.mAlignChannels,'Enable','off','Checked','off');
-set(hMainGui.RightPanel.pTools.cKymoDrift,'Value',0);
+% setappdata(hMainGui.fig,'Drift', []);
+% OffsetMap.T = [1 0 0;0 1 0;0 0 1];
+% setappdata(hMainGui.fig,'OffsetMap',OffsetMap);
+% set(hMainGui.Menu.mCorrectStack,'Checked','off', 'Enable', 'off');
+% set(hMainGui.Menu.mAlignChannels,'Enable','off','Checked','off');
+% set(hMainGui.RightPanel.pTools.cKymoDrift,'Value',0);
 
 function OpenStackSpecial(hMainGui, reopen)
 global Stack;

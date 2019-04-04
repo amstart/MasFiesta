@@ -35,6 +35,7 @@ Filament = fTransformCoord(Filament,mode,1);
 fShow('Image');
 fShow('Tracks');
 
+
 function CreateOffsetMap
 global Molecule;
 global Filament;
