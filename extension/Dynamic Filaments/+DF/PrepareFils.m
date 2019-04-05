@@ -1,11 +1,11 @@
 function PrepareFils(NewObjects, RefObjects, PathName, FileName)
-hDynamicFilamentsGui = getappdata(0,'hDynamicFilamentsGui');
-ref = get(hDynamicFilamentsGui.cUsePosEnd, 'Value')*2+1;
+hDFGui = getappdata(0,'hDFGui');
+ref = get(hDFGui.cUsePosEnd, 'Value')*2+1;
 fieldnames = {'Selected','Channel','TformMat','Color','PathData', 'Visible', 'PlotHandles', 'Data', 'TrackingResults'};
 NewObjects = rmfield(NewObjects,fieldnames);
 str=cell(length(NewObjects),1);
 deleteobjects = false(length(NewObjects), 1);
-external_intensity_name = get(hDynamicFilamentsGui.eLoadIntensityFile, 'String');
+external_intensity_name = get(hDFGui.eLoadIntensityFile, 'String');
 has_external_intensity = 0;
 if ~strcmp(external_intensity_name, '')
     try
@@ -54,7 +54,7 @@ for i=1:length(NewObjects)
     NewObjects(i).LoadedFromPath = PathName;
     NewObjects(i).LoadedFromFile = FileName;
 end
-if ~get(hDynamicFilamentsGui.cAllowUnknownTypes, 'Value') % deletes MTs with unknown type
+if ~get(hDFGui.cAllowUnknownTypes, 'Value') % deletes MTs with unknown type
     NewObjects(deleteobjects) = [];
 end
 for i=1:length(NewObjects)
@@ -68,7 +68,7 @@ for i=1:length(NewObjects)
     end
     catastrophes = tags==10;
     rescues = tags==15;
-    if ~get(hDynamicFilamentsGui.cAllowWithoutReference, 'Value')
+    if ~get(hDFGui.cAllowWithoutReference, 'Value')
         refcomment=strfind(NewObjects(i).Comments,'ref:');
         if ~isempty(refcomment)
             RefPos=fJKGetRefData(NewObjects(i), ref, tags==11, RefObjects);
@@ -101,11 +101,10 @@ for i=1:length(NewObjects)
     NewObjects(i).Duration = 0;
     NewObjects(i).Disregard = 0;
 end
-OldObjects = getappdata(hDynamicFilamentsGui.fig,'Objects');
+OldObjects = getappdata(hDFGui.fig,'Objects');
 if ~isempty(OldObjects)
     NewObjects = [OldObjects NewObjects];
 end
-setappdata(hDynamicFilamentsGui.fig,'Objects',NewObjects);
-set(hDynamicFilamentsGui.cUsePosEnd, 'Enable', 'off');
-setappdata(0,'hDynamicFilamentsGui',hDynamicFilamentsGui);
-DF.SetTable()
+setappdata(hDFGui.fig,'Objects',NewObjects);
+set(hDFGui.cUsePosEnd, 'Enable', 'off');
+setappdata(0,'hDFGui',hDFGui);

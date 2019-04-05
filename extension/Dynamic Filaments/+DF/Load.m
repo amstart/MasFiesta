@@ -1,25 +1,27 @@
 function Load(varargin)
 global DFDir
-if nargin > 0
-    FileName = varargin{1};
-    PathName = varargin{2};
-    switch FileName(end)
-        case 'f'
-            FilterIndex = 1;
-        case 't'
-            FilterIndex = 2;
-        case 'i'
-            FilterIndex = 3;
-    end
-else
+if nargin == 0
     try
         [FileName, PathName, FilterIndex] = ...
-        uigetfile({'*.tif','tif file (*.tif)'; '*.mat','MAT-File (*.mat)'; '*.roi','ImageJ roi (*.roi)'},'Load Objects',DFDir, 'MultiSelect', 'on'); 
+        uigetfile({'*.mat','MAT-File (*.mat)';'*.tif','tif file (*.tif)';  '*.roi','ImageJ roi (*.roi)'},'Load Objects',DFDir, 'MultiSelect', 'on'); 
     catch
         [FileName, PathName, FilterIndex] = ...
-        uigetfile({'*.tif','tif file (*.tif)'; '*.mat','MAT-File (*.mat)'; '*.roi','ImageJ roi (*.roi)'},'Load Objects', 'MultiSelect', 'on');        
+        uigetfile({'*.mat','MAT-File (*.mat)';'*.tif','tif file (*.tif)';  '*.roi','ImageJ roi (*.roi)'},'Load Objects', 'MultiSelect', 'on');        
     end
+else
+    FileName = varargin{1};
+    PathName = varargin{2};
 end
+
+switch FileName(end)
+    case 'f'
+        FilterIndex = 1;
+    case 't'
+        FilterIndex = 2;
+    case 'i'
+        FilterIndex = 3;
+end
+
 if FilterIndex
     hDFGui = getappdata(0,'hDFGui');
     if hDFGui.mode == 0
