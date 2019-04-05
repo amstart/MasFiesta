@@ -524,9 +524,7 @@ else
     set(f, 'Name',[plotstr{ChosenPlot} str], 'Tag', 'Plot', 'UserData', ChosenPlot);
     switch ChosenPlot
         case 3
-            if hDFGui.complicated
-                EventPlot(Options.lGroup.val, Options.eRescueCutoff.val);
-            end
+            DF.EventPlot(Options.lGroup.val, Options.eRescueCutoff.val);
         case 4
             BoxPlot(Options);
         case 5
@@ -550,7 +548,7 @@ end
 set(gcf, 'Position', get(0,'Screensize')); 
 
 function PrepareXYData(isfrequencyplot, Options)
-[type, Tracks, events]=SetType(Options.cPlotGrowingTracks.val);
+[type, Tracks, events]=DF.SetType(Options.cPlotGrowingTracks.val);
 xcolumn = Options.lPlot_XVar.val;
 ycolumn = Options.lPlot_YVar.val;
 if Options.mXReference.val == 5
@@ -656,117 +654,6 @@ for i=1:length(Tracks)
     end
 end
 
-
-function [type, Tracks, event]=SetType(PlotGrowingTags) %PlotGrowingTags is needed because of the event plot
-if PlotGrowingTags 
-    plottag = 1;
-else
-    plottag = 4; %this is a code (see DF.SegmentFIESTAFils.m))
-end
-hDFGui = getappdata(0,'hDFGui');
-Options = getappdata(hDFGui.fig,'Options');
-if ~isempty(strfind(Options.lPlot_XVar.print, 'Ase1')) || ~isempty(strfind(Options.lPlot_YVar.print, 'Ase1'))
-    OnlyWithIntensity = 1;
-else
-    OnlyWithIntensity = 0;
-end
-if Options.lPlot_XVar.val > 6 || Options.lPlot_YVar.val > 6 
-    OnlyWithCustomData = 1;
-else
-    OnlyWithCustomData = 0;
-end
-Tracks = getappdata(hDFGui.fig,'Tracks');
-if Options.cOnlySelected.val
-    Objects = getappdata(hDFGui.fig,'Objects');
-    selected=get(hDFGui.lSelection,'Value');
-    selected=unique(selected);
-    selected=selected(logical(selected));
-    Objects = Objects(selected);
-    selected_tracks = [];
-    for m = 1:length(Objects)
-        selected_tracks = vertcat(selected_tracks, Objects(m).SegTagAuto(:,5));
-    end
-    selected_tracks = unique(selected_tracks);
-    Tracks = Tracks(selected_tracks(logical(selected_tracks)));
-end
-type={Tracks.Type};
-event=[Tracks.Event];
-distance_event_end=[Tracks.DistanceEventEnd];
-file={Tracks.File};
-track_id=1:length(type);
-for i=1:length(type)
-    if hDFGui.mode == 2
-        if floor(event(i))~=plottag || size(Tracks(i).Data, 1) < Options.eMinLength.val
-            track_id(i)=0;
-            continue
-        end
-        if Options.cPlotGrowingTracks.val == 1 && Tracks(i).Duration < Options.eMinDuration.val
-            track_id(i)=0;
-            continue
-        end
-        if OnlyWithIntensity
-            if Tracks(i).HasIntensity==0
-                track_id(i)=0;
-                continue
-            end
-        end
-        if OnlyWithCustomData
-            if Tracks(i).HasCustomData==0
-                track_id(i)=0;
-                continue
-            end
-        end
-        type{i}=[type{i} ' tag' num2str(event(i))];
-    end
-    type{i}=strrep(type{i}, 'single400', 'single');
-    type{i}=strrep(type{i}, '4.8', '4');
-    type{i}=strrep(type{i}, '4.9', '4');
-    type{i}=strrep(type{i}, 'tag4', '\downarrow');
-    type{i}=strrep(type{i}, '1.8', '1');
-    type{i}=strrep(type{i}, '1.9', '1');
-    type{i}=strrep(type{i}, 'tag1', '\uparrow');
-    switch Options.lGroup.val
-        case 1
-            prepend = '';
-        case 2
-            splitstr = strsplit(file{i},'_');
-            if length(splitstr{1})>3
-                prepend=[splitstr{1}  ' \_ '];
-            else
-                prepend=[splitstr{2}  ' \_ '];
-            end
-        case 3
-            splitstr = strsplit(file{i},'_');
-            if length(splitstr{1})>3
-                prepend=[splitstr{1}(7:8) ' \_ ' splitstr{2} ' \_ '];
-            else
-                prepend=[splitstr{2} ' \_ ' splitstr{1} ' \_ '];
-            end
-        case 4
-            prepend = '';
-            type{i} = 'everything';
-    end
-    type{i}=[prepend type{i}];
-    if hDFGui.mode == 2
-        if (distance_event_end(i)>Options.eRescueCutoff.val||floor(event(i))~=4)&&abs(mod(event(i),1)-0.85)<0.1
-            if abs(mod(event(i),1)-0.85)<0.1
-                event(i)=2; %events which had not been recorded
-            else
-                event(i)=1;
-            end
-            if Options.cPlotEventsAsSeperateTypes.val
-                type{i}=[type{i} '*'];
-            end
-        else
-            event(i)=0;
-        end
-    end
-end
-track_id=track_id(logical(track_id));
-type=type(track_id);
-event=event(track_id);
-Tracks=Tracks(track_id);
-
 % function vel=CalcVelocity(track)
 % nData=size(track,1);
 % if nData>1
@@ -818,67 +705,6 @@ end
 setappdata(hDFGui.fig,'Objects',Objects);
 DF.updateOptions();
 
-function EventPlot(group, cutoff)
-subplot = @(m,n,p) subtightplot (m, n, p, [0.08 0.08], [0.08 0.08], [0.08 0.02]);
-PlotGrowing=[1 0];
-for i=1:2
-    [type, Tracks, event]=SetType(PlotGrowing(i));
-    uniquetypes=unique(type, 'stable');
-    NEvents=zeros(length(uniquetypes),1);
-    sumTime=zeros(length(uniquetypes),1);
-    sumFrames=zeros(length(uniquetypes),1);
-    subplot(2,2,2*(i-1)+1)
-    hold on;
-    if isempty(strfind(uniquetypes{1}, '\downarrow'))
-        plot([0.5 length(uniquetypes) + 0.5] , [0 0], 'k--')
-        ylabel('Catastrophe distance to seed [nm]');
-    else
-        plot([0.5 length(uniquetypes) + 0.5] , [cutoff cutoff], 'r-')
-        ylabel('Rescue distance to seed [nm]');
-    end
-    for n=1:length(Tracks)
-        typenum=find(strcmp(uniquetypes, type{n}));
-        if ~isempty(Tracks(n).Data)
-            print_str = [int2str(Tracks(n).MTIndex) '/' int2str(Tracks(n).TrackIndex)];
-            if event(n)
-                NEvents(typenum)=NEvents(typenum)+1;
-                text(typenum+0.1, double(Tracks(n).Data(end,2)), print_str, 'Color','red');
-                plot(typenum, Tracks(n).Data(end,2), 'Color','red', 'LineStyle', 'none', 'Marker','o');
-            else
-                text(typenum+0.1, double(Tracks(n).Data(end,2)), print_str, 'Color','black');
-                plot(typenum, Tracks(n).Data(end,2), 'Color','black', 'LineStyle', 'none', 'Marker','o');
-            end
-            sumTime(typenum)=sumTime(typenum)+Tracks(n).Duration;
-        end
-    end
-    set(gca,'XTick',1:length(uniquetypes), 'FontSize',18, 'LabelFontSizeMultiplier', 1.5,'xticklabel',uniquetypes, 'Ticklength', [0 0]);
-    if (length(uniquetypes)>2&&group>1)||length(uniquetypes)>3
-        set(gca,'XTickLabelRotation',15);
-    end
-    subplot(2,2,2*(i-1)+2)
-    hold on
-    fEvents = NEvents./sumTime;
-    fError = sqrt(NEvents)./sumTime; %see https://www.bcube-dresden.de/wiki/Error_bars
-    bar(fEvents,'stacked', 'r');
-    h_error = errorbar(fEvents, fError, '.');
-    for j=1:length(uniquetypes)
-        if fEvents(j)
-            text(j, fEvents(j)/2, {[num2str(fEvents(j), 2) ' per s'], ['N=' num2str(NEvents(j))], [num2str(sumTime(j)/60,'%1.1f') ' min']}, 'HorizontalAlignment', 'center', 'FontSize',16);
-        else
-            text(j, fEvents(j)/2, ['0 in ' num2str(sumTime(j)/60,'%1.1f') ' min'], 'HorizontalAlignment', 'center', 'VerticalAlignment', 'bottom', 'FontSize',16);
-        end
-    end
-    set(gca,'XTick',1:length(uniquetypes), 'FontSize',18, 'LabelFontSizeMultiplier', 1.5,'xticklabel',uniquetypes, 'Ticklength', [0 0]);
-    if (length(uniquetypes)>2&&group>1)||length(uniquetypes)>3
-        set(gca,'XTickLabelRotation',15);
-    end
-    if isempty(strfind(uniquetypes{1}, '\downarrow'))
-        ylabel('Catastrophe frequency [1/s]');
-    else
-        ylabel('Rescue frequency [1/s]');
-    end
-    legend(h_error, 'statistical uncertainty', 'Location', 'best');
-end
 
 function label = get_label(Options, isX)
 if isX
@@ -925,9 +751,9 @@ elseif strcmp(button,'All Other Shrinking')
     ChosePreviousTrack = 0;
 end
 hold on
-[type, AnalyzedTracks, ~]=SetType(Options.cPlotGrowingTracks.val);
+[type, AnalyzedTracks, ~]=DF.SetType(Options.cPlotGrowingTracks.val);
 if Options.cPlotGrowingTracks.val && ~ChoseGrowTracks
-    [~, AnalyzedOtherTracks, ~]=SetType(0);
+    [~, AnalyzedOtherTracks, ~]=DF.SetType(0);
     labels = {'Track Value (Growing): ', 'Same MT Track(s) Mean Values (Shrinking): '};
 elseif (Options.cPlotGrowingTracks.val && ChoseGrowTracks) || (~Options.cPlotGrowingTracks.val && ~ChoseGrowTracks)
     AnalyzedOtherTracks = AnalyzedTracks;
@@ -937,7 +763,7 @@ elseif (Options.cPlotGrowingTracks.val && ChoseGrowTracks) || (~Options.cPlotGro
         labels = {'Track Value (Shrinking): ', 'Same MT Track(s) Mean Values (Shrinking): '};
     end
 elseif ~Options.cPlotGrowingTracks.val && ChoseGrowTracks
-    [~, AnalyzedOtherTracks, ~]=SetType(1);
+    [~, AnalyzedOtherTracks, ~]=DF.SetType(1);
     labels = {'Track Value (Shrinking): ', 'Same MT Track(s) Mean Values (Growing): '};
 end
 [~, type_id, track_type_id] = unique(type);
@@ -988,7 +814,7 @@ hold off
 
 function TrackXYPlot(Options)
 hold on
-[type, AnalyzedTracks, ~]=SetType(Options.cPlotGrowingTracks.val);
+[type, AnalyzedTracks, ~]=DF.SetType(Options.cPlotGrowingTracks.val);
 [~, type_id, track_type_id] = unique(type);
 [x_vec, y_vec] = DF.get_plot_vectors(Options, AnalyzedTracks, 1:2);
 fJKscatterboxplot(x_vec, y_vec, track_type_id', 0);
@@ -1031,7 +857,7 @@ for m=1:length(binvecy)
 end
 
 function IntensityVsDistWeightedVel(Options)
-[type, Tracks, events]=SetType(Options.cPlotGrowingTracks.val);
+[type, Tracks, events]=DF.SetType(Options.cPlotGrowingTracks.val);
 for i=1:length(Tracks)
     Data=Tracks(i).Data;
     [middlex, middley, middlez] = histcounts2(Data(:,2), Data(:,3), Data(:,4));
@@ -1057,7 +883,7 @@ else
     kymo_field = 'pixelkymo';
 end
 l = Objects(1).CustomData.(kymo_field).ScanOptions.help_get_tip_kymo.ExtensionLength;
-[type, Tracks, events]=SetType(Options.cPlotGrowingTracks.val);
+[type, Tracks, events]=DF.SetType(Options.cPlotGrowingTracks.val);
 for n = 1:length(Tracks)
     Tracks(n).X = Tracks(n).Data(:, 6); %Frames from .Data Container
     Tracks(n).Y = Tracks(n).Data(:, 6);
@@ -1103,7 +929,7 @@ fJKplotframework(Tracks, type, 0, events, Options);
 
 function BoxPlot(Options)
 hold on;
-[type, AnalyzedTracks, ~]=SetType(Options.cPlotGrowingTracks.val);
+[type, AnalyzedTracks, ~]=DF.SetType(Options.cPlotGrowingTracks.val);
 [x_vec, ~] = DF.get_plot_vectors(Options, AnalyzedTracks, 1);
 if isempty(x_vec)
     text(0.3,0.5,'No data or path available for any objects','Parent','FontWeight','bold','FontSize',16);
