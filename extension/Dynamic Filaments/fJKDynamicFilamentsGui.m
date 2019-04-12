@@ -31,7 +31,7 @@ switch func
     case 'DF.Draw'
         DF.Draw(varargin{:});
     case 'Quicksave'
-        Quicksave(varargin{:});
+        DF.Quicksave(varargin{:});
     case 'OpenInfo'
         OpenInfo;
     case 'OpenProtocol'
@@ -77,32 +77,6 @@ end
 setappdata(hDFGui.fig,'Tracks', Tracks);
 setappdata(hDFGui.fig,'Objects',Objects);
 DF.SetTable();
-
-
-function Quicksave(varargin)
-global DFDir
-persistent QuicksaveDir
-if nargin>0
-    QuicksaveDir = [];
-    return
-end
-if isempty(QuicksaveDir)
-    try
-        QuicksaveDir = uigetdir(DFDir, 'Select the quicksave folder (choice will be remembered until you refresh the GUI).');
-    catch 
-        QuicksaveDir = uigetdir('','Select the quicksave folder (choice will be remembered until you refresh the GUI).');
-    end
-end
-if strcmp(get(gcf, 'CurrentCharacter'),'s')
-    jFrame = get(handle(gcf),'JavaFrame');
-    jFrame.setMaximized(true);
-%     export_fig([QuicksaveDir filesep strrep(get(gcf, 'Name'), ' | ', '_')], '-png', '-nocrop');
-    filename = strrep(get(gcf, 'Name'), ' | ', '_');
-    optionsstart = strfind(filename, '- ');
-    filename = inputdlg('Filename?', 'Filename?', 1, {[filename(1:optionsstart) ' ']});
-    saveas(gcf,[QuicksaveDir filesep filename{1} '.png'], 'png');
-%     savefig(gcf,[QuicksaveDir filesep strrep(get(gcf, 'Name'), ' | ', '_') '.fig']);
-end
 
 
 function AddCustomData(varargin)
@@ -306,17 +280,17 @@ msgbox(str,'Legend');
 
 
 function SetMenu(hDFGui)
-switch get(hDFGui.lChoosePlot, 'Value')
-    case {1,2}
-        set(hDFGui.mXReference, 'Visible', 'on');
-        set(hDFGui.lSubsegment, 'Visible', 'on');
-    case 7
-        set(hDFGui.mXReference, 'Visible', 'off');
-        set(hDFGui.lSubsegment, 'Visible', 'on');
-    otherwise
-        set(hDFGui.mXReference, 'Visible', 'off');
-        set(hDFGui.lSubsegment, 'Visible', 'off');
-end
+% switch get(hDFGui.lChoosePlot, 'Value')
+%     case {1,2}
+%         set(hDFGui.mXReference, 'Visible', 'on');
+%         set(hDFGui.lSubsegment, 'Visible', 'on');
+%     case 7
+%         set(hDFGui.mXReference, 'Visible', 'off');
+%         set(hDFGui.lSubsegment, 'Visible', 'on');
+%     otherwise
+%         set(hDFGui.mXReference, 'Visible', 'off');
+%         set(hDFGui.lSubsegment, 'Visible', 'off');
+% end
 
 
 function SurfPlot()
@@ -496,7 +470,6 @@ for field = optionfields'
     end
     str = [str fchar '=' Options.(fchar).print ' | '];
 end
-uicontrol(f, 'Style', 'text', 'String',str(4:end), 'Units','norm', 'Position', [0.1 0.98 0.9 0.02]);
 set(f,'WindowKeyPressFcn','fJKDynamicFilamentsGui(''Quicksave'');');
 ChosenPlot = get(hDFGui.lChoosePlot, 'Value');
 if ChosenPlot < 3
@@ -509,15 +482,18 @@ if ChosenPlot < 3
         [Options.ZVar,Options.ZOK] = listdlg('ListString', varnames, 'SelectionMode', 'single');
         if Options.ZOK
             Options.ZVarName = varnames{Options.ZVar};
+            [type, Tracks, events]=DF.SetType(Options.cPlotGrowingTracks.val, 'colors', Options.ZVar);
+        else
+            [type, Tracks, events]=DF.SetType(Options.cPlotGrowingTracks.val);
         end
         set(f, 'Name',[XStr ' vs ' YStr str], 'Tag', 'Plot', ...
             'UserData', XVar*10+YVar);
-        PrepareXYData(0 , Options);
+        fJKplotframework(Tracks, type, 0, events, Options);
     else
-        Options.ZOK = 0;
         set(f, 'Name',['Events along ' XStr ' per ' YStr str], 'Tag', 'Plot', ...
             'UserData', 100+XVar*10+YVar);
-        PrepareXYData(1 , Options);
+        [type, Tracks, events]=DF.SetType(Options.cPlotGrowingTracks.val);
+        fJKplotframework(Tracks, type, 1, events, Options);
     end
 else
     plotstr = get(hDFGui.lChoosePlot, 'String');
@@ -546,113 +522,7 @@ else
     end
 end
 set(gcf, 'Position', get(0,'Screensize')); 
-
-function PrepareXYData(isfrequencyplot, Options)
-[type, Tracks, events]=DF.SetType(Options.cPlotGrowingTracks.val);
-xcolumn = Options.lPlot_XVar.val;
-ycolumn = Options.lPlot_YVar.val;
-if Options.mXReference.val == 5
-    if ycolumn == 3
-        for i=1:length(Tracks)
-            Tracks(i).Data(:,3) = Tracks(i).Data(:,3)-Tracks(i).Velocity(Options.lMethod_TrackValue.val);
-        end
-    else
-        return
-    end
-end
-if Options.eSmoothX.val > 1
-    for i=1:length(Tracks)
-        Tracks(i).X = nanfastsmooth(Tracks(i).Data(:,xcolumn), Options.eSmoothX.val);
-    end
-else
-    for i=1:length(Tracks)
-        Tracks(i).X = Tracks(i).Data(:,xcolumn);
-    end
-end
-if Options.eSmoothY.val > 1
-    for i=1:length(Tracks)
-        Tracks(i).Y = nanfastsmooth(Tracks(i).Data(:,ycolumn), Options.eSmoothY.val);
-    end
-else
-    for i=1:length(Tracks)
-        Tracks(i).Y = Tracks(i).Data(:,ycolumn);
-    end
-end
-for i=1:length(Tracks)
-    Tracks(i).XEventEnd = Tracks(i).XEventEnd(xcolumn);
-    Tracks(i).XEventStart = Tracks(i).XEventStart(xcolumn);
-end
-[Tracks, DelObjects] = SelectSubsegments(Tracks, Options, 'X');
-Tracks(DelObjects) = [];
-events(DelObjects) = [];
-type(DelObjects) = [];
-[Tracks, ~] = SelectSubsegments(Tracks, Options, 'Y');
-if Options.ZOK
-    for i=1:length(Tracks)
-        Tracks(i).Z = Tracks(i).Data(:,Options.ZVar);
-    end
-    [Tracks, ~] = SelectSubsegments(Tracks, Options, 'Z');
-end
-Tracks = rmfield(Tracks, 'Data');
-fJKplotframework(Tracks, type, isfrequencyplot, events, Options);
-
-function [Tracks, DelObjects] = SelectSubsegments(Tracks, Options, field)
-DelObjects = false(length(Tracks),1);
-switch Options.lSubsegment.val
-    case 2
-        for i=1:length(Tracks)
-            if Tracks(i).end_first_subsegment
-                Tracks(i).(field) = Tracks(i).(field)(1:Tracks(i).end_first_subsegment);
-            else
-                DelObjects(i) = 1;
-            end
-        end
-    case 3
-        for i=1:length(Tracks)
-            if Tracks(i).end_first_subsegment && Tracks(i).start_last_subsegment
-                Tracks(i).(field) = Tracks(i).(field)(Tracks(i).end_first_subsegment:Tracks(i).start_last_subsegment);
-            else
-                DelObjects(i) = 1;
-            end
-        end
-    case 4
-        for i=1:length(Tracks)
-            if Tracks(i).start_last_subsegment
-                Tracks(i).(field) = Tracks(i).(field)(Tracks(i).start_last_subsegment:end);
-            else
-                DelObjects(i) = 1;
-            end
-        end
-    case 5
-        for i=1:length(Tracks)
-            if Tracks(i).end_first_subsegment && Tracks(i).start_last_subsegment
-                Tracks(i).(field) = Tracks(i).(field)(1:Tracks(i).start_last_subsegment);
-            else
-                DelObjects(i) = 1;
-            end
-        end
-    case 6
-        for i=1:length(Tracks)
-            if Tracks(i).end_first_subsegment && Tracks(i).start_last_subsegment
-                Tracks(i).(field) = Tracks(i).(field)(Tracks(i).end_first_subsegment:end);
-            else
-                DelObjects(i) = 1;
-            end
-        end
-    case 7
-        for i=1:length(Tracks)
-            if Tracks(i).minindex > 1 && Tracks(i).minindex < length(Tracks(i).(field))
-                Tracks(i).(field) = Tracks(i).(field)(Tracks(i).minindex:end);
-            else
-                DelObjects(i) = 1;
-            end
-        end
-end
-for i=1:length(Tracks)
-    if isempty(Tracks(i).(field))
-        DelObjects(i) = 1;
-    end
-end
+uicontrol(f, 'Style', 'text', 'String',str(4:end), 'Units','norm', 'Position', [0 0.96 1 0.04]);
 
 % function vel=CalcVelocity(track)
 % nData=size(track,1);
@@ -727,10 +597,15 @@ if Options.lMethod_TrackValue.val == 7
         methodstr = 'sum';
     end
 end
+if strcmp(Options.lSubsegment.print, 'All') || Options.cPlotGrowingTracks.val==1
+    segment = '';
+else
+    segment =  [' (' Options.lSubsegment.print ' only)'];
+end
 if Options.cPlotGrowingTracks.val==1
     label=[title ' (' methodstr '. Only tracks > ' Options.eMinDuration.print ' evaluated)'  ' [' unit ']'];
 else
-    label=[title ' (' methodstr ')' ' [' unit ']'];
+    label=[title ' (' methodstr ')' segment ' [' unit ']'];
 end
 
 
@@ -937,19 +812,17 @@ if isempty(x_vec)
     legend('off');
 else
     [~, type_id, track_type_id] = unique(type, 'stable');
-    b=boxplot(x_vec, type);
     for j=1:length(type_id)
         type_datavec=x_vec(track_type_id == j);
         plot_x = repmat(j, size(type_datavec)) + (rand(size(type_datavec))-0.5)./2.2;
         plot(plot_x, type_datavec, '*', 'Color', [1,102,94]/255, 'MarkerSize', 25); %[217;95;2]/255
-        text(j,nanmean(type_datavec),{num2str(median(type_datavec),3), ['N = ' num2str(length(type_datavec))]}, 'HorizontalAlignment', 'center', 'VerticalAlignment', 'middle', 'FontSize',18);
+        text(j,nanmean(type_datavec),{num2str(nanmedian(type_datavec),3), ['N = ' num2str(length(type_datavec))]}, 'HorizontalAlignment', 'center', 'VerticalAlignment', 'middle', 'FontSize',18);
     end
-    set(gca,'XTickLabel','', 'FontSize',26, 'LabelFontSizeMultiplier', 1.5, 'XTickLabelMode','manual');
-    hxt = get(gca, 'XTick');
-    ypos = min(ylim) - diff(ylim)*0.05;
-    newtext = text(hxt, ones(1, length(type_id))*ypos, type(type_id), 'HorizontalAlignment', 'center', 'FontSize',18);
+    b=boxplot(x_vec, type);
+    set(gca,'TickLabelInterpreter', 'tex');
+    set(gca,'FontSize',14);
     if (length(type_id)>2&&Options.lGroup.val>1)||length(type_id)>3
-        set(newtext, 'rotation', 15);
+        xtickangle(15);
     end
     h = findobj(b,'tag','Outliers');
     set(h,'Visible','off');

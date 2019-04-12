@@ -1,5 +1,5 @@
-function fJKscatterboxplot(plot_x, plot_y, point_info, color_mode, weights)
-[out, edgesmid, nelements, allpointsx, allpointsy] = histcounts2(plot_x, plot_y, weights);
+function fJKscatterboxplot(plot_x, plot_y, point_info, color_mode, varargin)
+[out, edgesmid, nelements, allpointsx, allpointsy] = histcounts2own(plot_x, plot_y, varargin);
 if color_mode == 0
 %     gscatter(plot_x, plot_y, point_info, [], 'o')
 else
@@ -34,7 +34,12 @@ end
 set(gca,'Color',[0.9 0.9 0.9]);
 % ylim([-600 0])
 
-function [out, edgesmid, nelements, allpointsx, allpointsy] = histcounts2(plotx, ploty, weights)
+function [out, edgesmid, nelements, allpointsx, allpointsy] = histcounts2own(plotx, ploty, weights)
+if ~isempty(weights)
+    weights = weights{1};
+else
+    weights = ones(size(plotx));
+end
 %HISTCOUNTS2D Summary of this function goes here
 %   Detailed explanation goes here
 plotx=plotx(~isnan(plotx));

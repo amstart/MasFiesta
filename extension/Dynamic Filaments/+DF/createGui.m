@@ -22,7 +22,7 @@ else
     hDFGui=getappdata(0,'hDFGui');
     children=get(hDFGui.fig, 'Children');
     delete(children);
-    Quicksave(1);
+    DF.Quicksave(1);
 end
 
 

@@ -2,12 +2,15 @@ function EventPlot(group, cutoff)
 subplot = @(m,n,p) subtightplot (m, n, p, [0.08 0.08], [0.08 0.08], [0.08 0.02]);
 PlotGrowing=[1 0];
 for i=1:2
-    [type, Tracks, event]=DF.SetType(PlotGrowing(i));
-    uniquetypes=unique(type, 'stable');
+    [type, Tracks, event, orderid]=DF.SetType(PlotGrowing(i), 'file');
+    [uniquetypes, ~, typeid]=unique(type, 'stable');
     NEvents=zeros(length(uniquetypes),1);
     sumTime=zeros(length(uniquetypes),1);
-    sumFrames=zeros(length(uniquetypes),1);
+    [~, uniqueorder, uidid] = unique(orderid, 'stable');
+    NEventsO=zeros(length(uniqueorder),1);
+    sumTimeO=zeros(length(uniqueorder),1);
     subplot(2,2,2*(i-1)+1)
+    set(gca,'ButtonDownFcn',@createnew_fig)
     hold on;
     if isempty(strfind(uniquetypes{1}, '\downarrow'))
         plot([0.5 length(uniquetypes) + 0.5] , [0 0], 'k--')
@@ -22,13 +25,15 @@ for i=1:2
             print_str = [int2str(Tracks(n).MTIndex) '/' int2str(Tracks(n).TrackIndex)];
             if event(n)
                 NEvents(typenum)=NEvents(typenum)+1;
+                NEventsO(uidid(n))=NEventsO(uidid(n))+1;
                 text(typenum+0.1, double(Tracks(n).Data(end,2)), print_str, 'Color','red');
                 plot(typenum, Tracks(n).Data(end,2), 'Color','red', 'LineStyle', 'none', 'Marker','o');
             else
                 text(typenum+0.1, double(Tracks(n).Data(end,2)), print_str, 'Color','black');
                 plot(typenum, Tracks(n).Data(end,2), 'Color','black', 'LineStyle', 'none', 'Marker','o');
             end
-            sumTime(typenum)=sumTime(typenum)+Tracks(n).Duration;
+            sumTime(typenum)=sumTime(typenum)+Tracks(n).Duration/60;
+            sumTimeO(uidid(n))=sumTimeO(uidid(n))+Tracks(n).Duration/60;
         end
     end
     set(gca,'XTick',1:length(uniquetypes), 'FontSize',18, 'LabelFontSizeMultiplier', 1.5,'xticklabel',uniquetypes, 'Ticklength', [0 0]);
@@ -36,16 +41,35 @@ for i=1:2
         set(gca,'XTickLabelRotation',15);
     end
     subplot(2,2,2*(i-1)+2)
+    set(gca,'ButtonDownFcn',@createnew_fig)
     hold on
-    fEvents = NEvents./sumTime;
-    fError = sqrt(NEvents)./sumTime; %see https://www.bcube-dresden.de/wiki/Error_bars
-    bar(fEvents,'stacked', 'r');
-    h_error = errorbar(fEvents, fError, '.');
+    if 1
+        fEvents = accumarray(typeid(uniqueorder), NEventsO./sumTimeO, [], @median);
+        bar(fEvents,'stacked', 'r');
+        flow = accumarray(typeid(uniqueorder), NEventsO./sumTimeO, [], @min);
+        fhigh = accumarray(typeid(uniqueorder), NEventsO./sumTimeO, [], @max);
+        h_error = errorbar(1:length(fEvents), fEvents, fEvents-flow, fhigh-fEvents, '.');
+    else       
+        fEvents = NEvents./sumTime;
+        bar(fEvents,'stacked', 'r');
+        fError = sqrt(NEvents)./sumTime; %see https://www.bcube-dresden.de/wiki/Error_bars
+        h_error = errorbar(1:length(fEvents), fEvents, fError, '.');
+    end
+    %text on bars
+    MTnum = accumarray(typeid, [Tracks.MTIndex], [], @uniquecount);
+    movienum = accumarray(typeid(uniqueorder),1);
+    for j=1:length(uniquetypes)
+        if max(movienum) > 1
+            ntext{j} = [num2str(MTnum(j)) 'MTs in ' num2str(movienum(j)) 'movies'];
+        else
+            ntext{j} = [num2str(MTnum(j)) 'MTs'];
+        end
+    end
     for j=1:length(uniquetypes)
         if fEvents(j)
-            text(j, fEvents(j)/2, {[num2str(fEvents(j), 2) ' per s'], ['N=' num2str(NEvents(j))], [num2str(sumTime(j)/60,'%1.1f') ' min']}, 'HorizontalAlignment', 'center', 'FontSize',16);
+            text(j, fEvents(j)/2, {[num2str(fEvents(j), 2)], [num2str(NEvents(j)) ' events'], [num2str(sumTime(j),'%1.1f') ' min'], ntext{j}}, 'HorizontalAlignment', 'center', 'FontSize',16);
         else
-            text(j, fEvents(j)/2, ['0 in ' num2str(sumTime(j)/60,'%1.1f') ' min'], 'HorizontalAlignment', 'center', 'VerticalAlignment', 'bottom', 'FontSize',16);
+            text(j, fEvents(j)/2, {['0 in ' num2str(sumTime(j),'%1.1f') ' min'], ntext{j}}, 'HorizontalAlignment', 'center', 'VerticalAlignment', 'bottom', 'FontSize',16);
         end
     end
     set(gca,'XTick',1:length(uniquetypes), 'FontSize',18, 'LabelFontSizeMultiplier', 1.5,'xticklabel',uniquetypes, 'Ticklength', [0 0]);
@@ -53,9 +77,23 @@ for i=1:2
         set(gca,'XTickLabelRotation',15);
     end
     if isempty(strfind(uniquetypes{1}, '\downarrow'))
-        ylabel('Catastrophe frequency [1/s]');
+        ylabel('Catastrophe frequency [1/min]');
     else
-        ylabel('Rescue frequency [1/s]');
+        ylabel('Rescue frequency [1/min]');
     end
     legend(h_error, 'statistical uncertainty', 'Location', 'best');
 end
+
+function createnew_fig(cb,evendata)
+%cb is the handle of the axes that was clicked
+%click on the whitespace within and axes and not on the line object
+%copy the axes object to the new figure
+hh = copyobj(cb,figure);
+%for the new figure assign the ButtonDownFcn to empty
+set(hh,'ButtonDownFcn',[]);
+%resize the axis to fill the figure
+set(hh, 'Position', get(0, 'DefaultAxesPosition'));
+
+function out = uniquecount(in)
+u = unique(in);
+out = length(u);

@@ -160,6 +160,7 @@ for n = 1:length(Objects)
         tmp_fit = polyfit(segt,segd,1);
         velocity(m) = tmp_fit(1);
         Tracks(track_id).Velocity=velocity(m);
+        Tracks(track_id).Startendvel=(segd(end) - segd(1))/(segt(end) - segt(1));
         Tracks(track_id).Selected=0;
         Tracks(track_id).HasCustomData = has_custom_data;
         track_id=track_id+1;
@@ -238,9 +239,9 @@ end
 for i = starti:step:minindex
     if velocity(i)/velocity(minindex) > bordervalue/100 && velocity(i) < 0
         if step > 0 
-            borderindex = max(i, 2);
+            borderindex = max(i, 1);
         else
-            borderindex = min(i, starti-1);
+            borderindex = min(i, starti);
         end
         break
     end

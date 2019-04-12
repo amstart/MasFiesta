@@ -1,4 +1,4 @@
-function [type, Tracks, event]=SetType(PlotGrowingTags) %PlotGrowingTags is needed because of the event plot
+function [type, Tracks, event, orderid]=SetType(PlotGrowingTags, varargin) %PlotGrowingTags is needed because of the event plot
 if PlotGrowingTags 
     plottag = 1;
 else
@@ -103,7 +103,121 @@ for i=1:length(type)
         end
     end
 end
-track_id=track_id(logical(track_id));
-type=type(track_id);
-event=event(track_id);
-Tracks=Tracks(track_id);
+track_id = track_id(logical(track_id));
+Tracks = Tracks(track_id);
+event = event(track_id);
+type = type(track_id);
+file = file(track_id);
+
+%old function preparexydata
+xcolumn = Options.lPlot_XVar.val;
+ycolumn = Options.lPlot_YVar.val;
+if Options.mXReference.val == 5
+    if ycolumn == 3
+        for i=1:length(Tracks)
+            Tracks(i).Data(:,3) = Tracks(i).Data(:,3)-Tracks(i).Velocity;
+        end
+    else
+        return
+    end
+end
+if Options.eSmoothX.val > 1
+    for i=1:length(Tracks)
+        Tracks(i).Data(:,xcolumn) = nanfastsmooth(Tracks(i).Data(:,xcolumn), Options.eSmoothX.val);
+    end
+end
+if Options.eSmoothY.val > 1
+    for i=1:length(Tracks)
+        Tracks(i).Data(:,ycolumn) = nanfastsmooth(Tracks(i).Data(:,ycolumn), Options.eSmoothY.val);
+    end
+end
+for i=1:length(Tracks)
+    Tracks(i).XEventEnd = Tracks(i).XEventEnd(xcolumn);
+    Tracks(i).XEventStart = Tracks(i).XEventStart(xcolumn);
+end
+[Tracks, DelObjects] = SelectSubsegments(Tracks, Options);
+Tracks(DelObjects) = [];
+event(DelObjects) = [];
+type(DelObjects) = [];
+for i=1:length(Tracks)
+    Tracks(i).Y = Tracks(i).Data(:,ycolumn);
+    Tracks(i).X = Tracks(i).Data(:,xcolumn);
+    Tracks(i).Startendvel = (Tracks(i).Data(end,2)-Tracks(i).Data(1,2))/(Tracks(i).Data(end,1)-Tracks(i).Data(1,1));
+end
+if (xcolumn == 3 && Options.lMethod_TrackValue.val==7) || (ycolumn == 3 && Options.lMethod_TrackValueY.val==7) 
+    for i=1:length(Tracks)
+        [tmp_fit] = polyfit(Tracks(i).Data(:,1),Tracks(i).Data(:,2),1);
+        Tracks(i).Subsegvel = tmp_fit(1);
+    end
+end
+% Tracks = rmfield(Tracks, 'Data');
+if nargin > 1
+    switch varargin{1}
+        case 'file'
+            [~, ~, orderid] = unique(file);
+        case 'colors'
+            for i=1:length(Tracks)
+                Tracks(i).Z = Tracks(i).Data(:,varargin{2});
+            end
+    end
+end
+
+
+function [Tracks, DelObjects] = SelectSubsegments(Tracks, Options)
+DelObjects = false(length(Tracks),1);
+switch Options.lSubsegment.val
+    case 2
+        for i=1:length(Tracks)
+            if Tracks(i).end_first_subsegment
+                Tracks(i).Data = Tracks(i).Data(1:Tracks(i).end_first_subsegment,:);
+            else
+                DelObjects(i) = 1;
+            end
+        end
+    case 3
+        for i=1:length(Tracks)
+            if Tracks(i).end_first_subsegment && Tracks(i).start_last_subsegment
+                Tracks(i).Data = Tracks(i).Data(Tracks(i).end_first_subsegment:Tracks(i).start_last_subsegment,:);
+            else
+                DelObjects(i) = 1;
+            end
+        end
+    case 4
+        for i=1:length(Tracks)
+            if Tracks(i).start_last_subsegment
+                Tracks(i).Data = Tracks(i).Data(Tracks(i).start_last_subsegment:end,:);
+            else
+                DelObjects(i) = 1;
+            end
+        end
+    case 5
+        for i=1:length(Tracks)
+            if Tracks(i).end_first_subsegment && Tracks(i).start_last_subsegment
+                Tracks(i).Data = Tracks(i).Data(1:Tracks(i).start_last_subsegment,:);
+            else
+                DelObjects(i) = 1;
+            end
+        end
+    case 6
+        for i=1:length(Tracks)
+            if Tracks(i).end_first_subsegment && Tracks(i).start_last_subsegment
+                Tracks(i).Data = Tracks(i).Data(Tracks(i).end_first_subsegment:end,:);
+            else
+                DelObjects(i) = 1;
+            end
+        end
+    case 7
+        for i=1:length(Tracks)
+            if Tracks(i).minindex > 1 && Tracks(i).minindex < size(Tracks(i).Data,1)
+                Tracks(i).Data = Tracks(i).Data(Tracks(i).minindex:end,:);
+            else
+                DelObjects(i) = 1;
+            end
+        end
+end
+for i=1:length(Tracks)
+    if isempty(Tracks(i).Data)
+        DelObjects(i) = 1;
+    end
+end
+
