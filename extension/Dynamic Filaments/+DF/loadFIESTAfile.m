@@ -3,7 +3,7 @@ AllObjects = load([PathName FileName], 'Filament');
 if ~isfield(AllObjects, 'Filament')
     fJKLoadLink(FileName, PathName, @DF.Load)
     try
-        LoadIntensityPerMAP('intensities.txt', PathName)
+        DF.LoadIntensityPerMAP('intensities.txt', PathName)
     catch
         warning('Could not load intensity per MAP file');
     end

@@ -83,17 +83,18 @@ for j=1:ntypes    %Loop through all groups to be plotted, each group gets its ow
         figure(mainfig);
         axes(f);drawnow;
     end
+    set(gca,'ButtonDownFcn',@createnew_fig)
     switch isfrequencyplot
         case 0
             [plot_x, plot_y, ~] = Get_Vectors(PlotTracks, events(correct_type), Options.mXReference.val, isfrequencyplot, Options.cExclude.val);
             point_info=cell(sum(correct_type),1);
-            if Options.ZOK
-                color_mode = 1;
-                for k=1:sum(correct_type)
-                    point_info{k}=PlotTracks(k).Z(1+Options.cExclude.val:end-Options.cExclude.val);
-                end
-                point_info=vertcat(point_info{:});
-            else
+%             if Options.ZOK
+%                 color_mode = 1;
+%                 for k=1:sum(correct_type)
+%                     point_info{k}=PlotTracks(k).Z(1+Options.cExclude.val:end-Options.cExclude.val);
+%                 end
+%                 point_info=vertcat(point_info{:});
+%             else
                 color_mode = 0;
                 if Options.cGroupIntoMTs.val
                     [legend_items, ~, object_name_ids] = unique({PlotTracks.Name}, 'stable');
@@ -108,7 +109,7 @@ for j=1:ntypes    %Loop through all groups to be plotted, each group gets its ow
                     end
                     point_info=vertcat(point_info{:});
                 end
-            end
+%             end
             fJKscatterboxplot(plot_x, plot_y, point_info, color_mode);
             if Options.cLegend.val
                 legend(legend_items, 'Interpreter', 'none', 'Location', 'best');
@@ -193,11 +194,11 @@ else
         end
         case {2, 6}
         for k=1:pr
-            cellx{k}=PlotTracks(k).X(1+exclude:end-exclude)-PlotTracks(k).XEventStart;
+            cellx{k}=PlotTracks(k).X(1+exclude:end-exclude)-PlotTracks(k).X(1+exclude);
         end
         case {3, 7}
         for k=1:pr
-            cellx{k}=PlotTracks(k).X(1+exclude:end-exclude)-PlotTracks(k).XEventEnd;
+            cellx{k}=PlotTracks(k).X(1+exclude:end-exclude)-PlotTracks(k).X(end-exclude);
         end
         case 4
         for k=1:pr

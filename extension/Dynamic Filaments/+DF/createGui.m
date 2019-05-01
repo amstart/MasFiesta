@@ -212,6 +212,13 @@ tooltipstr=sprintf(['Distinguishes between tracks (marked with *) with and witho
 hDFGui.cPlotEventsAsSeperateTypes = uicontrol('Parent',hDFGui.pOptions,'Style','checkbox','Units','normalized',...
                                          'Position',[.8 .3 .4 .05],'Tag','cPlotEventsAsSeperateTypes','Fontsize',10,'TooltipString', tooltipstr,...
                                          'String','Distinguish events','BackgroundColor',c,'HorizontalAlignment','center', 'Value', 0); 
+
+tooltipstr=sprintf(['Pools tracks with and without MAPs.']);
+                                                    
+hDFGui.cPoolMAPs = uicontrol('Parent',hDFGui.pOptions,'Style','checkbox','Units','normalized',...
+                                         'Position',[.8 .25 .4 .05],'Tag','cPoolMAPs','Fontsize',10,'TooltipString', tooltipstr,...
+                                         'String','Pool w and w/o MAPs','BackgroundColor',c,'HorizontalAlignment','center', 'Value', 0); 
+                                     
                                      
 tooltipstr=sprintf(['Excludes first and last points of tracks for plots.']);
                                                                                          

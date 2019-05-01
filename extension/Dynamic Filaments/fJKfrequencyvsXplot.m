@@ -39,7 +39,7 @@ function [edgesmid, edges, sumy] = histcounts2(plot_x, plot_y)
 %HISTCOUNTS2D Summary of this function goes here
 %   Detailed explanation goes here
 plot_x=plot_x(~isnan(plot_x));
-binnum = 0;
+binnum = 10;
 if binnum == 0
     [~, edges, xid] = histcounts(plot_x);
     if length(edges)>7

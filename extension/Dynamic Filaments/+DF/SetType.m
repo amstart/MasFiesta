@@ -59,6 +59,10 @@ for i=1:length(type)
         end
         type{i}=[type{i} ' tag' num2str(event(i))];
     end
+    if Options.cPoolMAPs.val
+        type{i}=strrep(type{i}, '+Ase1', '');
+        type{i}=strrep(type{i}, '-Ase1', '');
+    end
     type{i}=strrep(type{i}, 'single400', 'single');
     type{i}=strrep(type{i}, '4.8', '4');
     type{i}=strrep(type{i}, '4.9', '4');
@@ -216,7 +220,7 @@ switch Options.lSubsegment.val
         end
 end
 for i=1:length(Tracks)
-    if isempty(Tracks(i).Data)
+    if isempty(Tracks(i).Data) || size(Tracks(i).Data,1) < 2
         DelObjects(i) = 1;
     end
 end
