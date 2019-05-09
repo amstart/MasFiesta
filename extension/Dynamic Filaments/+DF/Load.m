@@ -26,7 +26,7 @@ if FilterIndex
     hDFGui = getappdata(0,'hDFGui');
     if hDFGui.mode == 0
         hDFGui.mode = FilterIndex;
-        hDFGui = DF.createSpecialGui(hDFGui);
+%         hDFGui = DF.createSpecialGui(hDFGui);
         setappdata(0,'hDFGui',hDFGui);
     end
     DFDir=PathName;

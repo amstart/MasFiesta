@@ -315,5 +315,7 @@ if nargin == 0
     Objects = fDefStructure([], 'Filament');                                
     setappdata(hDFGui.fig,'Objects',Objects);
 end
+hDFGui.mode
+[ hDFGui ] = DF.createSpecialGui(hDFGui);
 setappdata(0,'hDFGui',hDFGui);
 DF.updateOptions()
