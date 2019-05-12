@@ -94,7 +94,7 @@ for i=1:length(type)
     type{i}=[prepend type{i}];
     if hDFGui.mode == 2
         if (distance_event_end(i)>Options.eRescueCutoff.val||floor(event(i))~=4)&&abs(mod(event(i),1)-0.85)<0.1
-            if abs(mod(event(i),1)-0.85)<0.1
+            if mod(event(i),1)-0.85<0
                 event(i)=2; %events which had not been recorded
             else
                 event(i)=1;
@@ -136,6 +136,9 @@ if Options.eSmoothY.val > 1
     end
 end
 for i=1:length(Tracks)
+    if xcolumn >2 || ycolumn > 2
+        Tracks(i).Data = [Tracks(i).Data(1:end-1,1:2) + diff(Tracks(i).Data(:,1:2)) Tracks(i).Data(1:end-1,3:end)];
+    end
     Tracks(i).XEventEnd = Tracks(i).XEventEnd(xcolumn);
     Tracks(i).XEventStart = Tracks(i).XEventStart(xcolumn);
 end

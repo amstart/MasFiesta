@@ -185,7 +185,7 @@ tooltipstr=sprintf('Plots a legend (does not work for all plots).');
                                 
 hDFGui.cLegend = uicontrol('Parent',hDFGui.pOptions,'Style','checkbox','Units','normalized', 'Tag', 'cLegend',...
                                          'Position',[0.65 0.3 0.15 0.05],'Fontsize',10,'TooltipString', tooltipstr,...
-                                         'String','Legend','BackgroundColor',c,'HorizontalAlignment','center', 'Value', 1);  
+                                         'String','Legend','BackgroundColor',c,'HorizontalAlignment','center', 'Value', 0);  
                                      
 tooltipstr=sprintf('Groups points of tracks which come from the same microtubule into one color and one legend entry.');
                                 
@@ -205,7 +205,7 @@ hDFGui.tGroup = uicontrol('Parent',hDFGui.pOptions,'Units','normalized','Backgro
 tooltipstr=sprintf(['Type&Day&Experiment is only necessary if there are experiments with the same movie number on different days.\n Month/Year only considered for Type&Day.']);
 
 hDFGui.lGroup = uicontrol('Parent',hDFGui.pOptions,'Units','normalized','Style','popupmenu','Tag','lGroup','TooltipString', tooltipstr,...
-                             'Position',[0.3 0.19 0.3 0.125],'BackgroundColor','white','String',{'Type','Type&Day','Type&Day&Experiment', 'Pool everything'}, 'Value',2);
+                             'Position',[0.3 0.19 0.3 0.125],'BackgroundColor','white','String',{'Type','Type&Day','Type&Day&Experiment', 'Pool everything'}, 'Value',1);
                         
 tooltipstr=sprintf(['Distinguishes between tracks (marked with *) with and without event in the end.']);
                                                     
@@ -315,7 +315,7 @@ if nargin == 0
     Objects = fDefStructure([], 'Filament');                                
     setappdata(hDFGui.fig,'Objects',Objects);
 end
-hDFGui.mode
+hDFGui.mode = 2;
 [ hDFGui ] = DF.createSpecialGui(hDFGui);
 setappdata(0,'hDFGui',hDFGui);
 DF.updateOptions()

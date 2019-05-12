@@ -135,25 +135,30 @@ for n = 1:length(Objects)
         Tracks(track_id).Duration=segt(end)-segt(1);
         Objects(n).Duration=Objects(n).Duration+Tracks(track_id).Duration;
         Tracks(track_id).Event=segtagauto(m,3);
-        if m==1 || abs(mod(Tracks(track_id-1).Event,1)-0.8)<0.05
+        Tracks(track_id).DistanceEventEnd=segd(end);
+        Tracks(track_id).Data=[segt segd segvel intensity(starti:endi) autotags(starti:endi) segframes custom_data(starti:endi, :)];
+        Tracks(track_id).XEventStart=Tracks(track_id).Data(1,:);
+        Tracks(track_id).XEventEnd=Tracks(track_id).Data(end,:);
+        if m==1 || mod(Tracks(track_id-1).Event,1)-0.85<0
             Tracks(track_id).PreviousEvent=0;
+            Tracks(track_id).XEventStart(:)=nan;
         else
             Tracks(track_id).PreviousEvent=1;
         end
+        if mod(Tracks(track_id).Event,1)-0.85<0
+            Tracks(track_id).XEventEnd(:)=nan;
+        end
+        
         Tracks(track_id).end_first_subsegment = 0;
         Tracks(track_id).start_last_subsegment = 0;
         is_tagged(m)=floor(segtagauto(m,3))==tagnum;
         [~, Tracks(track_id).minindex] = min(segvel);
         if Options.eSubStart.val && is_tagged(m)
-            Tracks(track_id).end_first_subsegment = FindSubsegments(segvel, 1, Options.eSubStart.val, Tracks(track_id).minindex);
+            Tracks(track_id).end_first_subsegment = FindSubsegments(segvel, 1, Options.eSubStart.val, Tracks(track_id).minindex, Options.cAbsVelocity);
         end
         if Options.eSubEnd.val && is_tagged(m)
-            Tracks(track_id).start_last_subsegment = FindSubsegments(segvel, -1, Options.eSubEnd.val, Tracks(track_id).minindex);
+            Tracks(track_id).start_last_subsegment = FindSubsegments(segvel, -1, Options.eSubEnd.val, Tracks(track_id).minindex, Options.cAbsVelocity);
         end
-        Tracks(track_id).DistanceEventEnd=segd(end);
-        Tracks(track_id).Data=[segt segd segvel intensity(starti:endi) autotags(starti:endi) segframes custom_data(starti:endi, :)];
-        Tracks(track_id).XEventStart=Tracks(track_id).Data(1,:);
-        Tracks(track_id).XEventEnd=Tracks(track_id).Data(end,:);
         Tracks(track_id).HasIntensity=any(intensity(starti:endi));
         segtagauto(m, 5)=track_id;
         segtagauto(m, 4)=Tracks(track_id).DistanceEventEnd;
@@ -209,7 +214,7 @@ for m=1:size(segtagauto,1) %crop/extend end of tracks
     for k=segtagauto(m,1)+minv-1:length(d)-2 %loop through track, beginning at point with maximum shrinkage velocity (thought to be definitively part of the segment)
         if t(k+1)-t(k)> Options.eMaxTimeDiff.val %if too much time passes
             segtagauto(m,2)=k;
-            segtagauto(m,3)=segtagauto(m,3)-0.1;
+            segtagauto(m,3)=segtagauto(m,3)-0.1; %censor event
             if m~=size(segtagauto,1)
                 segtagauto(m+1,1)=k+1;
             end
@@ -230,14 +235,19 @@ for m=1:size(segtagauto,1) %crop/extend end of tracks
 end
 
 
-function [borderindex] = FindSubsegments(velocity, step, bordervalue, minindex)
+function [borderindex] = FindSubsegments(velocity, step, bordervalue, minindex, cAbsVelocity)
 if step > 0
     starti = 1;
 else
     starti = length(velocity)-1;
 end
 for i = starti:step:minindex
-    if velocity(i)/velocity(minindex) > bordervalue/100 && velocity(i) < 0
+    if cAbsVelocity.val
+        criterium = velocity(i) < -bordervalue;
+    else
+        criterium = velocity(i)/velocity(minindex) > bordervalue/100;
+    end
+    if  criterium && velocity(i) < 0
         if step > 0 
             borderindex = max(i, 1);
         else

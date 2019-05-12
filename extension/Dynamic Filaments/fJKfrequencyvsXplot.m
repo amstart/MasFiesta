@@ -1,59 +1,58 @@
-function fJKfrequencyvsXplot(plot_x, plot_y, ploteventends, units)
+function fJKfrequencyvsXplot(f, plot_x, plot_y, ploteventends, units)
 [edgesmid, edges, sumy] = histcounts2(plot_x, plot_y);
 set(gca, 'Ticklength', [0 0]);
 N = histcounts(ploteventends, edges);
 plotynew=N./sumy;
-plotynew(sumy==0) = 0;
-bar(edgesmid, plotynew, 'r');
+yemptybar = 0.05 * sign(mean(plotynew)) * max(abs(plotynew));
+xemptybar = find(N==0);
+b = bar(f, edgesmid, plotynew, 'k');
+b.FaceColor = 'flat';
 fError = sqrt(N)./sumy; %see https://www.bcube-dresden.de/wiki/Error_bars
-errorbar(edgesmid, plotynew, fError, '.');
-if any(plotynew==0)
-    dummyvec = double(plotynew==0|isnan(plotynew));
-    if max(plotynew) > 0
-        dummyvec = dummyvec * 0.05 * max(plotynew);
-    else
-        dummyvec = dummyvec * 0.05 * min(plotynew);
-    end
-    bar(edgesmid, dummyvec, 'w');
-end
+alpha = 1 - sumy/max(abs(sumy));
+scatter(edgesmid(xemptybar)', ones(length(xemptybar),1) * yemptybar, 1000, repmat(alpha(xemptybar)', 1, 3), 'filled');
+s = scatter(edgesmid(xemptybar)', ones(length(xemptybar),1) * yemptybar, 1, 'k', 'filled');
+e = errorbar(edgesmid, plotynew, fError, 'r.');
 for m=1:length(edgesmid)
+    b.CData(m,:) = ones(1,3) .* alpha(m);
     if abs(plotynew(m))
-        strlabel = {[num2str(plotynew(m), 2) ' per ' units{2}], ...
-            ['N=' num2str(N(m))], [num2str(sumy(m),'%1.1f') ' ' units{2}]};
+        strlabel = {['N=' num2str(N(m))], [num2str(sumy(m),max(2, floor(1+log10(sumy(m))))) ' ' units{2}]};
     else
-        strlabel = [num2str(sumy(m),'%1.1f') '' units{2}];
+        strlabel = [num2str(sumy(m),max(2, floor(1+log10(sumy(m))))) '' units{2}];
     end
     if plotynew(m) > 0
         text(double(edgesmid(m)), plotynew(m)/2, strlabel,...
-            'HorizontalAlignment', 'center', 'VerticalAlignment', 'bottom');
+            'HorizontalAlignment', 'center', 'VerticalAlignment', 'bottom', 'Color', 'r', 'FontSize', 12);
     elseif plotynew(m) < 0
         text(double(edgesmid(m)), plotynew(m)/2, strlabel,...
-            'HorizontalAlignment', 'center', 'VerticalAlignment', 'top');
+            'HorizontalAlignment', 'center', 'VerticalAlignment', 'top', 'Color', 'r', 'FontSize', 12);
     elseif max(plotynew) > 0
-        text(double(edgesmid(m)), dummyvec(m)/2, strlabel, 'HorizontalAlignment', 'center');
+        text(double(edgesmid(m)), yemptybar, strlabel, 'HorizontalAlignment', 'center', 'Color', 'r', 'FontSize', 12);
     end
 end
+legend([b, s, e], {'frequency (N/sum(t))', 'no events in bin', 'square root(N)/sum(t)'});
 
 
-function [edgesmid, edges, sumy] = histcounts2(plot_x, plot_y)
+function [edgesmid, edges, sumy] = histcounts2(plotx, ploty)
 %HISTCOUNTS2D Summary of this function goes here
 %   Detailed explanation goes here
-plot_x=plot_x(~isnan(plot_x));
-binnum = 10;
+plotx=plotx(~isnan(plotx));
+binnum = 0;
 if binnum == 0
-    [~, edges, xid] = histcounts(plot_x);
+    [~, edges, xid] = histcounts(plotx);
     if length(edges)>7
-        [~, edges, xid] = histcounts(plot_x,7);
+        [~, edges, xid] = histcounts(plotx,6);
     end
 else
-    [~, edges, xid] = histcounts(plot_x,binnum);
+    [~, edges, xid] = histcounts(plotx,binnum);
 end
+ploty(xid==0) = [];
+xid(xid==0) = [];
 binvec=cell(numel(edges)-1,1);
 for m=1:length(xid)
     if isempty(binvec{xid(m)})
-        binvec{xid(m)}=plot_y(m);
+        binvec{xid(m)}=ploty(m);
     else
-        binvec{xid(m)}=[binvec{xid(m)}; plot_y(m)];
+        binvec{xid(m)}=[binvec{xid(m)}; ploty(m)];
     end
 end
 sumy=zeros(1,length(binvec));

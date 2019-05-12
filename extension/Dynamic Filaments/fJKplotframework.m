@@ -6,6 +6,7 @@ if additionalplots>1
     statfig=figure('Name',[get(mainfig, 'Name') '_STATS'], 'Tag','Plot');
     figure(mainfig);
 end
+% events(events==2) = 0; %also remove tracks with censored events
 subplot = @(m,n,p) subtightplot (m, n, p, [0.08 0.11], [0.08 0.08], [0.08 0.02]);
 [label_x, label_y, DelTracks] = SetUpMode(isfrequencyplot, events, [Tracks.PreviousEvent]', Options);
 [uniquetype, ~, idvec] = unique(type,'stable');
@@ -110,7 +111,7 @@ for j=1:ntypes    %Loop through all groups to be plotted, each group gets its ow
                     point_info=vertcat(point_info{:});
                 end
 %             end
-            fJKscatterboxplot(plot_x, plot_y, point_info, color_mode);
+            fJKscatterboxplot(f, plot_x, plot_y, point_info, color_mode);
             if Options.cLegend.val
                 legend(legend_items, 'Interpreter', 'none', 'Location', 'best');
             else
@@ -128,7 +129,7 @@ for j=1:ntypes    %Loop through all groups to be plotted, each group gets its ow
             end
         case 1
             [plot_x, plot_y, ploteventends] = Get_Vectors(PlotTracks, events(correct_type), Options.mXReference.val, isfrequencyplot, Options.cExclude.val);
-            fJKfrequencyvsXplot(plot_x, plot_y, ploteventends, {Options.lPlot_XVar.str, Options.lPlot_YVar.str});
+            fJKfrequencyvsXplot(f, plot_x, plot_y, ploteventends, {Options.lPlot_XVar.str, Options.lPlot_YVar.str});
     end
     set(gca, 'FontSize', 16, 'LabelFontSizeMultiplier', 1.5);
     title(uniquetype{j}, 'FontSize', 18);
