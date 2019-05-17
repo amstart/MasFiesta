@@ -18,7 +18,7 @@ refPoint = fGetRefPoint(Filament);
 % end
 
 for n = 1:size(Filament.Results,1)
-    if n>1
+    if n>1 && ~isempty(Filament.Data{n})
         x_c = Filament.PosCenter(n,1)-Filament.PosCenter(n-1,1);
         y_c = Filament.PosCenter(n,2)-Filament.PosCenter(n-1,2);
         d_ss = sqrt( (Filament.Data{n}(1,1)-Filament.Data{n-1}(1,1)-x_c)^2 + (Filament.Data{n}(1,2)-Filament.Data{n-1}(1,2)-y_c)^2);
@@ -30,8 +30,10 @@ for n = 1:size(Filament.Results,1)
            Filament.Data{n} = flipud(Filament.Data{n}); 
         end
     end
-    Filament.PosStart(n,1:3)=Filament.Data{n}(1,1:3);
-    Filament.PosEnd(n,1:3)=Filament.Data{n}(end,1:3);
+    if ~isempty(Filament.Data{n})
+        Filament.PosStart(n,1:3)=Filament.Data{n}(1,1:3);
+        Filament.PosEnd(n,1:3)=Filament.Data{n}(end,1:3);
+    end
 end
 if isempty(Config)
     if refPoint == 1
