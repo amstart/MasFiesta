@@ -14,10 +14,10 @@ for i=1:2
     hold on;
     if isempty(strfind(uniquetypes{1}, '\downarrow'))
         plot([0.5 length(uniquetypes) + 0.5] , [0 0], 'k--')
-        ylabel('Catastrophe distance to seed [nm]');
+        ylabel('Distance to seed [nm]');
     else
         plot([0.5 length(uniquetypes) + 0.5] , [cutoff cutoff], 'r-')
-        ylabel('Rescue distance to seed [nm]');
+        ylabel('Distance to seed [nm]');
     end
     for n=1:length(Tracks)
         typenum=find(strcmp(uniquetypes, type{n}));
@@ -44,6 +44,7 @@ for i=1:2
     set(gca,'ButtonDownFcn',@createnew_fig)
     hold on
     if 1
+        frequencies = accumarray(typeid(uniqueorder), NEventsO./sumTimeO, [], @(x) {x});
         fEvents = accumarray(typeid(uniqueorder), NEventsO./sumTimeO, [], @median);
         bar(fEvents,'stacked', 'r');
         flow = accumarray(typeid(uniqueorder), NEventsO./sumTimeO, [], @min);
@@ -67,7 +68,7 @@ for i=1:2
     end
     for j=1:length(uniquetypes)
         if fEvents(j)
-            text(j, fEvents(j)/2, {[num2str(fEvents(j), 2)], [num2str(NEvents(j)) ' events'], [num2str(sumTime(j),'%1.1f') ' min'], ntext{j}}, 'HorizontalAlignment', 'center', 'FontSize',16);
+            text(j, fEvents(j)/2, {[num2str(NEvents(j)) ' events'], [num2str(sumTime(j),'%1.1f') ' min'], ntext{j}}, 'HorizontalAlignment', 'center', 'FontSize',16);
         else
             text(j, fEvents(j)/2, {['0 in ' num2str(sumTime(j),'%1.1f') ' min'], ntext{j}}, 'HorizontalAlignment', 'center', 'VerticalAlignment', 'bottom', 'FontSize',16);
         end

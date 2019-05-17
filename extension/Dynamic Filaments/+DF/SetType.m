@@ -45,12 +45,12 @@ for i=1:length(type)
             track_id(i)=0;
             continue
         end
-        if OnlyWithIntensity
-            if Tracks(i).HasIntensity==0
-                track_id(i)=0;
-                continue
-            end
-        end
+%         if OnlyWithIntensity
+%             if Tracks(i).HasIntensity==0
+%                 track_id(i)=0;
+%                 continue
+%             end
+%         end
         if OnlyWithCustomData
             if Tracks(i).HasCustomData==0
                 track_id(i)=0;
