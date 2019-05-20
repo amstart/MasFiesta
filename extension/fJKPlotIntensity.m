@@ -6,7 +6,7 @@ if MTend>1
 end
 if isfield(Object.Custom, 'Intensity')
     GFP=nan(size(Object.Results,1),1);
-    if ~isempty(Object.Custom.Intensity);
+    if ~isempty(Object.Custom.Intensity)
         for i=1:size(Object.Results,1)
 %             if CalcDistance(Object.Data{i}(1,1:2), Object.PosStart(i,:))>CalcDistance(Object.Data{i}(1,1:2), Object.PosEnd(i,:))
 %                 warning(['PosStart and PosEnd warning. Data flipped. i=' num2str(i)]);
@@ -17,9 +17,9 @@ if isfield(Object.Custom, 'Intensity')
                 GFP(i)=NaN;
                 continue
             end
-            GFP(i)=sum(Object.Custom.Intensity{i}(1:last,MTend));
+            GFP(i)=sum(Object.Custom.Intensity{i}(1:last,MTend))/(last*Object.PixelSize);
             if i>3
-                if isnan(Object.Custom.Intensity{i-1}(:,MTend))
+                if isnan(Object.Custom.Intensity{i-1}(:,MTend)) %replaces unknown values with averages on sides
                     GFP(i-1)=(GFP(i-2)+GFP(i))/2;
                 end
             end

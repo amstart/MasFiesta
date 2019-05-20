@@ -6,11 +6,6 @@ else
 end
 hDFGui = getappdata(0,'hDFGui');
 Options = getappdata(hDFGui.fig,'Options');
-if ~isempty(strfind(Options.lPlot_XVar.print, 'Ase1')) || ~isempty(strfind(Options.lPlot_YVar.print, 'Ase1'))
-    OnlyWithIntensity = 1;
-else
-    OnlyWithIntensity = 0;
-end
 if Options.lPlot_XVar.val > 6 || Options.lPlot_YVar.val > 6 
     OnlyWithCustomData = 1;
 else
@@ -142,10 +137,16 @@ for i=1:length(Tracks)
     Tracks(i).XEventEnd = Tracks(i).XEventEnd(xcolumn);
     Tracks(i).XEventStart = Tracks(i).XEventStart(xcolumn);
 end
-[Tracks, DelObjects] = SelectSubsegments(Tracks, Options);
-Tracks(DelObjects) = [];
-event(DelObjects) = [];
-type(DelObjects) = [];
+if get(hDFGui.lChoosePlot, 'Value') == 8
+    for i=1:length(Tracks)
+        Tracks(i).Data = Tracks(i).WithTrackAfter;
+    end
+else
+    [Tracks, DelObjects] = SelectSubsegments(Tracks, Options);
+    Tracks(DelObjects) = [];
+    event(DelObjects) = [];
+    type(DelObjects) = [];
+end
 for i=1:length(Tracks)
     Tracks(i).Y = Tracks(i).Data(:,ycolumn);
     Tracks(i).X = Tracks(i).Data(:,xcolumn);

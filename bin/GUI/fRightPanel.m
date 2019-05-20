@@ -506,6 +506,7 @@ end
 if (strcmp(get(hMainGui.Menu.mAlignChannels,'Checked'),'on')&&strcmp(get(hMainGui.Menu.mAlignChannels,'Enable'),'on'))||(strcmp(get(hMainGui.ToolBar.ToolThreshImage,'State'),'on')&&~isempty(hMainGui.Values.PostSpecial)&&~strcmp(get(hMainGui.ToolBar.ToolChannels(5),'State'),'on'))
     for n = 2:size(Image,3)
         T = hMainGui.Values.TformChannel{n};
+        T(end) = 1;
         Image(:,:,n) = quickwarp(Image(:,:,n),T,0);
     end
 end

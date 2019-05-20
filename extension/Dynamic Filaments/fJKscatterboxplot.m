@@ -1,13 +1,13 @@
-function fJKscatterboxplot(f, plot_x, plot_y, point_info, color_mode, varargin)
+function fJKscatterboxplot(f, plot_x, plot_y, point_info, names)
 [matrix, edgesmid, nelements] = histcounts2own(plot_x, plot_y);
-if color_mode == 0
-%     gscatter(plot_x, plot_y, point_info, [], 'o')
-else
-    colormap(linspecer_modified);
-    scatter(plot_x, plot_y, 500, point_info, 'o');
-    colorbar();
-%     scatter3(plot_x, plot_y, points_info, 50);
-end
+% if color_mode == 0
+% %     gscatter(plot_x, plot_y, point_info, [], 'o')
+% else
+%     colormap(linspecer_modified);
+%     scatter(plot_x, plot_y, 500, point_info, 'o');
+%     colorbar();
+% %     scatter3(plot_x, plot_y, points_info, 50);
+% end
 %     try
 %         cmap = distinguishable_colors(clength);
 %     catch
@@ -17,7 +17,9 @@ end
 %     for ci=1:size(plotNnew,1)
 %         plotc(ci,:)=cmap(find(uniquetracks==plotNnew(ci)),:);
 %     end
-scatter(f, plot_x, plot_y, 50, point_info); drawnow;
+s = scatter(f, plot_x, plot_y, 50, point_info); drawnow;
+row = dataTipTextRow('TrackId',names);
+s.DataTipTemplate.DataTipRows(end+1) = row;
 colormap(linspecer);
 % iosr.statistics.boxPlot(edgesmid, matrix, 'sampleSize', true, 'scatterAlpha', 1, 'showScatter', true, 'medianColor','r', 'showMean', true)
 iosr.statistics.boxPlot(edgesmid, matrix, 'medianColor','r', 'showOutliers', false, 'sampleSize', true, 'showMean', true)
@@ -30,14 +32,14 @@ function [matrix, edgesmid, nelements] = histcounts2own(plotx, ploty)
 %     weights = ones(size(plotx));
 % end https://stackoverflow.com/questions/41644022/using-accumarray-for-a-weighted-average
 % plotx=plotx(~isnan(plotx));
-binnum = 0;
+binnum = 17;
 if binnum == 0
     [~, edges, xid] = histcounts(plotx);
     if length(edges)>7
         [~, edges, xid] = histcounts(plotx,7);
     end
 else
-    [~, edges, xid] = histcounts(plotx,binnum);
+    [~, edges, xid] = histcounts(plotx,-26.25:2.5:26.25);
 end
 ploty(xid==0) = [];
 xid(xid==0) = [];

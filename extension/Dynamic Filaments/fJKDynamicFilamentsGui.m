@@ -445,21 +445,21 @@ for field = optionfields'
     str = [str fchar '=' Options.(fchar).print ' | '];
 end
 set(f,'WindowKeyPressFcn','fJKDynamicFilamentsGui(''Quicksave'');');
-ChosenPlot = get(hDFGui.lChoosePlot, 'Value');
-if ChosenPlot < 3
+ChosenPlot = Options.lChoosePlot.val;
+if ChosenPlot < 3 || ChosenPlot == 8
     XStr = Options.lPlot_XVar.print;
     YStr = Options.lPlot_YVar.print;
     XVar = Options.lPlot_XVar.val;
     YVar = Options.lPlot_YVar.val;
-    if ChosenPlot == 1
-        varnames = get(hDFGui.lPlot_XVar, 'String');
-        [Options.ZVar,Options.ZOK] = listdlg('ListString', varnames, 'SelectionMode', 'single');
-        if Options.ZOK
-            Options.ZVarName = varnames{Options.ZVar};
-            [type, Tracks, events]=DF.SetType(Options.cPlotGrowingTracks.val, 'colors', Options.ZVar);
-        else
+    if ChosenPlot ~= 2
+%         varnames = get(hDFGui.lPlot_XVar, 'String');
+%         [Options.ZVar,Options.ZOK] = listdlg('ListString', varnames, 'SelectionMode', 'single');
+%         if Options.ZOK
+%             Options.ZVarName = varnames{Options.ZVar};
+%             [type, Tracks, events]=DF.SetType(Options.cPlotGrowingTracks.val, 'colors', Options.ZVar);
+%         else
             [type, Tracks, events]=DF.SetType(Options.cPlotGrowingTracks.val);
-        end
+%         end
         set(f, 'Name',[XStr ' vs ' YStr str], 'Tag', 'Plot', ...
             'UserData', XVar*10+YVar);
         fJKplotframework(Tracks, type, 0, events, Options);
@@ -489,8 +489,6 @@ else
                 has_err_fun_format = 0;
             end
             FilamentEndPlot(hDFGui, has_err_fun_format);
-        case 8
-            AgainstOtherMTTracksPlot(Options);
         case 9
             IntensityVsDistWeightedVel(Options);
     end

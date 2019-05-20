@@ -9,11 +9,26 @@ end
 % events(events==2) = 0; %also remove tracks with censored events
 subplot = @(m,n,p) subtightplot (m, n, p, [0.08 0.11], [0.08 0.08], [0.08 0.02]);
 [label_x, label_y, DelTracks] = SetUpMode(isfrequencyplot, events, [Tracks.PreviousEvent]', Options);
-[uniquetype, ~, idvec] = unique(type,'stable');
+[uniquetype, ~, idvec] = unique(type,'stable')
 if isfrequencyplot == 1
     for i = 1:length(uniquetype)
         if ~any(events(idvec==i)) %find all types without events and remove their tracks
             DelTracks = DelTracks | idvec==i;
+        end
+    end
+end
+if Options.lChoosePlot.val == 8
+    for i = 1:length(Tracks)
+        eventloc = find(Tracks(i).Data(:,1)==0);
+        dist = 9;
+        if isempty(eventloc)
+            eventloc = 0;
+        end
+        if eventloc < (dist+1) || ~strcmp('OL  \downarrow*', type{i})
+            DelTracks(i) = 1;
+        else
+            Tracks(i).X = Tracks(i).X(eventloc-dist:min(eventloc+dist, length(Tracks(i).X)));
+            Tracks(i).Y = Tracks(i).Y(eventloc-dist:min(eventloc+dist, length(Tracks(i).Y)));
         end
     end
 end
@@ -84,7 +99,7 @@ for j=1:ntypes    %Loop through all groups to be plotted, each group gets its ow
         figure(mainfig);
         axes(f);drawnow;
     end
-    set(gca,'ButtonDownFcn',@createnew_fig)
+%     set(gca,'ButtonDownFcn',@createnew_fig)
     switch isfrequencyplot
         case 0
             [plot_x, plot_y, ~] = Get_Vectors(PlotTracks, events(correct_type), Options.mXReference.val, isfrequencyplot, Options.cExclude.val);
@@ -97,21 +112,32 @@ for j=1:ntypes    %Loop through all groups to be plotted, each group gets its ow
 %                 point_info=vertcat(point_info{:});
 %             else
                 color_mode = 0;
+                datatiplabel = {};
+                trackids = {PlotTracks.TrackIndex};
                 if Options.cGroupIntoMTs.val
-                    [legend_items, ~, object_name_ids] = unique({PlotTracks.Name}, 'stable');
+                    [legend_items, ~, object_name_ids] = unique({PlotTracks.Name}, 'stable');                    
                     for k=1:sum(correct_type)
                         point_info{k}=repmat(object_name_ids(k),size(PlotTracks(k).X(1+Options.cExclude.val:end-Options.cExclude.val)),1);
+                        datatiplabel{k} = repmat(trackids(k),length(point_info{k}),1);
                     end
-                    point_info=vertcat(point_info{:}); %point_info simply carries information about to which track a point belongs
                 else
                     legend_items = {PlotTracks.Name};
                     for k=1:sum(correct_type)
                         point_info{k}=repmat(k,[size(PlotTracks(k).X(1+Options.cExclude.val:end-Options.cExclude.val)),1]);
+                        datatiplabel{k} = repmat(trackids(k),length(point_info{k}),1);
                     end
-                    point_info=vertcat(point_info{:});
+                    
                 end
 %             end
-            fJKscatterboxplot(f, plot_x, plot_y, point_info, color_mode);
+            if abs(min(plot_x))/2 > max(plot_x)
+                plot_x = - plot_x;
+            end
+            if abs(min(plot_y)) > max(plot_y)
+                plot_y = - plot_y;
+            end
+            point_info=vertcat(point_info{:}); %point_info simply carries information about to which track a point belongs
+            fJKscatterboxplot(f, plot_x, plot_y, point_info, vertcat(datatiplabel{:}));
+            grid
             if Options.cLegend.val
                 legend(legend_items, 'Interpreter', 'none', 'Location', 'best');
             else

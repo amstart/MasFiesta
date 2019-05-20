@@ -125,8 +125,8 @@ for n = 1:length(Objects)
         end
         segframes=(starti:endi)';
         segvel=[v(starti:endi-1); nan]; %why, see Calcvelocity()
-        segt=t(starti:endi);
-        segd=d(starti:endi);
+        segt=t(segframes);
+        segd=d(segframes);
         Tracks(track_id).Name=Objects(n).Name;
         Tracks(track_id).MTIndex = n;
         Tracks(track_id).TrackIndex= track_id;
@@ -136,7 +136,7 @@ for n = 1:length(Objects)
         Objects(n).Duration=Objects(n).Duration+Tracks(track_id).Duration;
         Tracks(track_id).Event=segtagauto(m,3);
         Tracks(track_id).DistanceEventEnd=segd(end);
-        Tracks(track_id).Data=[segt segd segvel intensity(starti:endi) autotags(starti:endi) segframes custom_data(starti:endi, :)];
+        Tracks(track_id).Data=[segt segd segvel intensity(segframes) autotags(segframes) segframes custom_data(segframes, :)];
         Tracks(track_id).XEventStart=Tracks(track_id).Data(1,:);
         Tracks(track_id).XEventEnd=Tracks(track_id).Data(end,:);
         if m==1 || mod(Tracks(track_id-1).Event,1)-0.85<0
@@ -159,6 +159,18 @@ for n = 1:length(Objects)
         if Options.eSubEnd.val && is_tagged(m)
             Tracks(track_id).start_last_subsegment = FindSubsegments(segvel, -1, Options.eSubEnd.val, Tracks(track_id).minindex, Options.cAbsVelocity);
         end
+        if m~=1
+            subevent = Tracks(track_id-1).start_last_subsegment;
+            if ~subevent
+                subevent = starti;
+            else
+                subevent = Tracks(track_id-1).Data(subevent,6);
+            end
+            withFrames = Tracks(track_id-1).Data(1,6):endi;
+            Tracks(track_id-1).WithTrackAfter=[t(withFrames)-t(subevent), d(withFrames)-d(subevent), [v(withFrames(1:end-1)); nan], intensity(withFrames)]; %why, see Calcvelocity()
+        elseif track_id>1
+            Tracks(track_id-1).WithTrackAfter=nan(1,7);
+        end
         Tracks(track_id).HasIntensity=any(intensity(starti:endi));
         segtagauto(m, 5)=track_id;
         segtagauto(m, 4)=Tracks(track_id).DistanceEventEnd;
@@ -170,6 +182,7 @@ for n = 1:length(Objects)
         Tracks(track_id).HasCustomData = has_custom_data;
         track_id=track_id+1;
     end
+    Tracks(track_id-1).WithTrackAfter=nan(1,7);
     Objects(n).TrackIds = segtagauto(:,5);
     Objects(n).SegTagAuto=segtagauto;
     Objects(n).Velocity(1)=nanmean(velocity(~is_tagged));

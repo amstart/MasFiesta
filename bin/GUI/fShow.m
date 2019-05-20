@@ -71,10 +71,12 @@ if ~isempty(Stack)
         for n = 1:length(stidx)
             if stidx(n)>1
                 T = hMainGui.Values.TformChannel{stidx(n)};
+                T(end) = 1;
                 Image(:,:,n) = quickwarp(Image(:,:,n),T,0);
             end
             if hMainGui.Values.FrameIdx(1)>1 && ~strcmp(get(hMainGui.Menu.mAlignChannels,'Checked'),'on') && strcmp(get(hMainGui.ToolBar.ToolThreshImage,'State'),'on')&&~isempty(hMainGui.Values.PostSpecial)
                 T = hMainGui.Values.TformChannel{hMainGui.Values.FrameIdx(1)};
+                T(end) = 1;
                 Image(:,:,n) = quickwarp(Image(:,:,n),T,1);
             end
         end

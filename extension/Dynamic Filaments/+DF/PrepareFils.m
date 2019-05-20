@@ -100,6 +100,7 @@ for i=1:length(NewObjects)
     NewObjects(i).Velocity=nan(1,2);
     NewObjects(i).Duration = 0;
     NewObjects(i).Disregard = 0;
+    NewObjects(i).TrackIds = 0;
 end
 OldObjects = getappdata(hDFGui.fig,'Objects');
 if ~isempty(OldObjects)
