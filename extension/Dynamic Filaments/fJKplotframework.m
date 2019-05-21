@@ -20,7 +20,7 @@ end
 if Options.lChoosePlot.val == 8
     for i = 1:length(Tracks)
         eventloc = find(Tracks(i).Data(:,1)==0);
-        dist = 9;
+        dist = 8;
         if isempty(eventloc)
             eventloc = 0;
         end

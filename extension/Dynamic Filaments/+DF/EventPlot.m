@@ -43,7 +43,7 @@ for i=1:2
     subplot(2,2,2*(i-1)+2)
     set(gca,'ButtonDownFcn',@createnew_fig)
     hold on
-    if 1
+    if 0
         frequencies = accumarray(typeid(uniqueorder), NEventsO./sumTimeO, [], @(x) {x});
         fEvents = accumarray(typeid(uniqueorder), NEventsO./sumTimeO, [], @median);
         bar(fEvents,'stacked', 'r');
@@ -60,17 +60,10 @@ for i=1:2
     MTnum = accumarray(typeid, [Tracks.MTIndex], [], @uniquecount);
     movienum = accumarray(typeid(uniqueorder),1);
     for j=1:length(uniquetypes)
-        if max(movienum) > 1
-            ntext{j} = [num2str(MTnum(j)) 'MTs in ' num2str(movienum(j)) 'movies'];
-        else
-            ntext{j} = [num2str(MTnum(j)) 'MTs'];
-        end
-    end
-    for j=1:length(uniquetypes)
         if fEvents(j)
-            text(j, fEvents(j)/2, {[num2str(NEvents(j)) ' events'], [num2str(sumTime(j),'%1.1f') ' min'], ntext{j}}, 'HorizontalAlignment', 'center', 'FontSize',16);
+            text(j, fEvents(j)/2, {[num2str(NEvents(j)) ' events'], [num2str(sumTime(j),'%1.1f') ' min'],[num2str(MTnum(j)) 'MTs'], [num2str(movienum(j)) ' experiments']}, 'HorizontalAlignment', 'center', 'FontSize',16);
         else
-            text(j, fEvents(j)/2, {['0 in ' num2str(sumTime(j),'%1.1f') ' min'], ntext{j}}, 'HorizontalAlignment', 'center', 'VerticalAlignment', 'bottom', 'FontSize',16);
+            text(j, fEvents(j)/2, {['0 in ' num2str(sumTime(j),'%1.1f') ' min'], [num2str(MTnum(j)) ' MTs'], [num2str(movienum(j)) ' experiments']}, 'HorizontalAlignment', 'center', 'VerticalAlignment', 'bottom', 'FontSize',16);
         end
     end
     set(gca,'XTick',1:length(uniquetypes), 'FontSize',18, 'LabelFontSizeMultiplier', 1.5,'xticklabel',uniquetypes, 'Ticklength', [0 0]);
@@ -82,7 +75,7 @@ for i=1:2
     else
         ylabel('Rescue frequency [1/min]');
     end
-    legend(h_error, 'min max', 'Location', 'best');
+    legend(h_error, '$\frac{\sqrt{N}}{\sum{t}}$', 'Location', 'best', 'Interpreter', 'LaTex', 'FontSize', 20);
 end
 
 

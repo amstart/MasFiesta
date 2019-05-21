@@ -131,9 +131,9 @@ if Options.eSmoothY.val > 1
     end
 end
 for i=1:length(Tracks)
-    if xcolumn >2 || ycolumn > 2
-        Tracks(i).Data = [Tracks(i).Data(1:end-1,1:2) + diff(Tracks(i).Data(:,1:2)) Tracks(i).Data(1:end-1,3:end)];
-    end
+%     if xcolumn >2 || ycolumn > 2
+%         Tracks(i).Data = [Tracks(i).Data(1:end-1,1:2) + diff(Tracks(i).Data(:,1:2)) Tracks(i).Data(1:end-1,3:end)];
+%     end
     Tracks(i).XEventEnd = Tracks(i).XEventEnd(xcolumn);
     Tracks(i).XEventStart = Tracks(i).XEventStart(xcolumn);
 end
@@ -150,7 +150,6 @@ end
 for i=1:length(Tracks)
     Tracks(i).Y = Tracks(i).Data(:,ycolumn);
     Tracks(i).X = Tracks(i).Data(:,xcolumn);
-    Tracks(i).Startendvel = (Tracks(i).Data(end,2)-Tracks(i).Data(1,2))/(Tracks(i).Data(end,1)-Tracks(i).Data(1,1));
 end
 if (xcolumn == 3 && Options.lMethod_TrackValue.val==7) || (ycolumn == 3 && Options.lMethod_TrackValueY.val==7) 
     for i=1:length(Tracks)
@@ -173,6 +172,17 @@ end
 
 function [Tracks, DelObjects] = SelectSubsegments(Tracks, Options)
 DelObjects = false(length(Tracks),1);
+if Options.cPlotGrowingTracks.val
+    for i=1:length(Tracks)
+        starti = Tracks(i).end_first_subsegment-1;
+        endi = Tracks(i).start_last_subsegment;
+    %     if ~starti || ~endi
+    %         Tracks(i).Startendvel = nan;
+    %     else
+            Tracks(i).Startendvel = (Tracks(i).Data(endi,2)-Tracks(i).Data(starti,2))/(Tracks(i).Data(endi,1)-Tracks(i).Data(starti,1));
+    %     end
+    end
+end
 switch Options.lSubsegment.val
     case 2
         for i=1:length(Tracks)

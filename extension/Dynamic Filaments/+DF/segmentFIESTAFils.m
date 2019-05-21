@@ -27,6 +27,7 @@ for n = 1:length(Objects)
     else
         intensity = intensity(DynResults(:,4));                                    %of the original data the row data can be found, i.e. 1 2 4.. 542 323
     end
+    intensity = [nan; intensity(1:end-1)]; %to match intensity to velocity, see CalcVelocity()
     if isfield(Objects(n), 'CustomData') && ~isempty(Objects(n).CustomData)
         custom_data = [];
         for customfield = fields(Objects(n).CustomData)'
@@ -124,7 +125,7 @@ for n = 1:length(Objects)
             continue
         end
         segframes=(starti:endi)';
-        segvel=[v(starti:endi-1); nan]; %why, see Calcvelocity()
+        segvel=v(segframes); %why, see Calcvelocity()
         segt=t(segframes);
         segd=d(segframes);
         Tracks(track_id).Name=Objects(n).Name;
@@ -167,7 +168,7 @@ for n = 1:length(Objects)
                 subevent = Tracks(track_id-1).Data(subevent,6);
             end
             withFrames = Tracks(track_id-1).Data(1,6):endi;
-            Tracks(track_id-1).WithTrackAfter=[t(withFrames)-t(subevent), d(withFrames)-d(subevent), [v(withFrames(1:end-1)); nan], intensity(withFrames)]; %why, see Calcvelocity()
+            Tracks(track_id-1).WithTrackAfter=[t(withFrames)-t(subevent), d(withFrames)-d(subevent), v(withFrames), intensity(withFrames)]; %why, see Calcvelocity()
         elseif track_id>1
             Tracks(track_id-1).WithTrackAfter=nan(1,7);
         end
@@ -205,9 +206,9 @@ for m=1:size(segtagauto,1) %crop/extend beginning of tracks
                 segtagauto(m-1,3)=segtagauto(m-1,3)-0.1;
             end
             break
-        elseif d(k)-d(k-1)>0 %find growing step (above 0), then set beginning of track, unless...
-            if((abs(d(k)-d(k-2))<abs(d(k)-d(k-1))*Options.eMinXFactor.val&&d(k)-d(k-1)>Options.eMinXChange.val)|| ...
-                    d(k)-d(k-2)>min(0,Options.eMinXChange.val)) %... the filament shrinks heavily before that step
+        elseif v(k)>-Options.eMinXChange.val %find growing step (above 0), then set beginning of track, unless...
+            breaking = checkwhethercut(segtagauto, v(k+1), (d(k+1)-d(k-1))/(t(k+1)-t(k-1)), (d(k+1)-d(k-2))/(t(k+1)-t(k-2)), Options);
+            if breaking
                 segtagauto(m,1)=k;
                 if m~=1
                     segtagauto(m-1,2)=k;
@@ -224,7 +225,7 @@ for m=1:size(segtagauto,1) %crop/extend end of tracks
         continue
     end
     [~, minv] = min(v(segtagauto(m,1):segtagauto(m,2)));
-    for k=segtagauto(m,1)+minv-1:length(d)-2 %loop through track, beginning at point with maximum shrinkage velocity (thought to be definitively part of the segment)
+    for k=segtagauto(m,1)+minv-1:length(d)-1 %loop through track, beginning at point with maximum shrinkage velocity (thought to be definitively part of the segment)
         if t(k+1)-t(k)> Options.eMaxTimeDiff.val %if too much time passes
             segtagauto(m,2)=k;
             segtagauto(m,3)=segtagauto(m,3)-0.1; %censor event
@@ -232,27 +233,38 @@ for m=1:size(segtagauto,1) %crop/extend end of tracks
                 segtagauto(m+1,1)=k+1;
             end
             break
-        elseif d(k+1)-d(k)>0 %find growing step (above 0), then set beginning of track, unless...
-            if ((abs(d(k+2)-d(k))<abs(d(k+1)-d(k))*Options.eMinXFactor.val&&d(k+1)-d(k)>Options.eMinXChange.val)|| ...
-                    d(k+2)-d(k+1)>min(0,Options.eMinXChange.val)) %... the filament shrinks heavily before that step
-                segtagauto(m,2)=k;
+        elseif v(k)>-Options.eMinXChange.val %find growing step (above 0), then set beginning of track, unless...
+            breaking = checkwhethercut(segtagauto, v(k-1), (d(k+1)-d(k-1))/(t(k+1)-t(k-1)), (d(k+2)-d(k-1))/(t(k+2)-t(k-1)), Options);
+            if breaking
+                segtagauto(m,2)=k-1;
                 if m~=size(segtagauto,1)
-                    segtagauto(m+1,1)=k;
+                    segtagauto(m+1,1)=k-1;
                 end
                 break
             else
-                autotags(k) = 8; %is a pause
+                autotags(k-1) = 8; %is a pause
             end
         end
     end
 end
 
+function [breaking] = checkwhethercut(segtagauto, v1, v2, v3, Options) %v1 is velocity before the bump, v2 is velocity throughout the bump
+% if v2/Options.eMinXFactor.val>v1
+%     %... the filament shrinks heavily before that step
+%     breaking = 1;
+% else
+    if v3/3<min(0,-Options.eMinXChange.val) && v2<-Options.eMinXChange.val
+        breaking = 0;
+    else
+        breaking = 1;
+    end
+% end
 
 function [borderindex] = FindSubsegments(velocity, step, bordervalue, minindex, cAbsVelocity)
 if step > 0
     starti = 1;
 else
-    starti = length(velocity)-1;
+    starti = length(velocity);
 end
 for i = starti:step:minindex
     if cAbsVelocity.val
@@ -260,7 +272,7 @@ for i = starti:step:minindex
     else
         criterium = velocity(i)/velocity(minindex) > bordervalue/100;
     end
-    if  criterium && velocity(i) < 0
+    if  criterium
         if step > 0 
             borderindex = max(i, 1);
         else

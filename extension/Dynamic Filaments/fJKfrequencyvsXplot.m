@@ -2,6 +2,10 @@ function fJKfrequencyvsXplot(f, plot_x, plot_y, ploteventends, units)
 [edgesmid, edges, sumy] = histcounts2(plot_x, plot_y);
 set(gca, 'Ticklength', [0 0]);
 N = histcounts(ploteventends, edges);
+if strcmp(units{2}, 's')
+    units{2} = 'min';
+    sumy = sumy/60;
+end
 plotynew=N./sumy;
 yemptybar = 0.05 * sign(mean(plotynew)) * max(abs(plotynew));
 xemptybar = find(N==0);
@@ -9,7 +13,7 @@ b = bar(f, edgesmid, plotynew, 'k');
 b.FaceColor = 'flat';
 fError = sqrt(N)./sumy; %see https://www.bcube-dresden.de/wiki/Error_bars
 alpha = 1 - sumy/max(abs(sumy));
-scatter(edgesmid(xemptybar)', ones(length(xemptybar),1) * yemptybar, 1000, repmat(alpha(xemptybar)', 1, 3), 'filled');
+scatter(edgesmid(xemptybar)', ones(length(xemptybar),1) * yemptybar, 2000, repmat(alpha(xemptybar)', 1, 3), 'filled', 'MarkerEdgeColor', 'k');
 s = scatter(edgesmid(xemptybar)', ones(length(xemptybar),1) * yemptybar, 1, 'k', 'filled');
 e = errorbar(edgesmid, plotynew, fError, 'r.');
 for m=1:length(edgesmid)
@@ -29,21 +33,21 @@ for m=1:length(edgesmid)
         text(double(edgesmid(m)), yemptybar, strlabel, 'HorizontalAlignment', 'center', 'Color', 'r', 'FontSize', 12);
     end
 end
-legend([b, s, e], {'frequency (N/sum(t))', 'no events in bin', 'square root(N)/sum(t)'});
+legend([s, e], {'no rescues in bin', '$\frac{\sqrt{N}}{\sum{t}}$'}, 'Interpreter', 'LaTex', 'FontSize', 20);
 
 
 function [edgesmid, edges, sumy] = histcounts2(plotx, ploty)
 %HISTCOUNTS2D Summary of this function goes here
 %   Detailed explanation goes here
 plotx=plotx(~isnan(plotx));
-binnum = 0;
+binnum = 12;
 if binnum == 0
     [~, edges, xid] = histcounts(plotx);
     if length(edges)>7
         [~, edges, xid] = histcounts(plotx,6);
     end
 else
-    [~, edges, xid] = histcounts(plotx,binnum);
+    [~, edges, xid] = histcounts(plotx,7);
 end
 ploty(xid==0) = [];
 xid(xid==0) = [];

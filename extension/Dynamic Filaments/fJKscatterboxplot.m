@@ -32,14 +32,14 @@ function [matrix, edgesmid, nelements] = histcounts2own(plotx, ploty)
 %     weights = ones(size(plotx));
 % end https://stackoverflow.com/questions/41644022/using-accumarray-for-a-weighted-average
 % plotx=plotx(~isnan(plotx));
-binnum = 17;
-if binnum == 0
-    [~, edges, xid] = histcounts(plotx);
-    if length(edges)>7
-        [~, edges, xid] = histcounts(plotx,7);
-    end
+binnum = 7;
+if binnum > 0
+    [~, edges, xid] = histcounts(plotx,13);
+%     if length(edges)>7
+%         [~, edges, xid] = histcounts(plotx,10);
+%     end
 else
-    [~, edges, xid] = histcounts(plotx,-26.25:2.5:26.25);
+%     [~, edges, xid] = histcounts(plotx,-26.25:2.5:26.25);
 end
 ploty(xid==0) = [];
 xid(xid==0) = [];

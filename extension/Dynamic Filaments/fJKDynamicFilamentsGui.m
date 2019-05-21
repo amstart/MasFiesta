@@ -783,21 +783,28 @@ if isempty(x_vec)
     set('Visible','off');
     legend('off');
 else
-    [~, type_id, track_type_id] = unique(type, 'stable');
-    for j=1:length(type_id)
-        type_datavec=x_vec(track_type_id == j);
-        plot_x = repmat(j, size(type_datavec)) + (rand(size(type_datavec))-0.5)./2.2;
-        plot(plot_x, type_datavec, '*', 'Color', [1,102,94]/255, 'MarkerSize', 25); %[217;95;2]/255
-        text(j,nanmean(type_datavec),{num2str(nanmedian(type_datavec),3), ['N = ' num2str(length(type_datavec))]}, 'HorizontalAlignment', 'center', 'VerticalAlignment', 'middle', 'FontSize',18);
+    [uniquetype, type_id, track_type_id] = unique(type, 'stable');
+%     for j=1:length(type_id)
+%         type_datavec=x_vec(track_type_id == j);
+% %         plot_x = repmat(j, size(type_datavec)) + (rand(size(type_datavec))-0.5)./2.2;
+% %         plot(plot_x, type_datavec, '*', 'Color', [1,102,94]/255, 'MarkerSize', 25); %[217;95;2]/255
+% %         text(j,nanmean(type_datavec),{num2str(nanmedian(type_datavec),3), ['N = ' num2str(length(type_datavec))]}, 'HorizontalAlignment', 'center', 'VerticalAlignment', 'middle', 'FontSize',18);
+%     end
+    idr = ones(size(track_type_id));
+    for i = 1:length(track_type_id)
+        idr(track_type_id==i) = cumsum(idr(track_type_id==i));
     end
-    b=boxplot(x_vec, type);
+    nelements = accumarray(track_type_id, 1);
+    matrix = nan(max(nelements), length(type_id));
+    inds = sub2ind(size(matrix), idr, track_type_id);
+    matrix(inds) = x_vec;
+    iosr.statistics.boxPlot(uniquetype, matrix, 'medianColor','r', 'showScatter', true, 'sampleSize', true, 'showMean', true)
+%     b=boxplot(x_vec, type);
     set(gca,'TickLabelInterpreter', 'tex');
     set(gca,'FontSize',14);
     if (length(type_id)>2&&Options.lGroup.val>1)||length(type_id)>3
         xtickangle(15);
     end
-    h = findobj(b,'tag','Outliers');
-    set(h,'Visible','off');
     ylabel(get_label(Options, 1));
 end
 hold off

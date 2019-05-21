@@ -160,7 +160,7 @@ for i=1:length(tracks)
         plot(hDFGui.aPlot,tseg(tracks(i).end_first_subsegment),dseg(tracks(i).end_first_subsegment),'LineStyle', 'none', 'Marker', 'd', 'MarkerEdgeColor',c);
     end
     if tracks(i).start_last_subsegment
-        plot(hDFGui.aPlot,tseg(tracks(i).start_last_subsegment+1),dseg(tracks(i).start_last_subsegment+1),'LineStyle', 'none', 'Marker', 's', 'MarkerEdgeColor',c);
+        plot(hDFGui.aPlot,tseg(tracks(i).start_last_subsegment),dseg(tracks(i).start_last_subsegment),'LineStyle', 'none', 'Marker', 's', 'MarkerEdgeColor',c);
     end
     plot(hDFGui.aVelPlot,tseg,c2seg,'Color', c);
     plot(hDFGui.aIPlot,tseg,c1seg,'Color', c);
