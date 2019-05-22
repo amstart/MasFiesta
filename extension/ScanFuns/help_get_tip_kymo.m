@@ -58,7 +58,8 @@ for m = find(FilSelect==1)
 end
 
 
-function [intensity_vec] = get_pixelkymo(I, Filament, n, ScanSize, ExtensionLength)
+function [intensity_vec] = get_pixelkymo(I, Filament, n, ScanSize, ExtensionLength) 
+%extension length is the distance in pixels before the filament end
 nX=double(Filament.Data{n}(:,1)/Filament.PixelSize);
 nY=double(Filament.Data{n}(:,2)/Filament.PixelSize);
 d=cumsum(sqrt((nX(2:end)-nX(1:end-1)).^2 + (nY(2:end)-nY(1:end-1)).^2));

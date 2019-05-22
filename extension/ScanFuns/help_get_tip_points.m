@@ -1,6 +1,7 @@
 function [ Filament ] = help_get_tip_points( Filament, ScanOptions )
-%HELP_GET_TIP_POINTS Summary of this function goes here
-%   Detailed explanation goes here
+%HELP_GET_TIP_POINTS This function interpolates Filament tracks such to get
+%the filament position between two frames (to later get the intensity at
+%that spot)
 max_points = ScanOptions.help_get_tip_points.max_points;
 for m = 1:length(Filament)
     for frame = 1:size(Filament(m).Results, 1) - 1; %leave last data element unchanged

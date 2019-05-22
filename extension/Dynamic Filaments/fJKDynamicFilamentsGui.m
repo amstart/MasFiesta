@@ -79,53 +79,7 @@ setappdata(hDFGui.fig,'Objects',Objects);
 DF.SetTable();
 
 
-function AddCustomData(varargin)
-hDFGui = getappdata(0,'hDFGui');
-Objects = getappdata(hDFGui.fig,'Objects');
-LoadedFromPath = {Objects.LoadedFromPath};
-[unique_paths, ~, MT_index] = unique(LoadedFromPath, 'stable');
-filename = inputdlg('Filename (without .mat)? You will find the data under Object.Custom.<filename>', 'Filename?', 1, {'pixelkymo_GFP'});
-filename = filename{1};
-if ~isempty(strfind(filename, 'fit'))
-    fun = @PrepareFitData;
-    read_fun = @ReadFitData;
-    prefix = strrep(filename, 'pixelkymo_', '');
-    prefix = strrep(prefix, '_fit', '');
-    plot_options = {[prefix ' error function width'], [prefix ' error function displacement']; 'pixels', 'pixels'};
-elseif ~isempty(strfind(filename, 'pixelkymo'))
-    fun = @PrepareKymoData;
-    read_fun = [];
-    plot_options = {};
-elseif ~isempty(strfind(filename, 'tfi_intensity'))
-    fun = @(x) x;
-    read_fun = @ReadTFIData;
-    plot_options = {'TFI MAP count'; '1'};
-else
-    fun = @(x) x;
-    read_fun = [];
-    plot_options = {};
-end
-progressdlg('String','Appending Custom Data','Min',0,'Max',length(unique_paths));
-for m=1:length(unique_paths)
-    try
-        load_data = load([unique_paths{m} filename '.mat']);
-        for n = find(MT_index == m)'
-            Objects(n).CustomData.(filename).ScanOptions = load_data.ScanOptions;
-            for p=1:size(load_data.Data,1) %find microtubule data by name in second column
-                if strcmp(Objects(n).Name, load_data.Data{p, 2})
-                    custom_data = load_data.Data{p, 1};
-                    Objects(n).CustomData.(filename).Data = fun(custom_data);
-                    Objects(n).CustomData.(filename).read_fun = read_fun;
-                    Objects(n).CustomData.(filename).plot_options = plot_options;
-                end
-            end
-        end
-    progressdlg(m);
-    catch
-    end
-end
-setappdata(hDFGui.fig,'Objects',Objects);
-DF.updateOptions();
+
 
 function [matrix] = ReadTFIData(Object, customfield, Options)
 data = Object.CustomData.(customfield{1}).Data;
@@ -142,35 +96,6 @@ if isfield(Object.Custom, 'IntensityPerMAP')
     matrix = matrix./Object.Custom.IntensityPerMAP;
 end
 
-function [matrix] = ReadFitData(Object, customfield, ~)
-data = Object.CustomData.(customfield{1}).Data;
-matrix = nan(length(data), 2);
-for m = 1:length(data)
-    if isstruct(data{m})
-        matrix(m,1) = data{m}.w0;
-        matrix(m,2) = data{m}.x0;
-    end
-end
-
-function fit_data = PrepareFitData(fit_data)
-for m = 1:length(fit_data)
-    if ~isstruct(fit_data{m})
-        fit_data{m} = nan;
-        continue
-    end
-    tmp = fit_data{m}.gof;
-    tmp.w0 = fit_data{m}.fitresult.w0;
-    tmp.x0 = fit_data{m}.fitresult.x0;
-    tmp.p0 = fit_data{m}.fitresult.p0;
-    tmp.y0 = fit_data{m}.fitresult.y0;
-    fit_data{m} = tmp;
-end
-
-function kymo_data = PrepareKymoData(kymo_data)
-%simply takes the maximum pixel per "cross section" of the kymograph line
-for m = 1:length(kymo_data)
-    kymo_data{m} = max(kymo_data{m}, [], 1);
-end
 
 function Save
 hDFGui = getappdata(0,'hDFGui');
@@ -287,6 +212,7 @@ if ~isempty(Objects)&&~isempty(Selected)
         customfields = fields(Object.CustomData);
         answer = listdlg('ListString', customfields, 'SelectionMode', 'single');
         kymo_field = customfields{answer};
+        time = Object.DynResults(includepoints, 2);
         custom_data = Object.CustomData.(kymo_field).Data(includepoints)';
         figure('Name', ['Surf: ' Object.Name ' ' Object.File ' ' kymo_field])
     catch
@@ -294,22 +220,22 @@ if ~isempty(Objects)&&~isempty(Selected)
         return
     end
     maxLength=max(cellfun(@(x)numel(x),custom_data));
+    l = Object.CustomData.(kymo_field).ScanOptions.help_get_tip_kymo.ExtensionLength;
     padded_matrix=cell2mat(cellfun(@(x)cat(2,x, nan(1,maxLength-length(x))),custom_data,'UniformOutput',false));
-    surf(padded_matrix)
+    surf((-6:size(padded_matrix,2)-7)*Object.PixelSize,time, padded_matrix)
     colormap(linspecer_modified);
     hold on;
     zlabel('Intensity');
     ylabel('frame');
-    xlabel('Arc length away from plus end [pixels]');
-    l = Object.CustomData.(kymo_field).ScanOptions.help_get_tip_kymo.ExtensionLength;
+    xlabel('Arc length away from plus end [nm]');
     x_length = size(padded_matrix,1);
     z_min = min(max(padded_matrix(:,1:20,:)));
     z_max = max(max(padded_matrix(:,1:20,:)));
     set(gca, 'FontSize', 18, 'LabelFontSizeMultiplier', 1.5)
-    v = patch([l l l l], [0 0 x_length x_length], [z_min z_max z_max z_min],[0.9, 0.9, 0.9]);
-    set(v,'facealpha',0.3);
-    set(v,'edgealpha',0.5);
-    set(v,'edgecolor','red');
+%     v = patch([l l l l], [0 0 x_length x_length], [z_min z_max z_max z_min],[0.9, 0.9, 0.9]);
+%     set(v,'facealpha',0.3);
+%     set(v,'edgealpha',0.5);
+%     set(v,'edgecolor','red');
     try
         fit_data = Object.CustomData.([kymo_field '_fit']).Data(includepoints);
         fit_matrix = zeros(length(fit_data),2);
