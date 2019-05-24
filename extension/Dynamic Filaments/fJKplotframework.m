@@ -10,13 +10,13 @@ end
 subplot = @(m,n,p) subtightplot (m, n, p, [0.08 0.11], [0.08 0.08], [0.08 0.02]);
 [label_x, label_y, DelTracks] = SetUpMode(isfrequencyplot, events, [Tracks.PreviousEvent]', Options);
 [uniquetype, ~, idvec] = unique(type,'stable')
-if isfrequencyplot == 1
-    for i = 1:length(uniquetype)
-        if ~any(events(idvec==i)) %find all types without events and remove their tracks
-            DelTracks = DelTracks | idvec==i;
-        end
-    end
-end
+% if isfrequencyplot == 1
+%     for i = 1:length(uniquetype)
+%         if ~any(events(idvec==i)) %find all types without events and remove their tracks
+%             DelTracks = DelTracks | idvec==i;
+%         end
+%     end
+% end
 if Options.lChoosePlot.val == 8
     for i = 1:length(Tracks)
         eventloc = find(Tracks(i).Data(:,1)==0);
@@ -24,7 +24,7 @@ if Options.lChoosePlot.val == 8
         if isempty(eventloc)
             eventloc = 0;
         end
-        if eventloc < (dist+1) || ~strcmp('OL  \downarrow*', type{i})
+        if eventloc < (dist+1)
             DelTracks(i) = 1;
         else
             Tracks(i).X = Tracks(i).X(eventloc-dist:min(eventloc+dist, length(Tracks(i).X)));
@@ -129,12 +129,12 @@ for j=1:ntypes    %Loop through all groups to be plotted, each group gets its ow
                     
                 end
 %             end
-            if abs(min(plot_x))/2 > max(plot_x)
-                plot_x = - plot_x;
-            end
-            if abs(min(plot_y)) > max(plot_y)
-                plot_y = - plot_y;
-            end
+%             if abs(min(plot_x))/2 > max(plot_x)
+%                 plot_x = - plot_x;
+%             end
+%             if abs(min(plot_y)) > max(plot_y)
+%                 plot_y = - plot_y;
+%             end
             point_info=vertcat(point_info{:}); %point_info simply carries information about to which track a point belongs
             fJKscatterboxplot(f, plot_x, plot_y, point_info, vertcat(datatiplabel{:}));
             grid
@@ -174,8 +174,9 @@ if isfrequencyplot
     switch refmode
         case {1,5}
         for k=1:pr
-            cellx{k}=PlotTracks(k).X;
-            diffy=diff(PlotTracks(k).Y);
+            try
+            cellx{k}=PlotTracks(k).X(1:end-1);
+            diffy=diff(PlotTracks(k).Y(1:end-1));
             celly{k}=[diffy(1)/2; (diffy(1:end-1)+diffy(2:end))/2; diffy(end)/2];
             if plotevents(k)
                 if isnan(PlotTracks(k).X(end))
@@ -183,6 +184,11 @@ if isfrequencyplot
                 else
                     ploteventends(k)=PlotTracks(k).X(end);
                 end
+            end
+            catch
+                cellx{k}=[];
+                celly{k}=[];
+                ploteventends(k)=nan;
             end
         end
         case {2, 6}

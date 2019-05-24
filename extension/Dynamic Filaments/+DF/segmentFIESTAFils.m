@@ -150,8 +150,8 @@ for n = 1:length(Objects)
             Tracks(track_id).XEventEnd(:)=nan;
         end
         
-        Tracks(track_id).end_first_subsegment = 0;
-        Tracks(track_id).start_last_subsegment = 0;
+        Tracks(track_id).end_first_subsegment = length(segt);
+        Tracks(track_id).start_last_subsegment = length(segt);
         is_tagged(m)=floor(segtagauto(m,3))==tagnum;
         [~, Tracks(track_id).minindex] = min(segvel);
         if Options.eSubStart.val && is_tagged(m)

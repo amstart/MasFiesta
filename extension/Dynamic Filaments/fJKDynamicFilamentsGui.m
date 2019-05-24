@@ -249,7 +249,7 @@ if ~isempty(Objects)&&~isempty(Selected)
             values(m,1) = padded_matrix(m, 6+ceil(fit_matrix(m,1)));
             values(m,2) = padded_matrix(m, 6+ceil(fit_matrix(m,1))+ceil(fit_matrix(m,2)));
         end
-        plot3(fit_matrix(:,1), 1:length(fit_data), values(:,1), 'r-');
+        plot3((fit_matrix(:,1)-6)*Object.PixelSize, time, values(:,1), 'r-');
 %         plot3(fit_matrix(:,2), 1:length(fit_data), values(:,1), 'g-');
     catch
     end
@@ -651,21 +651,18 @@ Options = getappdata(hDFGui.fig,'Options');
 Objects = getappdata(hDFGui.fig,'Objects');
 answer = questdlg('Rhodamine/GFP?', 'Channel?', 'Rhodamine','GFP','Rhodamine' );
 if strcmp(answer, 'GFP')
-    kymo_field = 'pixelkymo_GFP';
+    kymo_field = 'pixelkymo_GFP_shifted';
 else
     kymo_field = 'pixelkymo';
 end
-l = Objects(1).CustomData.(kymo_field).ScanOptions.help_get_tip_kymo.ExtensionLength;
-[type, Tracks, events]=DF.SetType(Options.cPlotGrowingTracks.val);
-for n = 1:length(Tracks)
-    Tracks(n).X = Tracks(n).Data(:, 6); %Frames from .Data Container
-    Tracks(n).Y = Tracks(n).Data(:, 6);
+for i = 1:length(Objects)
+    try
+        l = Objects(i).CustomData.(kymo_field).ScanOptions.help_get_tip_kymo.ExtensionLength;
+        break
+    catch
+    end
 end
-[Tracks, DelObjects] = SelectSubsegments(Tracks, Options);
-Tracks(DelObjects) = [];
-events(DelObjects) = [];
-type(DelObjects) = [];
-Tracks = rmfield(Tracks, 'Data');
+[type, Tracks, events]=DF.SetType(Options.cPlotGrowingTracks.val);
 for n = 1:length(Tracks)
     frames = Tracks.X;
     X_cell = cell(length(frames),1);
@@ -728,8 +725,11 @@ else
 %     b=boxplot(x_vec, type);
     set(gca,'TickLabelInterpreter', 'tex');
     set(gca,'FontSize',14);
+    try
     if (length(type_id)>2&&Options.lGroup.val>1)||length(type_id)>3
         xtickangle(15);
+    end
+    catch
     end
     ylabel(get_label(Options, 1));
 end

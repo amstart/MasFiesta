@@ -18,12 +18,15 @@ function fJKscatterboxplot(f, plot_x, plot_y, point_info, names)
 %         plotc(ci,:)=cmap(find(uniquetracks==plotNnew(ci)),:);
 %     end
 s = scatter(f, plot_x, plot_y, 50, point_info); drawnow;
-row = dataTipTextRow('TrackId',names);
-s.DataTipTemplate.DataTipRows(end+1) = row;
 colormap(linspecer);
 % iosr.statistics.boxPlot(edgesmid, matrix, 'sampleSize', true, 'scatterAlpha', 1, 'showScatter', true, 'medianColor','r', 'showMean', true)
 iosr.statistics.boxPlot(edgesmid, matrix, 'medianColor','r', 'showOutliers', false, 'sampleSize', true, 'showMean', true)
+try %matlab 2019
+row = dataTipTextRow('TrackId',names);
+s.DataTipTemplate.DataTipRows(end+1) = row;
 xtickangle(45);
+catch
+end
 
 function [matrix, edgesmid, nelements] = histcounts2own(plotx, ploty)
 % if ~isempty(weights)
@@ -32,14 +35,14 @@ function [matrix, edgesmid, nelements] = histcounts2own(plotx, ploty)
 %     weights = ones(size(plotx));
 % end https://stackoverflow.com/questions/41644022/using-accumarray-for-a-weighted-average
 % plotx=plotx(~isnan(plotx));
-binnum = 7;
+binnum = 1;
 if binnum > 0
-    [~, edges, xid] = histcounts(plotx,13);
-%     if length(edges)>7
-%         [~, edges, xid] = histcounts(plotx,10);
-%     end
+    [~, edges, xid] = histcounts(plotx);
+    if length(edges)>7
+        [~, edges, xid] = histcounts(plotx,7);
+    end
 else
-%     [~, edges, xid] = histcounts(plotx,-26.25:2.5:26.25);
+    [~, edges, xid] = histcounts(plotx,-15:2.5:40);
 end
 ploty(xid==0) = [];
 xid(xid==0) = [];

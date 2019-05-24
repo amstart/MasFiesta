@@ -30,6 +30,8 @@ event=[Tracks.Event];
 distance_event_end=[Tracks.DistanceEventEnd];
 file={Tracks.File};
 track_id=1:length(type);
+xcolumn = Options.lPlot_XVar.val;
+ycolumn = Options.lPlot_YVar.val;
 for i=1:length(type)
     if hDFGui.mode == 2
         if floor(event(i))~=plottag || size(Tracks(i).Data, 1) < Options.eMinLength.val
@@ -47,7 +49,7 @@ for i=1:length(type)
 %             end
 %         end
         if OnlyWithCustomData
-            if Tracks(i).HasCustomData==0
+            if Tracks(i).HasCustomData==0 || size(Tracks(i).Data,2) < xcolumn || size(Tracks(i).Data,2) < ycolumn
                 track_id(i)=0;
                 continue
             end
@@ -109,8 +111,6 @@ type = type(track_id);
 file = file(track_id);
 
 %old function preparexydata
-xcolumn = Options.lPlot_XVar.val;
-ycolumn = Options.lPlot_YVar.val;
 if Options.mXReference.val == 5
     if ycolumn == 3
         for i=1:length(Tracks)
@@ -172,16 +172,14 @@ end
 
 function [Tracks, DelObjects] = SelectSubsegments(Tracks, Options)
 DelObjects = false(length(Tracks),1);
-if Options.cPlotGrowingTracks.val
-    for i=1:length(Tracks)
-        starti = Tracks(i).end_first_subsegment-1;
-        endi = Tracks(i).start_last_subsegment;
-    %     if ~starti || ~endi
-    %         Tracks(i).Startendvel = nan;
-    %     else
-            Tracks(i).Startendvel = (Tracks(i).Data(endi,2)-Tracks(i).Data(starti,2))/(Tracks(i).Data(endi,1)-Tracks(i).Data(starti,1));
-    %     end
-    end
+for i=1:length(Tracks)
+    starti = Tracks(i).end_first_subsegment-1;
+    endi = Tracks(i).start_last_subsegment;
+%     if ~starti || ~endi
+%         Tracks(i).Startendvel = nan;
+%     else
+%         Tracks(i).Startendvel = (Tracks(i).Data(endi,2)-Tracks(i).Data(starti,2))/(Tracks(i).Data(endi,1)-Tracks(i).Data(starti,1));
+%     end
 end
 switch Options.lSubsegment.val
     case 2

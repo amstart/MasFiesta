@@ -12,7 +12,11 @@ for m = 1:length(xy)
                 data = Tracks(n).Y;
             end
         else
+            try
             data = Tracks(n).Data(:,selected_vars(m));
+            catch
+                return
+            end
         end
         switch selected_methods(m)
             case 1

@@ -103,7 +103,11 @@ track_id=Object.TrackIds;
 
 track_id=track_id(track_id>0);
 tracks=Tracks(track_id);
+try
 [c1_vec, c2_vec] = DF.get_plot_vectors(Options, tracks, [1 2]);
+catch
+    return
+end
 set(hDFGui.fig, 'Name',['Dynamics: ' Object.Name '  (' Object.Comments ')']);
 modevents=mod(Object.SegTagAuto(Object.TrackIds>0,3),1);
 if ~isempty(track_id)

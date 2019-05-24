@@ -9,6 +9,10 @@ end
 plotynew=N./sumy;
 yemptybar = 0.05 * sign(mean(plotynew)) * max(abs(plotynew));
 xemptybar = find(N==0);
+turnaround = 1;
+if turnaround
+    edgesmid = - edgesmid;
+end
 b = bar(f, edgesmid, plotynew, 'k');
 b.FaceColor = 'flat';
 fError = sqrt(N)./sumy; %see https://www.bcube-dresden.de/wiki/Error_bars
@@ -17,8 +21,12 @@ scatter(edgesmid(xemptybar)', ones(length(xemptybar),1) * yemptybar, 2000, repma
 s = scatter(edgesmid(xemptybar)', ones(length(xemptybar),1) * yemptybar, 1, 'k', 'filled');
 e = errorbar(edgesmid, plotynew, fError, 'r.');
 for m=1:length(edgesmid)
-    b.CData(m,:) = ones(1,3) .* alpha(m);
-    if abs(plotynew(m))
+    if turnaround
+        b.CData(length(edgesmid)-m+1,:) = ones(1,3) .* alpha(m);
+    else
+        b.CData(m,:) = ones(1,3) .* alpha(m);
+    end
+    if ~isnan(plotynew(m)) && abs(plotynew(m))
         strlabel = {['N=' num2str(N(m))], [num2str(sumy(m),max(2, floor(1+log10(sumy(m))))) ' ' units{2}]};
     else
         strlabel = [num2str(sumy(m),max(2, floor(1+log10(sumy(m))))) '' units{2}];
@@ -47,7 +55,7 @@ if binnum == 0
         [~, edges, xid] = histcounts(plotx,6);
     end
 else
-    [~, edges, xid] = histcounts(plotx,7);
+    [~, edges, xid] = histcounts(plotx,10);
 end
 ploty(xid==0) = [];
 xid(xid==0) = [];

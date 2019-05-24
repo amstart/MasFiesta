@@ -4,14 +4,22 @@ var_units = {'s', 'nm', 'nm/s', '1/nm', '', '1'};
 var_names = {'time', 'location', 'velocity', 'Ase1 count', 'auto tags', 'frames'};
 hDFGui = getappdata(0,'hDFGui');
 Objects = getappdata(hDFGui.fig,'Objects');
+customfields ={};
 if ~isempty(Objects)
-    Objects = Objects(1);
-    if ~isempty(Objects.CustomData)
-        for customfield = fields(Objects.CustomData)'
-            if  ~isempty(Objects.CustomData.(customfield{1}).plot_options)
-                var_units = {var_units{:} Objects.CustomData.(customfield{1}).plot_options{2,:}};
-                var_names = {var_names{:} Objects.CustomData.(customfield{1}).plot_options{1,:}};
-            end
+    for i = 1:length(Objects)
+        Object = Objects(i);
+        if ~isempty(Object.CustomData)
+            customfields{i} = fields(Object.CustomData);
+            l(i) = length(customfields{i});
+        end
+    end
+end
+if ~isempty(customfields)
+    [~,i] = max(l);
+    for customfield = customfields{i}'
+        if  ~isempty(Objects(i).CustomData.(customfield{1}).plot_options)
+            var_units = {var_units{:} Objects(i).CustomData.(customfield{1}).plot_options{2,:}};
+            var_names = {var_names{:} Objects(i).CustomData.(customfield{1}).plot_options{1,:}};
         end
     end
 end

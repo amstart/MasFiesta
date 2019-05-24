@@ -10,11 +10,12 @@ if ~isempty(strfind(filename, 'fit'))
     read_fun = @ReadFitData;
     prefix = strrep(filename, 'pixelkymo_', '');
     prefix = strrep(prefix, '_fit', '');
-    plot_options = {[prefix ' error function width'], [prefix ' error function displacement']; 'pixels', 'pixels'};
+    plot_options = {[prefix ' error function width'], [prefix ' error function displacement']; 'nm', 'nm'};
 elseif ~isempty(strfind(filename, 'pixelkymo'))
     fun = @PrepareKymoData;
-    read_fun = [];
-    plot_options = {};
+    read_fun = @intensityatfit;
+    prefix = strrep(filename, 'pixelkymo_', '');
+    plot_options = {[prefix ' intensity at fit']; 'AU'};
 elseif ~isempty(strfind(filename, 'tfi_intensity'))
     fun = @(x) x;
     read_fun = @ReadTFIData;
@@ -46,13 +47,32 @@ end
 setappdata(hDFGui.fig,'Objects',Objects);
 DF.updateOptions();
 
+function vec = intensityatfit(Object, customfield, ~)
+kymodata = Object.CustomData.(customfield{1}).Data;
+vec = nan(length(kymodata), 2);
+locations = ReadFitData(Object, {[customfield{1} '_fit']}, [])/Object.PixelSize;
+locations = locations(:,1);
+locations = 6+[floor(locations)-1 ceil(locations)+1];
+for i=1:length(vec)
+    if isnan(locations(i,1)) || length(kymodata{i})==1
+        vec(i) = nan;
+    else
+        vec(i) = sum(kymodata{i}(locations(i,:)))/(Object.Custom.IntensityPerMAP*65);
+    end
+end
+
 function [matrix] = ReadFitData(Object, customfield, ~)
 data = Object.CustomData.(customfield{1}).Data;
 matrix = nan(length(data), 2);
 for m = 1:length(data)
-    if isstruct(data{m})
-        matrix(m,1) = data{m}.w0;
-        matrix(m,2) = data{m}.x0;
+    if isstruct(data{m}) 
+        if data{m}.w0 < 8 && abs(data{m}.x0) < 3.9  
+            matrix(m,1) = data{m}.w0*Object.PixelSize;
+            matrix(m,2) = data{m}.x0*Object.PixelSize;
+        else
+            matrix(m,1) = nan;
+            matrix(m,2) = nan;
+        end
     end
 end
 
