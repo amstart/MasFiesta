@@ -14,7 +14,7 @@ for i = 1:length(table.Value)
 end
 for i = 1:length(table.Value)
     if ~strcmp(table.Moviefolder(i),'all')
-        changeobjects = cellfun(@(x) contains(x, table.Folder{i}), LoadedFromPath) & cellfun(@(x) contains(x, [filesep table.Moviefolder{i}]), LoadedFromPath);
+        changeobjects = cellfun(@(x) ~isempty(strfind(x, table.Folder{i})), LoadedFromPath) & cellfun(@(x) ~isempty(strfind(x, [filesep table.Moviefolder{i}])), LoadedFromPath);
         for id = find(changeobjects==1)
             Objects(id).Custom.IntensityPerMAP = double(table.Value(i));
         end

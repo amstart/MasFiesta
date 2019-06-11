@@ -2,14 +2,21 @@ function fJKfrequencyvsXplot(f, plot_x, plot_y, ploteventends, units)
 [edgesmid, edges, sumy] = histcounts2(plot_x, plot_y);
 set(gca, 'Ticklength', [0 0]);
 N = histcounts(ploteventends, edges);
-if strcmp(units{2}, 's')
-    units{2} = 'min';
-    sumy = sumy/60;
+switch units{2}
+    case 's'
+        units{2} = 'min';
+        sumy = sumy/60;
+    case 'nm'
+        units{2} = '\mum';
+        sumy = sumy/1000;
+end
+if sum(sumy) < 0
+    sumy = -sumy;
 end
 plotynew=N./sumy;
 yemptybar = 0.05 * sign(mean(plotynew)) * max(abs(plotynew));
 xemptybar = find(N==0);
-turnaround = 1;
+turnaround = 0;
 if turnaround
     edgesmid = - edgesmid;
 end
@@ -29,34 +36,26 @@ for m=1:length(edgesmid)
     if ~isnan(plotynew(m)) && abs(plotynew(m))
         strlabel = {['N=' num2str(N(m))], [num2str(sumy(m),max(2, floor(1+log10(sumy(m))))) ' ' units{2}]};
     else
-        strlabel = [num2str(sumy(m),max(2, floor(1+log10(sumy(m))))) '' units{2}];
+        strlabel = [num2str(sumy(m),max(2, floor(1+log10(sumy(m))))) ' ' units{2}];
     end
     if plotynew(m) > 0
         text(double(edgesmid(m)), plotynew(m)/2, strlabel,...
-            'HorizontalAlignment', 'center', 'VerticalAlignment', 'bottom', 'Color', 'r', 'FontSize', 12);
+            'HorizontalAlignment', 'center', 'VerticalAlignment', 'bottom', 'Color', 'r', 'FontSize', 22);
     elseif plotynew(m) < 0
         text(double(edgesmid(m)), plotynew(m)/2, strlabel,...
-            'HorizontalAlignment', 'center', 'VerticalAlignment', 'top', 'Color', 'r', 'FontSize', 12);
+            'HorizontalAlignment', 'center', 'VerticalAlignment', 'top', 'Color', 'r', 'FontSize', 22);
     elseif max(plotynew) > 0
-        text(double(edgesmid(m)), yemptybar, strlabel, 'HorizontalAlignment', 'center', 'Color', 'r', 'FontSize', 12);
+        text(double(edgesmid(m)), yemptybar, strlabel, 'HorizontalAlignment', 'center', 'Color', 'r', 'FontSize', 22);
     end
 end
-legend([s, e], {'no rescues in bin', '$\frac{\sqrt{N}}{\sum{t}}$'}, 'Interpreter', 'LaTex', 'FontSize', 20);
+legend([s, e], {'no rescues in bin', '$\frac{\sqrt{N}}{\sum{t}}$'}, 'Interpreter', 'LaTex', 'FontSize', 24);
 
 
 function [edgesmid, edges, sumy] = histcounts2(plotx, ploty)
 %HISTCOUNTS2D Summary of this function goes here
 %   Detailed explanation goes here
 plotx=plotx(~isnan(plotx));
-binnum = 12;
-if binnum == 0
-    [~, edges, xid] = histcounts(plotx);
-    if length(edges)>7
-        [~, edges, xid] = histcounts(plotx,6);
-    end
-else
-    [~, edges, xid] = histcounts(plotx,10);
-end
+[~, edges, xid] = histcounts(plotx,6);
 ploty(xid==0) = [];
 xid(xid==0) = [];
 binvec=cell(numel(edges)-1,1);

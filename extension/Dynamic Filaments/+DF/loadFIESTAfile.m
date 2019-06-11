@@ -2,11 +2,11 @@ function loadFIESTAfile(FileName, PathName)
 AllObjects = load([PathName FileName], 'Filament');
 if ~isfield(AllObjects, 'Filament')
     fJKLoadLink(FileName, PathName, @DF.Load)
-    try
+%     try
         DF.LoadIntensityPerMAP('intensities.txt', PathName)
-    catch
-        warning('Could not load intensity per MAP file');
-    end
+%     catch
+%         warning('Could not load intensity per MAP file');
+%     end
 else
     AllObjects = AllObjects.Filament;
     NewObjects = select_filaments(AllObjects, 1);

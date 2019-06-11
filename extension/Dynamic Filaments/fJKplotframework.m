@@ -17,6 +17,11 @@ subplot = @(m,n,p) subtightplot (m, n, p, [0.08 0.11], [0.08 0.08], [0.08 0.02])
 %         end
 %     end
 % end
+% for i = 1:length(Tracks)
+%     if abs(Tracks(i).X(end)-Tracks(i).X(1)) < 4000
+%         DelTracks(i) = 1;
+%     end
+% end
 if Options.lChoosePlot.val == 8
     for i = 1:length(Tracks)
         eventloc = find(Tracks(i).Data(:,1)==0);
@@ -129,12 +134,12 @@ for j=1:ntypes    %Loop through all groups to be plotted, each group gets its ow
                     
                 end
 %             end
-%             if abs(min(plot_x))/2 > max(plot_x)
-%                 plot_x = - plot_x;
-%             end
-%             if abs(min(plot_y)) > max(plot_y)
-%                 plot_y = - plot_y;
-%             end
+            if abs(min(plot_x))/2 > max(plot_x)
+                plot_x = - plot_x;
+            end
+            if abs(min(plot_y)) > max(plot_y)
+                plot_y = - plot_y;
+            end
             point_info=vertcat(point_info{:}); %point_info simply carries information about to which track a point belongs
             fJKscatterboxplot(f, plot_x, plot_y, point_info, vertcat(datatiplabel{:}));
             grid
@@ -157,7 +162,7 @@ for j=1:ntypes    %Loop through all groups to be plotted, each group gets its ow
             [plot_x, plot_y, ploteventends] = Get_Vectors(PlotTracks, events(correct_type), Options.mXReference.val, isfrequencyplot, Options.cExclude.val);
             fJKfrequencyvsXplot(f, plot_x, plot_y, ploteventends, {Options.lPlot_XVar.str, Options.lPlot_YVar.str});
     end
-    set(gca, 'FontSize', 16, 'LabelFontSizeMultiplier', 1.5);
+    set(gca, 'FontSize', 24, 'LabelFontSizeMultiplier', 1.5);
     title(uniquetype{j}, 'FontSize', 18);
     xlabel(curent_x_label);
     ylabel([curent_y_label]);
@@ -175,8 +180,8 @@ if isfrequencyplot
         case {1,5}
         for k=1:pr
             try
-            cellx{k}=PlotTracks(k).X(1:end-1);
-            diffy=diff(PlotTracks(k).Y(1:end-1));
+            cellx{k}=PlotTracks(k).X(1:end);
+            diffy=diff(PlotTracks(k).Y(1:end));
             celly{k}=[diffy(1)/2; (diffy(1:end-1)+diffy(2:end))/2; diffy(end)/2];
             if plotevents(k)
                 if isnan(PlotTracks(k).X(end))

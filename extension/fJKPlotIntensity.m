@@ -26,6 +26,7 @@ if isfield(Object.Custom, 'Intensity')
             end
         end
     end
+    GFP = [nan; GFP(1:end-1)]; %to match intensity to velocity, see CalcVelocity()
 else
     GFP=zeros(size(Object.Results,1),1);
 end

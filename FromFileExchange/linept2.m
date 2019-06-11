@@ -27,7 +27,7 @@ function [result]=linept2(matrice, points)
 % Georges Cubas 20/11/03
 % georges.c@netcourrier.com
 % Version 1.0
-
+points = fliplr(points);
 result = matrice;
 for m = 1:size(points, 1)-1
     X1 = points(m,1);

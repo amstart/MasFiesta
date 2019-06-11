@@ -20,7 +20,7 @@ function fJKscatterboxplot(f, plot_x, plot_y, point_info, names)
 s = scatter(f, plot_x, plot_y, 50, point_info); drawnow;
 colormap(linspecer);
 % iosr.statistics.boxPlot(edgesmid, matrix, 'sampleSize', true, 'scatterAlpha', 1, 'showScatter', true, 'medianColor','r', 'showMean', true)
-iosr.statistics.boxPlot(edgesmid, matrix, 'medianColor','r', 'showOutliers', false, 'sampleSize', true, 'showMean', true)
+iosr.statistics.boxPlot(edgesmid, matrix, 'medianColor','r', 'showOutliers', false, 'sampleSize', true, 'showMean', true, 'sampleFontSize', 14)
 try %matlab 2019
 row = dataTipTextRow('TrackId',names);
 s.DataTipTemplate.DataTipRows(end+1) = row;
@@ -37,10 +37,10 @@ function [matrix, edgesmid, nelements] = histcounts2own(plotx, ploty)
 % plotx=plotx(~isnan(plotx));
 binnum = 1;
 if binnum > 0
-    [~, edges, xid] = histcounts(plotx);
-    if length(edges)>7
-        [~, edges, xid] = histcounts(plotx,7);
-    end
+    [~, edges, xid] = histcounts(plotx,10);
+%     if length(edges)>7
+%         [~, edges, xid] = histcounts(plotx,7);
+%     end
 else
     [~, edges, xid] = histcounts(plotx,-15:2.5:40);
 end

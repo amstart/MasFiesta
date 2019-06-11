@@ -17,7 +17,7 @@ end
 if ~isempty(customfields)
     [~,i] = max(l);
     for customfield = customfields{i}'
-        if  ~isempty(Objects(i).CustomData.(customfield{1}).plot_options)
+        if  isfield(Objects(i).CustomData.(customfield{1}),'plot_options')
             var_units = {var_units{:} Objects(i).CustomData.(customfield{1}).plot_options{2,:}};
             var_names = {var_names{:} Objects(i).CustomData.(customfield{1}).plot_options{1,:}};
         end
