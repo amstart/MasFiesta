@@ -5,7 +5,7 @@ function [ output_args ] = batch_rename(FileName, PathName)
 try
 % load([PathName 'pixelkymo_fit.mat']);
 % delete([PathName 'pixelkymo_fit_backup.mat']);
-movefile([PathName 'get_pixelkymo_GFP.mat'], [PathName 'pixelkymo_GFP.mat'])
+movefile([PathName 'intensity_points1to10andallpoints.mat'], [PathName 'total_intensity.mat'])
 %% Load the Filament
 % Filament = load([PathName FileName]);
 % Filament = Filament.Filament;

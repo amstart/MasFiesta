@@ -1,5 +1,5 @@
 <deployment-project plugin="plugin.ezdeploy" plugin-version="1.0">
-  <configuration file="D:\MasFiesta\MasFIESTA.prj" location="D:\MasFiesta" name="MasFIESTA" preferred-package-location="D:\MasFiesta\MasFIESTA\for_redistribution" preferred-package-type="package.type.exe" target="target.ezdeploy.standalone" target-name="Application Compiler">
+  <configuration build-checksum="1145623434" file="D:\Prag\matlab\MasFiesta\MasFIESTA.prj" location="D:\Prag\matlab\MasFiesta" name="MasFIESTA" preferred-package-location="D:\Prag\matlab\MasFiesta\MasFIESTA\for_redistribution" preferred-package-type="package.type.exe" target="target.ezdeploy.standalone" target-name="Application Compiler">
     <param.appname>MasFiesta</param.appname>
     <param.icon />
     <param.icons />
@@ -9,16 +9,16 @@
     <param.company />
     <param.summary />
     <param.description />
-    <param.screenshot />
+    <param.screenshot>D:\Prag\masfiesta\IMG-20190217-WA0001.jpg</param.screenshot>
     <param.guid />
     <param.installpath.string>\MasFiesta\</param.installpath.string>
     <param.installpath.combo>option.installpath.programfiles</param.installpath.combo>
     <param.logo />
     <param.install.notes />
     <param.target.install.notes />
-    <param.intermediate>${PROJECT_ROOT}\MasFIESTA\for_testing</param.intermediate>
-    <param.files.only>${PROJECT_ROOT}\MasFIESTA\for_redistribution_files_only</param.files.only>
-    <param.output>${PROJECT_ROOT}\MasFIESTA\for_redistribution</param.output>
+    <param.intermediate>Y:\Jochen\MasFiesta\MasFIESTA\for_testing</param.intermediate>
+    <param.files.only>Y:\Jochen\MasFiesta\Enduser</param.files.only>
+    <param.output>Y:\Jochen\MasFiesta\for_redistribution</param.output>
     <param.logdir>${PROJECT_ROOT}\MasFIESTA</param.logdir>
     <param.enable.clean.build>false</param.enable.clean.build>
     <param.user.defined.mcr.options />
@@ -41,15 +41,11 @@
       <param.company />
       <param.summary />
       <param.description />
-      <param.screenshot />
       <param.guid />
       <param.installpath.string />
       <param.installpath.combo />
       <param.logo />
       <param.target.install.notes />
-      <param.intermediate />
-      <param.files.only />
-      <param.output />
       <param.logdir />
       <param.enable.clean.build />
       <param.user.defined.mcr.options />
@@ -67,7 +63,6 @@
       <file>${PROJECT_ROOT}\Fiesta.m</file>
     </fileset.main>
     <fileset.resources>
-      <file>D:\MasFiesta</file>
       <file>${PROJECT_ROOT}\bin\BuildIn\bfmatlab\bfCheckJavaMemory.m</file>
       <file>${PROJECT_ROOT}\bin\BuildIn\bfmatlab\bfCheckJavaPath.m</file>
       <file>${PROJECT_ROOT}\bin\BuildIn\bfmatlab\bfGetFileExtensions.m</file>
@@ -302,10 +297,8 @@
       <file>${PROJECT_ROOT}\extension\Dynamic Filaments\+DF\Load.m</file>
       <file>${PROJECT_ROOT}\extension\Dynamic Filaments\+DF\loadFIESTAfile.m</file>
       <file>${PROJECT_ROOT}\extension\Dynamic Filaments\+DF\LoadFolder.m</file>
-      <file>${PROJECT_ROOT}\extension\Dynamic Filaments\+DF\loadROI.m</file>
       <file>${PROJECT_ROOT}\extension\Dynamic Filaments\+DF\PrepareFils.m</file>
       <file>${PROJECT_ROOT}\extension\Dynamic Filaments\+DF\segmentFIESTAFils.m</file>
-      <file>${PROJECT_ROOT}\extension\Dynamic Filaments\+DF\segmentPatches.m</file>
       <file>${PROJECT_ROOT}\extension\Dynamic Filaments\+DF\SetTable.m</file>
       <file>${PROJECT_ROOT}\extension\Dynamic Filaments\fJKDynamicFilamentsGui.m</file>
       <file>${PROJECT_ROOT}\extension\Dynamic Filaments\fJKfrequencyvsXplot.m</file>
@@ -477,14 +470,34 @@
     </fileset.resources>
     <fileset.package>
       <file>D:\AppData</file>
+      <file>D:\Prag\matlab\AppData</file>
       <file>${PROJECT_ROOT}\fiesta.ini</file>
       <file>${PROJECT_ROOT}\readme.txt</file>
     </fileset.package>
-    <fileset.depfun />
+    <fileset.depfun>
+      <file>${MATLAB_ROOT}\toolbox\matlab\demos\flow.m</file>
+      <file>D:\Prag\matlab\IoSR-Surrey-MatlabToolbox-4bff1bb\+iosr\+statistics\boxPlot.m</file>
+      <file>D:\Prag\matlab\IoSR-Surrey-MatlabToolbox-4bff1bb\+iosr\+statistics\kernelDensity.m</file>
+      <file>D:\Prag\matlab\IoSR-Surrey-MatlabToolbox-4bff1bb\+iosr\+statistics\quantile.m</file>
+      <file>D:\Prag\matlab\IoSR-Surrey-MatlabToolbox-4bff1bb\+iosr\+statistics\statsPlot.m</file>
+      <file>${PROJECT_ROOT}\extension\catstruc.m</file>
+      <file>${PROJECT_ROOT}\extension\Dynamic Filaments\+DF\AddCustomData.m</file>
+      <file>${PROJECT_ROOT}\extension\Dynamic Filaments\+DF\createGui.m</file>
+      <file>${PROJECT_ROOT}\extension\Dynamic Filaments\+DF\createSpecialGui.m</file>
+      <file>${PROJECT_ROOT}\extension\Dynamic Filaments\+DF\EventPlot.m</file>
+      <file>${PROJECT_ROOT}\extension\Dynamic Filaments\+DF\LoadIntensityPerMAP.m</file>
+      <file>${PROJECT_ROOT}\extension\Dynamic Filaments\+DF\loadTIF.m</file>
+      <file>${PROJECT_ROOT}\extension\Dynamic Filaments\+DF\Quicksave.m</file>
+      <file>${PROJECT_ROOT}\extension\Dynamic Filaments\+DF\segmentPatchesLines.m</file>
+      <file>${PROJECT_ROOT}\extension\Dynamic Filaments\+DF\segmentPatchesTIF.m</file>
+      <file>${PROJECT_ROOT}\extension\Dynamic Filaments\+DF\SetType.m</file>
+      <file>${PROJECT_ROOT}\extension\Dynamic Filaments\+DF\updateOptions.m</file>
+      <file>${PROJECT_ROOT}\extension\Dynamic Filaments\createnew_fig.m</file>
+    </fileset.depfun>
     <build-deliverables>
-      <file location="${PROJECT_ROOT}\MasFIESTA\for_testing" name="MasFiesta.exe" optional="false">D:\MasFiesta\MasFIESTA\for_testing\MasFiesta.exe</file>
-      <file location="${PROJECT_ROOT}\MasFIESTA\for_testing" name="readme.txt" optional="true">D:\MasFiesta\MasFIESTA\for_testing\readme.txt</file>
-      <file location="${PROJECT_ROOT}\MasFIESTA\for_testing" name="splash.png" optional="false">D:\MasFiesta\MasFIESTA\for_testing\splash.png</file>
+      <file location="Y:\Jochen\MasFiesta\MasFIESTA\for_testing" name="splash.png" optional="false">Y:\Jochen\MasFiesta\MasFIESTA\for_testing\splash.png</file>
+      <file location="Y:\Jochen\MasFiesta\MasFIESTA\for_testing" name="MasFiesta.exe" optional="false">Y:\Jochen\MasFiesta\MasFIESTA\for_testing\MasFiesta.exe</file>
+      <file location="Y:\Jochen\MasFiesta\MasFIESTA\for_testing" name="readme.txt" optional="true">Y:\Jochen\MasFiesta\MasFIESTA\for_testing\readme.txt</file>
     </build-deliverables>
     <workflow />
     <matlab>

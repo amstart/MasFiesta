@@ -175,11 +175,11 @@ DelObjects = false(length(Tracks),1);
 for i=1:length(Tracks)
     starti = Tracks(i).end_first_subsegment-1;
     endi = Tracks(i).start_last_subsegment;
-%     if ~starti || ~endi
-%         Tracks(i).Startendvel = nan;
-%     else
-%         Tracks(i).Startendvel = (Tracks(i).Data(endi,2)-Tracks(i).Data(starti,2))/(Tracks(i).Data(endi,1)-Tracks(i).Data(starti,1));
-%     end
+    if ~starti || ~endi
+        Tracks(i).Startendvel = nan;
+    else
+        Tracks(i).Startendvel = (Tracks(i).Data(endi,2)-Tracks(i).Data(starti,2))/(Tracks(i).Data(endi,1)-Tracks(i).Data(starti,1));
+    end
 end
 switch Options.lSubsegment.val
     case 2

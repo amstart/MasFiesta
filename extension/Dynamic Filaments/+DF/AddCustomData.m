@@ -16,7 +16,11 @@ elseif ~isempty(strfind(filename, 'pixelkymo'))
     read_fun = @intensityatfit;
     prefix = strrep(filename, 'pixelkymo_', '');
     plot_options = {[prefix ' intensity at fit']; 'AU'};
-elseif ~isempty(strfind(filename, 'tfi_intensity')) || ~isempty(strfind(filename, 'intensity_point2and3'))
+elseif ~isempty(strfind(filename, 'total_')) || ~isempty(strfind(filename, 'intensity_all'))
+    fun = @(x) x;
+    read_fun = @ReadtotalMAP;
+    plot_options = {'total MAP count', 'average MAP count'; '1', '1/nm'};
+elseif ~isempty(strfind(filename, 'intensity_'))
     fun = @(x) x;
     read_fun = @ReadTFIData;
     plot_options = {'MAP count TIP', 'MAP count lattice'; '1/nm', '1/nm'};
@@ -51,6 +55,24 @@ for m=1:length(unique_paths)
 end
 setappdata(hDFGui.fig,'Objects',Objects);
 DF.updateOptions();
+
+function [matrix] = ReadtotalMAP(Object, customfield, ~)
+data = Object.CustomData.(customfield{1}).Data;
+matrix = nan(length(data), 2);
+% if ~isempty(strfind(Object.Comment, %maybe here it should check whether
+% the MT can be used for this
+for m = 1:length(data)
+    if isnan(data{m}) 
+        matrix(m,1:2) = nan;
+    else
+        matrix(m,1:2) = data{m};
+    end
+    if m>2 && isnan(matrix(m-1,1))
+        matrix(m-1,1:2) = (matrix(m-2,1:2)+matrix(m,1:2))/2;
+    end
+end
+matrix(:,1) = [nan; matrix(2:end,1)/(Object.Custom.IntensityPerMAP)];
+matrix(:,2) = [nan; matrix(2:end,2)/(Object.Custom.IntensityPerMAP*Object.PixelSize)];
 
 function [matrix] = ReadTFIData(Object, customfield, ~)
 data = Object.CustomData.(customfield{1}).Data;

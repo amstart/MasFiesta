@@ -37,7 +37,7 @@ for i=1:length(NewObjects)
             space=length(restcomment(1:end))+1;
         end
         NewObjects(i).Type=restcomment(1:space(1)-1);
-        if strcmp(NewObjects(i).Type, 'unknown')
+        if strcmp(NewObjects(i).Type, 'unknown') || ~isempty(strfind(restcomment, 'OLP'));
             deleteobjects(i) = 1;
         end
         if ~isempty(strfind(NewObjects(i).Comments, '--'))

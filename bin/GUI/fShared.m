@@ -470,6 +470,7 @@ if strcmp(get(hMainGui.Menu.mCorrectStack,'Checked'),'on')
     set(hMainGui.Menu.mAlignChannels,'Enable','off','Checked','on');
 else  
     set(hMainGui.Menu.mCorrectStack,'Enable',enable);
+    set(hMainGui.Menu.mAlignChannels,'Enable','on','Checked','off');
 end
 if strcmp(get(hMainGui.ToolBar.ToolNormImage,'State'),'on')
    set(hMainGui.Menu.mZProjection,'Enable',enable);

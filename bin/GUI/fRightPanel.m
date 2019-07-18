@@ -184,6 +184,8 @@ if PathName~=0
     elseif FilterIndex==1
         csvwrite(file, [D I']);
     end
+    scan = hMainGui.Scan;
+    save([file '.mat'], 'scan');
     if get(hMainGui.RightPanel.pTools.cKymoLocation,'Value')==1
         if ~exist([PathName 'locations'], 'dir')
           mkdir([PathName 'locations']);

@@ -310,6 +310,8 @@ if ~isempty(fOpenStruct)
                         Config.Time(n:n+1) = NaN;
                         nFrames(n:n+1) = 1;
                     end
+                else
+                    splitStack = 'No';
                 end
                 if ~strcmp(splitStack, 'Yes')
                     Config.Time(n) = str2double(fInputDlg('Creation time corrupt - Enter plane time difference in ms:','100'));  
@@ -570,6 +572,8 @@ global TimeInfo;
 global Molecule;
 global Filament;
 global Config;
+set(hMainGui.Menu.mCorrectStack,'Checked','off', 'Enable','on');
+set(hMainGui.RightPanel.pTools.cKymoDrift,'Value',0,'Enable','on');
 if ~isempty(Stack)
     hMainGui=DeleteAllRegions(hMainGui);    
     set(hMainGui.MidPanel.sFrame,'Enable','off');
