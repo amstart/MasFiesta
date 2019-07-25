@@ -590,11 +590,13 @@ hold on
 [type, AnalyzedTracks, ~]=DF.SetType(Options.cPlotGrowingTracks.val);
 [~, type_id, track_type_id] = unique(type);
 [x_vec, y_vec] = DF.get_plot_vectors(Options, AnalyzedTracks, 1:2);
-fJKscatterboxplot(x_vec, y_vec, track_type_id', 0);
+fJKscatterboxplot(gca, x_vec, y_vec, track_type_id', {AnalyzedTracks.File});
+set(gca, 'FontSize', 20);
 xlabel(get_label(Options, 1));
 ylabel(get_label(Options, 0));
 Legend = type(type_id);
 legend(Legend{:});
+title('Whole tracks');
 hold off
 
 function [middlex, middley, middlez] = histcounts2(plotx, ploty, plotz)

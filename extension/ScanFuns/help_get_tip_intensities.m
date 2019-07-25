@@ -5,8 +5,8 @@ switch ScanOptions.help_get_tip_intensities.method
         fun = @get_highest;
     case 'get_TFI'
         fun = @get_TFI;
-    case 'get_end'
-        fun = @get_end;
+    case 'get_tipandmiddleandall'
+        fun = @get_tipandmiddleandall;
 end
 FilSelect = [Filament.Selected];
 selectall = 0;
@@ -43,61 +43,54 @@ for m = find(FilSelect==1)
     ifil=ifil+1;
 end
 
-function [sum_intensity] = get_end(I, Filament, n)
+function [sum_intensity] = get_tipandmiddleandall(I, Filament, n)
 data = Filament.Data{n};
 new_points = round(data(:,:)./Filament.PixelSize);
 edgepoints = [new_points(1,1:2); new_points(end,1:2)];
-start_i = max([min(edgepoints)-9; 1 1]);
+start_i = max([min(edgepoints)-11; 1 1]);
 new_points = [new_points(:, 1) - start_i(1)+1, new_points(:, 2) - start_i(2)+1];
-end_i = min([max(edgepoints) + 9; 512 512]);
+end_i = min([max(edgepoints) + 11; 512 512]);
 I = double(I(start_i(2):end_i(2), start_i(1):end_i(1)));
 
 mask = false(size(I));
 line = linept2(mask, new_points);
+lines = cat(3,mask,mask,line);
+lines(new_points(1:2,2),new_points(1:2,1),1) = 1;
+lines(new_points(5,2),new_points(5,1),2) = 1;
 
-in=strel('rectangle',[5 5]);
-spacer=strel('octagon',6); %Create morphological structuring element
-out=strel('octagon',9); %Create morphological structuring element
+in=strel('square',7);
+inall=strel('square',5);
+spacer=strel('square',9); %Create morphological structuring element
+out=strel('square',11); %Create morphological structuring element
 spacer_region = imdilate(line,spacer);
-in_region = imdilate(line,in);
-I_in = I;
-I_in(~in_region) = nan;
-out_region = imdilate(line,out);
-background = I(out_region & ~spacer_region);
-I_in = I_in - prctile(background,10);
-sum_intensity = [nansum(I_in(:)) nanmean(I_in(:))];
-%     imshow(I_in,[]);
-
-function [sum_intensity] = get_tipandmiddle(I, Filament, n)
-data = Filament.Data{n};
-new_points = round(data(1:6,:)./Filament.PixelSize);
-edgepoints = [new_points(1,1:2); new_points(end,1:2)];
-start_i = max([min(edgepoints)-9; 1 1]);
-new_points = [new_points(:, 1) - start_i(1)+1, new_points(:, 2) - start_i(2)+1];
-end_i = min([max(edgepoints) + 9; 512 512]);
-I = I(start_i(2):end_i(2), start_i(1):end_i(1));
-
-mask = false(size(I));
-line = linept2(mask, new_points);
-lines = cat(3,mask,mask);
-lines(new_points(1,2),new_points(1,1),1) = 1;
-lines(new_points(4,2),new_points(4,1),2) = 1;
-
-in=strel('rectangle',[5 5]);
-spacer=strel('octagon',6); %Create morphological structuring element
-out=strel('octagon',9); %Create morphological structuring element
-spacer_region = imdilate(line,spacer);
-sum_intensity = nan(1,2);
-for i=1:2
-    in_region = imdilate(lines(:,:,i),in);
+sum_intensity = nan(1,5);
+for i=1:3
+    if i == 1
+        in_region = imdilate(lines(:,:,i),in);
+    else
+        in_region = imdilate(lines(:,:,i),inall);
+    end
     I_in = I;
-    I_in(~in_region) = 0;
+    I_in(~in_region) = nan;
     out_region = imdilate(lines(:,:,i),out);
     background = I(out_region & ~spacer_region);
     I_in = I_in - prctile(background,10);
-    sum_intensity(i) = sum(sum(double(I_in)));
-%     imshow(I_in,[]);
+    sum_intensity(i) = nansum(I_in(:));
+    if i == 1
+        I_in( ~any(in_region,2), : ) = [];  %rows
+        I_in( :, ~any(in_region,1) ) = [];  %columns
+        sumi = nan(size(I_in)-4);
+        for j = 1:size(sumi,1)
+            for k = 1:size(sumi,2)
+                sumi(j,k) = nansum(nansum(I_in(j:j+4,k:k+4)));
+            end
+        end
+        sum_intensity(4) = max(max(sumi));
+        [~, maxi] = max(sumi);
+        sum_intensity(5) = mean(maxi);
+    end
 end
+%     imshow(I_in,[]);
 
 % function [Filament] = get_TFI(Stack, Filament, Options)
 function [sum_intensity] = get_TFI(I, Filament, n)

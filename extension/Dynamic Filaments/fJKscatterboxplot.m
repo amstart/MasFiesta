@@ -17,13 +17,20 @@ function fJKscatterboxplot(f, plot_x, plot_y, point_info, names)
 %     for ci=1:size(plotNnew,1)
 %         plotc(ci,:)=cmap(find(uniquetracks==plotNnew(ci)),:);
 %     end
+numcol = length(unique(point_info));
+colormap(linspecer(numcol));
+if numcol > 4
+    numcol = 1;
+end
 s = scatter(f, plot_x, plot_y, 50, point_info); drawnow;
-colormap(linspecer);
-% iosr.statistics.boxPlot(edgesmid, matrix, 'sampleSize', true, 'scatterAlpha', 1, 'showScatter', true, 'medianColor','r', 'showMean', true)
-iosr.statistics.boxPlot(edgesmid, matrix, 'medianColor','r', 'showOutliers', false, 'sampleSize', true, 'showMean', true, 'sampleFontSize', 14)
-try %matlab 2019
 row = dataTipTextRow('TrackId',names);
 s.DataTipTemplate.DataTipRows(end+1) = row;
+% iosr.statistics.boxPlot(edgesmid, matrix, 'sampleSize', true, 'scatterAlpha', 1, 'showScatter', true, 'medianColor','r', 'showMean', true)
+box = iosr.statistics.boxPlot(edgesmid, matrix, 'medianColor','r', 'showOutliers', false, 'sampleSize', true, 'showMean', true, 'sampleFontSize', 14)
+for h = [box.handles.box box.handles.medianLines box.handles.lowerWhiskers box.handles.upperWhiskers box.handles.lowerWhiskerTips box.handles.upperWhiskerTips box.handles.means]
+    set(h,'HandleVisibility','off');
+end
+try %matlab 2019
 xtickangle(45);
 catch
 end
@@ -35,14 +42,13 @@ function [matrix, edgesmid, nelements] = histcounts2own(plotx, ploty)
 %     weights = ones(size(plotx));
 % end https://stackoverflow.com/questions/41644022/using-accumarray-for-a-weighted-average
 % plotx=plotx(~isnan(plotx));
-binnum = 1;
-if binnum > 0
-    [~, edges, xid] = histcounts(plotx,10);
+if 1
+    [~, edges, xid] = histcounts(plotx);
 %     if length(edges)>7
 %         [~, edges, xid] = histcounts(plotx,7);
 %     end
 else
-    [~, edges, xid] = histcounts(plotx,-15:2.5:40);
+    [~, edges, xid] = histcounts(plotx,[-0.001 0.001 0.05:0.05:0.3]);
 end
 ploty(xid==0) = [];
 xid(xid==0) = [];

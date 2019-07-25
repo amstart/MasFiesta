@@ -7,13 +7,12 @@ global ScanOptions
 ScanOptions.PixSize = 157; %is used as default if nothing else available
 %%%%%%%%%%%%%%%%%%%parameters for helper functions%%%%%%%%%%%%%%
 ScanOptions.help_get_tip_intensities.framesuntilmissingframe = 40; %set to number higher than number of frames if you have the same number of frames for the channels
-ScanOptions.help_get_tip_intensities.method = 'get_end';
+ScanOptions.help_get_tip_intensities.method = 'get_tipandmiddleandall';
 ScanOptions.help_get_tip_intensities.AllFilaments = 1;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 ScanOptions.help_CorrectObject.AddDrift = 1;
 ScanOptions.help_CorrectObject.RemoveColorCorrection = 1;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-ScanOptions.filename = ['total_intensity_all' '.mat'];
 ScanOptions.help_get_tip_points.max_points = 500;
 ScanOptions.help_get_tip_points.GFP_frame_where = 0.4759;
 if ~isfield(ScanOptions, 'ObjectChannel')

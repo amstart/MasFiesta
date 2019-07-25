@@ -1,5 +1,5 @@
 <deployment-project plugin="plugin.ezdeploy" plugin-version="1.0">
-  <configuration build-checksum="1145623434" file="D:\Prag\matlab\MasFiesta\MasFIESTA.prj" location="D:\Prag\matlab\MasFiesta" name="MasFIESTA" preferred-package-location="D:\Prag\matlab\MasFiesta\MasFIESTA\for_redistribution" preferred-package-type="package.type.exe" target="target.ezdeploy.standalone" target-name="Application Compiler">
+  <configuration build-checksum="1470877472" file="D:\Prag\matlab\MasFiesta\MasFIESTA.prj" location="D:\Prag\matlab\MasFiesta" name="MasFIESTA" preferred-package-location="D:\Prag\matlab\MasFiesta Standalone" preferred-package-type="package.type.exe" target="target.ezdeploy.standalone" target-name="Application Compiler">
     <param.appname>MasFiesta</param.appname>
     <param.icon />
     <param.icons />
@@ -16,10 +16,10 @@
     <param.logo />
     <param.install.notes />
     <param.target.install.notes />
-    <param.intermediate>Y:\Jochen\MasFiesta\MasFIESTA\for_testing</param.intermediate>
-    <param.files.only>Y:\Jochen\MasFiesta\Enduser</param.files.only>
-    <param.output>Y:\Jochen\MasFiesta\for_redistribution</param.output>
-    <param.logdir>${PROJECT_ROOT}\MasFIESTA</param.logdir>
+    <param.intermediate>D:\Prag\matlab\MasFiesta Standalone\testing</param.intermediate>
+    <param.files.only>D:\Prag\matlab\MasFiesta Standalone\end user</param.files.only>
+    <param.output>D:\Prag\matlab\MasFiesta Standalone</param.output>
+    <param.logdir>D:\Prag\matlab\MasFiesta Standalone\log</param.logdir>
     <param.enable.clean.build>false</param.enable.clean.build>
     <param.user.defined.mcr.options />
     <param.embed.ctf>true</param.embed.ctf>
@@ -46,7 +46,6 @@
       <param.installpath.combo />
       <param.logo />
       <param.target.install.notes />
-      <param.logdir />
       <param.enable.clean.build />
       <param.user.defined.mcr.options />
       <param.embed.ctf />
@@ -495,9 +494,9 @@
       <file>${PROJECT_ROOT}\extension\Dynamic Filaments\createnew_fig.m</file>
     </fileset.depfun>
     <build-deliverables>
-      <file location="Y:\Jochen\MasFiesta\MasFIESTA\for_testing" name="splash.png" optional="false">Y:\Jochen\MasFiesta\MasFIESTA\for_testing\splash.png</file>
-      <file location="Y:\Jochen\MasFiesta\MasFIESTA\for_testing" name="MasFiesta.exe" optional="false">Y:\Jochen\MasFiesta\MasFIESTA\for_testing\MasFiesta.exe</file>
-      <file location="Y:\Jochen\MasFiesta\MasFIESTA\for_testing" name="readme.txt" optional="true">Y:\Jochen\MasFiesta\MasFIESTA\for_testing\readme.txt</file>
+      <file location="D:\Prag\matlab\MasFiesta Standalone\testing" name="MasFiesta.exe" optional="false">D:\Prag\matlab\MasFiesta Standalone\testing\MasFiesta.exe</file>
+      <file location="D:\Prag\matlab\MasFiesta Standalone\testing" name="splash.png" optional="false">D:\Prag\matlab\MasFiesta Standalone\testing\splash.png</file>
+      <file location="D:\Prag\matlab\MasFiesta Standalone\testing" name="readme.txt" optional="true">D:\Prag\matlab\MasFiesta Standalone\testing\readme.txt</file>
     </build-deliverables>
     <workflow />
     <matlab>

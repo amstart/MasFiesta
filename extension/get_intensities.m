@@ -1,4 +1,5 @@
 figure
+global Molecule
 global Stack
 movie = Stack{1};
 matrix = nan(length(Molecule), size(movie,3));

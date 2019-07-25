@@ -3,8 +3,10 @@ global logfile;
 global error_events;
 global DirCurrent;
 global FiestaDir;
+global suppress_progressdlg
 hMainGui=getappdata(0,'hMainGui'); 
 
+suppress_progressdlg = 0;
 error_events=[];
 abort=0;
 
