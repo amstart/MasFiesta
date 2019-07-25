@@ -19,9 +19,6 @@ function fJKscatterboxplot(f, plot_x, plot_y, point_info, names)
 %     end
 numcol = length(unique(point_info));
 colormap(linspecer(numcol));
-if numcol > 4
-    numcol = 1;
-end
 s = scatter(f, plot_x, plot_y, 50, point_info); drawnow;
 row = dataTipTextRow('TrackId',names);
 s.DataTipTemplate.DataTipRows(end+1) = row;

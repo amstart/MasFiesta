@@ -122,13 +122,13 @@ for j=1:ntypes    %Loop through all groups to be plotted, each group gets its ow
                 if Options.cGroupIntoMTs.val
                     [legend_items, ~, object_name_ids] = unique({PlotTracks.Name}, 'stable');                    
                     for k=1:sum(correct_type)
-                        point_info{k}=repmat(object_name_ids(k),size(PlotTracks(k).X(1+Options.cExclude.val:end-Options.cExclude.val)),1);
+                        point_info{k}=repmat(object_name_ids(k),size(PlotTracks(k).X),1);
                         datatiplabel{k} = repmat(trackids(k),length(point_info{k}),1);
                     end
                 else
                     legend_items = {PlotTracks.Name};
                     for k=1:sum(correct_type)
-                        point_info{k}=repmat(k,[size(PlotTracks(k).X(1+Options.cExclude.val:end-Options.cExclude.val)),1]);
+                        point_info{k}=repmat(k,[size(PlotTracks(k).X),1]);
                         datatiplabel{k} = repmat(trackids(k),length(point_info{k}),1);
                     end
                     
@@ -228,23 +228,33 @@ else
     switch refmode
         case {1,5}
         for k=1:pr
-            cellx{k}=PlotTracks(k).X(1+exclude:end-exclude);
+            cellx{k}=PlotTracks(k).X(1:end);
         end
-        case {2, 6}
+        case {2}
         for k=1:pr
-            cellx{k}=PlotTracks(k).X(1+exclude:end-exclude)-PlotTracks(k).X(1+exclude);
+            cellx{k}=[0; diff(PlotTracks(k).X(1:end))];
         end
-        case {3, 7}
+        case {6}
         for k=1:pr
-            cellx{k}=PlotTracks(k).X(1+exclude:end-exclude)-PlotTracks(k).X(end-exclude);
+            cellx{k}=PlotTracks(k).X(1:end)-PlotTracks(k).X(1);
+        end
+        case {7}
+        for k=1:pr
+            cellx{k}=PlotTracks(k).X(1:end)-PlotTracks(k).X(end);
         end
         case 4
         for k=1:pr
-            cellx{k}=PlotTracks(k).X(1+exclude:end-exclude)-nanmedian(PlotTracks(k).X);
+            cellx{k}=PlotTracks(k).X(1:end)-nanmedian(PlotTracks(k).X);
         end
     end
-    for k=1:pr
-        celly{k}=PlotTracks(k).Y(1+exclude:end-exclude);
+    if ~exclude
+        for k=1:pr
+            celly{k}=PlotTracks(k).Y(1:end);
+        end
+    else
+        for k=1:pr
+            celly{k}=[0; diff(PlotTracks(k).Y(1:end))];
+        end
     end
 end
 plotx=vertcat(cellx{:});
