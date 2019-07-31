@@ -168,6 +168,9 @@ if nargin > 1
             end
     end
 end
+for i=1:length(Tracks)
+    Tracks(i).Z = Tracks(i).Data(:,1);
+end
 
 
 function [Tracks, DelObjects] = SelectSubsegments(Tracks, Options)

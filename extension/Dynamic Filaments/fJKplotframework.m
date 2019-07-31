@@ -134,12 +134,12 @@ for j=1:ntypes    %Loop through all groups to be plotted, each group gets its ow
                     
                 end
 %             end
-            if abs(min(plot_x))/2 > max(plot_x)
-                plot_x = - plot_x;
-            end
-            if abs(min(plot_y)) > max(plot_y)
-                plot_y = - plot_y;
-            end
+%             if abs(min(plot_x))/2 > max(plot_x)
+%                 plot_x = - plot_x;
+%             end
+%             if abs(min(plot_y)) > max(plot_y)
+%                 plot_y = - plot_y;
+%             end
             point_info=vertcat(point_info{:}); %point_info simply carries information about to which track a point belongs
             fJKscatterboxplot(f, plot_x, plot_y, point_info, vertcat(datatiplabel{:}));
             grid
@@ -162,7 +162,7 @@ for j=1:ntypes    %Loop through all groups to be plotted, each group gets its ow
             [plot_x, plot_y, ploteventends] = Get_Vectors(PlotTracks, events(correct_type), Options.mXReference.val, isfrequencyplot, Options.cExclude.val);
             fJKfrequencyvsXplot(f, plot_x, plot_y, ploteventends, {Options.lPlot_XVar.str, Options.lPlot_YVar.str});
     end
-    set(gca, 'FontSize', 24, 'LabelFontSizeMultiplier', 1.5);
+    set(gca, 'FontSize', 24);
     title(uniquetype{j}, 'FontSize', 18);
     xlabel(curent_x_label);
     ylabel([curent_y_label]);
@@ -180,8 +180,8 @@ if isfrequencyplot
         case {1,5}
         for k=1:pr
             try
-            cellx{k}=PlotTracks(k).X(1:end);
-            diffy=diff(PlotTracks(k).Y(1:end));
+            cellx{k}=PlotTracks(k).X;
+            diffy=diff(PlotTracks(k).Y);
             celly{k}=[diffy(1)/2; (diffy(1:end-1)+diffy(2:end))/2; diffy(end)/2];
             if plotevents(k)
                 if isnan(PlotTracks(k).X(end))
@@ -228,32 +228,32 @@ else
     switch refmode
         case {1,5}
         for k=1:pr
-            cellx{k}=PlotTracks(k).X(1:end);
+            cellx{k}=PlotTracks(k).X;
         end
         case {2}
         for k=1:pr
-            cellx{k}=[0; diff(PlotTracks(k).X(1:end))];
+            cellx{k}=[0; diff(PlotTracks(k).X)];
         end
         case {6}
         for k=1:pr
-            cellx{k}=PlotTracks(k).X(1:end)-PlotTracks(k).X(1);
+            cellx{k}=PlotTracks(k).X-PlotTracks(k).X(1);
         end
         case {7}
         for k=1:pr
-            cellx{k}=PlotTracks(k).X(1:end)-PlotTracks(k).X(end);
+            cellx{k}=PlotTracks(k).X-PlotTracks(k).X(end);
         end
         case 4
         for k=1:pr
-            cellx{k}=PlotTracks(k).X(1:end)-nanmedian(PlotTracks(k).X);
+            cellx{k}=PlotTracks(k).X-nanmedian(PlotTracks(k).X);
         end
     end
     if ~exclude
         for k=1:pr
-            celly{k}=PlotTracks(k).Y(1:end);
+            celly{k}=PlotTracks(k).Y;
         end
     else
         for k=1:pr
-            celly{k}=[0; diff(PlotTracks(k).Y(1:end))];
+            celly{k}=[0; diff(PlotTracks(k).Y)]./[0; diff(PlotTracks(k).Z)];
         end
     end
 end

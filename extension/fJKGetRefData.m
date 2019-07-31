@@ -6,7 +6,7 @@ global Molecule;
 refcommentstart=strfind(Object.Comments,'ref:');
 found=0;
 Object.Results(:,5) = [];
-if isfield(Object, 'PosCenter');
+if isfield(Object, 'PosCenter')
     Object.PosStart(:,3) = [];
     Object.PosCenter(:,3) = [];
     Object.PosEnd(:,3) = [];
@@ -56,7 +56,7 @@ if ~isempty(refcommentstart)
         return
     end
     Reference.Results(:,5) = [];
-    if isfield(Object, 'PosCenter');
+    if isfield(Object, 'PosCenter')
         Reference.PosStart(:,3) = [];
         Reference.PosCenter(:,3) = [];
         Reference.PosEnd(:,3) = [];
@@ -73,7 +73,7 @@ else
     Object.Results(:,5:end) = [];
     Reference=Object;
     Reference.Results(:,:)=repmat(Reference.Results(refpoint,:),size(Reference.Results,1),1);
-    if isfield(Object, 'PosCenter');
+    if isfield(Object, 'PosCenter')
         Reference.PosStart(:,:)=repmat(Reference.PosStart(refpoint,:),size(Reference.Results,1),1);
         Reference.PosCenter(:,:)=repmat(Reference.PosCenter(refpoint,:),size(Reference.Results,1),1);
         Reference.PosEnd(:,:)=repmat(Reference.PosEnd(refpoint,:),size(Reference.Results,1),1);
@@ -83,14 +83,14 @@ end
 if size(Object.Results,1)~=size(Reference.Results,1)
     Object.Results(:,5:end) = [];
     Reference.Results(:,5:end) = [];
-    if isfield(Object, 'PosCenter');
+    if isfield(Object, 'PosCenter')
         objfilfields=[Object.PosStart Object.PosCenter Object.PosEnd];
         objnum=6;
     else
         objfilfields=[];
         objnum=0;
     end
-    if isfield(Reference, 'PosCenter');
+    if isfield(Reference, 'PosCenter')
         reffilfields=[Reference.PosStart Reference.PosCenter Reference.PosEnd];
         refnum=6;
     else
@@ -122,6 +122,8 @@ end
 if isempty(refmode)
         if isfield(Object, 'PosStart')&&isfield(Reference, 'PosStart')
             switch mode
+                case 0
+                    refdata = Reference.PosStart;
                 case 1
                     refdata = CalcDistance(Object.PosStart,Reference.PosCenter)-CalcDistance(Reference.PosStart,Reference.PosCenter);
                 case 2
