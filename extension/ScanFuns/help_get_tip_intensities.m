@@ -32,7 +32,7 @@ for m = find(FilSelect==1)
     for n = 1:size(Filament(m).Results,1)
         frame = Filament(m).Results(n,1);
         missedframes=ceil(frame/framesuntilmissingframe);
-        if mod(frame, framesuntilmissingframe)==1
+        if mod(frame, framesuntilmissingframe)==1 || isnan(Filament(m).Data{n}(1))
             Filament(m).Custom.CustomData{n}=nan;
             continue
         end
@@ -45,8 +45,8 @@ end
 
 function [sum_intensity] = get_tipandmiddleandall(I, Filament, n)
 data = Filament.Data{n};
-new_points = round(data(:,:)./Filament.PixelSize);
-edgepoints = [new_points(1,1:2); new_points(end,1:2)];
+new_points = round(data(:,1:2)./Filament.PixelSize);
+edgepoints = [new_points(1,:); new_points(end,:)];
 start_i = max([min(edgepoints)-11; 1 1]);
 new_points = [new_points(:, 1) - start_i(1)+1, new_points(:, 2) - start_i(2)+1];
 end_i = min([max(edgepoints) + 11; 512 512]);
@@ -55,16 +55,21 @@ I = double(I(start_i(2):end_i(2), start_i(1):end_i(1)));
 mask = false(size(I));
 line = linept2(mask, new_points);
 lines = cat(3,mask,mask,line);
-lines(new_points(1:2,2),new_points(1:2,1),1) = 1;
-lines(new_points(5,2),new_points(5,1),2) = 1;
+lines(new_points(1,2),new_points(1,1),1) = 1;
+if size(new_points,1) > 4
+    lines(new_points(5,2),new_points(5,1),2) = 1;
+    indices = [1 2 3];
+else
+    indices = [1 3];
+end
 
 in=strel('square',7);
 inall=strel('square',5);
 spacer=strel('square',9); %Create morphological structuring element
 out=strel('square',11); %Create morphological structuring element
 spacer_region = imdilate(line,spacer);
-sum_intensity = nan(1,5);
-for i=1:3
+sum_intensity = nan(1,6);
+for i=indices
     if i == 1
         in_region = imdilate(lines(:,:,i),in);
     else
@@ -86,8 +91,10 @@ for i=1:3
             end
         end
         sum_intensity(4) = max(max(sumi));
-        [~, maxi] = max(sumi);
-        sum_intensity(5) = mean(maxi);
+        [~, maxix] = max(sumi,[],2);
+        [~, maxiy] = max(sumi);
+        sum_intensity(5) = mean(maxix);
+        sum_intensity(6) = mean(maxiy);
     end
 end
 %     imshow(I_in,[]);

@@ -1,4 +1,4 @@
-function [refdata] = fJKGetRefData(Object, mode, reftags, varargin)
+function [refdata, Object] = fJKGetRefData(Object, mode, reftags, varargin)
 %FGETREFDATA Summary of this function goes here
 %   Detailed explanation goes here
 global Filament;
@@ -80,7 +80,7 @@ else
     end
     refmode=[];
 end
-if size(Object.Results,1)~=size(Reference.Results,1)
+if ~strcmp(Object.Name, Reference.Name)
     Object.Results(:,5:end) = [];
     Reference.Results(:,5:end) = [];
     if isfield(Object, 'PosCenter')
@@ -102,8 +102,8 @@ if size(Object.Results,1)~=size(Reference.Results,1)
     tmpref=[Reference.Results reffilfields];
     tmpnanobj=nan(size(Object.Results,1),size(Object.Results,2)+objnum);
     tmpnanref=nan(size(Object.Results,1),size(Object.Results,2)+refnum);
-    [~, objectframes] = ismember(frames, tmpobj(:,1));
-    [~, refframes] = ismember(frames, tmpref(:,1));
+    [~, objectframes] = ismember(frames, tmpobj(:,1)); %gets the ids of the common frames in terms of object
+    [~, refframes] = ismember(frames, tmpref(:,1)); %" in terms of ref
     tmpnanobj(objectframes,:)=tmpobj(objectframes,:);
     Object.Results=tmpnanobj(:,1:4);
     if objnum
@@ -123,7 +123,12 @@ if isempty(refmode)
         if isfield(Object, 'PosStart')&&isfield(Reference, 'PosStart')
             switch mode
                 case 0
-                    refdata = Reference.PosStart;
+                    refdata = Reference.PosStart(~isnan(Reference.PosStart(:,1)),:);
+                    Object.Data = Object.Data(objectframes);
+                    Object.Results = Object.Results(objectframes,:);
+                    Object.PosCenter = Object.PosCenter(objectframes,:);
+                    Object.PosStart = Object.PosStart(objectframes,:);
+                    Object.PosEnd = Object.PosEnd(objectframes,:);
                 case 1
                     refdata = CalcDistance(Object.PosStart,Reference.PosCenter)-CalcDistance(Reference.PosStart,Reference.PosCenter);
                 case 2

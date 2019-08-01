@@ -2,13 +2,13 @@
 %scans through the link file you specify here. 
 %% Do the work
 global ScanOptions
-try
-    [FileName, PathName] = uigetfile({'*.mat','MAT-File (*.mat)';},'Load Link',ScanOptions.LinkFolder);
-catch
-    [FileName, PathName] = uigetfile({'*.mat','MAT-File (*.mat)';},'Load Link');        
-end
-answer = inputdlg('Filename');
-ScanOptions.filename = answer{1};
+% try
+%     [FileName, PathName] = uigetfile({'*.mat','MAT-File (*.mat)';},'Load Link',ScanOptions.LinkFolder);
+% catch
+%     [FileName, PathName] = uigetfile({'*.mat','MAT-File (*.mat)';},'Load Link');        
+% end
+% answer = inputdlg('Filename');
+% ScanOptions.filename = answer{1};
 fJKLoadLink(FileName, PathName, @batch_tip_circles) %any analyze_x function
 ScanOptions.LinkFolder=PathName;     
 % Z:\Data\Jochen\16.10.10\4\4_dynamics.mat

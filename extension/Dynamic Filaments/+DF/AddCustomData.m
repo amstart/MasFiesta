@@ -25,6 +25,11 @@ elseif ~isempty(strfind(filename, 'tipandmiddleandallandycenter'))
     read_fun = @ReadTipMiddleAllYPos;
     plot_options = {'Tip count', 'Density middle', 'Total count', 'Tip density', 'y center';...
         '1', '1/nm', '1', '1/nm', 'px'};
+elseif ~isempty(strfind(filename, 'tipandmiddleandextension'))
+    fun = @(x) x;
+    read_fun = @ReadTipMiddleExtension;
+    plot_options = {'Tip count', 'Density middle', 'Extension count', 'Tip density', 'x center', 'y center';...
+        '1', '1/nm', '1', '1/nm', 'px', 'px'};
 elseif ~isempty(strfind(filename, 'intensity_'))
     fun = @(x) x;
     read_fun = @ReadTFIData;
@@ -60,6 +65,26 @@ for m=1:length(unique_paths)
 end
 setappdata(hDFGui.fig,'Objects',Objects);
 DF.updateOptions();
+
+function [matrix] = ReadTipMiddleExtension(Object, customfield, ~)
+data = Object.CustomData.(customfield{1}).Data;
+matrix = nan(length(data), 6);
+% if ~isempty(strfind(Object.Comment, %maybe here it should check whether
+% the MT can be used for this
+for m = 1:length(data)
+    if isnan(data{m}) 
+        matrix(m,1:6) = nan;
+    else
+        matrix(m,1:6) = data{m};
+    end
+    if m>2 && isnan(matrix(m-1,1))
+        matrix(m-1,1:4) = (matrix(m-2,1:4)+matrix(m,1:4))/2;
+    end
+end
+matrix(:,[1 3]) = [[nan nan]; matrix(2:end,[1 3])/(Object.Custom.IntensityPerMAP)];
+matrix(:,[2 4]) = [[nan nan]; matrix(2:end,[2 4])/(Object.Custom.IntensityPerMAP*(Object.PixelSize*5))];
+
+
 
 function [matrix] = ReadTipMiddleAllYPos(Object, customfield, ~)
 data = Object.CustomData.(customfield{1}).Data;

@@ -17,10 +17,15 @@ for m = 1:length(Filament)
         fY = zeros(max(num_points),2);
         for n = 1:2
             if num_points(n) ~=max(num_points) %if the number of points is less than in the other frame then interpolate to right number of points
-                new_vector = 1:(num_points(n)-1)/(max(num_points)-1):num_points(n);
-                old_vector = 1:num_points(n);
-                fX(:,n) = interp1(old_vector,points{n}(:,1),new_vector);
-                fY(:,n) = interp1(old_vector,points{n}(:,2),new_vector);
+                if num_points(n) > 1
+                    new_vector = 1:(num_points(n)-1)/(max(num_points)-1):num_points(n);
+                    old_vector = 1:num_points(n);
+                    fX(:,n) = interp1(old_vector,points{n}(:,1),new_vector);
+                    fY(:,n) = interp1(old_vector,points{n}(:,2),new_vector);
+                else
+                    fX(:,n) = ones(max(num_points),1) .* points{n}(:,1);
+                    fY(:,n) = ones(max(num_points),1) .*points{n}(:,2);
+                end
             else
                 fX(:,n) = points{n}(:,1);
                 fY(:,n) = points{n}(:,2);
