@@ -7,7 +7,7 @@ end
 hDFGui = getappdata(0,'hDFGui');
 Options = getappdata(hDFGui.fig,'Options');
 if Options.lPlot_XVar.val > 6 || Options.lPlot_YVar.val > 6 
-    OnlyWithCustomData = 0;
+    OnlyWithCustomData = 1;
 else
     OnlyWithCustomData = 0;
 end

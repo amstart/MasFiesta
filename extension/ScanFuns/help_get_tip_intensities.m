@@ -90,11 +90,13 @@ for i=indices
                 sumi(j,k) = nansum(nansum(I_in(j:j+4,k:k+4)));
             end
         end
-        sum_intensity(4) = max(max(sumi));
-        [~, maxix] = max(sumi,[],2);
-        [~, maxiy] = max(sumi);
-        sum_intensity(5) = mean(maxix);
-        sum_intensity(6) = mean(maxiy);
+        if ~isempty(sumi)
+            sum_intensity(4) = max(max(sumi));
+            [~, maxix] = max(sumi,[],2);
+            [~, maxiy] = max(sumi);
+            sum_intensity(5) = mean(maxix);
+            sum_intensity(6) = mean(maxiy);
+        end
     end
 end
 %     imshow(I_in,[]);

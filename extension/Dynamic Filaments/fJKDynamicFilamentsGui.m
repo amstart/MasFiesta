@@ -735,6 +735,7 @@ else
     end
     ylabel(get_label(Options, 1));
 end
+set(gca, 'FontSize', 20)
 hold off
 
 function DataPlot(hDFGui)

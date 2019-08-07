@@ -34,7 +34,7 @@ for m = 1:length(xy)
             case 5
                 vector{m}(n) = max(data);
             case 6
-                vector{m}(n) = (data(end) - data(1))/(length(data)-1);
+                vector{m}(n) = (data(end) - data(1))/Tracks(n).Duration;
             case 7
                 if selected_vars(m) == 3
                     if isfield(Tracks, 'Subsegvel')
