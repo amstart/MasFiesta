@@ -7,7 +7,7 @@ if additionalplots>1
     figure(mainfig);
 end
 % events(events==2) = 0; %also remove tracks with censored events
-subplot = @(m,n,p) subtightplot (m, n, p, [0.08 0.11], [0.08 0.08], [0.08 0.02]);
+subplot = @(m,n,p) subtightplot (m, n, p, [0.08 0.11], [0.2 0.08], [0.08 0.02]);
 [label_x, label_y, DelTracks] = SetUpMode(isfrequencyplot, events, [Tracks.PreviousEvent]', Options);
 [uniquetype, ~, idvec] = unique(type,'stable')
 % if isfrequencyplot == 1
@@ -107,7 +107,7 @@ for j=1:ntypes    %Loop through all groups to be plotted, each group gets its ow
 %     set(gca,'ButtonDownFcn',@createnew_fig)
     switch isfrequencyplot
         case 0
-            [plot_x, plot_y, ~] = Get_Vectors(PlotTracks, events(correct_type), Options.mXReference.val, isfrequencyplot, Options.cExclude.val);
+            [plot_x, plot_y, ~] = Get_Vectors(PlotTracks, events(correct_type), Options, isfrequencyplot);
             point_info=cell(sum(correct_type),1);
 %             if Options.ZOK
 %                 color_mode = 1;
@@ -159,7 +159,7 @@ for j=1:ntypes    %Loop through all groups to be plotted, each group gets its ow
                 end
             end
         case 1
-            [plot_x, plot_y, ploteventends] = Get_Vectors(PlotTracks, events(correct_type), Options.mXReference.val, isfrequencyplot, Options.cExclude.val);
+            [plot_x, plot_y, ploteventends] = Get_Vectors(PlotTracks, events(correct_type), Options, isfrequencyplot);
             fJKfrequencyvsXplot(f, plot_x, plot_y, ploteventends, {Options.lPlot_XVar.str, Options.lPlot_YVar.str});
     end
     set(gca, 'FontSize', 24);
@@ -169,11 +169,14 @@ for j=1:ntypes    %Loop through all groups to be plotted, each group gets its ow
 end
 
 
-function [plotx, ploty, ploteventends] = Get_Vectors(PlotTracks, plotevents, refmode, isfrequencyplot, exclude)
+function [plotx, ploty, ploteventends] = Get_Vectors(PlotTracks, plotevents, Options, isfrequencyplot)
+exclude = Options.cExclude.val;
+refmode = [Options.mXReference.val Options.mYReference.val Options.mZReference.val];
 %plotx and ploty are vectors with all datapoints of the group to be plotted
 pr = length(PlotTracks);
 cellx=cell(pr,1);
 celly=cell(pr,1);
+cellz=cell(pr,1);
 ploteventends=nan(size(plotevents));
 if isfrequencyplot
     switch refmode
@@ -225,35 +228,37 @@ if isfrequencyplot
         end
     end
 else
-    switch refmode
-        case {1,5}
-        for k=1:pr
-            cellx{k}=PlotTracks(k).X;
+    for k=1:pr
+        if ~exclude
+            vars = {PlotTracks(k).X PlotTracks(k).Y};
+        else
+            vars = {PlotTracks(k).X PlotTracks(k).Y PlotTracks(k).Z};
         end
-        case {2}
-        for k=1:pr
-            cellx{k}=[0; diff(PlotTracks(k).X)];
+        for j = 1:length(vars)
+            var = vars{j};
+            switch refmode(j)
+                case {1,5}
+                    cellvar=var;
+                case {2}
+                    cellvar=[0; diff(var)];
+                case {6}
+                    cellvar=var-var(1);
+                case {7}
+                    cellvar=var-var(end);
+                case 4
+                    cellvar=var-nanmedian(var);
+            end
+            switch j
+                case 1                
+                    cellx{k} = cellvar;
+                case 2
+                    celly{k} = cellvar;
+                case 3
+                    cellz{k} = cellvar;
+            end
         end
-        case {6}
-        for k=1:pr
-            cellx{k}=PlotTracks(k).X-PlotTracks(k).X(1);
-        end
-        case {7}
-        for k=1:pr
-            cellx{k}=PlotTracks(k).X-PlotTracks(k).X(end);
-        end
-        case 4
-        for k=1:pr
-            cellx{k}=PlotTracks(k).X-nanmedian(PlotTracks(k).X);
-        end
-    end
-    if ~exclude
-        for k=1:pr
-            celly{k}=PlotTracks(k).Y;
-        end
-    else
-        for k=1:pr
-            celly{k}=[0; diff(PlotTracks(k).Y)]./[0; diff(PlotTracks(k).Z)];
+        if exclude
+            celly{k}=celly{k}./cellz{k};
         end
     end
 end
@@ -262,23 +267,34 @@ ploty=vertcat(celly{:});
 
 function [labelx, labely, DelTracks] = SetUpMode(plot_mode, events, previous_event, Options)
 DelTracks = false(length(events),1);
-switch Options.mXReference.val
-    case 1
-        labelsuffixx='';
-    case 2
-        labelsuffixx='- start (with events only)';
-        DelTracks = DelTracks | ~previous_event;
-    case 3
-        labelsuffixx='- end (with events only)';
-        DelTracks = DelTracks | ~events';
-    case 4
-        labelsuffixx='- median';
-    case 5
-        labelsuffixx='- track velocity';
-    case 6
-        labelsuffixx='- start';
-    case 7
-        labelsuffixx='- end';
+for i = 1:3
+    toswitch = [Options.mXReference.val Options.mYReference.val Options.mZReference.val];
+    switch toswitch(i)
+        case 1
+            str='';
+        case 2
+            str='- previous frame';
+            DelTracks = DelTracks | ~previous_event;
+        case 3
+            str='empty';
+            DelTracks = DelTracks | ~events';
+        case 4
+            str='- median';
+        case 5
+            str='- track velocity';
+        case 6
+            str='- start';
+        case 7
+            str='- end';
+    end
+    switch i
+        case 1
+            labelsuffixx = str;
+        case 2
+            labelsuffixy = str;
+        case 3
+            labelsuffixz = str;
+    end
 end
 if plot_mode == 1
     labelprefixy='N(events)/';
@@ -293,4 +309,4 @@ else
     segment =  [' (' Options.lSubsegment.print ' only)'];
 end
 labelx=[Options.lPlot_XVar.print ' ' labelsuffixx ' [' Options.lPlot_XVar.str ']'];
-labely=[labelprefixy Options.lPlot_YVar.print segment ' [' unitprefixy Options.lPlot_YVar.str ']'];
+labely=[labelprefixy Options.lPlot_YVar.print ' ' labelsuffixy ' ' segment ' [' unitprefixy Options.lPlot_YVar.str ']'];

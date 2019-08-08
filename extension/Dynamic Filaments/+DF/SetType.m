@@ -162,14 +162,10 @@ if nargin > 1
     switch varargin{1}
         case 'file'
             [~, ~, orderid] = unique(file);
-        case 'colors'
-            for i=1:length(Tracks)
-                Tracks(i).Z = Tracks(i).Data(:,varargin{2});
-            end
     end
 end
 for i=1:length(Tracks)
-    Tracks(i).Z = Tracks(i).Data(:,1);
+    Tracks(i).Z = Tracks(i).Data(:,Options.lPlot_ZVar.val);
 end
 
 

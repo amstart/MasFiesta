@@ -25,6 +25,7 @@ if ~isempty(customfields)
 end
 set(hDFGui.lPlot_XVar, 'UserData', var_units ,'String', var_names, 'Value', min(length(var_names), get(hDFGui.lPlot_XVar, 'Value')));
 set(hDFGui.lPlot_YVar, 'UserData', var_units ,'String', var_names, 'Value', min(length(var_names), get(hDFGui.lPlot_YVar, 'Value')));
+set(hDFGui.lPlot_ZVar, 'UserData', var_units ,'String', var_names, 'Value', min(length(var_names), get(hDFGui.lPlot_ZVar, 'Value')));
 children = get(hDFGui.pOptions, 'Children');
 children = vertcat(children, get(hDFGui.pLoadOptions, 'Children'));
 Options = struct;

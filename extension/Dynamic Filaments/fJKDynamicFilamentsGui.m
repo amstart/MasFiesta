@@ -342,7 +342,8 @@ for userdata=userdatacell'
                 set(hDFGui.lChoosePlot, 'Value', 1);
             end
             set(hDFGui.lPlot_XVar, 'Value', floor(userdatafixed/10));
-            set(hDFGui.lPlot_YVar, 'Value', mod(userdatafixed,10));
+            set(hDFGui.lPlot_YVar, 'Value', floor(userdatafixed,10));
+            set(hDFGui.lPlot_ZVar, 'Value', floor(userdatafixed,10));
         else
             set(hDFGui.lChoosePlot, 'Value', userdatafixed);
         end

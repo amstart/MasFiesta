@@ -25,7 +25,7 @@ elseif ~isempty(strfind(filename, 'tipandmiddleandallandycenter'))
     read_fun = @ReadTipMiddleAllYPos;
     plot_options = {'Tip count', 'Density middle', 'Total count', 'Tip density', 'y center';...
         '1', '1/nm', '1', '1/nm', 'px'};
-elseif ~isempty(strfind(filename, 'tipandmiddleandextension')) || ~isempty(strfind(filename, 'tmc'))
+elseif ~isempty(strfind(filename, 'tipandmiddleandextension')) || ~isempty(strfind(filename, 'extension')) || ~isempty(strfind(filename, 'whole_MT'))
     fun = @(x) x;
     read_fun = @ReadTipMiddleExtension;
     plot_options = {'Tip count', 'Density middle', 'Extension count', 'Tip density', 'x center', 'y center';...
