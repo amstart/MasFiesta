@@ -25,11 +25,11 @@ elseif ~isempty(strfind(filename, 'tipandmiddleandallandycenter'))
     read_fun = @ReadTipMiddleAllYPos;
     plot_options = {'Tip count', 'Density middle', 'Total count', 'Tip density', 'y center';...
         '1', '1/nm', '1', '1/nm', 'px'};
-elseif ~isempty(strfind(filename, 'tipandmiddleandextension')) || ~isempty(strfind(filename, 'extension')) || ~isempty(strfind(filename, 'whole_MT'))
+elseif ~isempty(strfind(filename, 'tipandmiddleandextension')) || ~isempty(strfind(filename, 'ext')) || ~isempty(strfind(filename, 'whole_MT'))
     fun = @(x) x;
     read_fun = @ReadTipMiddleExtension;
-    plot_options = {'Tip count', 'Density middle', 'Extension count', 'Tip density', 'x center', 'y center';...
-        '1', '1/nm', '1', '1/nm', 'px', 'px'};
+    plot_options = {'Tip count', 'Density middle', 'Extension count', 'Tip density', 'x center', 'y center', 'Extension length';...
+        '1', '1/nm', '1', '1/nm', 'px', 'px', 'nm'};
 elseif ~isempty(strfind(filename, 'intensity_'))
     fun = @(x) x;
     read_fun = @ReadTFIData;
@@ -68,14 +68,14 @@ DF.updateOptions();
 
 function [matrix] = ReadTipMiddleExtension(Object, customfield, ~)
 data = Object.CustomData.(customfield{1}).Data;
-matrix = nan(length(data), 6);
+matrix = nan(length(data), 7);
 % if ~isempty(strfind(Object.Comment, %maybe here it should check whether
 % the MT can be used for this
 for m = 1:length(data)
     if isnan(data{m}) 
-        matrix(m,1:6) = nan;
+        matrix(m,:) = nan;
     else
-        matrix(m,1:6) = data{m};
+        matrix(m,:) = data{m};
     end
     if m>2 && isnan(matrix(m-1,1))
         matrix(m-1,1:4) = (matrix(m-2,1:4)+matrix(m,1:4))/2;

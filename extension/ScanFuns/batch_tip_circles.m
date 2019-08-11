@@ -25,9 +25,9 @@ end
 Filament = load([PathName FileName]);
 Filament = Filament.Filament;
 %% Helper Functions
-% Reference = select_filaments(Filament, 3);
+Reference = select_filaments(Filament, 3);
 Filament = select_filaments(Filament, ScanOptions.ObjectChannel);
-% Filament = help_extension_only(Filament, Reference);
+Filament = help_extension_only(Filament, Reference);
 Filament = help_CorrectObject(Filament, PathName);
 [Filament] = help_get_tip_points(Filament, ScanOptions);
 [Stack, ~, ~] = help_GetStack(PathName, Filament(1).File);

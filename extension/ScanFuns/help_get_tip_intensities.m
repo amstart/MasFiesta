@@ -43,7 +43,7 @@ for m = find(FilSelect==1)
     ifil=ifil+1;
 end
 
-function [sum_intensity] = get_tipandmiddleandall(I, Filament, n)
+function [output] = get_tipandmiddleandall(I, Filament, n)
 data = Filament.Data{n};
 new_points = round(data(:,1:2)./Filament.PixelSize);
 edgepoints = [new_points(1,:); new_points(end,:)];
@@ -68,7 +68,7 @@ inall=strel('square',5);
 spacer=strel('square',9); %Create morphological structuring element
 out=strel('square',11); %Create morphological structuring element
 spacer_region = imdilate(line,spacer);
-sum_intensity = nan(1,6);
+output = nan(1,7);
 for i=indices
     if i == 1
         in_region = imdilate(lines(:,:,i),in);
@@ -80,7 +80,7 @@ for i=indices
     out_region = imdilate(lines(:,:,i),out);
     background = I(out_region & ~spacer_region);
     I_in = I_in - prctile(background,10);
-    sum_intensity(i) = nansum(I_in(:));
+    output(i) = nansum(I_in(:));
     if i == 1
         I_in( ~any(in_region,2), : ) = [];  %rows
         I_in( :, ~any(in_region,1) ) = [];  %columns
@@ -91,14 +91,19 @@ for i=indices
             end
         end
         if ~isempty(sumi)
-            sum_intensity(4) = max(max(sumi));
+            output(4) = max(max(sumi));
             [~, maxix] = max(sumi,[],2);
             [~, maxiy] = max(sumi);
-            sum_intensity(5) = mean(maxix);
-            sum_intensity(6) = mean(maxiy);
+            output(5) = mean(maxix);
+            output(6) = mean(maxiy);
         end
     end
 end
+d = zeros(size(data,1)-1,1);
+for i = 1:size(data,1)-1
+    d(i) = CalcDistance(data(i,1:2),data(i+1,1:2));
+end
+output(7) = sum(d);%length of MT
 %     imshow(I_in,[]);
 
 % function [Filament] = get_TFI(Stack, Filament, Options)
