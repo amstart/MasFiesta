@@ -101,9 +101,9 @@ for n = 1:length(Objects)
         starti = segtagauto(m,1);
         endi = segtagauto(m,2);
         if floor(segtagauto(m,3))~=tagnum  %remove points too close to seed (plus ends only)
-            if d(endi)<Options.eRescueCutoff.val %remove growing tracks ending below rescue threshold
-                continue
-            end
+%             if d(endi)<Options.eRescueCutoff.val %remove growing tracks ending below rescue threshold
+%                 continue
+%             end
             if min(d(starti:endi))<Options.eDisregard.val
                 for id=starti:endi
                     if d(id)<Options.eDisregard.val

@@ -40,7 +40,7 @@ for i=1:length(NewObjects)
         if strcmp(NewObjects(i).Type, 'unknown') || ~isempty(strfind(restcomment, 'OLP'));
             deleteobjects(i) = 1;
         end
-        if ~isempty(strfind(NewObjects(i).Comments, '--'))
+        if ~isempty(strfind(NewObjects(i).Comments, '--')) || ~isempty(strfind(NewObjects(i).Comments, 'maybeMinusEnd'))
             deleteobjects(i) = 1;
         end
         if strcmp(NewObjects(i).Type(end), 'A')

@@ -26,10 +26,10 @@ for i=1:2
             if event(n)
                 NEvents(typenum)=NEvents(typenum)+1;
                 NEventsO(uidid(n))=NEventsO(uidid(n))+1;
-%                 text(typenum+0.1, double(Tracks(n).Data(end,2)), print_str, 'Color','red');
+                text(typenum+0.1, double(Tracks(n).Data(end,2)), print_str, 'Color','red');
                 plot(typenum, Tracks(n).Data(end,2), 'Color','red', 'LineStyle', 'none', 'Marker','o');
             else
-%                 text(typenum+0.1, double(Tracks(n).Data(end,2)), print_str, 'Color','black');
+                text(typenum+0.1, double(Tracks(n).Data(end,2)), print_str, 'Color','black');
                 plot(typenum, Tracks(n).Data(end,2), 'Color','black', 'LineStyle', 'none', 'Marker','o');
             end
             sumTime(typenum)=sumTime(typenum)+Tracks(n).Duration/60;
