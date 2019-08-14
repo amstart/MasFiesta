@@ -401,7 +401,7 @@ else
     set(f, 'Name',[plotstr{ChosenPlot} str], 'Tag', 'Plot', 'UserData', ChosenPlot);
     switch ChosenPlot
         case 3
-            DF.EventPlot(Options.lGroup.val, Options.eRescueCutoff.val);
+            DF.EventPlot(Options);
         case 4
             BoxPlot(Options);
         case 5

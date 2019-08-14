@@ -1,6 +1,19 @@
-function EventPlot(group, cutoff)
+function EventPlot(Options)
+group = Options.lGroup.val;
+cutoff = Options.eRescueCutoff.val;
 subplot = @(m,n,p) subtightplot (m, n, p, [0.08 0.08], [0.08 0.08], [0.08 0.02]);
 PlotGrowing=[1 0];
+switch Options.lPlot_XVar.str
+    case 's'
+        unit = 'min';
+        factor = 60;
+    case 'nm'
+        unit = '\mum';
+        factor = 1000;
+    otherwise
+        unit = Options.lPlot_XVar.str;
+        factor = 1;
+end
 for i=1:2
     [type, Tracks, event, orderid]=DF.SetType(PlotGrowing(i), 'file');
     [uniquetypes, ~, typeid]=unique(type, 'stable');
@@ -19,6 +32,8 @@ for i=1:2
         plot([0.5 length(uniquetypes) + 0.5] , [cutoff cutoff], 'r-')
         ylabel('Distance to seed [nm]');
     end
+    Options.lMethod_TrackValue.val = 3;
+    [duration, ~] = DF.get_plot_vectors(Options, Tracks, 1);
     for n=1:length(Tracks)
         typenum=find(strcmp(uniquetypes, type{n}));
         if ~isempty(Tracks(n).Data)
@@ -32,8 +47,8 @@ for i=1:2
                 text(typenum+0.1, double(Tracks(n).Data(end,2)), print_str, 'Color','black');
                 plot(typenum, Tracks(n).Data(end,2), 'Color','black', 'LineStyle', 'none', 'Marker','o');
             end
-            sumTime(typenum)=sumTime(typenum)+Tracks(n).Duration/60;
-            sumTimeO(uidid(n))=sumTimeO(uidid(n))+Tracks(n).Duration/60;
+            sumTime(typenum)=sumTime(typenum)+duration(n)/factor;
+            sumTimeO(uidid(n))=sumTimeO(uidid(n))+duration(n)/factor;
         end
     end
     set(gca,'XTick',1:length(uniquetypes), 'FontSize',18, 'LabelFontSizeMultiplier', 1.5,'xticklabel',uniquetypes, 'Ticklength', [0 0]);
@@ -61,9 +76,9 @@ for i=1:2
     movienum = accumarray(typeid(uniqueorder),1);
     for j=1:length(uniquetypes)
         if fEvents(j)
-            text(j, fEvents(j)/2, {[num2str(NEvents(j)) ' events'], [num2str(sumTime(j),'%1.1f') ' min'],[num2str(MTnum(j)) 'MTs'], [num2str(movienum(j)) ' experiments']}, 'HorizontalAlignment', 'center', 'FontSize',16);
+            text(j, fEvents(j)/2, {[num2str(NEvents(j)) ' events'], [num2str(sumTime(j),'%1.1f') ' ' unit],[num2str(MTnum(j)) 'MTs'], [num2str(movienum(j)) ' experiments']}, 'HorizontalAlignment', 'center', 'FontSize',16);
         else
-            text(j, fEvents(j)/2, {['0 in ' num2str(sumTime(j),'%1.1f') ' min'], [num2str(MTnum(j)) ' MTs'], [num2str(movienum(j)) ' experiments']}, 'HorizontalAlignment', 'center', 'VerticalAlignment', 'bottom', 'FontSize',16);
+            text(j, fEvents(j)/2, {['0 in ' num2str(sumTime(j),'%1.1f') ' ' unit], [num2str(MTnum(j)) ' MTs'], [num2str(movienum(j)) ' experiments']}, 'HorizontalAlignment', 'center', 'VerticalAlignment', 'bottom', 'FontSize',16);
         end
     end
     set(gca,'XTick',1:length(uniquetypes), 'FontSize',18, 'LabelFontSizeMultiplier', 1.5,'xticklabel',uniquetypes, 'Ticklength', [0 0]);
@@ -71,9 +86,9 @@ for i=1:2
         set(gca,'XTickLabelRotation',15);
     end
     if isempty(strfind(uniquetypes{1}, '\downarrow'))
-        ylabel('Catastrophe frequency [1/min]');
+        ylabel(['Catastrophe frequency [1/' unit ']']);
     else
-        ylabel('Rescue frequency [1/min]');
+        ylabel(['Rescue frequency [1/' unit ']']);
     end
     legend(h_error, '$\frac{\sqrt{N}}{\sum{t}}$', 'Location', 'best', 'Interpreter', 'LaTex', 'FontSize', 20);
 end

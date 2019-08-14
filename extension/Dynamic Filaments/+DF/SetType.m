@@ -141,11 +141,12 @@ if get(hDFGui.lChoosePlot, 'Value') == 8
     for i=1:length(Tracks)
         Tracks(i).Data = Tracks(i).WithTrackAfter;
     end
-else
+elseif ~PlotGrowingTags 
     [Tracks, DelObjects] = SelectSubsegments(Tracks, Options);
     Tracks(DelObjects) = [];
     event(DelObjects) = [];
     type(DelObjects) = [];
+    file(DelObjects) = [];
 end
 for i=1:length(Tracks)
     Tracks(i).Y = Tracks(i).Data(:,ycolumn);
