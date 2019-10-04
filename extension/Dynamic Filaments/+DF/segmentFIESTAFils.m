@@ -137,6 +137,10 @@ for n = 1:length(Objects)
         Tracks(track_id).Event=segtagauto(m,3);
         Tracks(track_id).DistanceEventEnd=segd(end);
         Tracks(track_id).Data=[segt segd segvel intensity(segframes) autotags(segframes) segframes custom_data(segframes, :)];
+        try
+        Tracks(track_id).Data(:,end) = Tracks(track_id).Data(:,9)./Tracks(track_id).Data(:,2);
+        catch
+        end
         Tracks(track_id).XEventStart=Tracks(track_id).Data(1,:);
         Tracks(track_id).XEventEnd=Tracks(track_id).Data(end,:);
         if m==1 || mod(Tracks(track_id-1).Event,1)-0.85<0

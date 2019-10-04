@@ -94,6 +94,8 @@ for j=1:ntypes    %Loop through all groups to be plotted, each group gets its ow
             return
     end
     hold on;
+    xlabel(curent_x_label);
+    ylabel([curent_y_label]);
     correct_type=cellfun(@(x) strcmp(x, uniquetype(j)),type);
     PlotTracks=Tracks(correct_type);
     if additionalplots==2
@@ -164,8 +166,6 @@ for j=1:ntypes    %Loop through all groups to be plotted, each group gets its ow
     end
     set(gca, 'FontSize', 24);
     title(uniquetype{j}, 'FontSize', 18);
-    xlabel(curent_x_label);
-    ylabel([curent_y_label]);
 end
 
 
@@ -179,7 +179,7 @@ celly=cell(pr,1);
 cellz=cell(pr,1);
 ploteventends=nan(size(plotevents));
 if isfrequencyplot
-    switch refmode
+    switch refmode(1)
         case {1,5}
         for k=1:pr
             try
@@ -274,10 +274,8 @@ for i = 1:3
             str='';
         case 2
             str='- previous frame';
-            DelTracks = DelTracks | ~previous_event;
         case 3
             str='empty';
-            DelTracks = DelTracks | ~events';
         case 4
             str='- median';
         case 5
@@ -296,9 +294,16 @@ for i = 1:3
             labelsuffixz = str;
     end
 end
+yunit = Options.lPlot_YVar.str;
 if plot_mode == 1
     labelprefixy='N(events)/';
     unitprefixy='1/';
+    switch yunit
+        case 's'
+            yunit = 'min';
+        case 'nm'
+            yunit = '\mum';
+    end
 else
     labelprefixy='';
     unitprefixy='';
@@ -309,4 +314,4 @@ else
     segment =  [' (' Options.lSubsegment.print ' only)'];
 end
 labelx=[Options.lPlot_XVar.print ' ' labelsuffixx ' [' Options.lPlot_XVar.str ']'];
-labely=[labelprefixy Options.lPlot_YVar.print ' ' labelsuffixy ' ' segment ' [' unitprefixy Options.lPlot_YVar.str ']'];
+labely=[labelprefixy Options.lPlot_YVar.print ' ' labelsuffixy ' ' segment ' [' unitprefixy yunit ']'];

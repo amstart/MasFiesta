@@ -19,9 +19,13 @@ function fJKscatterboxplot(f, plot_x, plot_y, point_info, names)
 %     end
 numcol = length(unique(point_info));
 colormap(linspecer(numcol));
-s = scatter(f, plot_x, plot_y, 50, point_info); drawnow;
-row = dataTipTextRow('TrackId',names);
-s.DataTipTemplate.DataTipRows(end+1) = row;
+% for i=1:numcol
+%     now = point_info==i;
+    now = true(size(point_info));
+    s = scatter(f, plot_x(now), plot_y(now), 50, point_info(now)); drawnow;
+    row = dataTipTextRow('TrackId',names(now));
+    s.DataTipTemplate.DataTipRows(end+1) = row;
+% end
 % iosr.statistics.boxPlot(edgesmid, matrix, 'sampleSize', true, 'scatterAlpha', 1, 'showScatter', true, 'medianColor','r', 'showMean', true)
 box = iosr.statistics.boxPlot(edgesmid, matrix, 'medianColor','r', 'showOutliers', false, 'sampleSize', true, 'showMean', true, 'sampleFontSize', 14)
 for h = [box.handles.box box.handles.medianLines box.handles.lowerWhiskers box.handles.upperWhiskers box.handles.lowerWhiskerTips box.handles.upperWhiskerTips box.handles.means]
@@ -40,7 +44,7 @@ function [matrix, edgesmid, nelements] = histcounts2own(plotx, ploty)
 % end https://stackoverflow.com/questions/41644022/using-accumarray-for-a-weighted-average
 % plotx=plotx(~isnan(plotx));
 if 1
-    [~, edges, xid] = histcounts(plotx, 10);
+    [~, edges, xid] = histcounts(plotx, 14);
 %     if length(edges)>7
 %         [~, edges, xid] = histcounts(plotx,7);
 %     end
