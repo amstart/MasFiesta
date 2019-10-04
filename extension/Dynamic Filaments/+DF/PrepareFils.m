@@ -37,10 +37,10 @@ for i=1:length(NewObjects)
             space=length(restcomment(1:end))+1;
         end
         NewObjects(i).Type=restcomment(1:space(1)-1);
-        if strcmp(NewObjects(i).Type, 'unknown') || ~isempty(strfind(restcomment, 'OLP'));
+        if strcmp(NewObjects(i).Type, 'unknown') || ~isempty(strfind(restcomment, 'OLP'))
             deleteobjects(i) = 1;
         end
-        if ~isempty(strfind(NewObjects(i).Comments, '--')) || ~isempty(strfind(NewObjects(i).Comments, 'maybeMinusEnd'))
+        if ~isempty(strfind(NewObjects(i).Comments, '--')) %|| ~isempty(strfind(NewObjects(i).Comments, 'noplusend')) nominusend endisparallelplusend
             deleteobjects(i) = 1;
         end
         if strcmp(NewObjects(i).Type(end), 'A')
