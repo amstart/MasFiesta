@@ -155,7 +155,7 @@ for n = 1:length(Objects)
         end
         Tracks(track_id).XEventStart=Tracks(track_id).Data(1,:);
         Tracks(track_id).XEventEnd=Tracks(track_id).Data(end,:);
-        if m==1 || mod(Tracks(track_id-1).Event,1)-0.85<0
+        if m==1 || Tracks(track_id-1).MTIndex ~= Tracks(track_id).MTIndex || mod(Tracks(track_id-1).Event,1)-0.85<0
             Tracks(track_id).PreviousEvent=0;
             Tracks(track_id).XEventStart(:)=nan;
         else
@@ -168,7 +168,7 @@ for n = 1:length(Objects)
         Tracks(track_id).end_first_subsegment = length(segt);
         Tracks(track_id).start_last_subsegment = length(segt);
         is_tagged(m)=floor(segtagauto(m,3))==tagnum;
-        if m~=1
+        if track_id > 1 && Tracks(track_id-1).MTIndex == Tracks(track_id).MTIndex
             subevent = Tracks(track_id-1).start_last_subsegment;
             if ~subevent
                 subevent = starti;
