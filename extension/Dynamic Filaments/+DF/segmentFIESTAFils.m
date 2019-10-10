@@ -115,18 +115,30 @@ for n = 1:length(Objects)
                 segtagauto(m,1) = lastid;
             end
         else %remove shrinking tracks starting below rescue threshold
-            if d(starti)<Options.eRescueCutoff.val
+            if starti == 0 || d(starti)<Options.eRescueCutoff.val
                 continue
             end
-        end
-        if starti==endi
-            warning(['track only one frame long:' Objects(n).Name]);
-            continue
         end
         segframes=(starti:endi)';
         segvel=v(segframes); %why, see Calcvelocity()
         segt=t(segframes);
         segd=d(segframes);
+        if Options.eSubStart.val && is_tagged(m)
+            end_first_subsegment = FindSubsegments(segvel, 1, Options.eSubStart.val, Options.cAbsVelocity);
+            if isempty(end_first_subsegment)
+                warning(['no segments:' Objects(n).Name]);
+                continue
+            end
+            Tracks(track_id).end_first_subsegment = end_first_subsegment;
+        end
+        if Options.eSubEnd.val && is_tagged(m)
+             Tracks(track_id).start_last_subsegment = FindSubsegments(segvel, -1, Options.eSubEnd.val, Options.cAbsVelocity);
+        end
+        if starti==endi
+            warning(['track only one frame long:' Objects(n).Name]);
+            continue
+        end
+        [~, Tracks(track_id).minindex] = min(segvel);
         Tracks(track_id).Name=Objects(n).Name;
         Tracks(track_id).MTIndex = n;
         Tracks(track_id).TrackIndex= track_id;
@@ -156,13 +168,6 @@ for n = 1:length(Objects)
         Tracks(track_id).end_first_subsegment = length(segt);
         Tracks(track_id).start_last_subsegment = length(segt);
         is_tagged(m)=floor(segtagauto(m,3))==tagnum;
-        [~, Tracks(track_id).minindex] = min(segvel);
-        if Options.eSubStart.val && is_tagged(m)
-            Tracks(track_id).end_first_subsegment = FindSubsegments(segvel, 1, Options.eSubStart.val, Tracks(track_id).minindex, Options.cAbsVelocity);
-        end
-        if Options.eSubEnd.val && is_tagged(m)
-            Tracks(track_id).start_last_subsegment = FindSubsegments(segvel, -1, Options.eSubEnd.val, Tracks(track_id).minindex, Options.cAbsVelocity);
-        end
         if m~=1
             subevent = Tracks(track_id-1).start_last_subsegment;
             if ~subevent
@@ -178,10 +183,10 @@ for n = 1:length(Objects)
         Tracks(track_id).HasIntensity=any(intensity(starti:endi));
         segtagauto(m, 5)=track_id;
         segtagauto(m, 4)=Tracks(track_id).DistanceEventEnd;
-        tmp_fit = polyfit(segt,segd,1);
-        velocity(m) = tmp_fit(1);
+%         tmp_fit = polyfit(segt,segd,1);
+        velocity(m) = (segd(end) - segd(1))/(segt(end) - segt(1));
+        Tracks(track_id).Startendvel=velocity(m);
         Tracks(track_id).Velocity=velocity(m);
-        Tracks(track_id).Startendvel=(segd(end) - segd(1))/(segt(end) - segt(1));
         Tracks(track_id).Selected=0;
         Tracks(track_id).HasCustomData = has_custom_data;
         track_id=track_id+1;
@@ -263,12 +268,14 @@ function [breaking] = checkwhethercut(segtagauto, v1, v2, v3, Options) %v1 is ve
     end
 % end
 
-function [borderindex] = FindSubsegments(velocity, step, bordervalue, minindex, cAbsVelocity)
+function [borderindex] = FindSubsegments(velocity, step, bordervalue, cAbsVelocity)
+[~, minindex] = min(velocity);
 if step > 0
     starti = 1;
 else
     starti = length(velocity);
 end
+borderindex = [];
 for i = starti:step:minindex
     if cAbsVelocity.val
         criterium = velocity(i) < -bordervalue;
@@ -283,9 +290,4 @@ for i = starti:step:minindex
         end
         break
     end
-end
-if isempty(i)
-    borderindex = 0;
-elseif i == minindex && isempty(borderindex)
-    borderindex = minindex;
 end

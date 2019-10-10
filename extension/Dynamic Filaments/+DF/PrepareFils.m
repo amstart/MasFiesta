@@ -40,7 +40,13 @@ for i=1:length(NewObjects)
         if strcmp(NewObjects(i).Type, 'unknown') || ~isempty(strfind(restcomment, 'OLP'))
             deleteobjects(i) = 1;
         end
-        if ~isempty(strfind(NewObjects(i).Comments, '--')) %|| ~isempty(strfind(NewObjects(i).Comments, 'noplusend')) nominusend endisparallelplusend
+        if ref == 1 && ~isempty(strfind(NewObjects(i).Comments, 'noplusend'))
+            deleteobjects(i) = 1;
+        end
+        if ref == 3 && (~isempty(strfind(NewObjects(i).Comments, 'nominusend')) || ~isempty(strfind(NewObjects(i).Comments, 'endisparallelplusend'))) 
+            deleteobjects(i) = 1;
+        end
+        if ~isempty(strfind(NewObjects(i).Comments, '--'))  
             deleteobjects(i) = 1;
         end
         if strcmp(NewObjects(i).Type(end), 'A')
