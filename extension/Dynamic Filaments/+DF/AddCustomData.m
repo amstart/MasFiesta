@@ -186,7 +186,7 @@ for m = 1:length(fit_data)
 end
 
 function kymo_data = PrepareKymoData(kymo_data, Object)
-%simply takes the maximum pixel per "cross section" of the kymograph line
+%takes the background-subtracted sum per "cross section" of the kymograph line
 for m = 1:length(kymo_data)
 %     kymo_data{m} = max(kymo_data{m}, [], 1);
     kymo_data{m} = (nansum(double(kymo_data{m}), 1)-sum(~isnan(kymo_data{m}),1).*min(min(double(kymo_data{m}), [], 1)))/(Object.Custom.IntensityPerMAP*Object.PixelSize);

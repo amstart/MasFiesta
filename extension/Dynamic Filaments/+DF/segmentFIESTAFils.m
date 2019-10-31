@@ -123,6 +123,9 @@ for n = 1:length(Objects)
         segvel=v(segframes); %why, see Calcvelocity()
         segt=t(segframes);
         segd=d(segframes);
+        is_tagged(m)=floor(segtagauto(m,3))==tagnum;
+        Tracks(track_id).end_first_subsegment = length(segt);
+        Tracks(track_id).start_last_subsegment = length(segt);
         if Options.eSubStart.val && is_tagged(m)
             end_first_subsegment = FindSubsegments(segvel, 1, Options.eSubStart.val, Options.cAbsVelocity);
             if isempty(end_first_subsegment)
@@ -165,9 +168,6 @@ for n = 1:length(Objects)
             Tracks(track_id).XEventEnd(:)=nan;
         end
         
-        Tracks(track_id).end_first_subsegment = length(segt);
-        Tracks(track_id).start_last_subsegment = length(segt);
-        is_tagged(m)=floor(segtagauto(m,3))==tagnum;
         if track_id > 1 && Tracks(track_id-1).MTIndex == Tracks(track_id).MTIndex
             subevent = Tracks(track_id-1).start_last_subsegment;
             if ~subevent
