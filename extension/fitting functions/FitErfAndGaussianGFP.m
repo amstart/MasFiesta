@@ -33,12 +33,8 @@ opts.Upper = [1 1 1 10 16];
 [fitresult, gof] = fit( xData, yData, ft, opts );
 
 % Plot fit with data.
-figure( 'Name', 'untitled fit 1' );
 h = plot( fitresult, xData, yData );
-legend( h, 'y vs. x', 'untitled fit 1', 'Location', 'NorthEast', 'Interpreter', 'none' );
-% Label axes
-xlabel( 'x', 'Interpreter', 'none' );
-ylabel( 'y', 'Interpreter', 'none' );
-grid on
+legend('hide');
+set(h, 'MarkerSize',30);
 
 
