@@ -18,7 +18,11 @@ ScanOptions.kymo_options = file_data.ScanOptions;
 
 for i=1:length(names)
     index = cellfun(@(x)strcmp(x, names{i}), frame_data(:,2));
-    shrinkingframes{i} = frame_data{index,1};
+    if any(index)
+        shrinkingframes{i} = frame_data{index,1};
+    else
+        shrinkingframes{i} = [];
+    end
 end
 %% Helper Functions
 [fit_results] = help_fit_error_function(kymos, ScanOptions, shrinkingframes, names);
