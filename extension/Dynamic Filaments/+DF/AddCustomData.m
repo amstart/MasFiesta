@@ -180,8 +180,8 @@ for m = 1:length(fit_data)
     tmp = fit_data{m}.gof;
     tmp.w0 = fit_data{m}.fitresult.w0;
     tmp.x0 = fit_data{m}.fitresult.x0;
-    tmp.p0 = fit_data{m}.fitresult.p0;
-    tmp.y0 = fit_data{m}.fitresult.y0;
+%     tmp.p0 = fit_data{m}.fitresult.p0;
+%     tmp.y0 = fit_data{m}.fitresult.y0;
     fit_data{m} = tmp;
 end
 
