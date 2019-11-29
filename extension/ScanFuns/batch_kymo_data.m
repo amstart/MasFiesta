@@ -6,19 +6,21 @@ global ScanOptions
 % try
 %rmappdata(0, 'hMainGui');
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-ScanOptions.filename = ['pixelkymo_GFP_shifted_sumkymo_test_fit' '.mat'];
+ScanOptions.filename = ['pixelkymo_GFP_sum_gaussiananderr_fit' '.mat'];
 ScanOptions.help_fit_error_function.fit_session = @FitErfAndGaussianGFP;
 %% Load the Kymograph data
-file_data = load([PathName 'pixelkymo_GFP_shifted.mat']);
+forFileName = load([PathName FileName]);
+ScanOptions.File = forFileName.Filament(1).File;
+file_data = load([PathName 'pixelkymo.mat']);
 frame_data = load([PathName 'shrinkingframes.mat']);
 frame_data = frame_data.Data;
 kymos = file_data.Data(:,1);
 names = file_data.Data(:,2);
 ScanOptions.kymo_options = file_data.ScanOptions;
-
+onlyshrinking = 0;
 for i=1:length(names)
     index = cellfun(@(x)strcmp(x, names{i}), frame_data(:,2));
-    if any(index)
+    if any(index) && onlyshrinking
         shrinkingframes{i} = frame_data{index,1};
     else
         shrinkingframes{i} = [];

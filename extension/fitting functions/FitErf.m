@@ -30,3 +30,7 @@ opts.Upper = [2 20 2 0.25];
 [fitresult, gof] = fit( xData, yData, ft, opts );
 
 
+% Plot fit with data.
+% h = plot( fitresult, xData, yData );
+% legend('hide');
+% set(h, 'MarkerSize',30);

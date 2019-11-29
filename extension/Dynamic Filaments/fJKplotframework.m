@@ -124,7 +124,7 @@ for j=1:ntypes    %Loop through all groups to be plotted, each group gets its ow
                 if Options.cGroupIntoMTs.val
                     [legend_items, ~, object_name_ids] = unique({PlotTracks.Name}, 'stable');                    
                     for k=1:sum(correct_type)
-                        point_info{k}=repmat(object_name_ids(k),size(PlotTracks(k).X),1);
+                        point_info{k}=repmat(object_name_ids(k),size(PlotTracks(k).X));
                         datatiplabel{k} = repmat(trackids(k),length(point_info{k}),1);
                     end
                 else

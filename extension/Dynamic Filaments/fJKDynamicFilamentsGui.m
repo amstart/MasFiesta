@@ -671,8 +671,7 @@ hold on;
 [type, AnalyzedTracks, ~]=DF.SetType(Options.cPlotGrowingTracks.val);
 [x_vec, ~] = DF.get_plot_vectors(Options, AnalyzedTracks, 1);
 if isempty(x_vec)
-    text(0.3,0.5,'No data or path available for any objects','Parent','FontWeight','bold','FontSize',16);
-    set('Visible','off');
+    text(0.3,0.5,'No data or path available for any objects','FontWeight','bold','FontSize',16);
     legend('off');
 else
     [uniquetype, type_id, track_type_id] = unique(type, 'stable');
