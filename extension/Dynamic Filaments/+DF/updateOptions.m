@@ -43,11 +43,12 @@ for i = 1:length(children)
             Options.(tagname).val = get(children(i), 'value');
             strings = get(children(i), 'string');
             Options.(tagname).print = strings{min(Options.(tagname).val, length(strings))};
-            try %currently used for units
-                userdata = get(children(i), 'UserData');
-                Options.(tagname).str = userdata{Options.(tagname).val};
-            catch
-            end
+%             try %currently used for units
+%                 userdata = get(children(i), 'UserData');
+%                 Options.(tagname).str = userdata{Options.(tagname).val};
+%             catch
+                Options.(tagname).str = 'error';
+%             end
         case 'edit'
             Options.(tagname).val = str2double(get(children(i), 'string'));
             if isnan(Options.(tagname).val)

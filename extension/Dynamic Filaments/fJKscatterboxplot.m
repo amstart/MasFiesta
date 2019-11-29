@@ -21,10 +21,10 @@ numcol = length(unique(point_info));
 colormap(linspecer(numcol));
 % for i=1:numcol
 %     now = point_info==i;
-    now = true(size(point_info));
-    s = scatter(f, plot_x(now), plot_y(now), 50, point_info(now)); drawnow;
-    row = dataTipTextRow('TrackId',names(now));
-    s.DataTipTemplate.DataTipRows(end+1) = row;
+%     now = true(size(point_info));
+%     s = scatter(f, plot_x(now), plot_y(now), 50, point_info(now)); drawnow;
+%     row = dataTipTextRow('TrackId',names(now));
+%     s.DataTipTemplate.DataTipRows(end+1) = row;
 % end
 % iosr.statistics.boxPlot(edgesmid, matrix, 'sampleSize', true, 'scatterAlpha', 1, 'showScatter', true, 'medianColor','r', 'showMean', true)
 box = iosr.statistics.boxPlot(edgesmid, matrix, 'medianColor','r', 'showOutliers', false, 'showMean', true, 'sampleFontSize', 14)

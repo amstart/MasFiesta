@@ -28,7 +28,7 @@ elseif ~isempty(strfind(filename, 'tipandmiddleandallandycenter'))
 elseif ~isempty(strfind(filename, 'tipandmiddleandextension')) || ~isempty(strfind(filename, 'ext')) || ~isempty(strfind(filename, 'whole_MT'))
     fun = @(x) x;
     read_fun = @ReadTipMiddleExtension;
-    plot_options = {'Tip count', 'Density middle', 'Extension count', 'Tip density', 'x center', 'y center', 'Extension length';...
+    plot_options = {'Tip count 7 pix', 'Middle count 5 pix', 'Extension count', 'Tip count 5 pix', 'x center', 'y center', 'Extension length';...
         '1', '1/nm', '1', '1/nm', 'px', 'px', 'nm'};
 elseif ~isempty(strfind(filename, 'intensity_'))
     fun = @(x) x;
@@ -81,8 +81,8 @@ for m = 1:length(data)
         matrix(m-1,1:4) = (matrix(m-2,1:4)+matrix(m,1:4))/2;
     end
 end
-matrix(:,[1 3]) = [[nan nan]; matrix(2:end,[1 3])/(Object.Custom.IntensityPerMAP)];
-matrix(:,[2 4]) = [[nan nan]; matrix(2:end,[2 4])/(Object.Custom.IntensityPerMAP*(Object.PixelSize*5))];
+matrix(:,[1:4]) = [[nan nan nan nan]; matrix(2:end,1:4)/(Object.Custom.IntensityPerMAP)];
+% matrix(:,[2 4]) = [[nan nan]; matrix(2:end,[2 4])/(Object.Custom.IntensityPerMAP*(Object.PixelSize*5))];
 
 
 
@@ -101,8 +101,8 @@ for m = 1:length(data)
         matrix(m-1,1:4) = (matrix(m-2,1:4)+matrix(m,1:4))/2;
     end
 end
-matrix(:,[1 3]) = [[nan nan]; matrix(2:end,[1 3])/(Object.Custom.IntensityPerMAP)];
-matrix(:,[2 4]) = [[nan nan]; matrix(2:end,[2 4])/(Object.Custom.IntensityPerMAP*(Object.PixelSize*5))];
+matrix(:,1:4) = [[nan nan]; matrix(2:end,[1 3])/(Object.Custom.IntensityPerMAP)];
+% matrix(:,[2 4]) = [[nan nan]; matrix(2:end,[2 4])/(Object.Custom.IntensityPerMAP*(Object.PixelSize*5))];
 
 function [matrix] = ReadtotalMAP(Object, customfield, ~)
 data = Object.CustomData.(customfield{1}).Data;

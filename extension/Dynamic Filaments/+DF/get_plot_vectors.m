@@ -2,7 +2,7 @@ function [x_vec, y_vec] = get_plot_vectors(Options, Tracks, xy)
 vector = cell(1,2);
 selected_methods = [Options.lMethod_TrackValue.val, Options.lMethod_TrackValueY.val];
 selected_vars = [Options.lPlot_XVar.val, Options.lPlot_YVar.val];
-for m = 1:length(xy)
+for m = xy
     vector{m} = nan(length(Tracks),1);
     for n = 1:length(Tracks) % {'median', 'mean', 'end-start', 'minimum', 'maximum', 'standard dev', 'linear fit (only for velocity) or sum (only for MAP count)'}
         if isfield(Tracks(n), 'X')

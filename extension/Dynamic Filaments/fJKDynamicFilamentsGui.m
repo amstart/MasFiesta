@@ -339,7 +339,7 @@ for field = optionfields'
 end
 set(f,'WindowKeyPressFcn','fJKDynamicFilamentsGui(''Quicksave'');');
 ChosenPlot = Options.lChoosePlot.val;
-if ChosenPlot < 3 || ChosenPlot == 8
+if ChosenPlot < 3 %|| ChosenPlot == 8
     XStr = Options.lPlot_XVar.print;
     YStr = Options.lPlot_YVar.print;
     XVar = Options.lPlot_XVar.val;
@@ -382,6 +382,8 @@ else
                 has_err_fun_format = 0;
             end
             FilamentEndPlot(hDFGui, has_err_fun_format);
+        case 8
+            AgainstOtherMTTracksPlot(Options);
         case 9
             IntensityVsDistWeightedVel(Options);
     end
@@ -508,47 +510,33 @@ elseif ~Options.cPlotGrowingTracks.val && ChoseGrowTracks
 end
 [~, type_id, track_type_id] = unique(type);
 [x_vec, ~] = DF.get_plot_vectors(Options, AnalyzedTracks, 1);
-[~, other_y_vecs] = DF.get_plot_vectors(Options, AnalyzedOtherTracks, 2);
+% [~, other_y_vecs] = DF.get_plot_vectors(Options, AnalyzedOtherTracks, 2);
 MT_indices = [AnalyzedOtherTracks.MTIndex];
 track_indices = [AnalyzedOtherTracks.TrackIndex];
 y_vec = nan(size(x_vec));
 for m = 1:length(x_vec)
     related_tracks = find(MT_indices == AnalyzedTracks(m).MTIndex);
-    if length(related_tracks) > 1
-        current_track_track_id = find(track_indices == AnalyzedTracks(m).TrackIndex);
-        if ChosePreviousTrack
-            if isempty(current_track_track_id)
-                try
-                    previous_track_track_id = find(track_indices == AnalyzedTracks(m).TrackIndex-1);
-                    previous_track_MT_id = find(related_tracks == previous_track_track_id);
-                catch
-%                     there is no track directly before the current track
-%                     in AnalyzedOtherTracks, possibly because it was too
-%                     short and was cut out
-                    previous_track_MT_id = 0;
-                end
-            else
-                previous_track_MT_id = find(related_tracks == current_track_track_id)-1;
-            end
-            if previous_track_MT_id
-                related_tracks = related_tracks(previous_track_MT_id);
-            else
-                related_tracks = [];
-            end
-        else
-            related_tracks = setxor(related_tracks, current_track_track_id);
-        end
-        same_MT_vecs = other_y_vecs(related_tracks);
-        y_vec(m) = mean(same_MT_vecs);
-    else
-        y_vec(m) = NaN;
-    end
+    data = vertcat(AnalyzedOtherTracks(related_tracks).Data);
+    data = data(:,Options.lPlot_XVar.val);
+    y_vec(m) = x_vec(m) - prctile(data, 10);
 end
-fJKscatterboxplot(x_vec, y_vec, track_type_id', 0);
-xlabel([labels{1} get_label(Options, 1)]);
-ylabel([labels{2} get_label(Options, 0)]);
-Legend = type(type_id);
-legend(Legend{:});
+
+[uniquetype, type_id, track_type_id] = unique(type, 'stable');
+idr = ones(size(track_type_id));
+for i = 1:length(track_type_id)
+    idr(track_type_id==i) = cumsum(idr(track_type_id==i));
+end
+nelements = accumarray(track_type_id, 1);
+matrix = nan(max(nelements), length(type_id));
+inds = sub2ind(size(matrix), idr, track_type_id);
+matrix(inds) = y_vec;
+iosr.statistics.boxPlot(uniquetype, matrix, 'medianColor','r', 'showScatter', true)
+% fJKscatterboxplot(x_vec, y_vec, track_type_id', 0);
+ylabel(get_label(Options, 1));
+% xlabel([labels{1} get_label(Options, 1)]);
+% ylabel([labels{2} get_label(Options, 0)]);
+% Legend = type(type_id);
+% legend(Legend{:});
 hold off
 
 
@@ -689,7 +677,7 @@ else
     matrix = nan(max(nelements), length(type_id));
     inds = sub2ind(size(matrix), idr, track_type_id);
     matrix(inds) = x_vec;
-    iosr.statistics.boxPlot(uniquetype, matrix, 'medianColor','r', 'showScatter', true, 'sampleSize', true, 'showMean', true)
+    iosr.statistics.boxPlot(uniquetype, matrix, 'medianColor','r', 'showScatter', true)
 %     b=boxplot(x_vec, type);
     set(gca,'TickLabelInterpreter', 'tex');
     set(gca,'FontSize',14);
