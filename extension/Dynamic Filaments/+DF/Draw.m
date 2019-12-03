@@ -97,7 +97,7 @@ setappdata(0,'hDFGui',hDFGui);
 
 function drawFil(hDFGui, Object, Tracks, Selected, Options, Objects)
 eSmoothY=str2double(get(hDFGui.eSmoothY, 'String'));
-tagnum = 4;
+tagnum = 1;
 cutoff=Options.eRescueCutoff.val;
 track_id=Object.TrackIds;
 
@@ -109,7 +109,7 @@ catch
     return
 end
 set(hDFGui.fig, 'Name',['Dynamics: ' Object.Name '  (' Object.Comments ')']);
-modevents=mod(Object.SegTagAuto(Object.TrackIds>0,3),1);
+% modevents=mod(Object.SegTagAuto(Object.TrackIds>0,3),1);
 if ~isempty(track_id)
 hold(hDFGui.aVelPlot,'on');
 hold(hDFGui.aIPlot,'on');
@@ -143,29 +143,23 @@ for i=1:length(tracks)
         if size(dseg,1) < str2double(get(hDFGui.eMinLength, 'String'))
             c=[0.7 0.7 0.7];
         end
-        if modevents(i)>0.85&&dseg(end)>cutoff
-            plot(hDFGui.aPlot,tseg(end),dseg(end),'LineStyle', 'none', 'Marker', '*', 'MarkerEdgeColor',c);
-        elseif modevents(i)>0.7&&dseg(end)>cutoff
-            plot(hDFGui.aPlot,t0,max(dseg)+d0/10,'LineStyle', 'none', 'Marker', '*', 'MarkerEdgeColor',c);
-        end
+%         if modevents(i)>0.85&&dseg(end)>cutoff
+%             plot(hDFGui.aPlot,tseg(end),dseg(end),'LineStyle', 'none', 'Marker', '*', 'MarkerEdgeColor',c);
+%         elseif modevents(i)>0.7&&dseg(end)>cutoff
+%             plot(hDFGui.aPlot,t0,max(dseg)+d0/10,'LineStyle', 'none', 'Marker', '*', 'MarkerEdgeColor',c);
+%         end
     else
         c='k';
-        if modevents(i)>0.85
-            plot(hDFGui.aPlot,tseg(end),dseg(end),'LineStyle', 'none', 'Marker', '*', 'MarkerEdgeColor',c);
-        elseif modevents(i)>0.7
-            plot(hDFGui.aPlot,t0,max(dseg)+d0/10,'LineStyle', 'none', 'Marker', '*', 'MarkerEdgeColor',c);
-        end
+%         if modevents(i)>0.85
+%             plot(hDFGui.aPlot,tseg(end),dseg(end),'LineStyle', 'none', 'Marker', '*', 'MarkerEdgeColor',c);
+%         elseif modevents(i)>0.7
+%             plot(hDFGui.aPlot,t0,max(dseg)+d0/10,'LineStyle', 'none', 'Marker', '*', 'MarkerEdgeColor',c);
+%         end
     end
 %         plot(hDFGui.aPlot,tseg,tracks(i).Velocity(end).*(tseg-t0)+d0,'b-.');
     plot(hDFGui.aIPlot,tseg,repmat(c1_vec(i), 1, length(tseg)),'b-.');
     plot(hDFGui.aVelPlot,tseg,repmat(c2_vec(i), 1, length(tseg)),'b-.');
     plot(hDFGui.aPlot,tseg,dseg,'Color', c);
-    if tracks(i).end_first_subsegment
-        plot(hDFGui.aPlot,tseg(tracks(i).end_first_subsegment),dseg(tracks(i).end_first_subsegment),'LineStyle', 'none', 'Marker', 'd', 'MarkerEdgeColor',c);
-    end
-    if tracks(i).start_last_subsegment
-        plot(hDFGui.aPlot,tseg(tracks(i).start_last_subsegment),dseg(tracks(i).start_last_subsegment),'LineStyle', 'none', 'Marker', 's', 'MarkerEdgeColor',c);
-    end
     plot(hDFGui.aVelPlot,tseg,c2seg,'Color', c);
     plot(hDFGui.aIPlot,tseg,c1seg,'Color', c);
 end
