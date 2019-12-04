@@ -48,42 +48,60 @@ for n = 1:length(Objects)
     a=[0; diff(v)./diff(t)];
     dmov = movsum([0; diff(d)],3);
     shrinks = dmov < - Options.eMinDist.val;
-    shrinks = movmedian(shrinks,3);
+    shrinks = logical(movmedian(shrinks,5));
     changes = find(diff(shrinks))+1;
-    tracks_shrinks = logical(shrinks([1; changes]));
+    tracks_shrinks = shrinks([1; changes]);
+    tracks_direction = 1 - 2 * tracks_shrinks;
     for i = 1:length(changes) %this moves the changes maximum 2 frames backwards (movsum has kernel of 3 frames)
-        direction = 1 - 2 * tracks_shrinks(i);
         for j = 1:2
-            if (-direction) * v(changes(i)) > direction * Options.eMinXChange.val
+            if (-tracks_direction(i)) * v(changes(i)) > tracks_direction(i) * Options.eMinXChange.val
                 changes(i) = changes(i)-1;
             end
         end
     end
-    track_borders = [1; changes; length(shrinks)];
-    
-    
-%     figure
-%     plot(t,d);
-%     hold on
-%     plot(t,v);
-%     plot(t,a);
-%     for m = 1:length(track_borders)-2
-%         shared_frames = (track_borders(m):(track_borders(m+2)-3))';
-%         event = shared_frames(1) + findchangepts(v_nonan(shared_frames)) - 1;
-%         track_borders(m+1) = event;
-% %         vline(t(event));
+
+    disr = d - Options.eDisregard.val;
+%     track_borders = [1; changes; length(shrinks)];
+    track_starts = [1; changes];
+    track_ends = [changes; length(shrinks)];
+    for i = 1:length(tracks_shrinks)
+        if tracks_shrinks(i)
+            if disr(track_starts(i)) < 0
+                track_starts(i) = nan;
+                track_ends(i) = nan;
+            end
+            continue
+        end
+        lastbelowdisregard = find(disr(track_starts(i):track_ends(i))<0,1,'last');
+        if ~isempty(lastbelowdisregard)
+            if lastbelowdisregard == length(track_starts(i):track_ends(i))
+                track_starts(i) = nan;
+                track_ends(i) = nan;
+            else
+                track_starts(i) = track_starts(i)+lastbelowdisregard;
+            end
+        end
+    end
+    track_starts(isnan(track_starts)) = [];
+    track_ends(isnan(track_ends)) = [];
+%     [~, w] = unique( track_borders, 'stable' );
+%     duplicate_indices = setdiff( 1:numel(track_borders), w );
+%     if ~isempty(duplicate_indices)
+%         warning(['removed stretch with one frame only:' Objects(n).Name]);
+%         track_borders(duplicate_indices) = []; %remove track with only one frame if given
 %     end
-    track_ids = track_id+(1:length(track_borders)-1);
-    for m = 1:length(track_borders)-1
+
+    track_ids = track_id+(1:length(track_starts));
+    for m = 1:length(track_starts)
         track_id = track_ids(m);
         track.Name=Objects(n).Name;
         track.MTIndex = n;
         track.TrackIndex = track_ids(m);
         track.File=Objects(n).File;
         track.Type=Objects(n).Type;
-        track.WithTrackAfter=nan(1,15);
+        track.CensoredEvent = 0;
         
-        trackframes=(track_borders(m):(track_borders(m+1)))';
+        trackframes=(track_starts(m):(track_ends(m)))';
         if m == 1
             track.PreviousEvent=0;
         else
@@ -91,41 +109,43 @@ for n = 1:length(Objects)
         end
         if diff(t(trackframes(1:2))) > Options.eMaxTimeDiff.val %in case there are frames missing
             trackframes(1) = [];
-            v(trackframes(1)) = nan;
             track.PreviousEvent=0;
+            tracks(track_id-1).CensoredEvent = 1;
         end
+        track.Event = 1;
         if diff(t(trackframes(end-1:end))) > Options.eMaxTimeDiff.val
             trackframes(end) = [];
+            track.Event = 0;
         end
-        starti = trackframes(1);
-        endi = trackframes(end);
+        if trackframes(end) == length(v)
+            track.Event = 0;
+        end
+        if length(trackframes) == 1
+            warning(['track only one frame long:' Objects(n).Name]);
+        end
+
         
         segvel=v(trackframes); %why, see Calcvelocity()
+        segvel(1) = nan;
         segt=t(trackframes);
         segd=d(trackframes);
-        if starti==endi
-            warning(['track only one frame long:' Objects(n).Name]);
-%             continue
-        end
-        [~, track.minindex] = min(segvel);
+        
         track.Duration=segt(end)-segt(1);
         Objects(n).Duration=Objects(n).Duration+track.Duration;
-        track.Event=tracks_shrinks(m);
         track.DistanceEventEnd=segd(end);
+        track.Shrinks=logical(median(shrinks(trackframes)));
+
         track.Data=[segt segd segvel intensity(trackframes) shrinks(trackframes)*3+1 trackframes custom_data(trackframes, :)];
         try
             track.Data(:,13) = track.Data(:,9)./track.Data(:,2);
         catch
         end
         
-        if track_id > 1 && tracks(track_id-1).MTIndex == track.MTIndex
-            withFrames = tracks(track_id-1).Data(1,6):endi;
-            tracks(track_id-1).WithTrackAfter=nan(1,7);%[t(withFrames)-t(subevent), d(withFrames)-d(subevent), v(withFrames), intensity(withFrames)]; %why, see Calcvelocity()
-        elseif track_id>1
-            tracks(track_id-1).WithTrackAfter=nan(1,7);
+        track.WithTrackAfter=nan(1,1,size(track.Data,2));
+        if m > 1
+            withFrames = tracks(track_id-1).Data(1,6):trackframes(end);
+            tracks(track_id-1).WithTrackAfter = [t(withFrames)-t(trackframes(1)), d(withFrames)-d(trackframes(1)), v(withFrames), intensity(withFrames)]; 
         end
-        track.HasIntensity=any(intensity(starti:endi));
-%         tmp_fit = polyfit(segt,segd,1);
         velocity(m) = (segd(end) - segd(1))/(segt(end) - segt(1));
         track.Startendvel=velocity(m);
         track.Velocity=velocity(m);
@@ -138,6 +158,7 @@ for n = 1:length(Objects)
         end
     end
     Objects(n).TrackIds = track_ids;
+    tracks_shrinks = [tracks(track_ids).Shrinks];
     Objects(n).Velocity(1)=nanmean(velocity(~tracks_shrinks));
     Objects(n).Velocity(2)=nanmean(velocity(tracks_shrinks));
     progressdlg(n);

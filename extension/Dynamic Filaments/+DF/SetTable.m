@@ -21,9 +21,12 @@ for n = 1:length(Objects)
     str{n} = [num2str(n) ' ' Objects(n).Name hascomments ' ' Objects(n).Type ' '];
     switch hDFGui.mode 
         case 2
-        segtagauto=Objects(n).SegTagAuto;
-        nResAuto=sum(abs(segtagauto(:,3)-4.85)<0.1&segtagauto(:,4)>cutoff);%to get 4.8 (stops of shrinkages not captured) and 4.9
-        nCatAuto=sum(abs(segtagauto(:,3)-1.85)<0.1|abs(segtagauto(:,3)-4.8)<0.1); %to get 1.8 (catastrophes not captured) and 1.9
+        tracks = Tracks(Objects(n).TrackIds);
+        shrinking = [tracks.Shrinks];
+        event = [tracks.Event];
+        nResAuto = sum(shrinking & event & [tracks.DistanceEventEnd] > cutoff);
+        nCatAuto= sum(~shrinking & event);
+        
         str{n}=[str{n} num2str(Objects(n).CatRes(1)) '|' num2str(nCatAuto) '    ' num2str(Objects(n).CatRes(2)) '|' num2str(nResAuto) ...
             '    ' num2str(velocity(1), '%2.2f') '    ' num2str(velocity(2), '%2.1f') '    ' Objects(n).Custom.type_intensity];
         case 1

@@ -11,7 +11,7 @@ if nData>1
     for i=2:nData
        vel(i)=(track(i,2)-track(i-1,2))/(track(i,1)-track(i-1,1));
     end
-    vel(1) = vel(2);
+    vel(1) = 0;
 else
     vel=nan(size(track,1),1);
 end
