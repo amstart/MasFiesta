@@ -1,7 +1,7 @@
 function [Objects, tracks] = SegmentFils(Options)
 hDFGui = getappdata(0,'hDFGui');
-% tracks=struct('Name', [], 'File', [], 'Type', [], 'Data', [NaN NaN NaN NaN], 'Velocity', nan(2,1), ...
-%     'Event', [NaN], 'DistanceEventEnd', [NaN]);  %these are required for the SetTable function to work upon startup
+tracks=struct('Name', [], 'File', [], 'Type', [], 'Data', [NaN NaN NaN NaN], 'Velocity', nan(2,1), ...
+    'Event', [NaN], 'DistanceEventEnd', [NaN]);  %these are required for the SetTable function to work upon startup
 Objects = getappdata(hDFGui.fig,'Objects');
 track_id = 0;
 progressdlg('String','Creating tracks','Min',0,'Max',length(Objects));
@@ -60,7 +60,7 @@ for n = 1:length(Objects)
         end
     end
 
-    disr = d - Options.eDisregard.val;
+    disr = movmax(d - Options.eDisregard.val,5);
 %     track_borders = [1; changes; length(shrinks)];
     track_starts = [1; changes];
     track_ends = [changes; length(shrinks)];
@@ -78,18 +78,12 @@ for n = 1:length(Objects)
                 track_starts(i) = nan;
                 track_ends(i) = nan;
             else
-                track_starts(i) = track_starts(i)+lastbelowdisregard;
+                track_starts(i) = track_starts(i)+lastbelowdisregard-1;
             end
         end
     end
     track_starts(isnan(track_starts)) = [];
     track_ends(isnan(track_ends)) = [];
-%     [~, w] = unique( track_borders, 'stable' );
-%     duplicate_indices = setdiff( 1:numel(track_borders), w );
-%     if ~isempty(duplicate_indices)
-%         warning(['removed stretch with one frame only:' Objects(n).Name]);
-%         track_borders(duplicate_indices) = []; %remove track with only one frame if given
-%     end
 
     track_ids = track_id+(1:length(track_starts));
     for m = 1:length(track_starts)
@@ -99,7 +93,7 @@ for n = 1:length(Objects)
         track.TrackIndex = track_ids(m);
         track.File=Objects(n).File;
         track.Type=Objects(n).Type;
-        track.CensoredEvent = 0;
+        track.isPause = 0;
         
         trackframes=(track_starts(m):(track_ends(m)))';
         if m == 1
@@ -110,21 +104,21 @@ for n = 1:length(Objects)
         if diff(t(trackframes(1:2))) > Options.eMaxTimeDiff.val %in case there are frames missing
             trackframes(1) = [];
             track.PreviousEvent=0;
-            tracks(track_id-1).CensoredEvent = 1;
         end
         track.Event = 1;
-        if diff(t(trackframes(end-1:end))) > Options.eMaxTimeDiff.val
-            trackframes(end) = [];
-            track.Event = 0;
-        end
+        track.CensoredEvent = 0;
         if trackframes(end) == length(v)
             track.Event = 0;
+        elseif diff(t(trackframes(end-1:end)+1)) > Options.eMaxTimeDiff.val
+            track.CensoredEvent = 1;
+        elseif diff(t(trackframes(end-1:end))) > Options.eMaxTimeDiff.val
+            trackframes(end) = [];
+            track.CensoredEvent = 1;
         end
         if length(trackframes) == 1
             warning(['track only one frame long:' Objects(n).Name]);
         end
 
-        
         segvel=v(trackframes); %why, see Calcvelocity()
         segvel(1) = nan;
         segt=t(trackframes);
@@ -134,8 +128,14 @@ for n = 1:length(Objects)
         Objects(n).Duration=Objects(n).Duration+track.Duration;
         track.DistanceEventEnd=segd(end);
         track.Shrinks=logical(median(shrinks(trackframes)));
+        if track.Shrinks && m > 2 && shrinks(trackframes(1)-3) %checks whether there was a pause
+            tracks(track_id-1).Event = 0;
+            tracks(track_id-1).isPause = 1;
+            tracks(track_id-2).Event = 0;
+            tracks(track_id-2).isPause = 1;
+        end
 
-        track.Data=[segt segd segvel intensity(trackframes) shrinks(trackframes)*3+1 trackframes custom_data(trackframes, :)];
+        track.Data=[segt segd segvel intensity(trackframes) shrinks(trackframes) trackframes custom_data(trackframes, :)];
         try
             track.Data(:,13) = track.Data(:,9)./track.Data(:,2);
         catch

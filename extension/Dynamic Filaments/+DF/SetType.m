@@ -1,9 +1,4 @@
 function [type, Tracks, event, orderid]=SetType(PlotGrowingTags, varargin) %PlotGrowingTags is needed because of the event plot
-if PlotGrowingTags 
-    plottag = 1;
-else
-    plottag = 4; %this is a code (see DF.SegmentFIESTAFils.m))
-end
 hDFGui = getappdata(0,'hDFGui');
 Options = getappdata(hDFGui.fig,'Options');
 if Options.lPlot_XVar.val > 6 || Options.lPlot_YVar.val > 6 
@@ -27,46 +22,31 @@ if Options.cOnlySelected.val
 end
 type={Tracks.Type};
 event=[Tracks.Event];
+shrinks=[Tracks.Shrinks];
 distance_event_end=[Tracks.DistanceEventEnd];
 file={Tracks.File};
 track_id=1:length(type);
 xcolumn = Options.lPlot_XVar.val;
 ycolumn = Options.lPlot_YVar.val;
 for i=1:length(type)
-    if hDFGui.mode == 2
-        if floor(event(i))~=plottag || size(Tracks(i).Data, 1) < Options.eMinLength.val
-            track_id(i)=0;
-            continue
-        end
-        if Options.cPlotGrowingTracks.val == 1 && Tracks(i).Duration < Options.eMinDuration.val
-            track_id(i)=0;
-            continue
-        end
-%         if OnlyWithIntensity
-%             if Tracks(i).HasIntensity==0
-%                 track_id(i)=0;
-%                 continue
-%             end
-%         end
-        if OnlyWithCustomData
-            if Tracks(i).HasCustomData==0 || size(Tracks(i).Data,2) < xcolumn || size(Tracks(i).Data,2) < ycolumn
-                track_id(i)=0;
-                continue
-            end
-        end
-        type{i}=[type{i} ' tag' num2str(event(i))];
+    if shrinks(i) ~= PlotGrowingTags || size(Tracks(i).Data, 1) < Options.eMinLength.val
+        track_id(i)=0;
+        continue
+    end
+    if Options.cPlotGrowingTracks.val == 1 && Tracks(i).Duration < Options.eMinDuration.val
+        track_id(i)=0;
+        continue
     end
     if Options.cPoolMAPs.val
         type{i}=strrep(type{i}, '+Ase1', '');
         type{i}=strrep(type{i}, '-Ase1', '');
     end
     type{i}=strrep(type{i}, 'single400', 'single');
-    type{i}=strrep(type{i}, '4.8', '4');
-    type{i}=strrep(type{i}, '4.9', '4');
-    type{i}=strrep(type{i}, 'tag4', '\downarrow');
-    type{i}=strrep(type{i}, '1.8', '1');
-    type{i}=strrep(type{i}, '1.9', '1');
-    type{i}=strrep(type{i}, 'tag1', '\uparrow');
+    if shrinks(i)
+        type{i}=[type{i} ' \downarrow'];
+    else
+        type{i}=[type{i} ' \uparrow'];
+    end
     switch Options.lGroup.val
         case 1
             prepend = '';
@@ -89,19 +69,14 @@ for i=1:length(type)
             type{i} = 'everything';
     end
     type{i}=[prepend type{i}];
-    if hDFGui.mode == 2
-        if (distance_event_end(i)>Options.eRescueCutoff.val||floor(event(i))~=4)&&abs(mod(event(i),1)-0.85)<0.1
-            if mod(event(i),1)-0.85<0
-                event(i)=2; %events which had not been recorded
-            else
-                event(i)=1;
-            end
-            if Options.cPlotEventsAsSeperateTypes.val
-                type{i}=[type{i} '*'];
-            end
-        else
-            event(i)=0;
-        end
+    if Tracks(i).Shrinks && distance_event_end(i) < Options.eRescueCutoff.val
+        event(i) = 0;
+    end
+    if Tracks(i).CensoredEvent
+        event(i)= event(i) * 2; %events which had not been recorded
+    end
+    if event(i) && Options.cPlotEventsAsSeperateTypes.val
+        type{i}=[type{i} '*'];
     end
 end
 track_id = track_id(logical(track_id));
@@ -134,19 +109,13 @@ for i=1:length(Tracks)
 %     if xcolumn >2 || ycolumn > 2
 %         Tracks(i).Data = [Tracks(i).Data(1:end-1,1:2) + diff(Tracks(i).Data(:,1:2)) Tracks(i).Data(1:end-1,3:end)];
 %     end
-    Tracks(i).XEventEnd = Tracks(i).XEventEnd(xcolumn);
-    Tracks(i).XEventStart = Tracks(i).XEventStart(xcolumn);
+    Tracks(i).XEventEnd = Tracks(i).Data(end, xcolumn);
+    Tracks(i).XEventStart = Tracks(i).Data(1, xcolumn);
 end
 if get(hDFGui.lChoosePlot, 'Value') == 8
 %     for i=1:length(Tracks)
 %         Tracks(i).Data = Tracks(i).WithTrackAfter;
 %     end
-elseif ~PlotGrowingTags 
-    [Tracks, DelObjects] = SelectSubsegments(Tracks, Options);
-    Tracks(DelObjects) = [];
-    event(DelObjects) = [];
-    type(DelObjects) = [];
-    file(DelObjects) = [];
 end
 for i=1:length(Tracks)
     Tracks(i).Y = Tracks(i).Data(:,ycolumn);
@@ -168,72 +137,3 @@ end
 for i=1:length(Tracks)
     Tracks(i).Z = Tracks(i).Data(:,Options.lPlot_ZVar.val);
 end
-
-
-function [Tracks, DelObjects] = SelectSubsegments(Tracks, Options)
-DelObjects = false(length(Tracks),1);
-for i=1:length(Tracks)
-    starti = Tracks(i).end_first_subsegment-1;
-    endi = Tracks(i).start_last_subsegment;
-    if ~starti || ~endi
-        Tracks(i).Startendvel = nan;
-    else
-        Tracks(i).Startendvel = (Tracks(i).Data(endi,2)-Tracks(i).Data(starti,2))/(Tracks(i).Data(endi,1)-Tracks(i).Data(starti,1));
-    end
-end
-switch Options.lSubsegment.val
-    case 2
-        for i=1:length(Tracks)
-            if Tracks(i).end_first_subsegment
-                Tracks(i).Data = Tracks(i).Data(1:Tracks(i).end_first_subsegment,:);
-            else
-                DelObjects(i) = 1;
-            end
-        end
-    case 3
-        for i=1:length(Tracks)
-            if Tracks(i).end_first_subsegment && Tracks(i).start_last_subsegment
-                Tracks(i).Data = Tracks(i).Data(Tracks(i).end_first_subsegment:Tracks(i).start_last_subsegment,:);
-            else
-                DelObjects(i) = 1;
-            end
-        end
-    case 4
-        for i=1:length(Tracks)
-            if Tracks(i).start_last_subsegment
-                Tracks(i).Data = Tracks(i).Data(Tracks(i).start_last_subsegment:end,:);
-            else
-                DelObjects(i) = 1;
-            end
-        end
-    case 5
-        for i=1:length(Tracks)
-            if Tracks(i).end_first_subsegment && Tracks(i).start_last_subsegment
-                Tracks(i).Data = Tracks(i).Data(1:Tracks(i).start_last_subsegment,:);
-            else
-                DelObjects(i) = 1;
-            end
-        end
-    case 6
-        for i=1:length(Tracks)
-            if Tracks(i).end_first_subsegment && Tracks(i).start_last_subsegment
-                Tracks(i).Data = Tracks(i).Data(Tracks(i).end_first_subsegment:end,:);
-            else
-                DelObjects(i) = 1;
-            end
-        end
-    case 7
-        for i=1:length(Tracks)
-            if Tracks(i).minindex > 1 && Tracks(i).minindex < size(Tracks(i).Data,1)
-                Tracks(i).Data = Tracks(i).Data(Tracks(i).minindex:end,:);
-            else
-                DelObjects(i) = 1;
-            end
-        end
-end
-for i=1:length(Tracks)
-    if isempty(Tracks(i).Data) || size(Tracks(i).Data,1) < 2
-        DelObjects(i) = 1;
-    end
-end
-

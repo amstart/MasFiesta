@@ -59,18 +59,17 @@ for i=1:length(tracks)
         if size(dseg,1) < str2double(get(hDFGui.eMinLength, 'String'))
             c=[0.7 0.7 0.7];
         end
-        if tracks(i).Event && dseg(end) > cutoff
-            plot(hDFGui.aPlot,tseg(end),dseg(end),'LineStyle', 'none', 'Marker', '*', 'MarkerEdgeColor',c);
-        elseif tracks(i).CensoredEvent && dseg(end) > cutoff
-            plot(hDFGui.aPlot,t0,max(dseg)+d0/10,'LineStyle', 'none', 'Marker', '*', 'MarkerEdgeColor',c);
-        end
     else
         c='k';
-        if tracks(i).Event
-            plot(hDFGui.aPlot,tseg(end),dseg(end),'LineStyle', 'none', 'Marker', '*', 'MarkerEdgeColor',c);
-        elseif tracks(i).CensoredEvent
-            plot(hDFGui.aPlot,t0,max(dseg)+d0/10,'LineStyle', 'none', 'Marker', '*', 'MarkerEdgeColor',c);
-        end
+    end
+    if tracks(i).isPause
+        c='b';
+        plot(hDFGui.aPlot,tseg(end),dseg(end),'LineStyle', 'none', 'Marker', 'x', 'MarkerEdgeColor',c);
+    end
+    if ~tracks(i).CensoredEvent && tracks(i).Event && (dseg(end) > cutoff || ~tracks(i).Shrinks)
+        plot(hDFGui.aPlot,tseg(end),dseg(end),'LineStyle', 'none', 'Marker', '*', 'MarkerEdgeColor',c);
+    elseif tracks(i).CensoredEvent && (dseg(end) > cutoff || ~tracks(i).Shrinks)
+        plot(hDFGui.aPlot,t0,max(dseg)+d0/10,'LineStyle', 'none', 'Marker', '*', 'MarkerEdgeColor',c);
     end
 %         plot(hDFGui.aPlot,tseg,tracks(i).Velocity(end).*(tseg-t0)+d0,'b-.');
     plot(hDFGui.aIPlot,tseg,repmat(c1_vec(i), 1, length(tseg)),'b-.');
