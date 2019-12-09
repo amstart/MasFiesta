@@ -17,6 +17,24 @@ for n = 1:length(Objects)
     if ~Options.cIncludeNonTypePoints.val
         includepoints = includepoints & Objects(n).Tags(:,2)==0;
     end
+    custom_data = [];
+    if isfield(Objects(n), 'CustomData') && ~isempty(Objects(n).CustomData)
+        for customfield = fields(Objects(n).CustomData)'
+            if ~isempty(Objects(n).CustomData.(customfield{1}).read_fun)
+                custom_data = [custom_data Objects(n).CustomData.(customfield{1}).read_fun(Objects(n), customfield, Options)];
+            end
+        end
+    else
+        custom_data = nan(length(includepoints),1);
+        has_custom_data = 0;
+    end
+    if ~isempty(custom_data)
+        custom_data = custom_data(includepoints, :);  
+        has_custom_data = 1;
+    else
+        custom_data = nan(size(t));
+        has_custom_data = 0;
+    end
     DynResults = DynResults(includepoints, :);
     t = DynResults(:,2);
     d = DynResults(:,3);
@@ -25,24 +43,6 @@ for n = 1:length(Objects)
         intensity = intensity(DynResults(:,4))./Objects(n).Custom.IntensityPerMAP; %DynResults(:,4) is just a vector telling you in which rows 
     else
         intensity = intensity(DynResults(:,4));                                    %of the original data the row data can be found, i.e. 1 2 4.. 542 323
-    end
-    if isfield(Objects(n), 'CustomData') && ~isempty(Objects(n).CustomData)
-        custom_data = [];
-        for customfield = fields(Objects(n).CustomData)'
-            if ~isempty(Objects(n).CustomData.(customfield{1}).read_fun)
-                custom_data = [custom_data Objects(n).CustomData.(customfield{1}).read_fun(Objects(n), customfield, Options)];
-            end
-        end
-        if ~isempty(custom_data)
-            custom_data = custom_data(DynResults(:,4), :);  
-            has_custom_data = 1;
-        else
-            custom_data = nan(size(t));
-            has_custom_data = 0;
-        end
-    else
-        custom_data = nan(size(t));
-        has_custom_data = 0;
     end
     v=DF.CalcVelocity([t d]);
     a=[0; diff(v)./diff(t)];
@@ -84,6 +84,15 @@ for n = 1:length(Objects)
     end
     track_starts(isnan(track_starts)) = [];
     track_ends(isnan(track_ends)) = [];
+    for i = 2:length(track_starts)
+        tooLong = diff(t(track_starts(i)-1:track_starts(i)+1)) > Options.eMaxTimeDiff.val;
+%         speedDiff = abs(diff(v(track_starts(i)-2:track_starts(i)+2))) > 20;
+        whereLong = find(tooLong);
+        if ~isempty(whereLong) && track_starts(i) == track_ends(i-1)
+            track_starts(i) = track_starts(i) + whereLong(end) - 1;
+            track_ends(i-1) = track_ends(i-1) + whereLong(end) - 2;
+        end
+    end
 
     track_ids = track_id+(1:length(track_starts));
     for m = 1:length(track_starts)
@@ -96,23 +105,17 @@ for n = 1:length(Objects)
         track.isPause = 0;
         
         trackframes=(track_starts(m):(track_ends(m)))';
-        if m == 1
+        if m == 1 || track_ends(m-1) ~= track_starts(m)
             track.PreviousEvent=0;
         else
             track.PreviousEvent=1;
-        end
-        if diff(t(trackframes(1:2))) > Options.eMaxTimeDiff.val %in case there are frames missing
-            trackframes(1) = [];
-            track.PreviousEvent=0;
         end
         track.Event = 1;
         track.CensoredEvent = 0;
         if trackframes(end) == length(v)
             track.Event = 0;
-        elseif diff(t(trackframes(end-1:end)+1)) > Options.eMaxTimeDiff.val
-            track.CensoredEvent = 1;
-        elseif diff(t(trackframes(end-1:end))) > Options.eMaxTimeDiff.val
-            trackframes(end) = [];
+        end
+        if m ~= length(track_starts) && track_ends(m) ~= track_starts(m+1)
             track.CensoredEvent = 1;
         end
         if length(trackframes) == 1

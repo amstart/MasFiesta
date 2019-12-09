@@ -29,7 +29,7 @@ track_id=1:length(type);
 xcolumn = Options.lPlot_XVar.val;
 ycolumn = Options.lPlot_YVar.val;
 for i=1:length(type)
-    if shrinks(i) ~= PlotGrowingTags || size(Tracks(i).Data, 1) < Options.eMinLength.val
+    if shrinks(i) == PlotGrowingTags || size(Tracks(i).Data, 1) < Options.eMinLength.val
         track_id(i)=0;
         continue
     end

@@ -15,7 +15,7 @@ end
 function drawFil(hDFGui, Object, Tracks, Selected, Options, Objects)
 eSmoothY=str2double(get(hDFGui.eSmoothY, 'String'));
 cutoff=Options.eRescueCutoff.val;
-track_id=Object.TrackIds;
+track_id=Object(1).TrackIds;
 
 track_id=track_id(track_id>0);
 tracks=Tracks(track_id);
@@ -98,7 +98,7 @@ end
 for i=2:length(Selected)
     Object = Objects(Selected(i));
     tmp=Object.TrackIds;
-    track_id=[track_id; tmp(tmp>0)];
+    track_id=[track_id tmp(tmp>0)];
 end
 for i=1:length(Tracks)
     if ismember(i,track_id)

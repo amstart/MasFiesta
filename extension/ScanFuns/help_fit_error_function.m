@@ -11,15 +11,12 @@ for m = 1:length(kymodata)
     end
     for n = shrinkingframes{m}'%1:length(kymodata{m})
         kymo = (nansum(double(kymodata{m}{n}), 1)-sum(~isnan(kymodata{m}{n}),1).*min(min(double(kymodata{m}{n}), [], 1)));
-        max(kymodata{m}{n}, [], 1);
         if isnan(kymo)
             fit_results{m}{n} = NaN;
         else
 %             try
             N_datapoints = min(extension_length+25, length(kymo));
             y=kymo(1:N_datapoints);
-            y=y-min(y);
-            y=y/max(y); 
 %                 y=(y-0.5);
 %                 y=y*1.99;
             x=(0:length(y)-1)-extension_length;
