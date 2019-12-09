@@ -27,7 +27,7 @@ colormap(linspecer(numcol));
 %     s.DataTipTemplate.DataTipRows(end+1) = row;
 % end
 % iosr.statistics.boxPlot(edgesmid, matrix, 'sampleSize', true, 'scatterAlpha', 1, 'showScatter', true, 'medianColor','r', 'showMean', true)
-box = iosr.statistics.boxPlot(edgesmid, matrix, 'medianColor','r', 'showOutliers', false, 'showMean', true, 'sampleFontSize', 14)
+box = iosr.statistics.boxPlot(edgesmid, matrix, 'medianColor','r', 'showOutliers', true, 'showMean', true, 'sampleSize', true, 'sampleFontSize', 14)
 for h = [box.handles.box box.handles.medianLines box.handles.lowerWhiskers box.handles.upperWhiskers box.handles.lowerWhiskerTips box.handles.upperWhiskerTips box.handles.means]
     set(h,'HandleVisibility','off');
 end

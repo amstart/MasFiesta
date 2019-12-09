@@ -657,7 +657,10 @@ fJKplotframework(Tracks, type, 0, events, Options);
 function BoxPlot(Options)
 hold on;
 [type, AnalyzedTracks, ~]=DF.SetType(Options.cPlotGrowingTracks.val);
-[x_vec, ~] = DF.get_plot_vectors(Options, AnalyzedTracks, 1);
+[x_vec, y_vec] = DF.get_plot_vectors(Options, AnalyzedTracks, [1 2]);
+if Options.cExclude.val
+    x_vec = x_vec./y_vec;
+end
 if isempty(x_vec)
     text(0.3,0.5,'No data or path available for any objects','FontWeight','bold','FontSize',16);
     legend('off');
