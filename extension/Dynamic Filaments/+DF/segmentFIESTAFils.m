@@ -46,20 +46,31 @@ for n = 1:length(Objects)
     end
     v=DF.CalcVelocity([t d]);
     a=[0; diff(v)./diff(t)];
-    dmov = movsum([0; diff(d)],3);
+    ddiff = [0; diff(d)];
+    dmov = movsum(ddiff,3);
     shrinks = dmov < - Options.eMinDist.val;
     shrinks = logical(movmedian(shrinks,5));
     changes = find(diff(shrinks))+1;
     tracks_shrinks = shrinks([1; changes]);
-    tracks_direction = 1 - 2 * tracks_shrinks;
-    for i = 1:length(changes) %this moves the changes maximum 2 frames backwards (movsum has kernel of 3 frames)
+    for i = 1:length(changes) %this moves the changes maximum 2 frames to the left (movsum has kernel of 3 frames)
+        vel2 = (d(changes(i)-2)-d(changes(i)))/(t(changes(i)-2)-t(changes(i)));
         for j = 1:2
-            if (-tracks_direction(i)) * v(changes(i)) > tracks_direction(i) * Options.eMinXChange.val
-                changes(i) = changes(i)-1;
+            if tracks_shrinks(i) && max(v(changes(i)), vel2) < -Options.eMinXChange.val
+                continue
             end
+            if ~tracks_shrinks(i) && v(changes(i)) > -Options.eMinXChange.val
+                continue
+            end
+            changes(i) = changes(i)-1;
         end
     end
-
+    for i = 1:length(changes) %this moves the changes 2 frames to the right (should not happen often)
+        vel2 = (d(changes(i)+2)-d(changes(i)))/(t(changes(i)+2)-t(changes(i)));
+        if ~tracks_shrinks(i) && vel2 > -Options.eMinXChange.val && t(changes(i)+2)-t(changes(i)) < Options.eMaxTimeDiff.val
+            changes(i) = changes(i)+2;
+        end
+    end
+    
     disr = movmax(d - Options.eDisregard.val,5);
 %     track_borders = [1; changes; length(shrinks)];
     track_starts = [1; changes];

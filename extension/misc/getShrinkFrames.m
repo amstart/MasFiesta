@@ -1,16 +1,18 @@
-event = [Tracks.Event];
 data = cell(length(Objects),2);
 files = cell(length(Objects),1);
 for i=1:length(Objects)
     ids = Objects(i).TrackIds;
     ids = ids(ids>0);
     st = Tracks(ids);
-    st = st(floor([st.Event])==4);
+    st = st([st.Shrinks]);
     f = [];
     for j=1:length(st)
         f = [f; st(j).Data(:,6)];
     end
-    data{i,1} = f;
+    c = ismember(Objects(i).DynResults(:,4), f);
+    c = imdilate(c, [1; 1; 1]);
+    indexes = find(c);
+    data{i,1} = indexes;
     data{i,2} = Objects(i).Name;
     files{i} = [Objects(i).LoadedFromPath];
 end

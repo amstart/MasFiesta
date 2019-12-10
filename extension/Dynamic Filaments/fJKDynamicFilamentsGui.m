@@ -108,7 +108,7 @@ assignin('base', 'Objects', Objects)
 Tracks = getappdata(hDFGui.fig,'Tracks');
 selected_tracks = [];
 for m = 1:length(Objects)
-    selected_tracks = vertcat(selected_tracks, Objects(m).TrackIds);
+    selected_tracks = [selected_tracks, Objects(m).TrackIds];
 end
 selected_tracks = unique(selected_tracks);
 Tracks = Tracks(selected_tracks(logical(selected_tracks)));
