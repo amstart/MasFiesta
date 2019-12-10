@@ -22,11 +22,13 @@ for amp_noise = [0.1,0.2,0.4,1]
     
     y_noisy = y+rand(size(y))*amp_noise;
     
-    fit = fitConvolutedExponential(x,y_noisy,[y_noisy(1),y_noisy(end),0.6,max(y_noisy)]);
+    bg2 = mean(y_noisy(1:2));
+    
+    fit = fitConvolutedExponential(x,y_noisy,[y_noisy(end),0.1,max(y_noisy),0.1],bg2);
     % Print the fitted values (Note that lambda prediction is quite good
     % despite the noise)
     fit
-    prediction = convolutedExponential(x,fit);
+    prediction = convolutedExponential(x,bg2,fit);
     
     figure
     scatter(x,y_noisy,'DisplayName','data')

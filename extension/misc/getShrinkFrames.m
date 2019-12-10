@@ -12,7 +12,7 @@ for i=1:length(Objects)
     c = ismember(Objects(i).DynResults(:,4), f);
     c = imdilate(c, [1; 1; 1]);
     indexes = find(c);
-    data{i,1} = indexes;
+    data{i,1} = [indexes Objects(i).DynResults(indexes,4)];
     data{i,2} = Objects(i).Name;
     files{i} = [Objects(i).LoadedFromPath];
 end

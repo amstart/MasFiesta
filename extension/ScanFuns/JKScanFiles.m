@@ -2,11 +2,11 @@
 %scans through the link file you specify here. 
 %% Do the work
 global ScanOptions
-try
-    [FileName, PathName] = uigetfile({'*.mat','MAT-File (*.mat)';},'Load Link',ScanOptions.LinkFolder);
-catch
-    [FileName, PathName] = uigetfile({'*.mat','MAT-File (*.mat)';},'Load Link');        
-end
+% try
+%     [FileName, PathName] = uigetfile({'*.mat','MAT-File (*.mat)';},'Load Link',ScanOptions.LinkFolder);
+% catch
+%     [FileName, PathName] = uigetfile({'*.mat','MAT-File (*.mat)';},'Load Link');        
+% end
 % answer = inputdlg('Filename');
 % ScanOptions.filename = answer{1};
 fJKLoadLink(FileName, PathName, @batch_kymo_data) %any analyze_x function
