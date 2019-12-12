@@ -42,7 +42,7 @@ for m = 1:length(kymodata)
         plot(x,prediction,'DisplayName','prediction'); drawnow;
         legend(num2str(fit,2),'Location','best'); drawnow;
         hold off
-        fit_results{m}{n} = {fit,fval,questdlg('yes'),x,y,[rf(n) n]};
+        fit_results{m}{n} = {fit,fval,questdlg('yes'),x,y,rf(n)};
 %             catch
 %                 [names{m} ' frame ' num2str(n) '/' num2str(n-floor(n/40))];
 %             end
