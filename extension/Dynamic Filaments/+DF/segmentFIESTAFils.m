@@ -36,6 +36,7 @@ for n = 1:length(Objects)
         has_custom_data = 0;
     end
     DynResults = DynResults(includepoints, :);
+    f = DynResults(:,1);
     t = DynResults(:,2);
     d = DynResults(:,3);
     intensity=fJKPlotIntensity(Objects(n),Options.eIevalLength.val,Options.cUsePosEnd.val+1);
@@ -149,7 +150,7 @@ for n = 1:length(Objects)
             tracks(track_id-2).isPause = 1;
         end
 
-        track.Data=[segt segd segvel intensity(trackframes) shrinks(trackframes) trackframes custom_data(trackframes, :)];
+        track.Data=[segt segd segvel intensity(trackframes) shrinks(trackframes) f(trackframes) custom_data(trackframes, :)];
         try
             track.Data(:,13) = track.Data(:,9)./track.Data(:,2);
         catch

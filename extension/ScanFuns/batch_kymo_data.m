@@ -11,7 +11,7 @@ ScanOptions.help_fit_error_function.fit_session = @DoFitConvolutedExponential;
 %% Load the Kymograph data
 forFileName = load([PathName FileName]);
 ScanOptions.File = forFileName.Filament(1).File;
-file_data = load([PathName 'pixelkymo_GFP_shifted.mat']);
+file_data = load([PathName 'pixelkymo_GFP_shifted_fine.mat']);
 frame_data = load([PathName 'shrinkingframes.mat']);
 frame_data = frame_data.Data;
 kymos = file_data.Data(:,1);

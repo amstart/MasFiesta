@@ -1,20 +1,19 @@
-function [y_out] = convolutedExponential(x,consts,pars)
+function [y_out] = convolutedExponential(x,pars)
     % Fixed parameters ------------------------------
-    
     PSF_width = 0.17;
     
     % Variating parameters ------------------------
     
+    Amp = pars(1);
     % The intensity level in the microtubule
-    bg1=pars(1);
-    % The intensity level outside the microtubule
-    bg2=consts(1);
-    % The lambda of the exponential
-    lambda = pars(2);
-    % The value of the exponential at x=0 minus the background bg1
-    Amp = pars(3);
     % MT end offset
-    MTend = pars(4);
+    MTend = pars(2);
+    % The lambda of the exponential
+    lambda = pars(3);
+    % The value of the exponential at x=0 minus the background bg1
+    bg1=pars(4);
+    % The intensity level outside the microtubule
+    bg2=pars(5);
     
     % Calculation ------------------------------------
     

@@ -9,10 +9,10 @@ for i=1:length(Objects)
     for j=1:length(st)
         f = [f; st(j).Data(:,6)];
     end
-    c = ismember(Objects(i).DynResults(:,4), f);
+    c = ismember(Objects(i).DynResults(:,1), f);
     c = imdilate(c, [1; 1; 1]);
     indexes = find(c);
-    data{i,1} = [indexes Objects(i).DynResults(indexes,4)];
+    data{i,1} = [indexes Objects(i).DynResults(indexes,1)];
     data{i,2} = Objects(i).Name;
     files{i} = [Objects(i).LoadedFromPath];
 end

@@ -33,12 +33,12 @@ for m = find(FilSelect==1)
         for n = 1:size(Filament(m).Results,1)
             frame = Filament(m).Results(n,1);
             missedframes=ceil(frame/framesuntilmissingframe);
-            if mod(frame, framesuntilmissingframe)==1 || tags(n)==9
+            if mod(frame, framesuntilmissingframe)==1 || tags(n)==9 || tags(n)==8 || tags(n)==7
                 Filament(m).Custom.CustomData{n}=nan;
                 continue
             end
             I = Stack(:,:,frame-missedframes);
-            Filament(m).Custom.CustomData{n} = fun(I, Filament(m), n, ScanOptions.help_get_tip_kymo.ScanSize, ScanOptions.help_get_tip_kymo.ExtensionLength);
+            Filament(m).Custom.CustomData{n} = {[frame, frame-missedframes], fun(I, Filament(m), n, ScanOptions.help_get_tip_kymo.ScanSize, ScanOptions.help_get_tip_kymo.ExtensionLength)};
         end
         progressdlg(ifil);
         ifil=ifil+1;
@@ -58,10 +58,11 @@ for m = find(FilSelect==1)
 end
 
 
-function [intensity_vec] = get_pixelkymo(I, Filament, n, ScanSize, ExtensionLength) 
+function [intensity_vec] = get_pixelkymo(I, Filament, frame, ScanSize, ExtensionLength) 
 %extension length is the distance in pixels before the filament end
-nX=double(Filament.Data{n}(:,1)/Filament.PixelSize);
-nY=double(Filament.Data{n}(:,2)/Filament.PixelSize);
+res = 4;
+nX=double(Filament.Data{frame}(:,1)/Filament.PixelSize);
+nY=double(Filament.Data{frame}(:,2)/Filament.PixelSize);
 d=cumsum(sqrt((nX(2:end)-nX(1:end-1)).^2 + (nY(2:end)-nY(1:end-1)).^2));
 rest = 1-(d(end)+ExtensionLength - floor(d(end)+ExtensionLength));
 delta = [nX(1)-nX(2) nX(end)-nX(end-1); nY(1)-nY(2) nY(end)-nY(end-1)];
@@ -71,8 +72,8 @@ add_d=[sqrt((ExtensionLength)^2/(1+slope(1)^2)) sqrt(rest^2/(1+slope(2)^2))];
 nX([1,end])=[nX(1)+sign(delta(1,1))*add_d(1) nX(end)+sign(delta(1,2))*add_d(2)];
 nY([1,end])=[nY(1)+sign(delta(2,1))*add_d(1)*slope(1) nY(end)+sign(delta(2,2))*add_d(2)*slope(2)];
 d=[0; cumsum(sqrt((nX(2:end)-nX(1:end-1)).^2 + (nY(2:end)-nY(1:end-1)).^2))];
-dt=max(d)/round(max(d));
-id=(0:round(max(d)))'*dt;
+dt=max(d)/(round(max(d))*res);
+id=(0:round(max(d))*res)'*dt;
 scan_length=length(id);
 idx = nearestpoint(id,d);
 X=zeros(scan_length,1);
