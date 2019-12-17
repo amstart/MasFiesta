@@ -187,11 +187,11 @@ if isfrequencyplot
             diffy=diff(PlotTracks(k).Y);
             celly{k}=[diffy(1)/2; (diffy(1:end-1)+diffy(2:end))/2; diffy(end)/2];
             if plotevents(k)
-                if isnan(PlotTracks(k).X(end))
+%                 if isnan(PlotTracks(k).X(end))
                     ploteventends(k)=PlotTracks(k).X(max(2,end-2));
-                else
-                    ploteventends(k)=PlotTracks(k).X(end);
-                end
+%                 else
+%                     ploteventends(k)=PlotTracks(k).X(end);
+%                 end
             end
             catch
                 cellx{k}=[];

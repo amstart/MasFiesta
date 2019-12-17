@@ -1,4 +1,6 @@
 function fJKfrequencyvsXplot(f, plot_x, plot_y, ploteventends, units)
+plot_x = - plot_x;
+ploteventends = -ploteventends;
 [edgesmid, edges, sumy] = histcounts2(plot_x, plot_y);
 set(gca, 'Ticklength', [0 0]);
 N = histcounts(ploteventends, edges);
@@ -55,7 +57,7 @@ function [edgesmid, edges, sumy] = histcounts2(plotx, ploty)
 %HISTCOUNTS2D Summary of this function goes here
 %   Detailed explanation goes here
 plotx=plotx(~isnan(plotx));
-[~, edges, xid] = histcounts(plotx,6);
+[~, edges, xid] = histcounts(plotx,[0:150:750]);
 ploty(xid==0) = [];
 xid(xid==0) = [];
 binvec=cell(numel(edges)-1,1);
