@@ -9,8 +9,7 @@ for m = 1:length(kymodata)
     fit_results{m} = cell(size(kymodata{m}));
     sf = shrinkingframes{m}';
     if any(isnan(sf))
-        sf = (1:length(kymodata{m}));
-        sf = [sf; sf];
+        continue
     end
     rf = [];
     gf = [];
@@ -35,14 +34,14 @@ for m = 1:length(kymodata)
         x=((0:length(y)-1)-extension_length*res)*(0.157/res);
         scatter(x,y,50); drawnow;
         hold on
-        [fit,fval,x,y] =  ScanOptions.help_fit_error_function.fit_session(x, y);
+        [fit,fval,xnew,ynew] =  ScanOptions.help_fit_error_function.fit_session(x, y);
         title([ScanOptions.File names{m} ' frame ' num2str(rf(n)) '/' num2str(n)], 'Interpreter', 'None');
         drawnow;
-        prediction = convolutedExponential(x,fit);
-        plot(x,prediction,'DisplayName','prediction'); drawnow;
+        prediction = convolutedExponential(xnew,fit);
+        plot(xnew,prediction,'DisplayName','prediction'); drawnow;
         legend(num2str(fit,2),'Location','best'); drawnow;
         hold off
-        fit_results{m}{n} = {fit,fval,'afk',x,y,rf(n)};
+        fit_results{m}{n} = {fit,fval,questdlg('yes'),xnew,ynew,rf(n),x,y};
 %             catch
 %                 [names{m} ' frame ' num2str(n) '/' num2str(n-floor(n/40))];
 %             end
