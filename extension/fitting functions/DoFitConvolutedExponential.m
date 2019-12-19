@@ -11,7 +11,7 @@ if overbg1(end)
     x = x(1:n);
 end
 xres = x(2)-x(1);
-suggs = [maxy-bg2,maxid*xres,0.1,mean(y(end-8:end)),bg2];
-lb = [0,-inf,0,bg2,bg2];
-ub = [inf,inf,inf,max(y),bg2];
+suggs = [2*maxy,maxid*xres,0.2,mean(y(end-8:end)),bg2,0.17];
+lb = [0,-inf,0,bg2,bg2,0.15];
+ub = [inf,inf,inf,max(y),bg2,0.19];
 [fit,fval] = fitConvolutedExponential(x,y,suggs,lb,ub);

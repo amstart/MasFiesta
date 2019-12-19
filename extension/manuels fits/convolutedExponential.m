@@ -1,9 +1,4 @@
 function [y_out] = convolutedExponential(x,pars)
-    % Fixed parameters ------------------------------
-    PSF_width = 0.17;
-    
-    % Variating parameters ------------------------
-    
     Amp = pars(1);
     % The intensity level in the microtubule
     % MT end offset
@@ -14,6 +9,8 @@ function [y_out] = convolutedExponential(x,pars)
     bg1=pars(4);
     % The intensity level outside the microtubule
     bg2=pars(5);
+    % PSF
+    PSF_width=pars(6);
     
     % Calculation ------------------------------------
     

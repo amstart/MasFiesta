@@ -4,8 +4,8 @@ function [ fit_results ] = help_fit_error_function(kymodata, ScanOptions, shrink
 res = 4;
 extension_length = ScanOptions.kymo_options.help_get_tip_kymo.ExtensionLength;
 fit_results = cell(size(kymodata));
+figure('units','normalized','outerposition',[0 0 1 1])
 for m = 1:length(kymodata)
-    figure('units','normalized','outerposition',[0 0 1 1])
     fit_results{m} = cell(size(kymodata{m}));
     sf = shrinkingframes{m}';
     if any(isnan(sf))
@@ -42,7 +42,7 @@ for m = 1:length(kymodata)
         plot(x,prediction,'DisplayName','prediction'); drawnow;
         legend(num2str(fit,2),'Location','best'); drawnow;
         hold off
-        fit_results{m}{n} = {fit,fval,questdlg('yes'),x,y,rf(n)};
+        fit_results{m}{n} = {fit,fval,'afk',x,y,rf(n)};
 %             catch
 %                 [names{m} ' frame ' num2str(n) '/' num2str(n-floor(n/40))];
 %             end
