@@ -151,10 +151,10 @@ for n = 1:length(Objects)
         end
 
         track.Data=[segt segd segvel intensity(trackframes) shrinks(trackframes) f(trackframes) custom_data(trackframes, :)];
-        try
-            track.Data(:,13) = track.Data(:,9)./track.Data(:,2);
-        catch
-        end
+%         try
+%             track.Data(:,13) = track.Data(:,9)./track.Data(:,2);
+%         catch
+%         end
         
         track.WithTrackAfter=nan(1,1,size(track.Data,2));
         if m > 1

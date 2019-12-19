@@ -5,7 +5,12 @@ LoadedFromPath = {Objects.LoadedFromPath};
 [unique_paths, ~, MT_index] = unique(LoadedFromPath, 'stable');
 filename = inputdlg('Filename (without .mat)? You will find the data under Object.Custom.<filename>', 'Filename?', 1, {'pixelkymo_GFP_shifted'});
 filename = filename{1};
-if ~isempty(strfind(filename, 'fit'))
+if  ~isempty(strfind(filename, 'Expo_fit'))
+    fun = @PrepareExpoData;
+    read_fun = @ReadExpoData;
+    plot_options = {'Amplitude', 'MT end', 'Timescale', 'Bg1', 'Bg2', 'PSF width', 'MSE';...
+        '1/nm', 'nm', 'nm', '1/nm', '1/nm', 'nm', 'AU'};
+elseif ~isempty(strfind(filename, 'fit'))
     fun = @PrepareFitData;
     read_fun = @ReadFitData;
     prefix = strrep(filename, 'pixelkymo_', '');
@@ -41,7 +46,6 @@ else
 end
 progressdlg('String','Appending Custom Data','Min',0,'Max',length(unique_paths));
 for m=1:length(unique_paths)
-    try
         load_data = load([unique_paths{m} filename '.mat']);
         for n = find(MT_index == m)'
 %             Objects(n).CustomData.(filename).ScanOptions = load_data.ScanOptions;
@@ -49,22 +53,42 @@ for m=1:length(unique_paths)
                 if strcmp(Objects(n).Name, load_data.Data{p, 2})
                     Objects(n).CustomData.(filename).ScanOptions = load_data.ScanOptions;
                     custom_data = load_data.Data{p, 1};
-                    try
-                        Objects(n).CustomData.(filename).Data = fun(custom_data, Objects(n));
-                    catch
-                        Objects(n).CustomData.(filename).Data = fun(custom_data);
-                    end
+                    Objects(n).CustomData.(filename).Data = fun(custom_data, Objects(n));
                     Objects(n).CustomData.(filename).read_fun = read_fun;
                     Objects(n).CustomData.(filename).plot_options = plot_options;
                 end
             end
         end
     progressdlg(m);
-    catch
-    end
 end
 setappdata(hDFGui.fig,'Objects',Objects);
 DF.updateOptions();
+
+function [matrix] = ReadExpoData(Object, customfield, ~)
+data = Object.CustomData.(customfield{1}).Data;
+matrix = nan(length(data), 7);
+for m = 1:length(data)
+    if length(data{m})>1
+        matrix(m,:) = data{m};
+        matrix(m,[1 4 5]) = matrix(m,[1 4 5])./Object.Custom.IntensityPerMAP;
+        matrix(m,[2 3]) = matrix(m,[2 3])*1000;
+        if matrix(m,7) > 5e8
+            matrix(m,:) = nan(1,7);
+        end
+    end
+end
+n = 1;
+
+function out = PrepareExpoData(fit_data, Object)
+frames = Object.DynResults(:,1);
+out = cell(length(frames),1);
+for m = 1:length(fit_data)
+    if ~iscell(fit_data{m})
+        continue
+    end
+    out{find(frames-fit_data{m}{6}==0)} = [fit_data{m}{1} fit_data{m}{2}];
+end
+
 
 function [matrix] = ReadTipMiddleExtension(Object, customfield, ~)
 data = Object.CustomData.(customfield{1}).Data;
