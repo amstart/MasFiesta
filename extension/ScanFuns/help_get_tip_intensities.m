@@ -37,7 +37,8 @@ for m = find(FilSelect==1)
             continue
         end
         I = Stack(:,:,frame-missedframes);
-        Filament(m).Custom.CustomData{n} = fun(I, Filament(m), n);
+        out = fun(I, Filament(m), n);
+        Filament(m).Custom.CustomData{n} = [out frame-missedframes];
     end
     progressdlg(ifil);
     ifil=ifil+1;

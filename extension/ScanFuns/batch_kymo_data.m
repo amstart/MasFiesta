@@ -17,7 +17,7 @@ frame_data = frame_data.Data;
 kymos = file_data.Data(:,1);
 names = file_data.Data(:,2);
 ScanOptions.kymo_options = file_data.ScanOptions;
-onlyshrinking = 1;
+onlyshrinking = 0;
 for i=1:length(names)
     index = cellfun(@(x)strcmp(x, names{i}), frame_data(:,2));
     if any(index) && onlyshrinking
