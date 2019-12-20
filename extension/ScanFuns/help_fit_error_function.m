@@ -34,14 +34,19 @@ for m = 1:length(kymodata)
         x=((0:length(y)-1)-extension_length*res)*(0.157/res);
         scatter(x,y,50); drawnow;
         hold on
-        [fit,fval,xnew,ynew] =  ScanOptions.help_fit_error_function.fit_session(x, y);
+        [fit,fval,xn,yn] =  ScanOptions.help_fit_error_function.fit_session(x, y);
         title([ScanOptions.File names{m} ' frame ' num2str(rf(n)) '/' num2str(n)], 'Interpreter', 'None');
         drawnow;
-        prediction = convolutedExponential(xnew,fit);
-        plot(xnew,prediction,'DisplayName','prediction'); drawnow;
+        plot(xn,yn); drawnow;
+        prediction = convolutedExponential(xn,fit);
+        plot(xn,prediction,'DisplayName','prediction'); drawnow;
         legend(num2str(fit,2),'Location','best'); drawnow;
         hold off
-        fit_results{m}{n} = {fit,fval,questdlg('yes'),xnew,ynew,rf(n),x,y};
+        answer = questdlg('yes');
+        if strcmp(answer,'No')
+            error('kk');
+        end
+        fit_results{m}{n} = {fit,fval,answer,xn,yn,rf(n),x,y};
 %             catch
 %                 [names{m} ' frame ' num2str(n) '/' num2str(n-floor(n/40))];
 %             end

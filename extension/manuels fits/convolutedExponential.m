@@ -3,14 +3,15 @@ function [y_out] = convolutedExponential(x,pars)
     % The intensity level in the microtubule
     % MT end offset
     MTend = pars(2);
-    % The lambda of the exponential
-    lambda = pars(3);
-    % The value of the exponential at x=0 minus the background bg1
-    bg1=pars(4);
-    % The intensity level outside the microtubule
-    bg2=pars(5);
+    % The tau of the exponential
+    tau = pars(3);
     % PSF
-    PSF_width=pars(6);
+    PSF_width=pars(4);
+    % The value of the exponential at x=0 minus the background bg1
+    bg1=pars(5);
+    % The intensity level outside the microtubule
+    bg2=pars(6);
+
     
     % Calculation ------------------------------------
     
@@ -23,7 +24,7 @@ function [y_out] = convolutedExponential(x,pars)
     % The part where there is a micotubule has a background bg1+signal of
     % exponential
     x_res = xx(2)-xx(1);
-    yy(xx>=MTend)= Amp*exp(-xx(xx>=MTend)/lambda)+bg1;
+    yy(xx>=MTend)= Amp*exp(-xx(xx>=MTend)/tau)+bg1;
     
     % The part where there is no microtubule has a background of bg2
     yy(xx<MTend)=bg2;

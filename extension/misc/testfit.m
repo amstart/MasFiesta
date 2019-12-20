@@ -1,4 +1,3 @@
-function [fit,fval,xn,yn] = DoFitConvolutedExponential(x, y)
 range = 6:min(45, length(x));
 [~,locs] = findpeaks(y(range),'NPeaks',1, 'SortStr', 'descend');
 peakid = locs + 5;
@@ -12,17 +11,11 @@ else
     left = closestmin - 1;
 end
 right = left+1;
-try
-if y(minima(left))-y(minima(left)-2) <  0
+if peakid - minima(left) ==  1
     left = left-1;
 end
-catch
-end
-try
-if y(minima(right)+2)-y(minima(right)) <  0
+if right - peakid ==  1
     right = right+1;
-end
-catch
 end
 
 leftmin = max(minima(left),peakid-15);
@@ -50,7 +43,11 @@ bg2 = mean(lowesty(1:5));
 
 [maxy, maxid] = max(yn);
 
-suggs = [2*maxy-bg1,xn(maxid),0.2,0.17,bg1,bg2];
+suggs = [3*maxy-bg1,xn(maxid),0.2,0.17,bg1,bg2];
 lb = [0,-inf,0,0.14,mean([bg2 bg1]),bg2];
-ub = [inf,inf,1,0.2,bg1,bg2*2];
+ub = [inf,inf,1,0.2,maxy,bg2*2];
 [fit,fval] = fitConvolutedExponential(xn,yn,suggs,lb,ub);
+
+hold on
+prediction = convolutedExponential(xn,fit);
+plot(xn,prediction,'DisplayName','prediction'); drawnow;

@@ -6,7 +6,7 @@ global ScanOptions
 % try
 %rmappdata(0, 'hMainGui');
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-ScanOptions.filename = ['pixelkymo_GFP_sum_Expo_fit' '.mat'];
+ScanOptions.filename = ['fit_run2' '.mat'];
 ScanOptions.help_fit_error_function.fit_session = @DoFitConvolutedExponential;
 %% Load the Kymograph data
 forFileName = load([PathName FileName]);
@@ -17,7 +17,7 @@ frame_data = frame_data.Data;
 kymos = file_data.Data(:,1);
 names = file_data.Data(:,2);
 ScanOptions.kymo_options = file_data.ScanOptions;
-onlyshrinking = 0;
+onlyshrinking = 1;
 for i=1:length(names)
     index = cellfun(@(x)strcmp(x, names{i}), frame_data(:,2));
     if any(index) && onlyshrinking
