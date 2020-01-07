@@ -11,7 +11,8 @@ function [y_out] = convolutedExponential(x,pars)
     bg1=pars(5);
     % The intensity level outside the microtubule
     bg2=pars(6);
-
+    % The shift between start of exponential and change of background
+    shift=pars(7);
     
     % Calculation ------------------------------------
     
@@ -24,10 +25,10 @@ function [y_out] = convolutedExponential(x,pars)
     % The part where there is a micotubule has a background bg1+signal of
     % exponential
     x_res = xx(2)-xx(1);
-    yy(xx>=MTend)= Amp*exp(-xx(xx>=MTend)/tau)+bg1;
-    
+    yy(xx>=MTend)= Amp*exp(-xx(xx>=MTend)/tau);
+    yy(xx>=MTend-shift) = yy(xx>=MTend-shift)+bg1;
     % The part where there is no microtubule has a background of bg2
-    yy(xx<MTend)=bg2;
+    yy(xx<MTend-shift)=bg2;
     
     % We apply a gaussian filter with the known width, but we have to
     % convert it to distance between our xx points.
