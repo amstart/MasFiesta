@@ -57,8 +57,8 @@ bg2 = mean(lowesty(1:5));
 [maxy, maxid] = max(yn);
 
 suggs = [2*maxy-bg1,xn(maxid),0.2,0.17,bg1,bg2,0];
-lb = [0,-inf,0,0.14,mean([bg2 bg1]),bg2,-0.5];
-ub = [inf,inf,10,0.2,bg1,bg2*2,0.5];
+lb = [0,-inf,0,0.17,mean([bg2 bg1]),bg2,-0.5];
+ub = [inf,inf,10,0.17,bg1,bg2*2,0.5];
 
 [fits,fvals] = fitConvolutedExponential(xn,yn,suggs,lb,ub,0.25);
 
