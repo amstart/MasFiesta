@@ -1,11 +1,6 @@
 function [type, Tracks, event, orderid]=SetType(PlotGrowingTags, varargin) %PlotGrowingTags is needed because of the event plot
 hDFGui = getappdata(0,'hDFGui');
 Options = getappdata(hDFGui.fig,'Options');
-if Options.lPlot_XVar.val > 6 || Options.lPlot_YVar.val > 6 
-    OnlyWithCustomData = 1;
-else
-    OnlyWithCustomData = 0;
-end
 Tracks = getappdata(hDFGui.fig,'Tracks');
 if Options.cOnlySelected.val
     Objects = getappdata(hDFGui.fig,'Objects');
@@ -26,8 +21,6 @@ shrinks=[Tracks.Shrinks];
 distance_event_end=[Tracks.DistanceEventEnd];
 file={Tracks.File};
 track_id=1:length(type);
-xcolumn = Options.lPlot_XVar.val;
-ycolumn = Options.lPlot_YVar.val;
 for i=1:length(type)
     if shrinks(i) == PlotGrowingTags || size(Tracks(i).Data, 1) < Options.eMinLength.val
         track_id(i)=0;
@@ -85,49 +78,31 @@ event = event(track_id);
 type = type(track_id);
 file = file(track_id);
 
-%old function preparexydata
+xcolumn = Options.lPlot_XVar.val;
+ycolumn = Options.lPlot_YVar.val;
+
 if Options.mXReference.val == 5
     if ycolumn == 3
         for i=1:length(Tracks)
-            Tracks(i).Data(:,3) = Tracks(i).Data(:,3)-Tracks(i).Velocity;
+            Tracks(i).Data(:,3,1) = Tracks(i).Data(:,3,1)-Tracks(i).Velocity;
         end
     else
         return
     end
 end
-if Options.eSmoothX.val > 1
-    for i=1:length(Tracks)
-        Tracks(i).Data(:,xcolumn) = nanfastsmooth(Tracks(i).Data(:,xcolumn), Options.eSmoothX.val);
-    end
-end
-if Options.eSmoothY.val > 1
-    for i=1:length(Tracks)
-        Tracks(i).Data(:,ycolumn) = nanfastsmooth(Tracks(i).Data(:,ycolumn), Options.eSmoothY.val);
-    end
-end
+
 for i=1:length(Tracks)
-%     if xcolumn >2 || ycolumn > 2
-%         Tracks(i).Data = [Tracks(i).Data(1:end-1,1:2) + diff(Tracks(i).Data(:,1:2)) Tracks(i).Data(1:end-1,3:end)];
-%     end
-    Tracks(i).XEventEnd = Tracks(i).Data(end, xcolumn);
-    Tracks(i).XEventStart = Tracks(i).Data(1, xcolumn);
+    Tracks(i).Y = Tracks(i).Data(:,ycolumn,Options.lPlot_YVardim.val);
+    Tracks(i).X = Tracks(i).Data(:,xcolumn,Options.lPlot_XVardim.val);
 end
-if get(hDFGui.lChoosePlot, 'Value') == 8
-%     for i=1:length(Tracks)
-%         Tracks(i).Data = Tracks(i).WithTrackAfter;
-%     end
-end
-for i=1:length(Tracks)
-    Tracks(i).Y = Tracks(i).Data(:,ycolumn);
-    Tracks(i).X = Tracks(i).Data(:,xcolumn);
-end
+
 if (xcolumn == 3 && Options.lMethod_TrackValue.val==7) || (ycolumn == 3 && Options.lMethod_TrackValueY.val==7) 
     for i=1:length(Tracks)
-        [tmp_fit] = polyfit(Tracks(i).Data(:,1),Tracks(i).Data(:,2),1);
-        Tracks(i).Subsegvel = tmp_fit(1);
+        [tmp_fit] = polyfit(Tracks(i).Data(:,1,1),Tracks(i).Data(:,2),1,1);
+        Tracks(i).Velocity = tmp_fit(1);
     end
 end
-% Tracks = rmfield(Tracks, 'Data');
+Tracks = rmfield(Tracks, 'Data');
 if nargin > 1
     switch varargin{1}
         case 'file'
@@ -135,5 +110,5 @@ if nargin > 1
     end
 end
 for i=1:length(Tracks)
-    Tracks(i).Z = Tracks(i).Data(:,Options.lPlot_ZVar.val);
+    Tracks(i).Z = Tracks(i).Data(:,Options.lPlot_ZVar.val,Options.lPlot_ZVardim.val);
 end

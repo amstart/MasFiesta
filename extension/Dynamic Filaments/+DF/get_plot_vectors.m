@@ -2,6 +2,7 @@ function [x_vec, y_vec] = get_plot_vectors(Options, Tracks, xy)
 vector = cell(1,2);
 selected_methods = [Options.lMethod_TrackValue.val, Options.lMethod_TrackValueY.val];
 selected_vars = [Options.lPlot_XVar.val, Options.lPlot_YVar.val];
+selected_dims = [Options.lPlot_XVardim.val, Options.lPlot_YVardim.val];
 for m = xy
     vector{m} = nan(length(Tracks),1);
     for n = 1:length(Tracks) % {'median', 'mean', 'end-start', 'minimum', 'maximum', 'standard dev', 'linear fit (only for velocity) or sum (only for MAP count)'}
@@ -13,7 +14,7 @@ for m = xy
             end
         else
             try
-            data = Tracks(n).Data(:,selected_vars(m));
+            data = Tracks(n).Data(:,selected_vars(m),selected_dims(m));
             catch
                 return
             end
@@ -39,11 +40,7 @@ for m = xy
                 end
             case 7
                 if selected_vars(m) == 3
-                    if isfield(Tracks, 'Subsegvel')
-                        vector{m}(n) = Tracks(n).Subsegvel;
-                    else
-                        vector{m}(n) = Tracks(n).Velocity;
-                    end
+                    vector{m}(n) = Tracks(n).Velocity;
                 else
                     vector{m}(n) = nansum(data);
                 end

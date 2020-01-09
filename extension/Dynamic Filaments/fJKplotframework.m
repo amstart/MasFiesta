@@ -205,7 +205,7 @@ if isfrequencyplot
             diffy=diff(PlotTracks(k).Y);
             celly{k}=[diffy(1)/2; (diffy(1:end-1)+diffy(2:end))/2; diffy(end)/2];
             if plotevents(k)
-                ploteventends(k)=PlotTracks(k).X(end)-PlotTracks(k).XEventStart;
+                ploteventends(k)=PlotTracks(k).X(end)-PlotTracks(k).X(1);
             end
         end
         case {3, 7}
@@ -214,7 +214,7 @@ if isfrequencyplot
             diffy=diff(PlotTracks(k).Y);
             celly{k}=[diffy(1)/2; (diffy(1:end-1)+diffy(2:end))/2; diffy(end)/2];
             if plotevents(k)
-                ploteventends(k)=PlotTracks(k).X(1)-PlotTracks(k).XEventEnd;
+                ploteventends(k)=PlotTracks(k).X(1)-PlotTracks(k).X(end);
             end
         end
         case 4

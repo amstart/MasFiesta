@@ -24,16 +24,6 @@ for n = 1:length(Objects)
                 custom_data = [custom_data Objects(n).CustomData.(customfield{1}).read_fun(Objects(n), customfield, Options)];
             end
         end
-    else
-        custom_data = nan(length(includepoints),1);
-        has_custom_data = 0;
-    end
-    if ~isempty(custom_data)
-        custom_data = custom_data(includepoints, :);  
-        has_custom_data = 1;
-    else
-        custom_data = nan(size(t));
-        has_custom_data = 0;
     end
     DynResults = DynResults(includepoints, :);
     f = DynResults(:,1);
@@ -150,7 +140,10 @@ for n = 1:length(Objects)
             tracks(track_id-2).isPause = 1;
         end
 
-        track.Data=[segt segd segvel intensity(trackframes) shrinks(trackframes) f(trackframes) custom_data(trackframes, :)];
+        track.Data=repmat([segt segd segvel intensity(trackframes) shrinks(trackframes) f(trackframes)], 1, 1, 8);
+        if ~isempty(custom_data)
+            track.Data = [track.Data custom_data(trackframes,:,:)];
+        end
 %         try
 %             track.Data(:,13) = track.Data(:,9)./track.Data(:,2);
 %         catch
@@ -165,7 +158,6 @@ for n = 1:length(Objects)
         track.Startendvel=velocity(m);
         track.Velocity=velocity(m);
         track.Selected=0;
-        track.HasCustomData = has_custom_data;
         if track_id == 1
             tracks = track;
         else

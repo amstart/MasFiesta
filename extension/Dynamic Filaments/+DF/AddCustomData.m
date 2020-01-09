@@ -5,11 +5,11 @@ LoadedFromPath = {Objects.LoadedFromPath};
 [unique_paths, ~, MT_index] = unique(LoadedFromPath, 'stable');
 filename = inputdlg('Filename (without .mat)? You will find the data under Object.Custom.<filename>', 'Filename?', 1, {'pixelkymo_GFP_shifted'});
 filename = filename{1};
-if  ~isempty(strfind(filename, 'Expo_fit'))
+if  ~isempty(strfind(filename, 'Expo_fit')) || ~isempty(strfind(filename, 'fit_run'))
     fun = @PrepareExpoData;
     read_fun = @ReadExpoData;
-    plot_options = {'Amplitude', 'MT end', 'Timescale', 'Bg1', 'Bg2', 'PSF width', 'MSE';...
-        '1/nm', 'nm', 'nm', '1/nm', '1/nm', 'nm', 'AU'};
+    plot_options = {'Amplitude', 'MT end', 'Sigma', 'PSF width', 'Bg1', 'Bg2', 'shift_bg', 'MSE';...
+        '1', 'nm', 'nm', 'nm', '1/nm', '1/nm', 'nm', 'AU'};
 elseif ~isempty(strfind(filename, 'fit'))
     fun = @PrepareFitData;
     read_fun = @ReadFitData;
@@ -66,27 +66,27 @@ DF.updateOptions();
 
 function [matrix] = ReadExpoData(Object, customfield, ~)
 data = Object.CustomData.(customfield{1}).Data;
-matrix = nan(length(data), 7);
+matrix = nan(length(data), 8, 8);
 for m = 1:length(data)
     if length(data{m})>1
-        matrix(m,:) = data{m};
-        matrix(m,[1 4 5]) = matrix(m,[1 4 5])./Object.Custom.IntensityPerMAP;
-        matrix(m,[2 3]) = matrix(m,[2 3])*1000;
-        if matrix(m,7) > 5e8
-            matrix(m,:) = nan(1,7);
-        end
+        matrix(m,:,:) = data{m}';
+        matrix(m,[1 5 6],:) = matrix(m,[1 5 6],:)./Object.Custom.IntensityPerMAP;
+        matrix(m,[2 3 4 7],:) = matrix(m,[2 3 4 7],:)*1000;
+%         if matrix(m,7) > 5e8
+%             matrix(m,:) = nan(1,7);
+%         end
     end
 end
-n = 1;
+
 
 function out = PrepareExpoData(fit_data, Object)
 frames = Object.DynResults(:,1);
 out = cell(length(frames),1);
 for m = 1:length(fit_data)
-    if ~iscell(fit_data{m})
+    if ~iscell(fit_data{m}) || length(fit_data{m}{1}) == 1
         continue
     end
-    out{find(frames-fit_data{m}{6}==0)} = [fit_data{m}{1} fit_data{m}{2}];
+    out{frames-fit_data{m}{7}==0} = [fit_data{m}{1} fit_data{m}{2}'];
 end
 
 

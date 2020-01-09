@@ -94,11 +94,6 @@ elseif gcbo == hDFGui.lMethod_TrackValueY
     DF.Draw(hDFGui);
 elseif gcbo == hDFGui.bSegment %bSegment button is pressed
     [Objects, Tracks] = hDFGui.Segment(Options);
-    for i = 1:length(Tracks)
-    if size(Tracks(i).Data,2) < 12
-        Tracks(i).Data = [Tracks(i).Data zeros(size(Tracks(i).Data,1),6)];
-    end
-    end
     setappdata(hDFGui.fig,'Tracks', Tracks);
     setappdata(hDFGui.fig,'Objects',Objects);
 end

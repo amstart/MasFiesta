@@ -13,7 +13,6 @@ if ~isempty(Objects)&&~isempty(Selected)
 end
 
 function drawFil(hDFGui, Object, Tracks, Selected, Options, Objects)
-eSmoothY=str2double(get(hDFGui.eSmoothY, 'String'));
 cutoff=Options.eRescueCutoff.val;
 track_id=Object(1).TrackIds;
 
@@ -39,15 +38,9 @@ for i=1:length(tracks)
     else
         pauses = [];
     end
-    if eSmoothY == 1
-        dseg=segtrack(:,2);
-        c2seg=segtrack(:, Options.lPlot_YVar.val);
-        c1seg=segtrack(:, Options.lPlot_XVar.val);
-    else
-        dseg=nanfastsmooth(segtrack(:,2), eSmoothY);
-        c2seg=nanfastsmooth(segtrack(:,Options.lPlot_YVar.val), eSmoothY);
-        c1seg=nanfastsmooth(segtrack(:,Options.lPlot_XVar.val), eSmoothY);
-    end
+    dseg=segtrack(:,2);
+    c2seg=segtrack(:, Options.lPlot_YVar.val, Options.lPlot_YVardim.val);
+    c1seg=segtrack(:, Options.lPlot_XVar.val, Options.lPlot_XVardim.val);
     d0=round(nanmean(segtrack(:,2)));
     t0=segtrack(round(size(segtrack,1)/2),1);
     if get(hDFGui.cshowTrackN,'Value')
