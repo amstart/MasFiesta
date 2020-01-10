@@ -142,7 +142,7 @@ for n = 1:length(Objects)
             tracks(track_id-2).isPause = 1;
         end
 
-        track.Data=repmat([segt segd segvel intensity(trackframes) shrinks(trackframes) f(trackframes)], 1, 1, 8);
+        track.Data=repmat([segt segd segvel intensity(trackframes) shrinks(trackframes) f(trackframes)], 1, 1, 2);
         if ~isempty(fit_data)
             track.Data = [track.Data fit_data(trackframes,:,:)];
             track.itrace = itrace(trackframes);

@@ -26,7 +26,7 @@ for i=1:length(type)
         track_id(i)=0;
         continue
     end
-    if Tracks(i).Duration < Options.eMinDuration.val && Options.cPlotGrowingTracks.val == 1 
+    if Tracks(i).Duration < Options.eMinDuration.val %&& Options.cPlotGrowingTracks.val == 1 
         track_id(i)=0;
         continue
     end

@@ -6,7 +6,7 @@ global ScanOptions
 % try
 %rmappdata(0, 'hMainGui');
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-ScanOptions.filename = ['fit_run4' '.mat'];
+ScanOptions.filename = ['fit_run5' '.mat'];
 ScanOptions.help_fit_error_function.fit_session = @DoFitConvolutedExponential;
 %% Load the Kymograph data
 forFileName = load([PathName FileName]);
