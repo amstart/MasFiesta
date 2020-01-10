@@ -308,10 +308,5 @@ else
     labelprefixy='';
     unitprefixy='';
 end
-if strcmp(Options.lSubsegment.print, 'All') || Options.cPlotGrowingTracks.val==1
-    segment = '';
-else
-    segment =  [' (' Options.lSubsegment.print ' only)'];
-end
 labelx=[Options.lPlot_XVar.print ' ' labelsuffixx ' [' Options.lPlot_XVar.str ']'];
-labely=[labelprefixy Options.lPlot_YVar.print ' ' labelsuffixy ' ' segment ' [' unitprefixy yunit ']'];
+labely=[labelprefixy Options.lPlot_YVar.print ' ' labelsuffixy ' [' unitprefixy yunit ']'];

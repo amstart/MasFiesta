@@ -57,34 +57,34 @@ bg2 = mean(lowesty(1:5));
 [maxy, maxid] = max(yn);
 
 suggs = [2*maxy-bg1,xn(maxid),0.2,0.17,bg1,bg2,0];
-lb = [0,-inf,0,0.17,mean([bg2 bg1]),bg2,-0.5];
-ub = [inf,inf,10,0.17,bg1,bg2*2,0.5];
+lb = [0,-inf,0,0.15,mean([bg2 bg1]),bg2,-0.5];
+ub = [inf,inf,10,0.3,bg1,bg2*2,0.5];
 
-[fits,fvals] = fitConvolutedExponential(xn,yn,suggs,lb,ub,0.25);
-
-[fit,fval] = fitConvolutedExponential(x,y,suggs,lb,ub,0.25);
-fits = vertcat(fits,fit);
-fvals = [fvals, fval];
-[fit,fval] = fitConvolutedExponential(xn,yn,suggs,lb,ub,1);
-fits = vertcat(fits,fit);
-fvals = [fvals, fval];
-[fit,fval] = fitConvolutedExponential(x,y,suggs,lb,ub,0.5);
-fits = vertcat(fits,fit);
-fvals = [fvals, fval];
+% [fits,fvals] = fitConvolutedExponential(xn,yn,suggs,lb,ub,0.25);
+% 
+% [fit,fval] = fitConvolutedExponential(x,y,suggs,lb,ub,0.25);
+% fits = vertcat(fits,fit);
+% fvals = [fvals, fval];
+% [fit,fval] = fitConvolutedExponential(xn,yn,suggs,lb,ub,0.5);
+% fits = vertcat(fits,fit);
+% fvals = [fvals, fval];
+% [fit,fval] = fitConvolutedExponential(x,y,suggs,lb,ub,0.5);
+% fits = vertcat(fits,fit);
+% fvals = [fvals, fval];
 
 lb(end) = 0;
 ub(end) = 0;
 
-[fit,fval] = fitConvolutedExponential(xn,yn,suggs,lb,ub,0.25);
+[fits,fvals] = fitConvolutedExponential(xn,yn,suggs,lb,ub,0.3);
+
+
+[fit,fval] = fitConvolutedExponential(x,y,suggs,lb,ub,0.3);
 fits = vertcat(fits,fit);
 fvals = [fvals, fval];
-[fit,fval] = fitConvolutedExponential(x,y,suggs,lb,ub,0.25);
-fits = vertcat(fits,fit);
-fvals = [fvals, fval];
-[fit,fval] = fitConvolutedExponential(xn,yn,suggs,lb,ub,1);
-fits = vertcat(fits,fit);
-fvals = [fvals, fval];
-[fit,fval] = fitConvolutedExponential(x,y,suggs,lb,ub,0.5);
-fits = vertcat(fits,fit);
-fvals = [fvals, fval];
+% [fit,fval] = fitConvolutedExponential(xn,yn,suggs,lb,ub,0.3);
+% fits = vertcat(fits,fit);
+% fvals = [fvals, fval];
+% [fit,fval] = fitConvolutedExponential(x,y,suggs,lb,ub,0.3);
+% fits = vertcat(fits,fit);
+% fvals = [fvals, fval];
 

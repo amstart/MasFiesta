@@ -17,11 +17,12 @@ for n = 1:length(Objects)
     if ~Options.cIncludeNonTypePoints.val
         includepoints = includepoints & Objects(n).Tags(:,2)==0;
     end
-    custom_data = [];
+    fit_data = [];
     if isfield(Objects(n), 'CustomData') && ~isempty(Objects(n).CustomData)
         for customfield = fields(Objects(n).CustomData)'
             if ~isempty(Objects(n).CustomData.(customfield{1}).read_fun)
-                custom_data = [custom_data Objects(n).CustomData.(customfield{1}).read_fun(Objects(n), customfield, Options)];
+                [fit_data, itrace, x_sel, fit_frames] = Objects(n).CustomData.(customfield{1}).read_fun(Objects(n), customfield, Options);
+                fit_data = fit_data(includepoints,:,:); itrace = itrace(includepoints,:); x_sel = x_sel(includepoints); fit_frames = fit_frames(includepoints);
             end
         end
     end
@@ -129,6 +130,7 @@ for n = 1:length(Objects)
         segt=t(trackframes);
         segd=d(trackframes);
         
+        
         track.Duration=segt(end)-segt(1);
         Objects(n).Duration=Objects(n).Duration+track.Duration;
         track.DistanceEventEnd=segd(end);
@@ -141,8 +143,13 @@ for n = 1:length(Objects)
         end
 
         track.Data=repmat([segt segd segvel intensity(trackframes) shrinks(trackframes) f(trackframes)], 1, 1, 8);
-        if ~isempty(custom_data)
-            track.Data = [track.Data custom_data(trackframes,:,:)];
+        if ~isempty(fit_data)
+            track.Data = [track.Data fit_data(trackframes,:,:)];
+            track.itrace = itrace(trackframes);
+            track.x_sel = x_sel(trackframes);
+            if any(f(trackframes)-fit_frames(trackframes))
+                error('frames do not match');
+            end
         end
 %         try
 %             track.Data(:,13) = track.Data(:,9)./track.Data(:,2);

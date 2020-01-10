@@ -464,15 +464,10 @@ if Options.lMethod_TrackValue.val == 7
         methodstr = 'sum';
     end
 end
-if strcmp(Options.lSubsegment.print, 'All') || Options.cPlotGrowingTracks.val==1
-    segment = '';
-else
-    segment =  [' (' Options.lSubsegment.print ' only)'];
-end
 if Options.cPlotGrowingTracks.val==1
     label=[title ' (' methodstr '. Only tracks > ' Options.eMinDuration.print ' evaluated)'  ' [' unit ']'];
 else
-    label=[title ' (' methodstr ')' segment ' [' unit ']'];
+    label=[title ' (' methodstr ') [' unit ']'];
 end
 
 

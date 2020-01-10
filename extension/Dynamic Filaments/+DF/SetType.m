@@ -26,7 +26,7 @@ for i=1:length(type)
         track_id(i)=0;
         continue
     end
-    if Options.cPlotGrowingTracks.val == 1 && Tracks(i).Duration < Options.eMinDuration.val
+    if Tracks(i).Duration < Options.eMinDuration.val && Options.cPlotGrowingTracks.val == 1 
         track_id(i)=0;
         continue
     end
@@ -102,13 +102,12 @@ if (xcolumn == 3 && Options.lMethod_TrackValue.val==7) || (ycolumn == 3 && Optio
         Tracks(i).Velocity = tmp_fit(1);
     end
 end
-Tracks = rmfield(Tracks, 'Data');
+for i=1:length(Tracks)
+    Tracks(i).Z = Tracks(i).Data(:,Options.lPlot_ZVar.val,Options.lPlot_ZVardim.val);
+end
 if nargin > 1
     switch varargin{1}
         case 'file'
             [~, ~, orderid] = unique(file);
     end
-end
-for i=1:length(Tracks)
-    Tracks(i).Z = Tracks(i).Data(:,Options.lPlot_ZVar.val,Options.lPlot_ZVardim.val);
 end

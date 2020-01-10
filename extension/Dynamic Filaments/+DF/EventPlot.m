@@ -60,28 +60,28 @@ for i=1:2
     hold on
 %     if 1
         frequencies = accumarray(typeid(uniqueorder), NEventsO./sumTimeO, [], @(x) {x});
-        iosr.statistics.boxPlot(padcat(frequencies{:}), 'showScatter', true);
+        iosr.statistics.boxPlot(padcat(frequencies{:}), 'showScatter', true, 'sampleSize', true);
 %         fEvents = accumarray(typeid(uniqueorder), NEventsO./sumTimeO, [], @median);
 %         bar(fEvents,'stacked', 'r');
 %         flow = accumarray(typeid(uniqueorder), NEventsO./sumTimeO, [], @min);
 %         fhigh = accumarray(typeid(uniqueorder), NEventsO./sumTimeO, [], @max);
 %         h_error = errorbar(1:length(fEvents), fEvents, fEvents-flow, fhigh-fEvents, '.');
 %     else       
-%         fEvents = NEvents./sumTime;
+        fEvents = NEvents./sumTime;
 %         bar(fEvents,'stacked', 'r');
-%         fError = sqrt(NEvents)./sumTime; %see https://www.bcube-dresden.de/wiki/Error_bars
+        fError = sqrt(NEvents)./sumTime; %see https://www.bcube-dresden.de/wiki/Error_bars
 %         h_error = errorbar(1:length(fEvents), fEvents, fError, '.');
 %     end
     %text on bars
-%     MTnum = accumarray(typeid, [Tracks.MTIndex], [], @uniquecount);
-%     movienum = accumarray(typeid(uniqueorder),1);
-%     for j=1:length(uniquetypes)
-%         if fEvents(j)
-%             text(j, fEvents(j)/2, {[num2str(NEvents(j)) ' events'], [num2str(sumTime(j),'%1.1f') ' ' unit],[num2str(MTnum(j)) 'MTs'], [num2str(movienum(j)) ' experiments']}, 'HorizontalAlignment', 'center', 'FontSize',16);
-%         else
-%             text(j, fEvents(j)/2, {['0 in ' num2str(sumTime(j),'%1.1f') ' ' unit], [num2str(MTnum(j)) ' MTs'], [num2str(movienum(j)) ' experiments']}, 'HorizontalAlignment', 'center', 'VerticalAlignment', 'bottom', 'FontSize',16);
-%         end
-%     end
+    MTnum = accumarray(typeid, [Tracks.MTIndex], [], @uniquecount);
+    movienum = accumarray(typeid(uniqueorder),1);
+    for j=1:length(uniquetypes)
+        if fEvents(j)
+            text(j, fEvents(j)/2, {[num2str(NEvents(j)) ' events'], [num2str(sumTime(j),'%1.1f') ' ' unit],[num2str(MTnum(j)) 'MTs'], [num2str(movienum(j)) ' experiments']}, 'HorizontalAlignment', 'center', 'FontSize',16);
+        else
+            text(j, fEvents(j)/2, {['0 in ' num2str(sumTime(j),'%1.1f') ' ' unit], [num2str(MTnum(j)) ' MTs'], [num2str(movienum(j)) ' experiments']}, 'HorizontalAlignment', 'center', 'VerticalAlignment', 'bottom', 'FontSize',16);
+        end
+    end
     set(gca,'XTick',1:length(uniquetypes), 'FontSize',18, 'LabelFontSizeMultiplier', 1.5,'xticklabel',uniquetypes, 'Ticklength', [0 0]);
     if (length(uniquetypes)>2&&group>1)||length(uniquetypes)>3
         set(gca,'XTickLabelRotation',15);

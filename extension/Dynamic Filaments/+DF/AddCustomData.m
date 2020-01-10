@@ -64,12 +64,20 @@ end
 setappdata(hDFGui.fig,'Objects',Objects);
 DF.updateOptions();
 
-function [matrix] = ReadExpoData(Object, customfield, ~)
+function [matrix, xy, xn, frames] = ReadExpoData(Object, customfield, ~)
 data = Object.CustomData.(customfield{1}).Data;
 matrix = nan(length(data), 8, 8);
+frames = nan(length(data),1);
+xy = cell(length(data),1);
+xn = cell(length(data),1);
 for m = 1:length(data)
     if length(data{m})>1
-        matrix(m,:,:) = data{m}';
+        xy{m} = data{m}{2}';
+        xy{m}(:,1) = xy{m}(:,1)*1000;
+        xy{m}(:,2) = xy{m}(:,2)./Object.Custom.IntensityPerMAP;
+        xn{m} = data{m}{3}*1000;
+        frames(m) = data{m}{end};
+        matrix(m,:,:) = data{m}{1}';
         matrix(m,[1 5 6],:) = matrix(m,[1 5 6],:)./Object.Custom.IntensityPerMAP;
         matrix(m,[2 3 4 7],:) = matrix(m,[2 3 4 7],:)*1000;
 %         if matrix(m,7) > 5e8
@@ -86,7 +94,7 @@ for m = 1:length(fit_data)
     if ~iscell(fit_data{m}) || length(fit_data{m}{1}) == 1
         continue
     end
-    out{frames-fit_data{m}{7}==0} = [fit_data{m}{1} fit_data{m}{2}'];
+    out{frames-fit_data{m}{7}==0} = {[fit_data{m}{1} fit_data{m}{2}'] vertcat(fit_data{m}{3:4}) fit_data{m}{5} fit_data{m}{7}};
 end
 
 

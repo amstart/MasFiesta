@@ -264,7 +264,18 @@ tooltipstr=sprintf(['Takes out tracks with less [seconds] duration than given in
 hDFGui.eMinDuration = uicontrol('Parent',hDFGui.pOptions,'Style','edit','Units','normalized',...
                                          'Position',[.45 .1 .1 .05],'Tag','eMinDuration','Fontsize',10, 'TooltipString', tooltipstr,...
                                          'UserData', 's', 'String','15','BackgroundColor','white','HorizontalAlignment','center');    
-                                     
+                                    
+tooltipstr=sprintf(['Select a track to plot']);
+
+hDFGui.eTrack = uicontrol('Parent',hDFGui.pOptions,'Style','edit','Units','normalized',...
+                                         'Position',[.3 .03 .1 .05],'Tag','eTrack','Fontsize',10,'TooltipString', tooltipstr,...
+                                         'UserData', '1', 'String','1','BackgroundColor','white','HorizontalAlignment','center');  
+
+tooltipstr = 'Plots frame data with a slider';       
+                               
+hDFGui.bTrack = uicontrol('Parent',hDFGui.pOptions,'Units','normalized','Callback',@DF.plotTrackSlide, 'FontSize', 10,...
+                                   'Position',[0.5 0.03 0.2 0.05],'String','Plot Track','Style','pushbutton','Tag','bTrack','TooltipString', tooltipstr);    
+
 tooltipstr=sprintf(['Bin width [nm] for plots which show distance weighted values (instead of frame weighted).']);
 
 hDFGui.tDistanceWeight = uicontrol('Parent',hDFGui.pOptions,'Units','normalized','BackgroundColor',c,...
