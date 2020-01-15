@@ -66,7 +66,7 @@ DF.updateOptions();
 
 function [matrix, xy, xn, frames] = ReadExpoData(Object, customfield, ~)
 data = Object.CustomData.(customfield{1}).Data;
-matrix = nan(length(data), 8, 2);
+matrix = nan(length(data), 8, 3);
 frames = nan(length(data),1);
 xy = cell(length(data),1);
 xn = cell(length(data),1);

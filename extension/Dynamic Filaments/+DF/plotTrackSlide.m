@@ -19,10 +19,10 @@ if ~isempty(track.itrace{frame})
     plot(x,track.itrace{frame}(:,2));
     hold on
     title(num2str(track.Data(frame,6,1)));
-    h1 = plot(x,convolutedExponential(x,track.Data(frame,7:end-1,1)'));
-    h2 = plot(x,convolutedExponential(x,track.Data(frame,7:end-1,2)'));
+    h1 = plot(x,convolutedExponential(x,track.Data(frame,7:end-1,2)'));
+    h2 = plot(x,convolutedExponential(x,track.Data(frame,7:end-1,3)'));
     plot(track.x_sel{frame}([1 end]),[mean(ylim) mean(ylim)]);
-    legend([h1, h2], {'xn', 'x'});
+    legend([h1, h2], {'x03', 'x05'});
     drawnow;
     hold off
 end
