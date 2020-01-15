@@ -1,6 +1,6 @@
 function [fits,fvals,xn,yn] = DoFitConvolutedExponential(x, y)
 range = 6:min(45, length(x));
-[~,locs] = findpeaks(y(range),'NPeaks',1, 'SortStr', 'descend');
+[~,locs] = findpeaks(y(range).*normpdf(x(range),0,1),'NPeaks',1, 'SortStr', 'descend');
 peakid = locs + 5;
 minima = unique([1 find(islocalmin(y,'MinSeparation',3)), length(y)]);
 if isempty(peakid)
@@ -56,9 +56,9 @@ bg2 = mean(lowesty(1:5));
 
 [maxy, maxid] = max(yn);
 
-suggs = [2*maxy-bg1,xn(maxid),0.2,0.17,bg1,bg2,0];
-lb = [0,-inf,0,0.15,mean([bg2 bg1]),bg2,-0.5];
-ub = [inf,inf,10,0.3,bg1,bg2*2,0.5];
+suggs = [2*maxy-bg1,xn(maxid),0,0.17,bg1,bg2,0];
+lb = [0,-inf,-1,0.15,mean([bg2 bg1]),bg2,-0.5];
+ub = [inf,inf,1,0.3,bg1,bg2*2,0.5];
 
 % [fits,fvals] = fitConvolutedExponential(xn,yn,suggs,lb,ub,0.25);
 % 
@@ -84,7 +84,7 @@ fvals = [fvals, fval];
 % [fit,fval] = fitConvolutedExponential(xn,yn,suggs,lb,ub,0.3);
 % fits = vertcat(fits,fit);
 % fvals = [fvals, fval];
-% [fit,fval] = fitConvolutedExponential(x,y,suggs,lb,ub,0.3);
-% fits = vertcat(fits,fit);
-% fvals = [fvals, fval];
+[fit,fval] = fitConvolutedExponential(x,y,suggs,lb,ub,0.5);
+fits = vertcat(fits,fit);
+fvals = [fvals, fval];
 
