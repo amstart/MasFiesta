@@ -1,7 +1,7 @@
 function updateOptions(varargin)
 global DFDir
 var_units = {'s', 'nm', 'nm/s', '1/nm', '', '1'};
-var_names = {'time', 'location', 'velocity', 'Ase1 count', 'auto tags', 'frames'};
+var_names = {'time', 'location', 'velocity', 'Ase1 count', 'track num', 'frames'};
 hDFGui = getappdata(0,'hDFGui');
 Objects = getappdata(hDFGui.fig,'Objects');
 customfields ={};

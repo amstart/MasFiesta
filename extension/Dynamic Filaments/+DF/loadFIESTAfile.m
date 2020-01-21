@@ -1,4 +1,14 @@
 function loadFIESTAfile(FileName, PathName)
+data = load([PathName FileName]);
+if isfield(data, 'Objects')
+    hDFGui = getappdata(0,'hDFGui');
+    setappdata(hDFGui.fig,'Objects',data.Objects);
+    setappdata(hDFGui.fig,'Tracks',data.Tracks);
+    set(hDFGui.cUsePosEnd, 'Enable', 'off');
+    setappdata(0,'hDFGui',hDFGui);
+    DF.updateOptions;
+    return
+end
 AllObjects = load([PathName FileName], 'Filament');
 if ~isfield(AllObjects, 'Filament')
     fJKLoadLink(FileName, PathName, @DF.Load)
