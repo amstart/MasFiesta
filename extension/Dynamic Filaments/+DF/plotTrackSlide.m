@@ -18,7 +18,8 @@ if ~isempty(track.itrace{frame})
     x = track.itrace{frame}(:,1);
     plot(x,track.itrace{frame}(:,2));
     hold on
-    title([num2str(track.TrackIndex) '   frame: ' num2str(track.Data(frame,6,1))]);
+    title(['MT: ' num2str(track.MTIndex) ' track: ' num2str(track.TrackIndex)...
+        '   frame: ' num2str(track.Data(frame,6,1))]);
     h1 = plot(x,convolutedExponential(x,track.Data(frame,7:end-1,2)'));
     h2 = plot(x,convolutedExponential(x,track.Data(frame,7:end-1,3)'));
     plot(track.x_sel{frame}([1 end]),[mean(ylim) mean(ylim)]);
