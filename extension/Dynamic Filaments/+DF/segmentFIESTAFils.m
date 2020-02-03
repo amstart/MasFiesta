@@ -106,6 +106,7 @@ for n = 1:length(Objects)
         track.File=Objects(n).File;
         track.Type=Objects(n).Type;
         track.isPause = 0;
+        track.IntensityPerMAP = Objects(n).Custom.IntensityPerMAP;
         
         trackframes=(track_starts(m):(track_ends(m)))';
         if m == 1 || track_ends(m-1) ~= track_starts(m)
@@ -142,11 +143,17 @@ for n = 1:length(Objects)
             tracks(track_id-2).isPause = 1;
         end
 
-        track.Data=repmat([segt segd segvel intensity(trackframes) repmat(track_id,size(segt)) f(trackframes)], 1, 1, 3);
+        track.Data=repmat([segt segd segvel intensity(trackframes) repmat(track_id,size(segt)) f(trackframes)], 1, 1, 8);
         if ~isempty(fit_data)
-            track.Data = [track.Data fit_data(trackframes,:,:)];
+            trackfitdata = fit_data(trackframes,:,:);
+            [dim1,dim2,dim3] = size(trackfitdata);
+            if dim3 ~= 8
+                trackfitdata = cat(3, trackfitdata, nan(dim1,dim2,8-dim3));
+            end
+            track.Data = [track.Data trackfitdata];
             track.itrace = itrace(trackframes);
-            track.x_sel = x_sel(trackframes);
+            track.x_autosel = x_sel(trackframes);
+            track.x_sel = nan(8,2);
             if any(f(trackframes)-fit_frames(trackframes))
                 error('frames do not match');
             end

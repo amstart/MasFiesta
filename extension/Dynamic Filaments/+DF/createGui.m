@@ -97,7 +97,7 @@ hDFGui.bRefreshGui = uicontrol('Parent',hDFGui.pOptions,'Units','normalized','Ca
                                
 tooltipstr = 'Segments the currently loaded MTs according to the given parameters.';       
                                
-hDFGui.bSegment = uicontrol('Parent',hDFGui.pOptions,'Units','normalized','Callback',@DF.updateOptions, 'FontSize', 15,...
+hDFGui.bSegment = uicontrol('Parent',hDFGui.pOptions,'Units','normalized','Callback',@DF.updateOptions, 'FontSize', 15,'Enable','off',...
                                    'Position',[0.65 0.85 0.15 0.05],'String','Segment','Style','pushbutton','Tag','bSegment','TooltipString', tooltipstr);    
                                
                                
