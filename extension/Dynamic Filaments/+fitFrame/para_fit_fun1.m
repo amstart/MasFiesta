@@ -1,21 +1,19 @@
 function [fits,fvals] = para_fit_fun1(x, y)
-bg1 = y(end);
 lowesty = sort(y);
 bg2 = mean(lowesty(1:5));
+bg1 = y(end) - bg2;
 
+side = 1;
 [maxy, maxid] = max(y);
+center = centerOfMass(y(maxid-side:maxid+side)) - side - 1;
+tip = interp1(maxid-2:maxid+2,x(maxid-2:maxid+2),maxid+center(1));
 
-amp = 2*maxy-bg1;
+amp = 100*maxy;
+PSF_width = 200;
+tau = 10;
 
-suggs = [amp,amp,x(maxid),0,170,bg1,bg2,50];
-lb = [0,0,-inf,-1000,150,mean([bg2 bg1]),bg2,1];
-ub = [inf,inf,inf,1000,300,bg1,bg2*2,1000];
+suggs = [amp,PSF_width,bg1,bg2,tip,tau];
+lb = [0,150,0,0,tip-150,0];
+ub = [inf,350,inf,inf,tip+150,500];
 
-[fits,fvals] = fitFrame.fit_fun1(x,y,suggs,lb,ub,500);
-
-suggs(2) = amp*10000;
-ub(4) = 10;
-[fit,fval] = fitFrame.fit_fun1(x,y,suggs,lb,ub,500);
-fits = vertcat(fits,fit);
-fvals = [fvals, fval];
-
+[fits,fvals] = fitFrame.fit_fun1(x,y,suggs,lb,ub,1000);

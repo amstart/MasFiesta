@@ -46,7 +46,7 @@ if ~isempty(track.itrace{frame})
         '   frame: ' num2str(track.Data(frame,6,1))]);
     data = squeeze(track.Data(frame,7:end,[dim1 dim2]));
     if ~isnan(data(1))
-        h1 = plot(x,fitFrame.fun2(x,data(:,1)));
+        h1 = plot(x,fitFrame.fun1(x,data(:,1)));
         text(0.1,0.1,num2str(data(1,1)),'Units','normalized');
         legend(h1, {['dim' num2str(dim1)]});
     end
@@ -82,7 +82,9 @@ if ~isempty(track.itrace{frame})
     end
     x = track.itrace{frame}(pts(1):pts(end),1);
     y = track.itrace{frame}(pts(1):pts(end),2);
-    [fits,fvals] = fitFrame.para_fit_fun2(x, y);
+    fits1 = fitFrame.para_fit_fun1(x, y);
+    fits2 = fitFrame.para_fit_fun2(x, y);
+    fits = padcat(fits1, fits2);
     if size(fits,1) == 1
         dim2 = [];
         track.x_sel(frame,:,dim1) = pts([1 end]);
