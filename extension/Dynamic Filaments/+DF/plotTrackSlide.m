@@ -45,15 +45,17 @@ if ~isempty(track.itrace{frame})
     title(['MT: ' num2str(track.MTIndex) ' track: ' num2str(track.TrackIndex)...
         '   frame: ' num2str(track.Data(frame,6,1))]);
     data = squeeze(track.Data(frame,7:end,[dim1 dim2]));
+    try
     if ~isnan(data(1))
         h1 = plot(x,fitFrame.fun1(x,data(:,1)));
-        text(0.1,0.1,num2str(data(1,1)),'Units','normalized');
-        legend(h1, {['dim' num2str(dim1)]});
     end
     if ~isnan(data(1,2))
         h2 = plot(x,fitFrame.fun2(x,data(:,2)));
-        text(0.5,0.1,num2str(data(1,2)),'Units','normalized');
-%         legend([h1, h2], {['dim' num2str(dim1)], ['dim' num2str(dim2)]});
+    end
+    legend([h1 h2],...
+    {['s=' num2str(data(2,1),3) ' t=' num2str(data(6,1),3) ' e=' num2str(data(8,1),3)], ['s=' num2str(data(2,2),3) ' e=' num2str(data(8,2),3)]},...
+    'Location', 'southeast');
+    catch
     end
 %     try
 %         h1 = plot(x,convolutedExponential(x,track.Data(frame,7:end-1,dim1)'));
@@ -82,8 +84,8 @@ if ~isempty(track.itrace{frame})
     end
     x = track.itrace{frame}(pts(1):pts(end),1);
     y = track.itrace{frame}(pts(1):pts(end),2);
-    fits1 = fitFrame.para_fit_fun1(x, y);
-    fits2 = fitFrame.para_fit_fun2(x, y);
+    [fits1] = fitFrame.para_fit_fun1(x, y);
+    [fits2] = fitFrame.para_fit_fun2(x, y);
     fits = padcat(fits1, fits2);
     if size(fits,1) == 1
         dim2 = [];

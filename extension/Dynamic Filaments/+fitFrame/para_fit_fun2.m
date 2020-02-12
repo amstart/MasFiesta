@@ -1,4 +1,4 @@
-function [fits,fvals] = para_fit_fun2(x, y)
+function out = para_fit_fun2(x, y)
 lowesty = sort(y);
 bg2 = mean(lowesty(1:5));
 bg1 = y(end) - bg2;
@@ -16,3 +16,6 @@ lb = [0,150,0,0,tip-150];
 ub = [inf,350,inf,inf,tip+150];
 
 [fits,fvals] = fitFrame.fit_fun2(x,y,suggs,lb,ub,1000);
+fits(end+1) = nan;
+
+out = [fits,tip,fvals];
