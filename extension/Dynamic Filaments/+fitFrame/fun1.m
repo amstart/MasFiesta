@@ -12,6 +12,8 @@ function [y] = fun1(x,pars)
     %exp
     tau = 1/(pars(6)/1000);
     
+    shift = pars(7)/1000;
+    
     % Calculation ------------------------------------
     
     % We make a continuous xx to be able to apply the convolution, and then
@@ -20,7 +22,7 @@ function [y] = fun1(x,pars)
     expdist = exp(sigma^2*tau^2/2-tau*xend).*erfc((sigma^2*tau-xend)/(sigma*sqrt(2)));
     
     y = ones(size(x)) * bg2 + ...
-        (erf(xend/(sigma*sqrt(2)))+1)*bg1/2 + ...
+        (erf((xend-shift)/(sigma*sqrt(2)))+1)*bg1/2 + ...
         Amp * expdist/max(expdist);
     
 end

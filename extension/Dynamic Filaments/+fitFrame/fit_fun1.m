@@ -1,10 +1,9 @@
-function [fit,fval] = fit_fun1(x,y,sugg,lb,ub,weights_sigma)
+function [fit,fval] = fit_fun1(x,y,sugg,lb,ub)
     % Fit of the data x,y to the convoluted exponential, sugg is the
     % initial guess for the parameters
-    weights = normpdf(x,sugg(2),weights_sigma);
     % Function that gives a weight sum(abs(data - prediction)), I think
     % is better to fit to the absolute value rather than the square.
-    f = @ (pars) sum((((fitFrame.fun1(x,pars) - y).*weights).^2)) ;
+    f = @ (pars) sum(((fitFrame.fun1(x,pars) - y).^2)) ;
     
     % Some random options for the optimization
     opts = optimset('MaxFunEvals',5000, 'MaxIter',1000, 'Display', 'off');
