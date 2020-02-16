@@ -33,11 +33,6 @@ axes(hDFGui.aPlot);
 for i=1:length(tracks)
     segtrack=tracks(i).Data;
     tseg=segtrack(:,1);
-    if hDFGui.mode == 2
-        pauses=find(segtrack(:,5)==8);
-    else
-        pauses = [];
-    end
     dseg=segtrack(:,2);
     c2seg=segtrack(:, Options.lPlot_YVar.val, Options.lPlot_YVardim.val);
     c1seg=segtrack(:, Options.lPlot_XVar.val, Options.lPlot_XVardim.val);
@@ -46,7 +41,6 @@ for i=1:length(tracks)
     if get(hDFGui.cshowTrackN,'Value') && tseg(end)-tseg(1) > 20 && tracks(i).Shrinks
         text(double(t0),double(max(segtrack(:,2))),num2str(track_id(i)));
     end
-    plot(hDFGui.aPlot,tseg(pauses),dseg(pauses),'LineStyle', 'none', 'Marker', 'x', 'MarkerEdgeColor','c');
     if tracks(i).Shrinks
         c='r';
         if size(dseg,1) < str2double(get(hDFGui.eMinLength, 'String'))

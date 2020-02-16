@@ -143,21 +143,22 @@ for n = 1:length(Objects)
             tracks(track_id-2).isPause = 1;
         end
 
-        track.Data=repmat([segt segd segvel intensity(trackframes) repmat(track_id,size(segt)) f(trackframes)], 1, 1, 8);
-        if ~isempty(fit_data)
-            trackfitdata = fit_data(trackframes,:,:);
-            [dim1,dim2,dim3] = size(trackfitdata);
-            if dim3 ~= 8
-                trackfitdata = cat(3, trackfitdata, nan(dim1,dim2,8-dim3));
-            end
-            track.Data = [track.Data trackfitdata];
-            track.itrace = itrace(trackframes);
-            track.x_autosel = x_sel(trackframes);
-            track.x_sel = nan(8,2);
-            if any(f(trackframes)-fit_frames(trackframes))
-                error('frames do not match');
-            end
-        end
+        track.Data=repmat([segt segd segvel intensity(trackframes) repmat(track_id,size(segt)) f(trackframes)], 1, 1, 5);
+        track.Data = [track.Data nan(length(segt),12,5)];
+%         if ~isempty(fit_data)
+%             trackfitdata = fit_data(trackframes,:,:);
+%             [dim1,dim2,dim3] = size(trackfitdata);
+%             if dim3 ~= 8
+%                 trackfitdata = cat(3, trackfitdata, nan(dim1,dim2,8-dim3));
+%             end
+%             track.Data = [track.Data trackfitdata];
+%             track.itrace = itrace(trackframes);
+%             track.x_autosel = x_sel(trackframes);
+%             track.x_sel = nan(8,2);
+%             if any(f(trackframes)-fit_frames(trackframes))
+%                 error('frames do not match');
+%             end
+%         end
 %         try
 %             track.Data(:,13) = track.Data(:,9)./track.Data(:,2);
 %         catch
