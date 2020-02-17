@@ -11,6 +11,12 @@ function [y] = fun2(x,pars)
     MTend = pars(5);
     
     shift = pars(6);
+    
+    if ~pars(7)
+        sigmaerf=sigma;
+    else
+        sigmaerf = pars(7);
+    end
     % Calculation ------------------------------------
     
     % We make a continuous xx to be able to apply the convolution, and then
@@ -18,7 +24,7 @@ function [y] = fun2(x,pars)
     
     gaussdist = normpdf(x,MTend,sigma);
     y = ones(size(x)) * bg2 + ...
-        (erf((x-MTend-shift)/(sigma*sqrt(2)))+1)*bg1/2 + ...
+        (erf((x-MTend-shift)/(sigmaerf*sqrt(2)))+1)*bg1/2 + ...
         Amp * gaussdist/max(gaussdist);
 end
 

@@ -3,7 +3,7 @@ function [fit,fval] = fit_fun2(x,y,sugg,lb,ub)
     % initial guess for the parameters
     % Function that gives a weight sum(abs(data - prediction)), I think
     % is better to fit to the absolute value rather than the square.
-    f = @ (pars) sum(((fitFrame.fun2(x,pars) - y).^2)) ;
+    f = @ (pars) sum((fitFrame.fun2(x,pars) - y).^2 + 10*[0; (diff(fitFrame.fun2(x,pars)) - diff(y)).^2]);
     
     % Some random options for the optimization
     opts = optimset('MaxFunEvals',5000, 'MaxIter',1000, 'Display', 'off');

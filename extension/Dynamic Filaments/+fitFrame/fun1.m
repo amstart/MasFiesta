@@ -10,9 +10,10 @@ function [y] = fun1(x,pars)
     % MT end offset
     MTend = pars(5)/1000;
     %exp
-    tau = 1/(pars(7)/1000);
-    
     shift = pars(6)/1000;
+    
+    sigmaerf = pars(7)/1000;
+    tau = 1/(pars(8)/1000);
     
     % Calculation ------------------------------------
     
@@ -22,7 +23,7 @@ function [y] = fun1(x,pars)
     expdist = exp(sigma^2*tau^2/2-tau*xend).*erfc((sigma^2*tau-xend)/(sigma*sqrt(2)));
     
     y = ones(size(x)) * bg2 + ...
-        (erf((xend-shift)/(sigma*sqrt(2)))+1)*bg1/2 + ...
+        (erf((xend-shift)/(sigmaerf*sqrt(2)))+1)*bg1/2 + ...
         Amp * expdist/max(expdist);
     
 end

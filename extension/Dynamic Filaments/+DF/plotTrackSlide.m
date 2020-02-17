@@ -44,7 +44,7 @@ end
 % dim1 = get(lDim1, 'Value');
 % dim2 = get(lDim2, 'Value');
 % dim3 = get(lDim3, 'Value');
-dims = 1:4;
+dims = 1:5;
 if ~isempty(track.itrace{frame})
     x = track.itrace{frame}(:,1);
     plot(x,track.itrace{frame}(:,2));
@@ -58,26 +58,19 @@ if ~isempty(track.itrace{frame})
     else
         set(gca,'Color',[1 1 1]);
     end
-    try
-    if ~isnan(data(1))
-        h1 = plot(x,fitFrame.fun1(x,data(:,1)));
-    end
     if ~isnan(data(1,2))
-        h2 = plot(x,fitFrame.fun2(x,data(:,2)));
-    end
-    if ~isnan(data(1,3))
-        h3 = plot(x,fitFrame.fun2(x,data(:,3)),'.');
-    end
-    if ~isnan(data(1,3))
-        h4 = plot(x,fitFrame.fun2(x,data(:,4)));
-    end
-    legend([h1 h2 h3 h4],...
-    {[' s=' num2str(data(2,1),3) ' t=' num2str(data(7,1),3) ' e=' num2str(data(9,1),3)],...
-    ['A=' num2str(data(1,2),3) ' s=' num2str(data(2,2),3) 'e=' num2str(data(9,2),3)],...
-    ['sh=' num2str(data(6,3),3) ' e=' num2str(data(9,3),3)],...
-    ['e=' num2str(data(9,4),3)]},...
+    h1 = plot(x,fitFrame.fun1(x,data(:,1)));
+    h2 = plot(x,fitFrame.fun2(x,data(:,2)));
+    h3 = plot(x,fitFrame.fun2(x,data(:,3)),'.');
+    h4 = plot(x,fitFrame.fun2(x,data(:,4)));
+    h5 = plot(x,fitFrame.fun2(x,data(:,5)));
+    legend([h1 h2 h3 h4 h5],...
+    {[' s=' num2str(data(2,1),3) ' t=' num2str(data(8,1),3) ' e=' num2str(data(10,1),3)],...
+    ['A=' num2str(data(1,2),3) ' s=' num2str(data(2,2),3) 'e=' num2str(data(10,2),3)],...
+    ['sh=' num2str(data(6,3),3) ' e=' num2str(data(10,3),3)],...
+    ['e=' num2str(data(10,4),3)],...
+    ['sigdiff=' num2str(diff(data([2 7],5)),3) ' e=' num2str(data(10,5),3)]},...
     'Location', 'southeast');
-    catch
     end
 %     try
 %         h1 = plot(x,convolutedExponential(x,track.Data(frame,7:end-1,dim1)'));
@@ -97,7 +90,7 @@ frame = round(get(hsl,'Value'));
 % dim1 = get(lDim1, 'Value');
 % dim2 = get(lDim2, 'Value');
 % dim3 = get(lDim3, 'Value');
-dims = 1:4;
+dims = 1:5;
 if ~isempty(track.itrace{frame})
     hdt = datacursormode;
     c_info = getCursorInfo(hdt);
@@ -112,7 +105,8 @@ if ~isempty(track.itrace{frame})
     [fits2] = fitFrame.para_fit_fun2(x, y);
     [fits3] = fitFrame.para_fit_fun3(x, y);
     [fits4] = fitFrame.para_fit_fun4(x, y);
-    fits = padcat(fits1, fits2, fits3, fits4);
+    [fits5] = fitFrame.para_fit_fun5(x, y);
+    fits = padcat(fits1, fits2, fits3, fits4, fits5);
     track.x_sel(frame,:) = pts([1 end]);
     if mode < 3
         track.Data(frame,7:end,dims) = nan;
@@ -121,10 +115,10 @@ if ~isempty(track.itrace{frame})
         track.Data(frame,7:size(fits,2)+6,dims) = fits';
     end
     if mode == 3
-        if track.Data(frame,end,dim1) == inf
-            track.Data(frame,end,dim1) = nan;
+        if track.Data(frame,end,1) == inf
+            track.Data(frame,end,1) = nan;
         else
-            track.Data(frame,end,dim1) = inf;
+            track.Data(frame,end,1) = inf;
         end
     end
     Tracks(tracknum) = track;
