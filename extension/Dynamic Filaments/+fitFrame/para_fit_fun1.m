@@ -11,8 +11,8 @@ amp = maxy-bg1;
 PSF_width = 170;
 tau = 1;
 
-a = 1000;
-b = 1000;
+a = 500;
+b = 500;
 
 suggs = [amp,PSF_width,bg1,bg2,tip,0,tau];
 lb = [0,130,bg1,bg2,tip-a,-b,0];

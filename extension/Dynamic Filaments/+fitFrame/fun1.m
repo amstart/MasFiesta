@@ -10,9 +10,9 @@ function [y] = fun1(x,pars)
     % MT end offset
     MTend = pars(5)/1000;
     %exp
-    tau = 1/(pars(6)/1000);
+    tau = 1/(pars(7)/1000);
     
-    shift = pars(7)/1000;
+    shift = pars(6)/1000;
     
     % Calculation ------------------------------------
     
