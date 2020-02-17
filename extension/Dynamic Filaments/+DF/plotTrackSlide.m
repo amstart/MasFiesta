@@ -41,9 +41,10 @@ if ~isnumeric(hsl)
 else
     frame = 1;
 end
-dim1 = get(lDim1, 'Value');
-dim2 = get(lDim2, 'Value');
-dim3 = get(lDim3, 'Value');
+% dim1 = get(lDim1, 'Value');
+% dim2 = get(lDim2, 'Value');
+% dim3 = get(lDim3, 'Value');
+dims = 1:4;
 if ~isempty(track.itrace{frame})
     x = track.itrace{frame}(:,1);
     plot(x,track.itrace{frame}(:,2));
@@ -51,7 +52,7 @@ if ~isempty(track.itrace{frame})
     datacursormode on
     title(['MT: ' num2str(track.MTIndex) ' track: ' num2str(track.TrackIndex)...
         '   frame: ' num2str(track.Data(frame,6,1))]);
-    data = squeeze(track.Data(frame,7:end,[dim1 dim2 dim3]));
+    data = squeeze(track.Data(frame,7:end,dims));
     if data(end,1) == inf
         set(gca,'Color',[0.7 0.7 0.7]);
     else
@@ -67,10 +68,14 @@ if ~isempty(track.itrace{frame})
     if ~isnan(data(1,3))
         h3 = plot(x,fitFrame.fun2(x,data(:,3)));
     end
-    legend([h1 h2 h3],...
+    if ~isnan(data(1,3))
+        h4 = plot(x,fitFrame.fun2(x,data(:,4)));
+    end
+    legend([h1 h2 h3 h4],...
     {['a=' num2str(data(5,1),3) ' t=' num2str(data(7,1),3) ' sh=' num2str(data(6,1),3)],...
     ['a=' num2str(data(5,2),3) ' sh=' num2str(data(6,2),3)],...
-    ['a=' num2str(data(5,3),3) ' sh=' num2str(data(6,3),3)]},...
+    ['a=' num2str(data(5,3),3) ' sh=' num2str(data(6,3),3)],...
+    ['a=' num2str(data(5,4),3) ' sh=' num2str(data(6,4),3)]},...
     'Location', 'southeast');
     catch
     end
@@ -89,9 +94,10 @@ hDFGui = getappdata(0,'hDFGui');
 Tracks = getappdata(hDFGui.fig,'Tracks');
 track = Tracks(tracknum);
 frame = round(get(hsl,'Value'));
-dim1 = get(lDim1, 'Value');
-dim2 = get(lDim2, 'Value');
-dim3 = get(lDim3, 'Value');
+% dim1 = get(lDim1, 'Value');
+% dim2 = get(lDim2, 'Value');
+% dim3 = get(lDim3, 'Value');
+dims = 1:4;
 if ~isempty(track.itrace{frame})
     hdt = datacursormode;
     c_info = getCursorInfo(hdt);
@@ -105,13 +111,14 @@ if ~isempty(track.itrace{frame})
     [fits1] = fitFrame.para_fit_fun1(x, y);
     [fits2] = fitFrame.para_fit_fun2(x, y);
     [fits3] = fitFrame.para_fit_fun3(x, y);
-    fits = padcat(fits1, fits2, fits3);
+    [fits4] = fitFrame.para_fit_fun4(x, y);
+    fits = padcat(fits1, fits2, fits3, fits4);
     track.x_sel(frame,:) = pts([1 end]);
     if mode < 3
-        track.Data(frame,7:end,[dim1 dim2 dim3]) = nan;
+        track.Data(frame,7:end,dims) = nan;
     end
     if mode == 1
-        track.Data(frame,7:size(fits,2)+6,[dim1 dim2 dim3]) = fits';
+        track.Data(frame,7:size(fits,2)+6,dims) = fits';
     end
     if mode == 3
         if track.Data(frame,end,dim1) == inf
