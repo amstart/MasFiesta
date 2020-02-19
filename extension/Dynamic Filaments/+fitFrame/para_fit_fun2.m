@@ -2,10 +2,7 @@ function out = para_fit_fun2(x, y)
 bg2 = y(1);
 bg1 = y(end) - bg2;
 
-side = 1;
-[maxy, maxid] = max(y);
-center = centerOfMass(y(maxid-side:maxid+side)) - side - 1;
-tip = interp1(maxid-2:maxid+2,x(maxid-2:maxid+2),maxid+center(1));
+[tip, maxy] = fitFrame.getTip(x,y);
 
 amp = maxy-bg1;
 s_sug = 170;

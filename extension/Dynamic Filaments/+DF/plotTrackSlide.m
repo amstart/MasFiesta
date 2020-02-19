@@ -92,26 +92,26 @@ frame = round(get(hsl,'Value'));
 % dim3 = get(lDim3, 'Value');
 dims = 1:5;
 if ~isempty(track.itrace{frame})
-    hdt = datacursormode;
-    c_info = getCursorInfo(hdt);
-    if isempty(c_info)
-        pts = track.x_sel(frame,:);
-    else
-        pts = sort([c_info.DataIndex]);
-    end
-    x = track.itrace{frame}(pts(1):pts(end),1);
-    y = track.itrace{frame}(pts(1):pts(end),2);
-    [fits1] = fitFrame.para_fit_fun1(x, y);
-    [fits2] = fitFrame.para_fit_fun2(x, y);
-    [fits3] = fitFrame.para_fit_fun3(x, y);
-    [fits4] = fitFrame.para_fit_fun4(x, y);
-    [fits5] = fitFrame.para_fit_fun5(x, y);
-    fits = padcat(fits1, fits2, fits3, fits4, fits5);
-    track.x_sel(frame,:) = pts([1 end]);
     if mode < 3
         track.Data(frame,7:end,dims) = nan;
     end
     if mode == 1
+        hdt = datacursormode;
+        c_info = getCursorInfo(hdt);
+        if isempty(c_info)
+            pts = track.x_sel(frame,:);
+        else
+            pts = sort([c_info.DataIndex]);
+        end
+        x = track.itrace{frame}(pts(1):pts(end),1);
+        y = track.itrace{frame}(pts(1):pts(end),2);
+        [fits1] = fitFrame.para_fit_fun1(x, y);
+        [fits2] = fitFrame.para_fit_fun2(x, y);
+        [fits3] = fitFrame.para_fit_fun3(x, y);
+        [fits4] = fitFrame.para_fit_fun4(x, y);
+        [fits5] = fitFrame.para_fit_fun5(x, y);
+        fits = padcat(fits1, fits2, fits3, fits4, fits5);
+        track.x_sel(frame,:) = pts([1 end]);
         track.Data(frame,7:size(fits,2)+6,dims) = fits';
     end
     if mode == 3
