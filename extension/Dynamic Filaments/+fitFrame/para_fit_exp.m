@@ -1,4 +1,4 @@
-function [out] = para_fit_fun1(x, y)
+function [out] = para_fit_exp(x, y)
 bg2 = y(1);
 bg1 = y(end) - bg2;
 

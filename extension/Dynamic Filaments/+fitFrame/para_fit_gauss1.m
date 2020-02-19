@@ -1,4 +1,4 @@
-function out = para_fit_fun3(x, y)
+function out = para_fit_gauss1(x, y)
 bg2 = y(1);
 bg1 = y(end) - bg2;
 
@@ -10,7 +10,7 @@ s_l = 130;
 s_h = 350;
 
 a = 1000;
-b = 250;
+b = 0;
 
 suggs = [amp,s_sug,bg1,bg2,tip,0,0];
 lb = [0,s_l,bg1,bg2,tip-a,-b,0];
