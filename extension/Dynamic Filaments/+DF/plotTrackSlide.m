@@ -7,7 +7,7 @@ track = Tracks(tracknum);
 
 figure
 slmin = 1;
-slmax = find(track.Data(:,2,1)<500,1)-1;
+slmax = find(track.Data(:,2)<500,1)-1;
 
 dimstr = strsplit(num2str(1:8));       
 lDim1 = uicontrol('Tag','lDim1','String',dimstr,'Position',[150 5 30 20],'Style','popupmenu', 'Value',1);
@@ -46,13 +46,14 @@ end
 % dim3 = get(lDim3, 'Value');
 dims = 1:5;
 if ~isempty(track.itrace{frame})
-    x = track.itrace{frame}(:,1);
-    plot(x,track.itrace{frame}(:,2));
+    x = track.itrace{frame}(1,:);
+    plot(x,track.itrace{frame}(2,:));
+    xlim([x(1) x(70)]);
     hold on
     datacursormode on
     title(['MT: ' num2str(track.MTIndex) ' track: ' num2str(track.TrackIndex)...
         '   frame: ' num2str(track.Data(frame,6,1))]);
-    data = squeeze(track.Data(frame,7:end,dims));
+    data = squeeze(track.FitData(frame,:,dims));
     if data(end,1) == inf
         set(gca,'Color',[0.7 0.7 0.7]);
     else
@@ -103,8 +104,8 @@ if ~isempty(track.itrace{frame})
         else
             pts = sort([c_info.DataIndex]);
         end
-        x = track.itrace{frame}(pts(1):pts(end),1);
-        y = track.itrace{frame}(pts(1):pts(end),2);
+        x = track.itrace{frame}(1,pts(1):pts(end));
+        y = track.itrace{frame}(2,pts(1):pts(end));
         [fits1] = fitFrame.para_fit_fun1(x, y);
         [fits2] = fitFrame.para_fit_fun2(x, y);
         [fits3] = fitFrame.para_fit_fun3(x, y);

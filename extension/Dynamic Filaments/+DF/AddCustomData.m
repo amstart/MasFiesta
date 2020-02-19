@@ -18,7 +18,7 @@ elseif ~isempty(strfind(filename, 'fit'))
     plot_options = {[prefix ' error function width'], [prefix ' error function displacement']; 'nm', 'nm'};
 elseif ~isempty(strfind(filename, 'pixelkymo'))
     fun = @PrepareKymoData;
-    read_fun = @intensityatfit;
+    read_fun = @getItrace;
     prefix = strrep(filename, 'pixelkymo_', '');
     plot_options = {[prefix ' intensity at fit']; 'AU'};
 elseif ~isempty(strfind(filename, 'total_')) || ~isempty(strfind(filename, 'intensity_all'))
@@ -53,7 +53,7 @@ for m=1:length(unique_paths)
                 if strcmp(Objects(n).Name, load_data.Data{p, 2})
                     Objects(n).CustomData.(filename).ScanOptions = load_data.ScanOptions;
                     custom_data = load_data.Data{p, 1};
-                    Objects(n).CustomData.(filename).Data = fun(custom_data, Objects(n));
+                    [Objects(n).CustomData.(filename).Data, Objects(n).CustomData.(filename).Frames] = fun(custom_data, Objects(n));
                     Objects(n).CustomData.(filename).read_fun = read_fun;
                     Objects(n).CustomData.(filename).plot_options = plot_options;
                 end
@@ -63,6 +63,10 @@ for m=1:length(unique_paths)
 end
 setappdata(hDFGui.fig,'Objects',Objects);
 DF.updateOptions();
+
+function [itrace, frames] = getItrace(Object, customfield, ~)
+itrace = Object.CustomData.(customfield{1}).Data;
+frames = Object.CustomData.(customfield{1}).Frames;
 
 function [matrix, xy, xn, frames] = ReadExpoData(Object, customfield, ~)
 data = Object.CustomData.(customfield{1}).Data;
@@ -217,9 +221,22 @@ for m = 1:length(fit_data)
     fit_data{m} = tmp;
 end
 
-function kymo_data = PrepareKymoData(kymo_data, Object)
+function [kymo_data, frames] = PrepareKymoData(kymo_data, Object)
 %takes the background-subtracted sum per "cross section" of the kymograph line
-for m = 1:length(kymo_data)
-%     kymo_data{m} = max(kymo_data{m}, [], 1);
-    kymo_data{m} = (nansum(double(kymo_data{m}), 1)-sum(~isnan(kymo_data{m}),1).*min(min(double(kymo_data{m}), [], 1)))/(Object.Custom.IntensityPerMAP*Object.PixelSize);
+extension_length = 6;
+res = 4;
+if size(Object.Results,1) ~= length(kymo_data)
+    error('');
 end
+frames = zeros(length(kymo_data),1);
+for m = 1:length(kymo_data)
+    if length(kymo_data{m}) > 1
+        frames(m) = kymo_data{m}{1}(1);
+        I = double(kymo_data{m}{2});
+        y = (nansum(I, 1)-sum(~isnan(I),1).*min(min(double(I), [], 1)))./Object.Custom.IntensityPerMAP;
+        x = (((0:length(y)-1)-extension_length*res)*(0.157/res))*1000;
+        kymo_data{m} = [x;y];
+    end
+end
+kymo_data = kymo_data(logical(frames));
+frames = frames(logical(frames));
