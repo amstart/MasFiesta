@@ -108,13 +108,21 @@ for n = 1:length(Objects)
         track.IntensityPerMAP = Objects(n).Custom.IntensityPerMAP;
         
         trackframes=(track_starts(m):(track_ends(m)))';
+        
+        segvel=v(trackframes); %why, see Calcvelocity()
+        segt=t(trackframes);
+        segd=d(trackframes);
+        segf=f(trackframes);
+        
         if m == 1 || track_ends(m-1) ~= track_starts(m)
             track.PreviousEvent=0;
+            segvel(1) = nan;
         else
             track.PreviousEvent=1;
         end
         track.Event = 1;
         track.CensoredEvent = 0;
+        
         if trackframes(end) == length(v)
             track.Event = 0;
         end
@@ -125,12 +133,6 @@ for n = 1:length(Objects)
             warning(['track only one frame long:' Objects(n).Name]);
         end
 
-        segvel=v(trackframes); %why, see Calcvelocity()
-        segvel(1) = nan;
-        segt=t(trackframes);
-        segd=d(trackframes);
-        segf=f(trackframes);
-        
         track.Duration=segt(end)-segt(1);
         Objects(n).Duration=Objects(n).Duration+track.Duration;
         track.DistanceEventEnd=segd(end);
@@ -143,7 +145,7 @@ for n = 1:length(Objects)
         end
 
         track.Data = [segt segd segvel intensity(trackframes) repmat(track_id,size(segt)) segf];
-        track.FitData = nan(6,12);
+        track.FitData = nan(length(segt),6,12);
         track.itrace = cell(length(segf),1);
         [la, ib] = ismember(segf,fit_frames);
         for i = 1:length(segf)

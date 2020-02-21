@@ -7,7 +7,7 @@ global ScanOptions
 ScanOptions.PixSize = 157; %is used as default if nothing else available
 %%%%%%%%%%%%%%%%%%%parameters for helper functions%%%%%%%%%%%%%%
 ScanOptions.help_get_tip_intensities.framesuntilmissingframe = 40; %set to number higher than number of frames if you have the same number of frames for the channels
-ScanOptions.help_get_tip_intensities.method = 'get_tipandmiddleandall';
+ScanOptions.help_get_tip_intensities.method = 'get_pixelkymo';
 ScanOptions.help_get_tip_intensities.AllFilaments = 1;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 ScanOptions.help_CorrectObject.AddDrift = 1;
@@ -25,14 +25,14 @@ end
 Filament = load([PathName FileName]);
 Filament = Filament.Filament;
 %% Helper Functions
-Reference = select_filaments(Filament, 3);
+% Reference = select_filaments(Filament, 3);
 Filament = select_filaments(Filament, ScanOptions.ObjectChannel);
-Filament = help_extension_only(Filament, Reference);
+% Filament = help_extension_only(Filament, Reference);
 Filament = help_CorrectObject(Filament, PathName);
 [Filament] = help_get_tip_points(Filament, ScanOptions);
 [Stack, ~, ~] = help_GetStack(PathName, Filament(1).File);
 Stack = Stack{1};
-[Filament] = help_get_tip_intensities(Stack, Filament);
+[Filament] = help_get_tip_kymo(Stack, Filament);
 %% save data
 Data = cell(length(Filament),2);
 for i = 1:length(Filament)

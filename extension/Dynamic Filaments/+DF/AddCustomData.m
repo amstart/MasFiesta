@@ -223,7 +223,7 @@ end
 
 function [kymo_data, frames] = PrepareKymoData(kymo_data, Object)
 %takes the background-subtracted sum per "cross section" of the kymograph line
-extension_length = 6;
+extension_length = 10;
 res = 4;
 if size(Object.Results,1) ~= length(kymo_data)
     error('');
