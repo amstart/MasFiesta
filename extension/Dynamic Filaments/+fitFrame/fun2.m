@@ -19,9 +19,6 @@ function [y] = fun2(x,pars)
     end
     % Calculation ------------------------------------
     
-    % We make a continuous xx to be able to apply the convolution, and then
-    % we interpolate the x values in it.
-    
     gaussdist = normpdf(x,MTend,sigma);
     y = ones(size(x)) * bg2 + ...
         (erf((x-MTend-shift)/(sigmaerf*sqrt(2)))+1)*bg1/2 + ...

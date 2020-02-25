@@ -1,5 +1,5 @@
 for i = 1:length(Tracks)
-    Tracks(i).FitData = nan(size(Tracks(i).Data,1),12,6);
+    Tracks(i).FitData = nan(size(Tracks(i).Data,1),6,12);
     if any(~isnan(Tracks(i).x_sel))
         for frame = 1:size(Tracks(i).Data,1)
             Tracks(i).x_sel = [Tracks(i).x_sel; nan(size(Tracks(i).Data,1)-size(Tracks(i).x_sel,1),2)];

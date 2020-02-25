@@ -17,10 +17,9 @@ function [y] = fun1(x,pars)
     
     % Calculation ------------------------------------
     
-    % We make a continuous xx to be able to apply the convolution, and then
-    % we interpolate the x values in it.
     xend = (x - MTend)/1000;
     expdist = exp(sigma^2*tau^2/2-tau*xend).*erfc((sigma^2*tau-xend)/(sigma*sqrt(2)));
+    expdist(expdist==inf) = nan;
     
     y = ones(size(x)) * bg2 + ...
         (erf((xend-shift)/(sigmaerf*sqrt(2)))+1)*bg1/2 + ...
