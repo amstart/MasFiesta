@@ -38,7 +38,7 @@ for i=1:length(tracks)
     c1seg=segtrack(:, Options.lPlot_XVar.val, Options.lPlot_XVardim.val);
     d0=round(nanmean(segtrack(:,2)));
     t0=segtrack(round(size(segtrack,1)/2),1);
-    if get(hDFGui.cshowTrackN,'Value') && tseg(end)-tseg(1) > 20 && tracks(i).Shrinks
+    if (get(hDFGui.cshowTrackN,'Value') && tseg(end)-tseg(1) > 20 || (tracks(i).Event && dseg(end) > cutoff)) && tracks(i).Shrinks
         text(double(t0),double(max(segtrack(:,2))),num2str(track_id(i)));
     end
     if tracks(i).Shrinks
