@@ -223,8 +223,6 @@ end
 
 function [kymo_data, frames] = PrepareKymoData(kymo_data, Object)
 %takes the background-subtracted sum per "cross section" of the kymograph line
-extension_length = 10;
-res = 4;
 if size(Object.Results,1) ~= length(kymo_data)
     error('');
 end
@@ -234,8 +232,7 @@ for m = 1:length(kymo_data)
         frames(m) = kymo_data{m}{1}(1);
         I = double(kymo_data{m}{2});
         y = (nansum(I, 1)-sum(~isnan(I),1).*min(min(double(I), [], 1)))./Object.Custom.IntensityPerMAP;
-        x = (((0:length(y)-1)-extension_length*res)*(0.157/res))*1000;
-        kymo_data{m} = [x;y];
+        kymo_data{m} = y;
     end
 end
 kymo_data = kymo_data(logical(frames));

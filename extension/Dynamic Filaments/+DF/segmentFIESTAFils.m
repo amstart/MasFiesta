@@ -143,15 +143,28 @@ for n = 1:length(Objects)
             tracks(track_id-2).Event = 0;
             tracks(track_id-2).isPause = 1;
         end
-
+        if track.Shrinks && m > 1 && length(tracks(track_id-1).itrace) > 4
+            track.bgitrace = tracks(track_id-1).itrace(end-4:end,:);
+        else
+            track.bgitrace = nan;
+        end
         track.Data = [segt segd segvel intensity(trackframes) repmat(track_id,size(segt)) segf];
         track.FitData = nan(length(segt),6,12);
         track.itrace = cell(length(segf),1);
         [la, ib] = ismember(segf,fit_frames);
-        for i = 1:length(segf)
-            if la(i)
-                track.itrace{i} = itrace{ib(i)};
+        if track.Shrinks
+            for i = 1:length(segf)
+                if la(i)
+                    track.itrace{i} = itrace{ib(i)};
+                    npoints = length(track.itrace{i});
+                end
             end
+            for i = 1:length(segf)
+                if isempty(track.itrace{i})
+                    track.itrace{i} = nan(1,npoints);
+                end
+            end
+        track.itrace = cell2mat(track.itrace);
         end
 %         try
 %             track.Data(:,13) = track.Data(:,9)./track.Data(:,2);

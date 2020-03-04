@@ -52,19 +52,23 @@ end
 % dim2 = get(lDim2, 'Value');
 % dim3 = get(lDim3, 'Value');
 dims = 1:6;
-if ~isempty(track.itrace{frame})
-    x = track.itrace{frame}(1,:);
-    plot(x,track.itrace{frame}(2,:));
-    if isnan(track.Data(frame,2))
-        if frame+1 > size(track.Data,1)
-            xlim([x(1) track.Data(frame-1,2)+500]);
-        else
-            xlim([x(1) track.Data(frame+1,2)+500]);
-        end
-    else
-        xlim([x(1) track.Data(frame,2)+500]);
-    end
+if ~all(isnan(track.itrace(frame,:)))
+    tipx = track.Data(:,2);
+    itrace = track.itrace(frame,:);
+    x = - ((((0:length(itrace)-1)-40)*(0.157/4))*1000 - tipx(1));
+    plot(x,itrace);
+%     if isnan(track.Data(frame,2))
+%         if frame+1 > size(track.Data,1)
+%             xlim([x(1) track.Data(frame-1,2)+500]);
+%         else
+%             xlim([x(1) track.Data(frame+1,2)+500]);
+%         end
+%     else
+%         xlim([x(1) track.Data(frame,2)+500]);
+%     end
     hold on
+    plot(x,itrace-track.itrace(1,:));
+    plot(x,itrace./track.itrace(1,:));
     datacursormode on
     title(['MT: ' num2str(track.MTIndex) ' track: ' num2str(track.TrackIndex)...
         '   frame: ' num2str(track.Data(frame,6,1))]);
@@ -74,7 +78,10 @@ if ~isempty(track.itrace{frame})
     else
         set(gca,'Color',[1 1 1]);
     end
-    vline(track.Data(frame,2));
+    if frame > 1
+        vline(mean(tipx(frame-1:frame)));
+    end
+    vline(tipx(1));
     if ~isnan(data(1))
     h1 = plot(x,fitFrame.fun2(x,data(:,1)));
     h2 = plot(x,fitFrame.fun2(x,data(:,2)));

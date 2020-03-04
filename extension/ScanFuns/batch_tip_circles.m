@@ -24,14 +24,26 @@ end
 %% Load the Filament
 Filament = load([PathName FileName]);
 Filament = Filament.Filament;
+frame_data = load([PathName 'shrinkingframes.mat']);
+frame_data = frame_data.Data;
 %% Helper Functions
 % Reference = select_filaments(Filament, 3);
 Filament = select_filaments(Filament, ScanOptions.ObjectChannel);
 % Filament = help_extension_only(Filament, Reference);
 Filament = help_CorrectObject(Filament, PathName);
-[Filament] = help_get_tip_points(Filament, ScanOptions);
+% [Filament] = help_get_tip_points(Filament, ScanOptions);
 [Stack, ~, ~] = help_GetStack(PathName, Filament(1).File);
 Stack = Stack{1};
+names = {Filament.Name};
+for i=1:length(names)
+    index = cellfun(@(x)strcmp(x, names{i}), frame_data(:,2));
+    if any(index)
+        shrinkingframes{i} = frame_data{index,1};
+    else
+        shrinkingframes{i} = nan;
+    end
+end
+[Filament] = help_get_ref_frames_kymo(Filament, shrinkingframes);
 [Filament] = help_get_tip_kymo(Stack, Filament);
 %% save data
 Data = cell(length(Filament),2);
