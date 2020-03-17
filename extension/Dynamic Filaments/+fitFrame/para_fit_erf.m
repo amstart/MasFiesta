@@ -1,7 +1,4 @@
-function out = para_fit_erf(x, y)
-bg2 = y(1);
-bg1 = y(end) - bg2;
-
+function out = para_fit_erf(x, y, bg1, bg2)
 [tip, maxy] = fitFrame.getTip(x,y);
 
 amp = 0;
@@ -18,4 +15,4 @@ ub = [0,s_h,bg1,bg2,tip+a,b,0];
 
 [fits,fvals] = fitFrame.fit_fun2(x,y,suggs,lb,ub);
 
-out = [[fits nan],tip,fvals];
+out = [[fits nan],fvals];

@@ -1,7 +1,4 @@
-function out = para_fit_gauss3(x, y)
-bg2 = y(1);
-bg1 = y(end) - bg2;
-
+function out = para_fit_gauss3(x, y, bg1, bg2)
 [tip, maxy] = fitFrame.getTip(x,y);
 
 amp = maxy-bg1;
@@ -18,4 +15,4 @@ ub = [inf,s_h,bg1,bg2,tip+a,b,s_h];
 
 [fits,fvals] = fitFrame.fit_fun2(x,y,suggs,lb,ub);
 
-out = [[fits nan],tip,fvals];
+out = [[fits nan],fvals];

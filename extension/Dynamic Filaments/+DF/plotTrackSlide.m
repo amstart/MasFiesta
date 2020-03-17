@@ -68,20 +68,24 @@ if ~all(isnan(track.itrace(frame,:)))
 %     end
     hold on
     plot(x,itrace-track.itrace(1,:));
-    plot(x,itrace./track.itrace(1,:));
+    plot(x,itrace./track.itrace(1,:) .* mean(itrace));
     datacursormode on
     title(['MT: ' num2str(track.MTIndex) ' track: ' num2str(track.TrackIndex)...
         '   frame: ' num2str(track.Data(frame,6,1))]);
     data = squeeze(track.FitData(frame,dims,:))';
-    if ~isnan(data(end,1))
-        set(gca,'Color',[1 1 1] - 0.1 * data(end,1));
+    if ~isnan(track.tags(frame))
+        set(gca,'Color',[1 1 1] - 0.1 * track.tags(frame));
     else
         set(gca,'Color',[1 1 1]);
     end
+    tubtip = tipx(1);
     if frame > 1
-        vline(mean(tipx(frame-1:frame)));
+        tubtip = mean(tipx(frame-1:frame));
     end
+    vline(tubtip);
     vline(tipx(1));
+    x_sel = track.x_sel(frame,:);
+    vline(tubtip - x(x_sel(~isnan(x_sel))) + tipx(1), 'b:');
     if ~isnan(data(1))
     h1 = plot(x,fitFrame.fun2(x,data(:,1)));
     h2 = plot(x,fitFrame.fun2(x,data(:,2)));
