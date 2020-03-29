@@ -53,9 +53,9 @@ end
 % dim3 = get(lDim3, 'Value');
 dims = 1:6;
 if ~all(isnan(track.itrace(frame,:)))
-    tipx = track.Data(:,2);
+    tipx = - track.Data(:,2);
     itrace = track.itrace(frame,:);
-    x = - ((((0:length(itrace)-1)-40)*(0.157/4))*1000 - tipx(1));
+    x = (((0:length(itrace)-1)-40)*157/4) + tipx(1);
     plot(x,itrace);
 %     if isnan(track.Data(frame,2))
 %         if frame+1 > size(track.Data,1)
@@ -67,25 +67,30 @@ if ~all(isnan(track.itrace(frame,:)))
 %         xlim([x(1) track.Data(frame,2)+500]);
 %     end
     hold on
-    plot(x,itrace-track.itrace(1,:));
-    plot(x,itrace./track.itrace(1,:) .* mean(itrace));
+    GFPTip = track.GFPTip(frame);
+    [~,idGFPTip] = min(abs(x-GFPTip));
+    ym = itrace-track.itrace(1,:);
+    plot(x,ym);
+    plot(x,[itrace(1:idGFPTip) ym(idGFPTip+1:end)+itrace(idGFPTip+1)-ym(idGFPTip+1)]);
+%     plot(x,itrace./track.itrace(1,:) .* mean(itrace));
     datacursormode on
     title(['MT: ' num2str(track.MTIndex) ' track: ' num2str(track.TrackIndex)...
         '   frame: ' num2str(track.Data(frame,6,1))]);
-    data = squeeze(track.FitData(frame,dims,:))';
+
     if ~isnan(track.tags(frame))
         set(gca,'Color',[1 1 1] - 0.1 * track.tags(frame));
     else
         set(gca,'Color',[1 1 1]);
     end
-    tubtip = tipx(1);
     if frame > 1
-        tubtip = mean(tipx(frame-1:frame));
+        vline(mean(tipx(frame-1:frame)));
+        x_sel = track.x_sel(frame,:);
+        vline(GFPTip,'g:');
+        vline(tipx(frame) - x(x_sel(~isnan(x_sel))) + tipx(1), 'b:');
     end
-    vline(tubtip);
     vline(tipx(1));
-    x_sel = track.x_sel(frame,:);
-    vline(tubtip - x(x_sel(~isnan(x_sel))) + tipx(1), 'b:');
+    
+    data = squeeze(track.FitData(frame,dims,:,2))';
     if ~isnan(data(1))
     h1 = plot(x,fitFrame.fun2(x,data(:,1)));
     h2 = plot(x,fitFrame.fun2(x,data(:,2)));
@@ -93,14 +98,14 @@ if ~all(isnan(track.itrace(frame,:)))
     h4 = plot(x,fitFrame.fun2(x,data(:,4)));
     h5 = plot(x,fitFrame.fun2(x,data(:,5)));
     h6 = plot(x,fitFrame.fun1(x,data(:,6)),'k.');
-    legend([h1 h2 h3 h4 h5 h6],...
-    {['e=' num2str(data(10,1),3)],...
-    ['A=' num2str(data(1,2),3) ' s=' num2str(data(2,2),3) 'e=' num2str(data(10,2),3)],...
-    ['sh=' num2str(data(6,3),3) ' e=' num2str(data(10,3),3)],...
-    ['sigdiff=' num2str(diff(data([2 7],4)),3) ' e=' num2str(data(10,4),3)],...
-    ['sigdiff=' num2str(diff(data([2 7],5)),3) ' e=' num2str(data(10,5),3)],...
-    [' s=' num2str(data(2,6),3) ' t=' num2str(data(8,6),3) ' e=' num2str(data(10,6),3)]},...
-    'Location', 'southeast');
+%     legend([h1 h2 h3 h4 h5 h6],...
+%     {['e=' num2str(data(10,1),3)],...
+%     ['A=' num2str(data(1,2),3) ' s=' num2str(data(2,2),3) 'e=' num2str(data(10,2),3)],...
+%     ['sh=' num2str(data(6,3),3) ' e=' num2str(data(10,3),3)],...
+%     ['sigdiff=' num2str(diff(data([2 7],4)),3) ' e=' num2str(data(10,4),3)],...
+%     ['sigdiff=' num2str(diff(data([2 7],5)),3) ' e=' num2str(data(10,5),3)],...
+%     [' s=' num2str(data(2,6),3) ' t=' num2str(data(8,6),3) ' e=' num2str(data(10,6),3)]},...
+%     'Location', 'southeast');
     end
 %     try
 %         h1 = plot(x,convolutedExponential(x,track.Data(frame,7:end-1,dim1)'));
@@ -121,9 +126,9 @@ frame = round(get(hsl,'Value'));
 % dim2 = get(lDim2, 'Value');
 % dim3 = get(lDim3, 'Value');
 dims = 1:6;
-if ~isempty(track.itrace{frame})
+if ~isnan(track.itrace(frame,1))
     if mode < 3
-        track.FitData(frame,dims,1:end-1) = nan;
+        track.FitData(frame,dims,1:end-1, 1) = nan;
     end
     if mode == 1
         hdt = datacursormode;
@@ -133,14 +138,18 @@ if ~isempty(track.itrace{frame})
         else
             pts = sort([c_info.DataIndex]);
         end
-        x = track.itrace{frame}(1,pts(1):pts(end));
-        y = track.itrace{frame}(2,pts(1):pts(end));
-        [fits0] = fitFrame.para_fit_erf(x, y);
-        [fits1] = fitFrame.para_fit_gauss1(x, y);
-        [fits2] = fitFrame.para_fit_gauss2(x, y);
-        [fits3] = fitFrame.para_fit_gauss3(x, y);
-        [fits4] = fitFrame.para_fit_gauss4(x, y);
-        [fits5] = fitFrame.para_fit_exp(x, y);
+        y = track.itrace(frame,:);
+        x = ((0:length(y)-1)-40)*(157/4) - track.Data(1,2);
+        bg2 = max(min(y(1:40)),0);
+        yp = y(pts(1):pts(end));
+        xp = double(x(pts(1):pts(end)));
+        bg1 = yp(end) - bg2;
+        [fits0] = fitFrame.para_fit_erf(xp, yp, bg1, bg2);
+        [fits1] = fitFrame.para_fit_gauss1(xp, yp, bg1, bg2);
+        [fits2] = fitFrame.para_fit_gauss2(xp, yp, bg1, bg2);
+        [fits3] = fitFrame.para_fit_gauss3(xp, yp, bg1, bg2);
+        [fits4] = fitFrame.para_fit_gauss4(xp, yp, bg1, bg2);
+        [fits5] = fitFrame.para_fit_exp(xp, yp, bg1, bg2);
         fits = padcat(fits0, fits1, fits2, fits3, fits4, fits5);
         if length(pts) == 3
             track.x_sel(frame,:) = pts;
@@ -148,13 +157,13 @@ if ~isempty(track.itrace{frame})
             track.x_sel(frame,[1 3]) = pts;
             track.x_sel(frame,2) = nan;
         end
-        track.FitData(frame,1:size(fits,1),1:size(fits,2)) = fits;
+        track.FitData(frame,1:size(fits,1),1:size(fits,2),1) = fits;
     end
     if mode > 2
-        if (~isnan(track.FitData(frame,1,end)) && mode == 3) || get(lTag,'Value') == 1
-            track.FitData(frame,1,end) = nan;
+        if (~isnan(track.Tags(frame)) && mode == 3) || get(lTag,'Value') == 1
+            track.Tags(frame) = nan;
         else
-            track.FitData(frame,1,end) = get(lTag,'Value');
+            track.Tags(frame) = get(lTag,'Value');
         end
     end
     Tracks(tracknum) = track;

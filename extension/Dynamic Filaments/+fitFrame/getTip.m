@@ -3,6 +3,9 @@ function [tip, maxy] = getTip(x,y)
 %   Detailed explanation goes here
 side = 2;
 [maxy, maxid] = max(y);
+if maxid == length(y)-1
+    side = 1;
+end
 if maxid == length(y)
     tip = length(y);
 else

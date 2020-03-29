@@ -8,7 +8,7 @@ function [y] = fun1(x,pars)
     % The intensity level outside the microtubule
     bg2=pars(4);
     % MT end offset
-    MTend = pars(5)/1000;
+    MTend = pars(5);
     %exp
     shift = pars(6)/1000;
     
