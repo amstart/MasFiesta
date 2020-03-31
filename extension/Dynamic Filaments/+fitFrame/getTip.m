@@ -7,7 +7,7 @@ if maxid == length(y)-1
     side = 1;
 end
 if maxid == length(y)
-    tip = length(y);
+    error('max not captured');
 else
     center = centerOfMass(y(maxid-side:maxid+side)) - side - 1;
     tip = interp1(maxid-1:min(maxid+1,length(y)),x(maxid-1:min(maxid+1,length(y))),maxid+center(2));

@@ -75,7 +75,7 @@ if ~all(isnan(track.itrace(frame,:)))
 %     plot(x,itrace./track.itrace(1,:) .* mean(itrace));
     datacursormode on
     title(['MT: ' num2str(track.MTIndex) ' track: ' num2str(track.TrackIndex)...
-        '   frame: ' num2str(track.Data(frame,6,1))]);
+        '   frame: ' num2str(track.Data(frame,6,1)) '/' num2str(frame)]);
 
     if ~isnan(track.tags(frame))
         set(gca,'Color',[1 1 1] - 0.1 * track.tags(frame));
@@ -84,9 +84,11 @@ if ~all(isnan(track.itrace(frame,:)))
     end
     if frame > 1
         vline(mean(tipx(frame-1:frame)));
-        x_sel = track.x_sel(frame,:);
+        minima = track.minima(frame,:);
         vline(GFPTip,'g:');
-        vline(tipx(frame) - x(x_sel(~isnan(x_sel))) + tipx(1), 'b:');
+        if ~isnan(minima(1))
+            vline(x(minima), 'b:');
+        end
     end
     vline(tipx(1));
     
