@@ -1,4 +1,4 @@
-for i = 202:length(Tracks)
+for i = 1:length(Tracks)
     track = Tracks(i);
     track.FitData = nan(size(track.Data,1),6,9,3);
     track.GFPTip = nan(size(track.Data,1),1);
@@ -12,31 +12,52 @@ for i = 202:length(Tracks)
     end
     for frame = 2:size(Tracks(i).Data,1)
         [num2str(i) ' ' num2str(frame)]
-        
+
         itrace = track.itrace;
         x = double((((0:length(itrace)-1)-40)*(157/4)) - tipx(1));
         track.minima = nan(size(track.x_sel,1),2);
         if ~isnan(itrace(frame,1))
             yf = itrace(frame,:);
+            [~, seed] = min(abs(x));
+            testforchange = findchangepts(yf(10:seed));
             yn = yf-itrace(1,:);
-            [~, tippt] = min(abs(-x-tipx(frame)));
-            [~, tippt] = findpeaks(yn(10:tippt+12), 'SortStr', 'descend', 'NPeaks', 1);
-            tippt = tippt+9;
+            if mean(yf(10+testforchange:seed)) - mean(yf(10:10+testforchange)) < 1 || max(yn) < 1
+                track.GoodData = 0;
+                continue
+            end
+            [~, tippt1] = min(abs(-x-tipx(frame)));
+            chptf = findchangepts(yf(tippt1-40:tippt1+40));
+            chptn = findchangepts(yn(tippt1-40:tippt1+40));
+            tippt2 = min(chptf, chptn);
+            if mean(yn(tippt1-40:tippt1-40+tippt2))>mean(yn(tippt1-40+tippt2:tippt1+40))
+                tippt2 = max(chptf, chptn);
+            end
+            tippt2 = tippt1-41+tippt2;
+            yns = smooth(yn);
+            [~, tippt3] = findpeaks(yns(tippt2:length(yn)), 'NPeaks', 1);
+            tippt = tippt3+tippt2-1;
             
             
             ys = max(yn)-yn;
             [~, minloc] = findpeaks(ys/max(ys),'MinPeakProminence',0.01);
             minimal = [find((minloc - tippt)<0,1,'last') find((minloc - tippt)>0,1)];
             minima = minloc(minimal);
-            if minimal(1) > 1 
-                if yf(minima(2)) > 2 && yf(minima(1))/yf(tippt) > 0.75
-                    minima = minloc(minimal-1);
+            counter = 1;
+            ytip = yf(tippt);
+            while minimal(1) > 1 
+                if yf(minima(2)) > 2 && yf(minima(1))/ytip > 0.75
+                    minima = minloc(minimal-counter);
+                    ytip = max(yf(minima(1):minima(2)));
+                    counter = counter + 1;
+                else
+                    break
                 end
             end
             track.minima(frame,:) = minima;
             if x(minima(2)) > - 200
                 continue
             end
+            track.GoodData = 1;
             tip = fitFrame.getTip(x(minima(1):minima(2)), yf(minima(1):minima(2)));
             track.GFPTip(frame) = tip;
 
@@ -45,7 +66,7 @@ for i = 202:length(Tracks)
     
             ally = [yf; ym; yn];
             xp = x(minima(1):minima(2));
-            [~, seed] = min(abs(x));
+            
             if ~any(x>0)
                 error('itrace too short');
             end
