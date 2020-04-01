@@ -1,4 +1,4 @@
-for i = 162:length(Tracks)
+for i = 1:length(Tracks)
     track = Tracks(i);
     track.FitData = nan(size(track.Data,1),6,9,3);
     track.GFPTip = nan(size(track.Data,1),1);
@@ -77,6 +77,7 @@ for i = 162:length(Tracks)
                     if isempty(tippt)
                         [~,tippt] = findpeaks(yn(minima(1):minima(2)),'NPeaks',1, 'SortStr', 'descend');
                     end
+                    tippt = tippt + minima(1) - 1;
                 else
                     break
                 end
