@@ -77,11 +77,11 @@ if ~all(isnan(track.itrace(frame,:)))
     title(['MT: ' num2str(track.MTIndex) ' track: ' num2str(track.TrackIndex)...
         '   frame: ' num2str(track.Data(frame,6,1)) '/' num2str(frame)]);
 
-    if ~isnan(track.tags(frame))
-        set(gca,'Color',[1 1 1] - 0.1 * track.tags(frame));
-    else
-        set(gca,'Color',[1 1 1]);
-    end
+%     if ~isnan(track.tags(frame))
+%         set(gca,'Color',[1 1 1] - 0.1 * track.tags(frame));
+%     else
+%         set(gca,'Color',[1 1 1]);
+%     end
     if frame > 1
         vline(mean(tipx(frame-1:frame)));
         minima = track.minima(frame,:);
