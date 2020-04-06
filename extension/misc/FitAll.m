@@ -1,17 +1,18 @@
-for i = 234:length(Tracks)
+for i = 1:length(Tracks)
     track = Tracks(i);
-    track.FitData = nan(size(track.Data,1),6,9,3);
-    track.GFPTip = nan(size(track.Data,1),1);
-    track.minima = nan(size(track.x_sel,1),2);
+    f1 = 5;
+    track.FitData = nan(size(track.itrace,1)-f1+1,6,9,3);
+    track.GFPTip = nan(size(track.itrace,1)-f1+1,1);
+    track.minima = nan(size(track.itrace,1)-f1+1,2);
     tipx = track.Data(:,2);
     if length(track.itrace) == 1
         continue
     end
-    if isnan(track.itrace(1,1)) || size(track.Data,1) < 5
+    if size(track.Data,1) < 10
         warning(num2str(size(track.itrace,1)));
         continue
     end
-    for frame = 2:size(Tracks(i).Data,1)
+    for frame = f1:size(Tracks(i).Data,1)
         [num2str(i) ' ' num2str(frame)]
 
         itrace = track.itrace;
@@ -19,8 +20,8 @@ for i = 234:length(Tracks)
         if ~isnan(itrace(frame,1))
             yf = itrace(frame,:);
             [~, seed] = min(abs(x));
-            yn = yf-itrace(1,:);
-            [~, tippt1] = min(abs(-x-tipx(frame)));
+            yn = yf-nanmean(itrace(1:6,:));
+            [~, tippt1] = min(abs(-x-tipx(frame-f1+1)));
             [~, maxid] = max(yn(20:tippt1+30));
             maxid = maxid + 19;
             ids = min(tippt1-30,maxid-30):min(tippt1+30,maxid);
@@ -91,17 +92,22 @@ for i = 234:length(Tracks)
             end
             end
             
+            if max(yf(1:minima(1)-15)) / yf(tippt) > 0.8
+                track.GoodData = -1;
+                continue
+            end
+            
             minima(1) = max(tippt - 20, minima(1));
 
-            track.minima(frame,:) = minima;
+            track.minima(frame-f1+1,:) = minima;
             tip = fitFrame.getTip(x(minima(1):minima(2)), yf(minima(1):minima(2)));
             if isnan(tip)
-                tipn = fitFrame.getTip(x(minima(1):minima(2)), yn(minima(1):minima(2)));
+                tip = fitFrame.getTip(x(minima(1):minima(2)), yn(minima(1):minima(2)));
                 if isnan(tip)
                     error('max not captured');
                 end
             end
-            track.GFPTip(frame) = tip;
+            track.GFPTip(frame-f1+1) = tip;
             track.GoodData = 1-yf(minima(1))/yf(tippt);
 
             [~,idTip] = min(abs(x-tip));
@@ -138,7 +144,7 @@ for i = 234:length(Tracks)
                 [fits4] = fitFrame.para_fit_gauss4(xp, yp, bg1, bg2);
                 [fits5] = fitFrame.para_fit_exp(xp, yp, bg1, bg2);
                 fits = padcat(fits0, fits1, fits2, fits3, fits4, fits5);
-                track.FitData(frame,1:size(fits,1),1:size(fits,2),j) = fits;
+                track.FitData(frame-f1+1,1:size(fits,1),1:size(fits,2),j) = fits;
             end
         end
     end

@@ -1,4 +1,4 @@
-function [ output_args ] = batch_tip_circles(FileName, PathName)
+function [ newtracks ] = batch_tip_circles(FileName, PathName)
 %Gets Objects from a file, evaluates their intensities within the Stack
 %they were tracked in and saves the output
 %% Options
@@ -24,7 +24,7 @@ end
 %% Load the Filament
 Filament = load([PathName FileName]);
 Filament = Filament.Filament;
-frame_data = load([PathName 'shrinkingframes.mat']);
+frame_data = load([PathName 'shrinkingframes2.mat']);
 frame_data = frame_data.Data;
 %% Helper Functions
 % Reference = select_filaments(Filament, 3);
@@ -44,14 +44,14 @@ for i=1:length(names)
     end
 end
 [Filament] = help_get_ref_frames_kymo(Filament, shrinkingframes);
-[Filament] = help_get_tip_kymo(Stack, Filament);
+[newtracks] = help_get_tip_kymo(Stack, Filament);
 %% save data
-Data = cell(length(Filament),2);
-for i = 1:length(Filament)
-    Data{i,1} = Filament(i).Custom.CustomData;
-    Data{i,2} = Filament(i).Name;
-end
-save([PathName ScanOptions.filename], 'Data', 'ScanOptions')
+% Data = cell(length(Filament),2);
+% for i = 1:length(Filament)
+%     Data{i,1} = Filament(i).Custom.CustomData;
+%     Data{i,2} = Filament(i).Name;
+% end
+% save([PathName ScanOptions.filename], 'Data', 'ScanOptions')
 
 
 %how to calculate GFP_frame_where:

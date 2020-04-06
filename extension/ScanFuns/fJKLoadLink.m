@@ -1,4 +1,4 @@
-function [ output ] = fJKLoadLink(LinkFileName, LinkPathName, fun)
+function [ tracks ] = fJKLoadLink(LinkFileName, LinkPathName, fun)
 %FJKLOADLINK This function takes the path of a file with a list of 
 %file locations. It also takes a function which is applied to each of those
 %files. Parameters are not directly passed nor is anything returned (-> use global variables or appdata)
@@ -19,6 +19,7 @@ for i = 1:numfiles
 end
 [UniqueStrings, ~, idwhichUnique] = unique(DiskStr);
 progressdlg('String','Loading Files','Min',0,'Max',numfiles);
+tracks = {};
 for i = 1:numfiles
     suppress_progressdlg = 1;
     FileName = LoadedFromFile{i};
@@ -31,7 +32,8 @@ for i = 1:numfiles
         end
     end
     [PathName, FileName]
-    fun(FileName, PathName);
+    newtracks = fun(FileName, PathName);
+    tracks = [tracks newtracks];
     suppress_progressdlg = 0;
     progressdlg(i);
 end

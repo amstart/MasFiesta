@@ -46,7 +46,7 @@ track = Tracks(tracknum);
 if ~isnumeric(hsl)
     frame = round(get(hsl,'Value'));
 else
-    frame = 1;
+    frame = 6;
 end
 % dim1 = get(lDim1, 'Value');
 % dim2 = get(lDim2, 'Value');
@@ -69,7 +69,7 @@ if ~all(isnan(track.itrace(frame,:)))
     hold on
     GFPTip = track.GFPTip(frame);
     [~,idGFPTip] = min(abs(x-GFPTip));
-    ym = itrace-track.itrace(1,:);
+    ym = itrace-nanmean(track.itrace(1:6,:));
     plot(x,ym);
     plot(x,[itrace(1:idGFPTip) ym(idGFPTip+1:end)+itrace(idGFPTip+1)-ym(idGFPTip+1)]);
 %     plot(x,itrace./track.itrace(1,:) .* mean(itrace));

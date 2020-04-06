@@ -1,11 +1,7 @@
-function [ Filament ] = help_get_tip_kymo(Stack, Filament)
+function [ out ] = help_get_tip_kymo(Stack, Filament)
 %HELP_GET_TIP_KYMO Summary of this function goes here
 %   Detailed explanation goes here
 global ScanOptions
-switch ScanOptions.help_get_tip_kymo.method
-    case 'get_pixelkymo'
-        fun = @get_pixelkymo;
-end
 FilSelect = [Filament.Selected];
 selectall = 0;
 if isfield(ScanOptions.help_get_tip_kymo, 'AllFilaments') && ScanOptions.help_get_tip_kymo.AllFilaments == 1
@@ -25,44 +21,42 @@ end
 framesuntilmissingframe=ScanOptions.help_get_tip_kymo.framesuntilmissingframe;
 progressdlg('String','Extracting Intensities','Min',0,'Max',sum(FilSelect));
 ifil=1;
+out = cell(1,length(Filament));
 for m = find(FilSelect==1)
-    tags = fJKfloat2tags(Filament(m).Results(:,end));
-    tags = tags(:,6);
-    Filament(m).Custom.CustomData=cell(1,size(Filament(m).Results,1));
-    if framesuntilmissingframe
-        for n = 1:size(Filament(m).Results,1)
-            frame = Filament(m).Results(n,1);
+    out{m} = cell(1,length(Filament(m).ForKymo));
+    ForKymo = Filament(m).ForKymo;
+    for n = 1:length(ForKymo)
+        Data = Filament(m).Data{Filament(m).Results(:,1)==ForKymo{n}(6)};
+        lastframe = -1;
+        for j = 1:length(ForKymo{n})
+            frame = ForKymo{n}(j);
             missedframes=ceil(frame/framesuntilmissingframe);
-            if mod(frame, framesuntilmissingframe)==1 || tags(n)==9 || tags(n)==8 || tags(n)==7
-                Filament(m).Custom.CustomData{n}=nan;
-                continue
+            currentframe = frame-missedframes;
+            if currentframe > 0 && currentframe < size(Stack,3)
+                I = Stack(:,:,frame-missedframes);
+                out{m}{n}{j} = {[frame, currentframe], get_pixelkymo(I, Data)};
+            else
+                out{m}{n}{j} = {[frame, currentframe], nan};
             end
-            I = Stack(:,:,frame-missedframes);
-            Filament(m).Custom.CustomData{n} = {[frame, frame-missedframes], fun(I, Filament(m), Filament(m).FramesForKymo(n), ScanOptions.help_get_tip_kymo.ScanSize, ScanOptions.help_get_tip_kymo.ExtensionLength)};
-        end
-        progressdlg(ifil);
-        ifil=ifil+1;
-    else
-        for n = 1:size(Filament(m).Results,1)
-            if tags(n)==9
-                Filament(m).Custom.CustomData{n}=nan;
-                continue
+            if currentframe == lastframe
+                out{m}{n}{j-1} = {[frame-1, currentframe], nan};
             end
-            frame = Filament(m).Results(n,1);
-            I = Stack(:,:,frame);
-            Filament(m).Custom.CustomData{n} = fun(I, Filament(m), n, ScanOptions.help_get_tip_kymo.ScanSize, ScanOptions.help_get_tip_kymo.ExtensionLength);
+            lastframe = currentframe;
         end
-        progressdlg(ifil);
-        ifil=ifil+1;
     end
+    progressdlg(ifil);
+    ifil=ifil+1;
 end
 
 
-function [intensity_vec] = get_pixelkymo(I, Filament, frame, ScanSize, ExtensionLength) 
+function [intensity_vec] = get_pixelkymo(I, Data)
+ScanSize = 3;
+ExtensionLength = 7;
 %extension length is the distance in pixels before the filament end
 res = 4;
-nX=double(Filament.Data{frame}(:,1)/Filament.PixelSize);
-nY=double(Filament.Data{frame}(:,2)/Filament.PixelSize);
+PixelSize = 157;
+nX=double(Data(:,1)/PixelSize);
+nY=double(Data(:,2)/PixelSize);
 d=cumsum(sqrt((nX(2:end)-nX(1:end-1)).^2 + (nY(2:end)-nY(1:end-1)).^2));
 delta = [nX(1)-nX(2) nX(end)-nX(end-1); nY(1)-nY(2) nY(end)-nY(end-1)];
 slope=[abs(delta(2,1)/delta(1,1)) abs(delta(2,2)/delta(1,2))];
