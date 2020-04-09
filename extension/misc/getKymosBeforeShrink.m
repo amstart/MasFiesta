@@ -2,10 +2,10 @@ t = Tracks([Tracks.Shrinks]);
 
 k = {};
 c = 0;
-for i = 1:length(kymos)
-for j = 1:length(kymos{i})
+for i = 1:length(tracks)
+for j = 1:length(tracks{i})
 c = c + 1;
-k{c} = kymos{i}{j};
+k{c} = tracks{i}{j};
 end
 end
 
@@ -41,3 +41,6 @@ for i = 1:length(t)
         t(i).frames = f{i};
     end
 end
+
+
+Tracks([Tracks.Shrinks]) = t;

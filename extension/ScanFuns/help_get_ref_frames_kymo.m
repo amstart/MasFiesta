@@ -6,7 +6,7 @@ for i = 1:length(Filament)
     sf = shrinkingframes{i};
     if isstruct(sf)
         for j = 1:length(sf)
-            Filament(i).ForKymo{j} = sf(j).Data(1,6)-5:sf(j).Data(end,6);
+            Filament(i).ForKymo{j} = sf(j).Data(1,6)-5:sf(j).Data(end,6)+10;
         end
     else
         Filament(i).ForKymo = [];

@@ -92,8 +92,15 @@ if Options.mXReference.val == 5
 end
 
 for i=1:length(Tracks)
-    Tracks(i).Y = Tracks(i).Data(:,ycolumn,Options.lPlot_YVardim.val);
-    Tracks(i).X = Tracks(i).Data(:,xcolumn,Options.lPlot_XVardim.val);
+    d = Tracks(i).Data2;
+    d = d(1:size(d,1)-10,:);
+    if length(d) > 1
+        Tracks(i).Y = d(d(:,2)<-Options.eRescueCutoff.val,ycolumn,Options.lPlot_YVardim.val);
+        Tracks(i).X = d(d(:,2)<-Options.eRescueCutoff.val,xcolumn,Options.lPlot_XVardim.val);
+    else
+        Tracks(i).Y = nan;
+        Tracks(i).X = nan;
+    end
 end
 
 if (xcolumn == 3 && Options.lMethod_TrackValue.val==7) || (ycolumn == 3 && Options.lMethod_TrackValueY.val==7) 

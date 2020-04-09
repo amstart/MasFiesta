@@ -7,7 +7,7 @@ track = Tracks(tracknum);
 
 figure
 slmin = 1;
-slmax = length(track.Data(:,2));
+slmax = size(track.itrace,1);
 
 dimstr = strsplit(num2str(1:8));       
 lDim1 = uicontrol('Tag','lDim1','String',dimstr,'Position',[150 5 30 20],'Style','popupmenu', 'Value',1);
@@ -53,6 +53,7 @@ end
 % dim3 = get(lDim3, 'Value');
 dims = 1:6;
 if ~all(isnan(track.itrace(frame,:)))
+    iframe = frame - 4;
     tipx = - track.Data(:,2);
     itrace = track.itrace(frame,:);
     x = (((0:length(itrace)-1)-40)*157/4) + tipx(1);
@@ -67,37 +68,44 @@ if ~all(isnan(track.itrace(frame,:)))
 %         xlim([x(1) track.Data(frame,2)+500]);
 %     end
     hold on
-    GFPTip = track.GFPTip(frame);
-    [~,idGFPTip] = min(abs(x-GFPTip));
-    ym = itrace-nanmean(track.itrace(1:6,:));
+    ym = itrace-nanmean(track.itrace(1:6,:));   
     plot(x,ym);
-    plot(x,[itrace(1:idGFPTip) ym(idGFPTip+1:end)+itrace(idGFPTip+1)-ym(idGFPTip+1)]);
 %     plot(x,itrace./track.itrace(1,:) .* mean(itrace));
     datacursormode on
-    title(['MT: ' num2str(track.MTIndex) ' track: ' num2str(track.TrackIndex)...
-        '   frame: ' num2str(track.Data(frame,6,1)) '/' num2str(frame)]);
 
 %     if ~isnan(track.tags(frame))
 %         set(gca,'Color',[1 1 1] - 0.1 * track.tags(frame));
 %     else
 %         set(gca,'Color',[1 1 1]);
 %     end
-    if frame > 1
-        vline(mean(tipx(frame-1:frame)));
-        minima = track.minima(frame,:);
-        vline(GFPTip,'g:');
-        if ~isnan(minima(1))
-            vline(x(minima), 'b:');
+
+    if iframe > 0
+    GFPTip = track.GFPTip(iframe);
+    [~,idGFPTip] = min(abs(x-GFPTip));
+    plot(x,[itrace(1:idGFPTip) ym(idGFPTip+1:end)+itrace(idGFPTip+1)-ym(idGFPTip+1)]);
+    if iframe > 1
+        if iframe < length(tipx)
+            vline(mean(tipx(iframe-1:iframe)));
+        else
+            vline(tipx(end));
         end
+    else
+        vline(tipx(iframe));
     end
-    vline(tipx(1));
     
-    data = squeeze(track.FitData(frame,dims,:,2))';
+    minima = track.minima(iframe,:);
+    vline(GFPTip,'g:');
+    if ~isnan(minima(1))
+        vline(x(minima), 'b:');
+    end
+    data = squeeze(track.FitData(iframe,dims,:))';
     if ~isnan(data(1))
     h1 = plot(x,fitFrame.fun2(x,data(:,1)));
     h2 = plot(x,fitFrame.fun2(x,data(:,2)));
     h3 = plot(x,fitFrame.fun2(x,data(:,3)));
     h4 = plot(x,fitFrame.fun2(x,data(:,4)));
+    vline(data(5,4),'k:');
+    text(data(5,4), 1, ['v = ' num2str(track.Data2(iframe,3))]);
     h5 = plot(x,fitFrame.fun2(x,data(:,5)));
     h6 = plot(x,fitFrame.fun1(x,data(:,6)),'k.');
 %     legend([h1 h2 h3 h4 h5 h6],...
@@ -108,6 +116,12 @@ if ~all(isnan(track.itrace(frame,:)))
 %     ['sigdiff=' num2str(diff(data([2 7],5)),3) ' e=' num2str(data(10,5),3)],...
 %     [' s=' num2str(data(2,6),3) ' t=' num2str(data(8,6),3) ' e=' num2str(data(10,6),3)]},...
 %     'Location', 'southeast');
+    end
+    title(['MT: ' num2str(track.MTIndex) ' track: ' num2str(track.TrackIndex)...
+        '   frame: ' num2str(iframe) '/' num2str(track.frames(iframe,:)) '   time: ' num2str(track.TimeInfo(track.frames(iframe,2)),3)]);
+    else
+    title(['MT: ' num2str(track.MTIndex) ' track: ' num2str(track.TrackIndex)...
+        '   frame: ' num2str(iframe)]);
     end
 %     try
 %         h1 = plot(x,convolutedExponential(x,track.Data(frame,7:end-1,dim1)'));

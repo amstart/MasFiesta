@@ -1,10 +1,13 @@
 for i = 1:length(Tracks)
     track = Tracks(i);
     f1 = 5;
-    track.FitData = nan(size(track.itrace,1)-f1+1,6,9,3);
-    track.GFPTip = nan(size(track.itrace,1)-f1+1,1);
-    track.minima = nan(size(track.itrace,1)-f1+1,2);
-    tipx = track.Data(:,2);
+    npoints = size(track.itrace,1)-f1+1;
+    track.FitData = nan(npoints,6,9);
+    track.GFPTip = nan(npoints,1);
+    track.minima = nan(npoints,2);
+    track.Data2 = nan(npoints,7);
+    tipx = interp1(track.Data(:,end), track.Data(:,2), track.Data(1,end):track.Data(end,end));
+    tipx = [tipx(1); tipx'; tipx(end).*ones(5,1)];
     if length(track.itrace) == 1
         continue
     end
@@ -12,7 +15,11 @@ for i = 1:length(Tracks)
         warning(num2str(size(track.itrace,1)));
         continue
     end
-    for frame = f1:size(Tracks(i).Data,1)
+    stackframes = track.frames(f1:end,2);
+    stackframes(stackframes>length(track.TimeInfo)) = length(track.TimeInfo);
+    time = track.TimeInfo(stackframes); 
+    for frame = f1:size(track.itrace,1)-5
+        iframe = frame-f1+1;
         [num2str(i) ' ' num2str(frame)]
 
         itrace = track.itrace;
@@ -21,7 +28,7 @@ for i = 1:length(Tracks)
             yf = itrace(frame,:);
             [~, seed] = min(abs(x));
             yn = yf-nanmean(itrace(1:6,:));
-            [~, tippt1] = min(abs(-x-tipx(frame-f1+1)));
+            [~, tippt1] = min(abs(-x-tipx(iframe)));
             [~, maxid] = max(yn(20:tippt1+30));
             maxid = maxid + 19;
             ids = min(tippt1-30,maxid-30):min(tippt1+30,maxid);
@@ -80,6 +87,10 @@ for i = 1:length(Tracks)
                     break
                 end
             end
+            
+            if length(minloc) == 1
+                continue
+            end
 
             start = minima(1);
             checklmin = max(yf(start:tippt))-yf(start:tippt);
@@ -92,14 +103,14 @@ for i = 1:length(Tracks)
             end
             end
             
-            if max(yf(1:minima(1)-15)) / yf(tippt) > 0.8
+            if max(yf(1:minima(1)-15)) / yf(tippt) > 0.7
                 track.GoodData = -1;
                 continue
             end
             
             minima(1) = max(tippt - 20, minima(1));
 
-            track.minima(frame-f1+1,:) = minima;
+            track.minima(iframe,:) = minima;
             tip = fitFrame.getTip(x(minima(1):minima(2)), yf(minima(1):minima(2)));
             if isnan(tip)
                 tip = fitFrame.getTip(x(minima(1):minima(2)), yn(minima(1):minima(2)));
@@ -107,45 +118,47 @@ for i = 1:length(Tracks)
                     error('max not captured');
                 end
             end
-            track.GFPTip(frame-f1+1) = tip;
+            track.GFPTip(iframe) = tip;
             track.GoodData = 1-yf(minima(1))/yf(tippt);
 
             [~,idTip] = min(abs(x-tip));
             ym = [yf(1:idTip) yn(idTip+1:end)+yf(idTip+1)-yn(idTip+1)];
     
-            ally = [yf; ym; yn];
             xp = x(minima(1):minima(2));
             
             if ~any(x>0)
                 error('itrace too short');
             end
             eval = min(length(ym),minima(2)+99);
-            for j = 1:3
-                y = ally(j,:);
-                bg2 = max(min(y(1:40)),0);
-                yp = y(minima(1):minima(2));
-                ymean = wmean(y(minima(2):eval), 1-(0:eval-minima(2))/100);
-                if j == 2
-                    if ymean < yp(end)
-                        bg1 = ymean - bg2;
-                    else
-                        bg1 = mean([ymean yp(end)]) - bg2;
-                    end
-                else
-                    bg1 = yp(end) - bg2;
-                end
-                if yp(1) == max(yp) || yp(2) == max(yp)
-                    continue
-                end
-                [fits0] = fitFrame.para_fit_erf(xp, yp, bg1, bg2);
-                [fits1] = fitFrame.para_fit_gauss1(xp, yp, bg1, bg2);
-                [fits2] = fitFrame.para_fit_gauss2(xp, yp, bg1, bg2);
-                [fits3] = fitFrame.para_fit_gauss3(xp, yp, bg1, bg2);
-                [fits4] = fitFrame.para_fit_gauss4(xp, yp, bg1, bg2);
-                [fits5] = fitFrame.para_fit_exp(xp, yp, bg1, bg2);
-                fits = padcat(fits0, fits1, fits2, fits3, fits4, fits5);
-                track.FitData(frame-f1+1,1:size(fits,1),1:size(fits,2),j) = fits;
+            
+            bg2 = max(min(ym(1:40)),0);
+            yp = ym(minima(1):minima(2));
+            ymean = wmean(ym(minima(2):eval), 1-(0:eval-minima(2))/100);
+
+            if ymean < yp(end)
+                bg1 = ymean - bg2;
+            else
+                bg1 = mean([ymean yp(end)]) - bg2;
             end
+            [fits0] = fitFrame.para_fit_erf(xp, yp, bg1, bg2);
+            [fits1] = fitFrame.para_fit_gauss1(xp, yp, bg1, bg2);
+            [fits2] = fitFrame.para_fit_gauss2(xp, yp, bg1, bg2);
+            [fits3] = fitFrame.para_fit_gauss3(xp, yp, bg1, bg2);
+            [fits4] = fitFrame.para_fit_gauss4(xp, yp, bg1, bg2);
+            [fits5] = fitFrame.para_fit_exp(xp, yp, bg1, bg2);
+            fits = padcat(fits0, fits1, fits2, fits3, fits4, fits5);
+            track.FitData(iframe,1:size(fits,1),1:size(fits,2)) = fits;
+            if iframe > 1
+                pframe = find(~isnan(track.Data2(1:iframe - 1,2)),1,'last');
+                if ~isempty(pframe)
+                    vel = (fits3(5)-track.Data2(pframe,2))/diff(track.TimeInfo([pframe iframe]));
+                else
+                    vel = nan;
+                end
+            else
+                vel = nan;
+            end
+            track.Data2(iframe,:) = [time(iframe) fits3(5) vel fits0(5) fits3([1 2 4])];
         end
     end
     Tracks(i) = track;

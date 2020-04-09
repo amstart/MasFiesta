@@ -17,11 +17,11 @@ subplot = @(m,n,p) subtightplot (m, n, p, [0.08 0.11], [0.2 0.08], [0.08 0.02]);
 %         end
 %     end
 % end
-% for i = 1:length(Tracks)
-%     if abs(Tracks(i).X(end)-Tracks(i).X(1)) < 4000
-%         DelTracks(i) = 1;
-%     end
-% end
+for i = 1:length(Tracks)
+    if length(Tracks(i).X) < 2
+        DelTracks(i) = 1;
+    end
+end
 if Options.lChoosePlot.val == 8
     for i = 1:length(Tracks)
         eventloc = find(Tracks(i).Data(:,1)==0);
