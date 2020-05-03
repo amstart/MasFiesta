@@ -111,7 +111,7 @@ for i = 1:length(Tracks)
             minima(1) = max(tippt - 20, minima(1));
 
             track.minima(iframe,:) = minima;
-            tip = fitFrame.getTip(x(minima(1):minima(2)), yf(minima(1):minima(2)));
+            tip = fitFrame.getTip(x(minima(1):minima(2)), yf(minima(1):minima(2))+yn(minima(1):minima(2)));
             if isnan(tip)
                 tip = fitFrame.getTip(x(minima(1):minima(2)), yn(minima(1):minima(2)));
                 if isnan(tip)

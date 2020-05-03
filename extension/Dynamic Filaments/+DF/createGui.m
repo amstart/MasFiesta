@@ -98,18 +98,18 @@ hDFGui.bRefreshGui = uicontrol('Parent',hDFGui.pOptions,'Units','normalized','Ca
 tooltipstr = 'Segments the currently loaded MTs according to the given parameters.';       
                                
 hDFGui.bSegment = uicontrol('Parent',hDFGui.pOptions,'Units','normalized','Callback',@DF.updateOptions, 'FontSize', 15,'Enable','off',...
-                                   'Position',[0.65 0.85 0.15 0.05],'String','Segment','Style','pushbutton','Tag','bSegment','TooltipString', tooltipstr);    
+                                   'Position',[0.45 0.85 0.15 0.05],'String','Segment','Style','pushbutton','Tag','bSegment','TooltipString', tooltipstr);    
                                
                                
 hDFGui.tMethod_TrackValue = uicontrol('Parent',hDFGui.pOptions,'Units','normalized','BackgroundColor',c,...
-                             'Position',[0.05 0.5 0.29 0.125],'String','Determine track value by:','Style','text','Tag','tVelocity','HorizontalAlignment','left');     
+                             'Position',[0.05 0.55 0.29 0.125],'String','Determine track value by:','Style','text','Tag','tVelocity','HorizontalAlignment','left');     
 
 hDFGui.lMethod_TrackValue = uicontrol('Parent',hDFGui.pOptions,'Units','normalized','Callback',@DF.updateOptions,...
-                            'Position',[0.3 0.5 0.3 0.125],'BackgroundColor','white','String',{'median', 'mean', 'end-start', 'minimum', 'maximum', 'end-start/end(Z)-start(Z)', 'sum or linear fit (only for velocity)'},...
+                            'Position',[0.3 0.55 0.3 0.125],'BackgroundColor','white','String',{'median', 'mean', 'end-start', 'minimum', 'maximum', 'end-start/end(Z)-start(Z)', 'sum or linear fit (only for velocity)'},...
                             'Value',1,'Style','popupmenu','Tag','lMethod_TrackValue','Enable','on');   
                         
 hDFGui.lMethod_TrackValueY = uicontrol('Parent',hDFGui.pOptions,'Units','normalized','Callback',@DF.updateOptions,...
-                            'Position',[0.65 0.5 0.3 0.125],'BackgroundColor','white','String',{'median', 'mean', 'end-start', 'minimum', 'maximum', 'standard dev', 'linear fit (only for velocity) or sum (only for MAP count)'},...
+                            'Position',[0.65 0.55 0.3 0.125],'BackgroundColor','white','String',{'median', 'mean', 'end-start', 'minimum', 'maximum', 'standard dev', 'linear fit (only for velocity) or sum (only for MAP count)'},...
                             'Value',1,'Style','popupmenu','Tag','lMethod_TrackValueY','Enable','on');   
                         
 % tooltipstr=sprintf(['Applies a walking average to the X-Variable (number indicates over how many points). 1 = no smoothing. Only has effect on "X vs Y" and "Events along X during Y" plots.\n Uses "nanfastsmooth" (google it).']);
@@ -133,6 +133,11 @@ hDFGui.tChoosePlot = uicontrol('Parent',hDFGui.pOptions,'Units','normalized','Ba
 hDFGui.bUpdatePlots = uicontrol('Parent',hDFGui.pOptions,'Units','normalized','Callback',@DF.updateOptions,...
                                    'Position',[0.15 0.45 0.12 0.05],'String','Update All','Style','pushbutton','Tag','bUpdatePlots');     
                                
+
+
+                               
+                               
+                               
 tooltipstr=sprintf(['Set the X variable.']); %lPlot_XVar and lPlot_YVar are set in DF.updateOptions()
                                
 hDFGui.lPlot_XVar = uicontrol('Parent',hDFGui.pOptions,'Units','normalized','Callback',@DF.updateOptions,...
@@ -148,7 +153,7 @@ hDFGui.lPlot_ZVar = uicontrol('Parent',hDFGui.pOptions,'Units','normalized','Cal
                             'Position',[0.75 0.4 0.15 0.125],'BackgroundColor','white', 'TooltipString', tooltipstr,'Style','popupmenu','Tag','lPlot_ZVar','Enable','on');
 
 tooltipstr=sprintf(['When you have different versions of the same parameter.']);
-dimstr = strsplit(num2str(1:8));       
+dimstr = {'only erf','gauss erf same','sigma same','shift zero','gauss erf different','exp'};      
 hDFGui.lPlot_XVardim = uicontrol('Parent',hDFGui.pOptions,'Units','normalized','Callback',@DF.updateOptions,'String',dimstr,...
                             'Position',[0.45 0.4 0.075 0.125],'BackgroundColor','white', 'TooltipString', tooltipstr,'Style','popupmenu','Tag','lPlot_XVardim','Enable','on');
 hDFGui.lPlot_YVardim = uicontrol('Parent',hDFGui.pOptions,'Units','normalized','Callback',@DF.updateOptions,'String',dimstr,...
