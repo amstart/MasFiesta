@@ -1,4 +1,4 @@
-for i = 212:length(Tracks)
+for i = 1:length(Tracks)
     track = Tracks(i);
     if length(track.itrace) == 1
         continue
@@ -9,7 +9,9 @@ for i = 212:length(Tracks)
     track.GFPTip = nan(npoints,1);
     track.minima = nan(npoints,2);
     track.Data2 = nan(npoints,7);
+    Tracks(i).GoodData = nan;
     td = track.Data(2:end-10,:);
+    td(isnan(td(:,1)),:) = [];
     tipx = interp1(td(:,end), td(:,2), td(1,end):td(end,end));
     tipx = [tipx(1); tipx'; tipx(end).*ones(10,1)];
 
@@ -36,8 +38,10 @@ for i = 212:length(Tracks)
             ids = min(tippt1-30,maxid-30):min(tippt1+30,maxid);
             ids = ids(ids>0);
             if max(yn(ids)) < 1.5
-                track.GoodData = 0;
-                continue
+                goodsign = -1;
+            else
+                goodsign = 1;
+%                 continue
             end
             chptf = findchangepts(yf(ids));
             chptn = findchangepts(yn(ids));
@@ -47,11 +51,15 @@ for i = 212:length(Tracks)
             end
             tippt2 = min(tippt1-30,maxid-30)+tippt2-1;
             yns = smooth(yn,7);
+            try
             [~, peakids] = findpeaks(yns(tippt2:length(yn)), 'NPeaks', 3, 'MinPeakProminence', 0.5);
+            catch
+                continue
+            end
             peaks = yf(peakids+tippt2-1);
             if length(peaks) > 1
                 if peaks(1)/peaks(2) < 0.85 && ...
-                        (peaks(2)-peaks(1))/(peakids(2)-peakids(1)) > 0.5 * (peaks(1)-yf(peakids(1)+tippt2-11))/10
+                        (peaks(2)-peaks(1))/(peakids(2)-peakids(1)) > 0.85 * (peaks(1)-yf(peakids(1)+tippt2-11))/10
                     if length(peaks) > 2
                         if peaks(3) < peaks(2)
                             tippt3 = peakids(2);
@@ -72,9 +80,13 @@ for i = 212:length(Tracks)
             
             ys = max(yn)-yn;
             [~, minloc] = findpeaks(ys/max(ys),'MinPeakProminence',0.025);
-
-            minimal = [find((minloc - tippt)<0,1,'last') find((minloc - tippt)>0,1)];
-            minima = minloc(minimal);
+            leftmin = find((minloc - tippt)<0,1,'last');
+            minimal = [leftmin find((minloc - tippt)>0,1)];
+            if isempty(leftmin)
+                minima = [1 minloc(minimal)];
+            else
+                minima = minloc(minimal);
+            end
             counter = 0;
             while minimal(1)-counter > 1 
                 if yf(minima(1))/yf(tippt) > 0.85
@@ -105,10 +117,6 @@ for i = 212:length(Tracks)
             end
             end
             
-            if max(yf(1:minima(1)-15)) / yf(tippt) > 0.7
-                track.GoodData = -1;
-                continue
-            end
             
             minima(1) = max(tippt - 20, minima(1));
 
@@ -121,7 +129,7 @@ for i = 212:length(Tracks)
                 end
             end
             track.GFPTip(iframe) = tip;
-            track.GoodData = 1-yf(minima(1))/yf(tippt);
+            track.GoodData = goodsign * (1-yf(minima(1))/yf(tippt));
 
             [~,idTip] = min(abs(x-tip));
             ym = [yf(1:idTip) yn(idTip+1:end)+yf(idTip+1)-yn(idTip+1)];

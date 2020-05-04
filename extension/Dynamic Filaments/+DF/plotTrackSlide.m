@@ -46,7 +46,7 @@ track = Tracks(tracknum);
 if ~isnumeric(hsl)
     frame = round(get(hsl,'Value'));
 else
-    frame = 6;
+    frame = 1;
 end
 % dim1 = get(lDim1, 'Value');
 % dim2 = get(lDim2, 'Value');
