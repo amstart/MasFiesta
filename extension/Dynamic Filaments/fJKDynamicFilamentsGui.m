@@ -332,7 +332,8 @@ for field = optionfields'
     fchar = char(field);
     if strcmp(fchar, 'lChoosePlot') || strcmp(fchar, 'lPlot_XVar') || strcmp(fchar, 'lAdditionalPlots') || ...
             strcmp(fchar, 'lPlot_YVar') || strcmp(fchar, 'cPlotGrowingTracks') || strcmp(fchar, 'cLegend') || strcmp(fchar, 'cOnlySelected') ...
-            || strcmp(fchar, 'lMethod_TrackValue') || strcmp(fchar, 'lMethod_TrackValueY') || strcmp(fchar, 'lSubsegment')
+            || strcmp(fchar, 'lMethod_TrackValue') || strcmp(fchar, 'lMethod_TrackValueY') || strcmp(fchar, 'lSubsegment')...
+            || strcmp(fchar, 'lPlot_XVarT') || strcmp(fchar, 'lPlot_YVarT') || strcmp(fchar, 'xunit') || strcmp(fchar, 'yunit') || strcmp(fchar, 'xlabel') || strcmp(fchar, 'ylabel')
         continue
     end
     str = [str fchar '=' Options.(fchar).print ' | '];

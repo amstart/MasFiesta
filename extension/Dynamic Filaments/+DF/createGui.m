@@ -133,25 +133,51 @@ hDFGui.tChoosePlot = uicontrol('Parent',hDFGui.pOptions,'Units','normalized','Ba
 hDFGui.bUpdatePlots = uicontrol('Parent',hDFGui.pOptions,'Units','normalized','Callback',@DF.updateOptions,...
                                    'Position',[0.15 0.45 0.12 0.05],'String','Update All','Style','pushbutton','Tag','bUpdatePlots');     
                                
-
-
+                              
+tooltipstr=sprintf(['Chooses below row instead']); %lPlot_XVar and lPlot_YVar are set in DF.updateOptions()
+   
                                
-                               
-                               
+hDFGui.cSwitch = uicontrol('Parent',hDFGui.pOptions,'Units','normalized','Callback',@DF.updateOptions,...
+                            'Position',[0.45 0.525 0.05 0.05],'BackgroundColor','white', 'TooltipString', tooltipstr,'Style','checkbox','Tag','cSwitch','Enable','on');
+                       
+% hDFGui.switchy = uicontrol('Parent',hDFGui.pOptions,'Units','normalized','Callback',@DF.updateOptions,...
+%                             'Position',[0.675 0.525 0.05 0.05],'BackgroundColor','white', 'TooltipString', tooltipstr,'Style','checkbox','Tag','ycheck','Enable','on');
+%                        
+% hDFGui.switchz = uicontrol('Parent',hDFGui.pOptions,'Units','normalized','Callback',@DF.updateOptions,...
+%                             'Position',[0.9 0.525 0.05 0.05],'BackgroundColor','white', 'TooltipString', tooltipstr,'Style','checkbox','Tag','zcheck','Enable','on');
+%                        
+                        
 tooltipstr=sprintf(['Set the X variable.']); %lPlot_XVar and lPlot_YVar are set in DF.updateOptions()
                                
 hDFGui.lPlot_XVar = uicontrol('Parent',hDFGui.pOptions,'Units','normalized','Callback',@DF.updateOptions,...
-                            'Position',[0.3 0.4 0.15 0.125],'BackgroundColor','white', 'TooltipString', tooltipstr,'Style','popupmenu','Tag','lPlot_XVar','Enable','on');
+                            'Position',[0.3 0.45 0.15 0.125],'BackgroundColor','white', 'TooltipString', tooltipstr,'Style','popupmenu','Tag','lPlot_XVar','Enable','on');
                        
 tooltipstr=sprintf(['Set the Y variable.']);
                         
 hDFGui.lPlot_YVar = uicontrol('Parent',hDFGui.pOptions,'Units','normalized','Callback',@DF.updateOptions,...
-                            'Position',[0.525 0.4 0.15 0.125],'BackgroundColor','white', 'TooltipString', tooltipstr,'Style','popupmenu','Tag','lPlot_YVar','Enable','on');
+                            'Position',[0.525 0.45 0.15 0.125],'BackgroundColor','white', 'TooltipString', tooltipstr,'Style','popupmenu','Tag','lPlot_YVar','Enable','on');
 tooltipstr=sprintf(['Set the Z variable.']);
                         
 hDFGui.lPlot_ZVar = uicontrol('Parent',hDFGui.pOptions,'Units','normalized','Callback',@DF.updateOptions,...
-                            'Position',[0.75 0.4 0.15 0.125],'BackgroundColor','white', 'TooltipString', tooltipstr,'Style','popupmenu','Tag','lPlot_ZVar','Enable','on');
+                            'Position',[0.75 0.45 0.15 0.125],'BackgroundColor','white', 'TooltipString', tooltipstr,'Style','popupmenu','Tag','lPlot_ZVar','Enable','on');
 
+str = {'time','distance','vel','amplitude gauss','sigma','lattice density','bg density','MT tip','shift gauss','sigma gauss','tau','sum square error'};
+unit = {'s','nm','nm/s','1','nm','1','1','nm','nm','nm','nm','1sq'};
+tooltipstr=sprintf(['Set the X variable.']); %lPlot_XVar and lPlot_YVar are set in DF.updateOptions()
+                               
+hDFGui.lPlot_XVarT = uicontrol('Parent',hDFGui.pOptions,'Units','normalized','Callback',@DF.updateOptions,'String',str,...
+                            'UserData',unit,'Position',[0.3 0.4 0.15 0.125],'BackgroundColor','white', 'TooltipString', tooltipstr,'Style','popupmenu','Tag','lPlot_XVarT','Enable','on');
+                       
+tooltipstr=sprintf(['Set the Y variable.']);
+                        
+hDFGui.lPlot_YVarT = uicontrol('Parent',hDFGui.pOptions,'Units','normalized','Callback',@DF.updateOptions,'String',str,...
+                            'Position',[0.525 0.4 0.15 0.125],'BackgroundColor','white', 'TooltipString', tooltipstr,'Style','popupmenu','Tag','lPlot_YVarT','Enable','on');
+tooltipstr=sprintf(['Set the Z variable.']);
+                        
+hDFGui.lPlot_ZVarT = uicontrol('Parent',hDFGui.pOptions,'Units','normalized','Callback',@DF.updateOptions,'String',str,...
+                            'Position',[0.75 0.4 0.15 0.125],'BackgroundColor','white', 'TooltipString', tooltipstr,'Style','popupmenu','Tag','lPlot_ZVarT','Enable','on');
+
+                        
 tooltipstr=sprintf(['When you have different versions of the same parameter.']);
 dimstr = {'only erf','gauss erf same','sigma same','shift zero','gauss erf different','exp'};      
 hDFGui.lPlot_XVardim = uicontrol('Parent',hDFGui.pOptions,'Units','normalized','Callback',@DF.updateOptions,'String',dimstr,...

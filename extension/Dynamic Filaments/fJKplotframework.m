@@ -294,7 +294,7 @@ for i = 1:3
             labelsuffixz = str;
     end
 end
-yunit = Options.lPlot_YVar.str;
+yunit = Options.yunit;
 if plot_mode == 1
     labelprefixy='N(events)/';
     unitprefixy='1/';
@@ -308,5 +308,5 @@ else
     labelprefixy='';
     unitprefixy='';
 end
-labelx=[Options.lPlot_XVar.print ' ' labelsuffixx ' [' Options.lPlot_XVar.str ']'];
-labely=[labelprefixy Options.lPlot_YVar.print ' ' labelsuffixy ' [' unitprefixy yunit ']'];
+labelx=[Options.xlabel ' ' labelsuffixx ' [' Options.xunit ']'];
+labely=[labelprefixy Options.ylabel ' ' labelsuffixy ' [' unitprefixy yunit ']'];

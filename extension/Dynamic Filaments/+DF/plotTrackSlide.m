@@ -54,7 +54,7 @@ end
 dims = 1:6;
 if ~all(isnan(track.itrace(frame,:)))
     iframe = frame - 4;
-    tipx = - track.Data(:,2);
+    tipx = - track.Data(2:end-10,2);
     itrace = track.itrace(frame,:);
     x = (((0:length(itrace)-1)-40)*157/4) + tipx(1);
     plot(x,itrace);

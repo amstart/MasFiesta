@@ -1,7 +1,7 @@
 function updateOptions(varargin)
 global DFDir
 var_units = {'s', 'nm', 'nm/s', '1/nm', '', '1'};
-var_names = {'time', 'location', 'velocity', 'Ase1 count', 'track num', 'frames'};
+var_names = {'time', 'location', 'velocity', 'GFP velocity', 'track num', 'frames'};
 hDFGui = getappdata(0,'hDFGui');
 Objects = getappdata(hDFGui.fig,'Objects');
 customfields ={};
@@ -61,6 +61,20 @@ for i = 1:length(children)
         otherwise
             continue
     end
+end
+if Options.cSwitch.val
+    var_units = get(hDFGui.lPlot_XVarT, 'UserData');
+    var_names = get(hDFGui.lPlot_XVarT, 'String');
+    var_dims = get(hDFGui.lPlot_XVardim, 'String');
+    Options.xunit = var_units{get(hDFGui.lPlot_XVarT, 'Value')};
+    Options.xlabel = [var_names{get(hDFGui.lPlot_XVarT, 'Value')} ' (' var_dims{get(hDFGui.lPlot_XVardim, 'Value')} ')'];
+    Options.yunit = var_units{get(hDFGui.lPlot_YVarT, 'Value')};
+    Options.ylabel = [var_names{get(hDFGui.lPlot_YVarT, 'Value')} ' (' var_dims{get(hDFGui.lPlot_YVardim, 'Value')} ')'];
+else
+    Options.xunit = var_units{get(hDFGui.lPlot_XVar, 'Value')};
+    Options.xlabel = var_names{get(hDFGui.lPlot_XVar, 'Value')};
+    Options.yunit = var_units{get(hDFGui.lPlot_YVar, 'Value')};
+    Options.ylabel = var_names{get(hDFGui.lPlot_YVar, 'Value')};
 end
 setappdata(hDFGui.fig,'Options',Options);
 if gcbo == hDFGui.bSaveOptions

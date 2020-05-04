@@ -78,8 +78,13 @@ event = event(track_id);
 type = type(track_id);
 file = file(track_id);
 
+if ~Options.cSwitch.val
 xcolumn = Options.lPlot_XVar.val;
 ycolumn = Options.lPlot_YVar.val;
+else
+xcolumn = Options.lPlot_XVarT.val;
+ycolumn = Options.lPlot_YVarT.val;
+end
 
 if Options.mXReference.val == 5
     if ycolumn == 3
@@ -91,9 +96,9 @@ if Options.mXReference.val == 5
     end
 end
 
+if ~Options.cSwitch.val
 for i=1:length(Tracks)
-    d = Tracks(i).Data2;
-    d = d(1:size(d,1)-10,:);
+    d = Tracks(i).Data;
     if length(d) > 1
         Tracks(i).Y = d(d(:,2)<-Options.eRescueCutoff.val,ycolumn,Options.lPlot_YVardim.val);
         Tracks(i).X = d(d(:,2)<-Options.eRescueCutoff.val,xcolumn,Options.lPlot_XVardim.val);
@@ -101,6 +106,19 @@ for i=1:length(Tracks)
         Tracks(i).Y = nan;
         Tracks(i).X = nan;
     end
+end
+else
+for i=1:length(Tracks)
+    if length(Tracks(i).FitData) > 1
+        d1 = [Tracks(i).Data2(:,1:3) squeeze(Tracks(i).FitData(:,Options.lPlot_XVardim.val,:))];
+        d2 = [Tracks(i).Data2(:,1:3) squeeze(Tracks(i).FitData(:,Options.lPlot_YVardim.val,:))];
+        Tracks(i).Y = d2(d2(:,2)<-Options.eRescueCutoff.val,ycolumn);
+        Tracks(i).X = d1(d1(:,2)<-Options.eRescueCutoff.val,xcolumn);
+    else
+        Tracks(i).Y = nan;
+        Tracks(i).X = nan;
+    end
+end
 end
 
 if (xcolumn == 3 && Options.lMethod_TrackValue.val==7) || (ycolumn == 3 && Options.lMethod_TrackValueY.val==7) 
@@ -110,7 +128,16 @@ if (xcolumn == 3 && Options.lMethod_TrackValue.val==7) || (ycolumn == 3 && Optio
     end
 end
 for i=1:length(Tracks)
-    Tracks(i).Z = Tracks(i).Data(:,Options.lPlot_ZVar.val,Options.lPlot_ZVardim.val);
+    if ~Options.cSwitch.val
+        Tracks(i).Z = Tracks(i).Data(:,Options.lPlot_ZVar.val);
+    else
+        if length(Tracks(i).FitData) > 1
+        d3 = [Tracks(i).Data2(:,1:3) squeeze(Tracks(i).FitData(:,Options.lPlot_ZVardim.val,:))];
+            Tracks(i).Z = d3(d3(:,2)<-Options.eRescueCutoff.val,ycolumn);
+        else
+            Tracks(i).Z = nan;
+        end
+    end
 end
 if nargin > 1
     switch varargin{1}

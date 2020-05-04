@@ -31,14 +31,27 @@ hold(hDFGui.aIPlot,'on');
 hold(hDFGui.aPlot,'on');
 axes(hDFGui.aPlot);
 for i=1:length(tracks)
-    segtrack=tracks(i).Data;
+    if Options.cSwitch.val
+        if length(tracks(i).FitData) > 1
+            segtrack = [tracks(i).Data2(2:end-10,1:3) squeeze(tracks(i).FitData(2:end-10,Options.lPlot_XVardim.val,:))];
+            segtrack2 = [tracks(i).Data2(2:end-10,1:3) squeeze(tracks(i).FitData(2:end-10,Options.lPlot_YVardim.val,:))];
+            segtrack(:,2) = -segtrack(:,2);
+            c2seg=segtrack2(:, Options.lPlot_YVarT.val);
+            c1seg=segtrack(:, Options.lPlot_XVarT.val);
+        else
+            continue
+        end
+    else
+        segtrack=tracks(i).Data;
+        c2seg=segtrack(:, Options.lPlot_YVar.val);
+        c1seg=segtrack(:, Options.lPlot_XVar.val);
+    end
+    
     tseg=segtrack(:,1);
     dseg=segtrack(:,2);
-    c2seg=segtrack(:, Options.lPlot_YVar.val, Options.lPlot_YVardim.val);
-    c1seg=segtrack(:, Options.lPlot_XVar.val, Options.lPlot_XVardim.val);
     d0=round(nanmean(segtrack(:,2)));
     t0=segtrack(round(size(segtrack,1)/2),1);
-    if (get(hDFGui.cshowTrackN,'Value') && tseg(end)-tseg(1) > 20 || (tracks(i).Event && dseg(end) > cutoff)) && tracks(i).Shrinks
+    if length(tracks(i).FitData)>1%(get(hDFGui.cshowTrackN,'Value') && tseg(end)-tseg(1) > 20 || (tracks(i).Event && dseg(end) > cutoff)) && tracks(i).Shrinks
         text(double(t0),double(max(segtrack(:,2))),num2str(track_id(i)));
     end
     if tracks(i).Shrinks
@@ -74,9 +87,9 @@ legend(hDFGui.aPlot,'off');
 xlabel(hDFGui.aPlot,'time [s]');
 ylabel(hDFGui.aPlot,'distance to seed [nm]'); 
 xlabel(hDFGui.aVelPlot,'time [s]');
-ylabel(hDFGui.aIPlot, [Options.lPlot_XVar.print ' [' Options.lPlot_XVar.str ']']); 
+ylabel(hDFGui.aIPlot, [Options.xlabel ' [' Options.xunit ']']); 
 xlabel(hDFGui.aIPlot,'time [s]');
-ylabel(hDFGui.aVelPlot, [Options.lPlot_YVar.print ' [' Options.lPlot_YVar.str ']']); 
+ylabel(hDFGui.aVelPlot, [Options.ylabel ' [' Options.yunit ']']); 
 zoom(hDFGui.aPlot, 'on');
 zoom(hDFGui.aVelPlot, 'on');
 zoom(hDFGui.aIPlot, 'on');

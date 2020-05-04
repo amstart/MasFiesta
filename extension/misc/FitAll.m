@@ -1,24 +1,26 @@
-for i = 1:length(Tracks)
+for i = 212:length(Tracks)
     track = Tracks(i);
+    if length(track.itrace) == 1
+        continue
+    end
     f1 = 5;
     npoints = size(track.itrace,1)-f1+1;
     track.FitData = nan(npoints,6,9);
     track.GFPTip = nan(npoints,1);
     track.minima = nan(npoints,2);
     track.Data2 = nan(npoints,7);
-    tipx = interp1(track.Data(:,end), track.Data(:,2), track.Data(1,end):track.Data(end,end));
-    tipx = [tipx(1); tipx'; tipx(end).*ones(5,1)];
-    if length(track.itrace) == 1
-        continue
-    end
-    if size(track.Data,1) < 10
+    td = track.Data(2:end-10,:);
+    tipx = interp1(td(:,end), td(:,2), td(1,end):td(end,end));
+    tipx = [tipx(1); tipx'; tipx(end).*ones(10,1)];
+
+    if size(track.Data,1) < 20
         warning(num2str(size(track.itrace,1)));
         continue
     end
     stackframes = track.frames(f1:end,2);
     stackframes(stackframes>length(track.TimeInfo)) = length(track.TimeInfo);
     time = track.TimeInfo(stackframes); 
-    for frame = f1:size(track.itrace,1)-5
+    for frame = f1:size(track.itrace,1)
         iframe = frame-f1+1;
         [num2str(i) ' ' num2str(frame)]
 
@@ -123,6 +125,9 @@ for i = 1:length(Tracks)
 
             [~,idTip] = min(abs(x-tip));
             ym = [yf(1:idTip) yn(idTip+1:end)+yf(idTip+1)-yn(idTip+1)];
+            
+%             change = findchangepts(ym);
+%             change = x(change);
     
             xp = x(minima(1):minima(2));
             

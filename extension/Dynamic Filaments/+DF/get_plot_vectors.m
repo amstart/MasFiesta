@@ -1,7 +1,11 @@
 function [x_vec, y_vec] = get_plot_vectors(Options, Tracks, xy)
 vector = cell(1,2);
 selected_methods = [Options.lMethod_TrackValue.val, Options.lMethod_TrackValueY.val];
-selected_vars = [Options.lPlot_XVar.val, Options.lPlot_YVar.val];
+if Options.cSwitch.val
+    selected_vars = [Options.lPlot_XVarT.val, Options.lPlot_YVarT.val];
+else
+    selected_vars = [Options.lPlot_XVar.val, Options.lPlot_YVar.val];
+end
 selected_dims = [Options.lPlot_XVardim.val, Options.lPlot_YVardim.val];
 for m = xy
     vector{m} = nan(length(Tracks),1);
@@ -14,7 +18,16 @@ for m = xy
             end
         else
             try
-            data = Tracks(n).Data(:,selected_vars(m),selected_dims(m));
+                if Options.cSwitch.val
+                    if length(Tracks(n).FitData) > 1
+                    data = [Tracks(n).Data2(:,1:3) squeeze(Tracks(n).FitData(:,selected_dims(m),:))];
+                    data = data(:,selected_vars(m));
+                    else
+                        data = nan;
+                    end
+                else
+                    data = Tracks(n).Data(:,selected_vars(m));
+                end
             catch
                 return
             end
