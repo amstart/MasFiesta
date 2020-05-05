@@ -35,7 +35,8 @@ for i = 1:length(Tracks)
             [~, tippt1] = min(abs(-x-tipx(iframe)));
             [~, maxid] = max(yn(20:tippt1+30));
             maxid = maxid + 19;
-            ids = min(tippt1-30,maxid-30):min(tippt1+30,maxid);
+            dist = 25;
+            ids = min(tippt1-dist,maxid-25):min(tippt1+dist,maxid);
             ids = ids(ids>0);
             if max(yn(ids)) < 1.5
                 goodsign = -1;
@@ -46,20 +47,31 @@ for i = 1:length(Tracks)
             chptf = findchangepts(yf(ids));
             chptn = findchangepts(yn(ids));
             tippt2 = min(chptf, chptn);
-            if mean(yn(tippt1-30:tippt1-30+tippt2))>mean(yn(tippt1-30+tippt2:tippt1+30))
+            if mean(yn(tippt1-dist:tippt1-dist+tippt2))>mean(yn(tippt1-dist+tippt2:tippt1+dist))
                 tippt2 = max(chptf, chptn);
             end
-            tippt2 = min(tippt1-30,maxid-30)+tippt2-1;
+            tippt2 = min(tippt1-dist,maxid-dist)+tippt2-1;
             yns = smooth(yn,7);
+            minbefore = find(islocalmin(yns(1:tippt2)));
+            minbeforesel = minbefore(yns(minbefore)<-1 | (yf(minbefore)<max(yf(20:tippt1+30))/2)'); %359
+            if ~isempty(minbeforesel)
+                tippt2 = minbeforesel(end);
+            else
+                if ~isempty(minbefore)
+                    tippt2 = minbefore(end);
+                else
+                    tippt2 = 1;
+                end
+            end
             try
-            [~, peakids] = findpeaks(yns(tippt2:length(yn)), 'NPeaks', 3, 'MinPeakProminence', 0.5);
+            [~, peakids] = findpeaks(yn(tippt2:length(yn)), 'NPeaks', 3, 'MinPeakProminence', 0.5);
             catch
                 continue
             end
             peaks = yf(peakids+tippt2-1);
             if length(peaks) > 1
-                if peaks(1)/peaks(2) < 0.85 && ...
-                        (peaks(2)-peaks(1))/(peakids(2)-peakids(1)) > 0.85 * (peaks(1)-yf(peakids(1)+tippt2-11))/10
+                if peaks(1)/peaks(2) < 0.85 && peakids(2) - peakids(1) < 30 && min(yn(peakids(1):peakids(2))) > max(0,peaks(1)/2) && ...
+                        (peaks(2)-peaks(1))/(peakids(2)-peakids(1)) > 0.5 * (peaks(1)-yf(peakids(1)+tippt2-11))/10
                     if length(peaks) > 2
                         if peaks(3) < peaks(2)
                             tippt3 = peakids(2);
@@ -89,7 +101,7 @@ for i = 1:length(Tracks)
             end
             counter = 0;
             while minimal(1)-counter > 1 
-                if yf(minima(1))/yf(tippt) > 0.85
+                if max(yf(minima(1)-10:minima(1)))/yf(tippt) > 0.85 && minloc(minimal(1)-counter-1) > 10
                     counter = counter + 1;
                     minima(1) = minloc(minimal(1)-counter);
                     [~,tippt] = findpeaks(yn(minima(1):minima(2)),'NPeaks',1, 'SortStr', 'descend');
@@ -108,26 +120,35 @@ for i = 1:length(Tracks)
 
             start = minima(1);
             checklmin = max(yf(start:tippt))-yf(start:tippt);
+            shifted = 0;
             if length(checklmin) > 2
             [~, checkminloc] = findpeaks(checklmin/max(checklmin),'MinPeakProminence',0.05);
             for k = checkminloc %to exclude parting protofilaments
                 if yf(minima(1) + k -1)/yf(tippt) < 0.8
                     minima(1) = start + k -1;
+                    shifted = 1;
                 end
             end
             end
             
-            
-            minima(1) = max(tippt - 20, minima(1));
+            minbefore = find(islocalmin(yf(1:minima(1)+5)));
+            if ~isempty(minbefore) && ~shifted && minbefore(end) < minima(1)
+                minima(1) = minbefore(end);
+            end
+%             minima(1) = max(tippt - 25, minima(1));
 
-            track.minima(iframe,:) = minima;
             tip = fitFrame.getTip(x(minima(1):minima(2)), yf(minima(1):minima(2))+yn(minima(1):minima(2)));
             if isnan(tip)
                 tip = fitFrame.getTip(x(minima(1):minima(2)), yn(minima(1):minima(2)));
                 if isnan(tip)
-                    error('max not captured');
+                    minima(2) = minloc(minimal(2)+1);
+                    tip = fitFrame.getTip(x(minima(1):minima(2)), yn(minima(1):minima(2))); %track61
+                    if isnan(tip)
+                        error('max not captured');
+                    end
                 end
             end
+            track.minima(iframe,:) = minima;
             track.GFPTip(iframe) = tip;
             track.GoodData = goodsign * (1-yf(minima(1))/yf(tippt));
 
