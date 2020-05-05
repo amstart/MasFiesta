@@ -60,7 +60,7 @@ for i = 1:length(Tracks)
                 if ~isempty(minbefore)
                     tippt2 = minbefore(end);
                 else
-                    tippt2 = 1;
+                    tippt2 = 1; %199
                 end
             end
             tippt2 = max(tippt2, 10); %294
