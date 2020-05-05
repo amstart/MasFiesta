@@ -24,7 +24,7 @@ for i = 1:length(Tracks)
     time = track.TimeInfo(stackframes); 
     for frame = f1:size(track.itrace,1)
         iframe = frame-f1+1;
-        [num2str(i) ' ' num2str(frame)]
+        [num2str(i) ' ' num2str(iframe)]
 
         itrace = track.itrace;
         x = double((((0:length(itrace)-1)-40)*(157/4)) - tipx(1));
@@ -63,15 +63,17 @@ for i = 1:length(Tracks)
                     tippt2 = 1;
                 end
             end
+            tippt2 = max(tippt2, 10); %294
             try
-            [~, peakids] = findpeaks(yn(tippt2:length(yn)), 'NPeaks', 3, 'MinPeakProminence', 0.5);
+            [~, peakids] = findpeaks(yn(tippt2:length(yn)), 'NPeaks', 3, 'MinPeakProminence', 0.5, 'MinPeakHeight', -1.5);
             catch
                 continue
             end
-            peaks = yf(peakids+tippt2-1);
+            peakids = peakids+tippt2-1;
+            peaks = yf(peakids);
             if length(peaks) > 1
-                if peaks(1)/peaks(2) < 0.85 && peakids(2) - peakids(1) < 30 && min(yn(peakids(1):peakids(2))) > max(0,peaks(1)/2) && ...
-                        (peaks(2)-peaks(1))/(peakids(2)-peakids(1)) > 0.5 * (peaks(1)-yf(peakids(1)+tippt2-11))/10
+                if peaks(1)/peaks(2) < 0.85 && peakids(2) - peakids(1) < 30 && min(yf(peakids(1):peakids(2))) > max(0,peaks(1)/2) && ...
+                        (peaks(2)-peaks(1))/(peakids(2)-peakids(1)) > 0.5 * (peaks(1)-yf(peakids(1)-10))/10
                     if length(peaks) > 2
                         if peaks(3) < peaks(2)
                             tippt3 = peakids(2);
@@ -87,23 +89,32 @@ for i = 1:length(Tracks)
             else
                 tippt3 = peakids(1);
             end
-            tippt = tippt3+tippt2-1;
+            tippt = tippt3;
             
             
             ys = max(yn)-yn;
             [~, minloc] = findpeaks(ys/max(ys),'MinPeakProminence',0.025);
             leftmin = find((minloc - tippt)<0,1,'last');
-            minimal = [leftmin find((minloc - tippt)>0,1)];
             if isempty(leftmin)
-                minima = [1 minloc(minimal)];
-            else
-                minima = minloc(minimal);
+                leftmin = 1;
             end
+            rightmin = find((minloc - tippt)>0,2);
+            minlocright = minloc;
+            if isempty(rightmin)
+                [~, minlocright] = findpeaks(ys/max(ys),'MinPeakProminence',0.01);
+                rightmin = find((minlocright - tippt)>0,2);
+            end
+            if minlocright(rightmin(1))-tippt < 5 && length(rightmin) == 2
+                rightmin = rightmin(2);
+            else
+                rightmin = rightmin(1);
+            end
+            minima = [minloc(leftmin) minlocright(rightmin)];
             counter = 0;
-            while minimal(1)-counter > 1 
-                if max(yf(minima(1)-10:minima(1)))/yf(tippt) > 0.85 && minloc(minimal(1)-counter-1) > 10
+            while leftmin-counter > 1 
+                if max(yf(minima(1)-10:minima(1)))/yf(tippt) > 0.85 && minloc(leftmin-counter-1) > 10
                     counter = counter + 1;
-                    minima(1) = minloc(minimal(1)-counter);
+                    minima(1) = minloc(leftmin-counter);
                     [~,tippt] = findpeaks(yn(minima(1):minima(2)),'NPeaks',1, 'SortStr', 'descend');
                     if isempty(tippt)
                         [~,tippt] = findpeaks(yf(minima(1):minima(2)),'NPeaks',1, 'SortStr', 'descend');
@@ -132,7 +143,7 @@ for i = 1:length(Tracks)
             end
             
             minbefore = find(islocalmin(yf(1:minima(1)+5)));
-            if ~isempty(minbefore) && ~shifted && minbefore(end) < minima(1)
+            if ~isempty(minbefore) && ~shifted && minbefore(end) < minima(1) && tippt-minima(1)<10
                 minima(1) = minbefore(end);
             end
 %             minima(1) = max(tippt - 25, minima(1));
