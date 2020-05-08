@@ -4,7 +4,7 @@ function out = para_fit_erf(x, y, bg1, bg2)
 amp = 0;
 s_sug = 170;
 s_l = 130;
-s_h = 350;
+s_h = 500;
 
 a = 1000;
 b = 0;

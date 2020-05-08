@@ -1,4 +1,4 @@
-for i = 1:length(Tracks)
+for i = 241:length(Tracks)
     track = Tracks(i);
     if length(track.itrace) == 1
         continue
@@ -9,7 +9,7 @@ for i = 1:length(Tracks)
     track.GFPTip = nan(npoints,1);
     track.minima = nan(npoints,2);
     track.Data2 = nan(npoints,7);
-    Tracks(i).GoodData = nan;
+    track.GoodData = nan;
     td = track.Data(2:end-10,:);
     td(isnan(td(:,1)),:) = [];
     tipx = interp1(td(:,end), td(:,2), td(1,end):td(end,end));
@@ -152,7 +152,7 @@ for i = 1:length(Tracks)
             if isnan(tip)
                 tip = fitFrame.getTip(x(minima(1):minima(2)), yn(minima(1):minima(2)));
                 if isnan(tip)
-                    minima(2) = minloc(minimal(2)+1);
+                    minima(2) = minlocright(rightmin+1);
                     tip = fitFrame.getTip(x(minima(1):minima(2)), yn(minima(1):minima(2))); %track61
                     if isnan(tip)
                         error('max not captured');
