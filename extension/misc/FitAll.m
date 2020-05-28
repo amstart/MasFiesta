@@ -1,4 +1,4 @@
-for i = 241:length(Tracks)
+for i = 1:length(Tracks)
     track = Tracks(i);
     if length(track.itrace) == 1
         continue
@@ -8,7 +8,7 @@ for i = 241:length(Tracks)
     track.FitData = nan(npoints,6,9);
     track.GFPTip = nan(npoints,1);
     track.minima = nan(npoints,2);
-    track.Data2 = nan(npoints,7);
+    track.Data2 = nan(npoints,5);
     track.GoodData = nan;
     td = track.Data(2:end-10,:);
     td(isnan(td(:,1)),:) = [];
@@ -196,14 +196,15 @@ for i = 241:length(Tracks)
             if iframe > 1
                 pframe = find(~isnan(track.Data2(1:iframe - 1,2)),1,'last');
                 if ~isempty(pframe)
-                    vel = (fits3(5)-track.Data2(pframe,2))/diff(track.TimeInfo([pframe iframe]));
+                    dt = diff(track.TimeInfo([pframe iframe]));
+                    vel = ([fits0(5) fits1(5)]-track.Data2(pframe,2:3))./dt;
                 else
-                    vel = nan;
+                    vel = [nan nan];
                 end
             else
-                vel = nan;
+                vel = [nan nan];
             end
-            track.Data2(iframe,:) = [time(iframe) fits3(5) vel fits0(5) fits3([1 2 4])];
+            track.Data2(iframe,:) = [time(iframe) fits0(5) fits1(5) vel];
         end
     end
     Tracks(i) = track;

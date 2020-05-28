@@ -100,8 +100,8 @@ if ~Options.cSwitch.val
 for i=1:length(Tracks)
     d = Tracks(i).Data;
     if length(d) > 1
-        Tracks(i).Y = d(d(:,2)<-Options.eRescueCutoff.val,ycolumn,Options.lPlot_YVardim.val);
-        Tracks(i).X = d(d(:,2)<-Options.eRescueCutoff.val,xcolumn,Options.lPlot_XVardim.val);
+        Tracks(i).Y = d(d(:,2)<-Options.eRescueCutoff.val,ycolumn);
+        Tracks(i).X = d(d(:,2)<-Options.eRescueCutoff.val,xcolumn);
     else
         Tracks(i).Y = nan;
         Tracks(i).X = nan;
@@ -112,8 +112,26 @@ for i=1:length(Tracks)
     if length(Tracks(i).FitData) > 1
         d1 = [Tracks(i).Data2(:,1:3) squeeze(Tracks(i).FitData(:,Options.lPlot_XVardim.val,:))];
         d2 = [Tracks(i).Data2(:,1:3) squeeze(Tracks(i).FitData(:,Options.lPlot_YVardim.val,:))];
-        Tracks(i).Y = d2(d2(:,2)<-Options.eRescueCutoff.val,ycolumn);
-        Tracks(i).X = d1(d1(:,2)<-Options.eRescueCutoff.val,xcolumn);
+        select1 = d1(:,2)<-600;
+        select2 = d2(:,2)<-600;
+        if ycolumn < 12
+            Tracks(i).Y = d2(select2,ycolumn);
+        else
+            switch ycolumn
+                case 13
+                     Tracks(i).Y = sqrt(d2(select2,4)*pi*2.*d2(select2,10).^2)./157;
+                case 14
+            end    
+        end
+        if xcolumn < 12 
+            Tracks(i).X = d1(select1,xcolumn);
+        else
+            switch xcolumn
+                case 13
+                    Tracks(i).X = sqrt(d1(select2,4)*pi*2.*d1(select2,10).^2)./157;
+                case 14
+            end    
+        end
     else
         Tracks(i).Y = nan;
         Tracks(i).X = nan;

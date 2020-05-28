@@ -4,7 +4,7 @@ function out = para_fit_gauss2(x, y, bg1, bg2)
 amp = maxy-bg1;
 s_sug = 170;
 s_l = 130;
-s_h = 500;
+s_h = 700;
 
 a = 1000;
 b = 250;
@@ -14,5 +14,7 @@ lb = [0,s_l,bg1,bg2,tip-a,-b,0];
 ub = [inf,s_h,bg1,bg2,tip+a,b,0];
 
 [fits,fvals] = fitFrame.fit_fun2(x,y,suggs,lb,ub);
+
+fits(7) = fits(2);
 
 out = [[fits nan],fvals];

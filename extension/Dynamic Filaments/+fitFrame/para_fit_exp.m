@@ -4,7 +4,7 @@ function [out] = para_fit_exp(x, y, bg1, bg2)
 amp = maxy-bg1;
 s_sug = 170;
 s_l = 130;
-s_h = 500;
+s_h = 700;
 tau = 1;
 
 a = 500;
