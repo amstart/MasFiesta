@@ -6,7 +6,7 @@ global ScanOptions
 %rmappdata(0, 'hMainGui');
 ScanOptions.PixSize = 157; %is used as default if nothing else available
 %%%%%%%%%%%%%%%%%%%parameters for helper functions%%%%%%%%%%%%%%
-ScanOptions.help_get_tip_kymo.framesuntilmissingframe = 10000; %set to number higher than number of frames if you have the same number of frames for the channels
+ScanOptions.help_get_tip_kymo.framesuntilmissingframe = inf; %set to number higher than number of frames if you have the same number of frames for the channels
 ScanOptions.help_get_tip_intensities.method = 'get_pixelkymo';
 ScanOptions.help_get_tip_intensities.AllFilaments = 1;
 ScanOptions.help_get_tip_kymo.AllFilaments = 1;

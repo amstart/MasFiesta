@@ -33,23 +33,26 @@ axes(hDFGui.aPlot);
 for i=1:length(tracks)
     if Options.cSwitch.val
         if length(tracks(i).FitData) > 1
-            segtrack = [tracks(i).Data2(2:end-10,1:3) squeeze(tracks(i).FitData(2:end-10,Options.lPlot_XVardim.val,:))];
-            segtrack2 = [tracks(i).Data2(2:end-10,1:3) squeeze(tracks(i).FitData(2:end-10,Options.lPlot_YVardim.val,:))];
+            segtrack = fitFrame.getPlotData(tracks(i), Options.lPlot_XVardim.val);
+            segtrack = segtrack(2:end-10,:);
+            segtrack2 = fitFrame.getPlotData(tracks(i), Options.lPlot_YVardim.val);
+            segtrack2 = segtrack2(2:end-10,:);
             segtrack(:,2) = -segtrack(:,2);
             c2seg=segtrack2(:, Options.lPlot_YVarT.val);
             c1seg=segtrack(:, Options.lPlot_XVarT.val);
+            dseg=-segtrack(:,7);
         else
             continue
         end
     else
         segtrack=tracks(i).Data;
+        dseg=segtrack(:,2);
         c2seg=segtrack(:, Options.lPlot_YVar.val);
         c1seg=segtrack(:, Options.lPlot_XVar.val);
     end
     
     tseg=segtrack(:,1);
-    dseg=segtrack(:,2);
-    d0=round(nanmean(segtrack(:,2)));
+    d0=round(nanmean(dseg));
     t0=segtrack(round(size(segtrack,1)/2),1);
     if length(tracks(i).FitData)>1%(get(hDFGui.cshowTrackN,'Value') && tseg(end)-tseg(1) > 20 || (tracks(i).Event && dseg(end) > cutoff)) && tracks(i).Shrinks
         text(double(t0),double(max(segtrack(:,2))),num2str(track_id(i)));

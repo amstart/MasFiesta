@@ -110,28 +110,12 @@ end
 else
 for i=1:length(Tracks)
     if length(Tracks(i).FitData) > 1
-        d1 = [Tracks(i).Data2(:,1:3) squeeze(Tracks(i).FitData(:,Options.lPlot_XVardim.val,:))];
-        d2 = [Tracks(i).Data2(:,1:3) squeeze(Tracks(i).FitData(:,Options.lPlot_YVardim.val,:))];
-        select1 = d1(:,2)<-600;
-        select2 = d2(:,2)<-600;
-        if ycolumn < 12
-            Tracks(i).Y = d2(select2,ycolumn);
-        else
-            switch ycolumn
-                case 13
-                     Tracks(i).Y = sqrt(d2(select2,4)*pi*2.*d2(select2,10).^2)./157;
-                case 14
-            end    
-        end
-        if xcolumn < 12 
-            Tracks(i).X = d1(select1,xcolumn);
-        else
-            switch xcolumn
-                case 13
-                    Tracks(i).X = sqrt(d1(select2,4)*pi*2.*d1(select2,10).^2)./157;
-                case 14
-            end    
-        end
+        d1 = fitFrame.getPlotData(Tracks(i), Options.lPlot_XVardim.val);
+        d2 = fitFrame.getPlotData(Tracks(i), Options.lPlot_YVardim.val);
+        select = d1(:,7)<-400;
+        select(find(select==0,1):end) = 0;
+        Tracks(i).X = d1(select,xcolumn);
+        Tracks(i).Y = d2(select,ycolumn);
     else
         Tracks(i).Y = nan;
         Tracks(i).X = nan;

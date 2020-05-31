@@ -89,17 +89,19 @@ if ~all(isnan(track.itrace(frame,:)))
     if ~isnan(minima(1))
         vline(x(minima), 'b:');
     end
-    data = squeeze(track.FitData(iframe,dims,:))';
+    data = fitFrame.getPlotData(track, dims);
+    data = squeeze(data(iframe,:,:));
+    fdata = data(3:end,:);
     if ~isnan(data(1))
-    h1 = plot(x,fitFrame.fun2(x,data(:,1)));
-    h2 = plot(x,fitFrame.fun2(x,data(:,2)));
-    h3 = plot(x,fitFrame.fun2(x,data(:,3)));
-    h4 = plot(x,fitFrame.fun2(x,data(:,4)));
-    vline(data(5,4),'k:');
+    h1 = plot(x,fitFrame.fun2(x,fdata(:,1)));
+    h2 = plot(x,fitFrame.fun2(x,fdata(:,2)));
+    h3 = plot(x,fitFrame.fun2(x,fdata(:,3)));
+    h4 = plot(x,fitFrame.fun2(x,fdata(:,4)));
+    vline(fdata(5,4),'k:');
     
-    text(data(5,4), 1, {['v = ' num2str(track.Data2(iframe,3))], ['G = ' num2str(data(10,2))]});
-    h5 = plot(x,fitFrame.fun2(x,data(:,5)));
-    h6 = plot(x,fitFrame.fun1(x,data(:,6)),'k.');
+    text(fdata(5,4), 1, {['v_{erf} = ' num2str(data(2,1))], ['G = ' num2str(fdata(10,2))]});
+    h5 = plot(x,fitFrame.fun2(x,fdata(:,5)));
+    h6 = plot(x,fitFrame.fun1(x,fdata(:,6)),'k.');
 %     legend([h1 h2 h3 h4 h5 h6],...
 %     {['e=' num2str(data(10,1),3)],...
 %     ['A=' num2str(data(1,2),3) ' s=' num2str(data(2,2),3) 'e=' num2str(data(10,2),3)],...
@@ -121,6 +123,12 @@ if ~all(isnan(track.itrace(frame,:)))
 %     catch
 %     end
 %     plot(track.x_sel{frame}([1 end]),[mean(ylim) mean(ylim)]);
+try
+    tubframedat = find(track.framestub(:,2)==track.frames(iframe,1));
+    itracetub = (itrace(idGFPTip).*track.itracetub(tubframedat,:))./max(track.itracetub(tubframedat,:));
+    plot(x,itracetub,'k');
+catch
+end
     drawnow;
     hold off
 end

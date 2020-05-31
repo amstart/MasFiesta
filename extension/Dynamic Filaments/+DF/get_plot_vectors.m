@@ -20,7 +20,7 @@ for m = xy
             try
                 if Options.cSwitch.val
                     if length(Tracks(n).FitData) > 1
-                    data = [Tracks(n).Data2(:,1:3) squeeze(Tracks(n).FitData(:,selected_dims(m),:))];
+                    data = fitFrame.getPlotData(Tracks(n),selected_dims(m));
                     data = data(:,selected_vars(m));
                     else
                         data = nan;
