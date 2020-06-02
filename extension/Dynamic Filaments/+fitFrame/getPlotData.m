@@ -10,5 +10,6 @@ for i = 1:length(dims)
     v(~del) = [nan; diff(d(~del,5))./diff(t(~del))];
     d(del,:) = nan;
     t(del) = nan;
-    out = cat(3, out, [t v d]);
+    g = sqrt(d(:,1)*pi*2.*d(:,7).^2)./157;
+    out = cat(3, out, [t v d g]);
 end
