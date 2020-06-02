@@ -1,10 +1,10 @@
-function out = para_fit_gauss2(x, y, bg1, bg2)
+function out = para_fit_gauss2(x, y, bg1, bg2, s)
 [tip, maxy] = fitFrame.getTip(x,y);
 
 amp = maxy-bg1;
 s_sug = 170;
-s_l = 130;
-s_h = 700;
+s_l = s(1);
+s_h = s(2);
 
 a = 1000;
 b = 250;
