@@ -186,7 +186,7 @@ for i = 1:length(Tracks)
             else
                 bg1 = mean([ymean yp(end)]) - bg2;
             end
-            s = [170 500];
+            s = [160 200];
             [fits0] = fitFrame.para_fit_erf(xp, yp, bg1, bg2, s);
             [fits1] = fitFrame.para_fit_gauss1(xp, yp, bg1, bg2, s);
             [fits2] = fitFrame.para_fit_gauss2(xp, yp, bg1, bg2, s);
