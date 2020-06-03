@@ -1,4 +1,4 @@
-function [out] = para_fit_exp(x, y, bg1, bg2, s)
+function [out] = para_fit_exp(x, y, bg1, bg2, s, b)
 [tip, maxy] = fitFrame.getTip(x,y);
 
 amp = maxy-(mean([bg1 bg2]));
@@ -8,7 +8,6 @@ s_h = s(2);
 tau = 1;
 
 a = 500;
-b = 500;
 
 suggs = [amp,s_sug,bg1,bg2,tip,0,s_sug,tau];
 lb = [0,s_l,bg1,bg2,tip-a,-b,s_l,0];

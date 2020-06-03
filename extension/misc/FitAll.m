@@ -5,7 +5,7 @@ for i = 1:length(Tracks)
     end
     f1 = 5;
     npoints = size(track.itrace,1)-f1+1;
-    track.FitData = nan(npoints,6,9);
+    track.FitData = nan(npoints,8,9);
     track.GFPTip = nan(npoints,1);
     track.minima = nan(npoints,2);
     track.Data2 = nan(npoints,5);
@@ -192,8 +192,10 @@ for i = 1:length(Tracks)
             [fits2] = fitFrame.para_fit_gauss2(xp, yp, bg1, bg2, s);
             [fits3] = fitFrame.para_fit_gauss3(xp, yp, bg1, bg2, s);
             [fits4] = fitFrame.para_fit_gauss4(xp, yp, bg1, bg2, s);
-            [fits5] = fitFrame.para_fit_exp(xp, yp, bg1, bg2, s);
-            fits = padcat(fits0, fits1, fits2, fits3, fits4, fits5);
+            [fits5] = fitFrame.para_fit_exp(xp, yp, bg1, bg2, s, 500);
+            [fits6] = fitFrame.para_fit_exp(xp, yp, bg1, bg2, s, 0);
+            [fits7] = fitFrame.para_fit_exp(xp, yp, bg1, bg2, [130 500], 500);
+            fits = padcat(fits0, fits1, fits2, fits3, fits4, fits5, fits6, fits7);
             track.FitData(iframe,1:size(fits,1),1:size(fits,2)) = fits;
             if iframe > 1
                 pframe = find(~isnan(track.Data2(1:iframe - 1,2)),1,'last');
