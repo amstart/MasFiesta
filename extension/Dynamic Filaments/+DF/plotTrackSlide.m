@@ -42,7 +42,6 @@ if ~isnumeric(hsl)
 else
     frame = 1;
 end
-dims = 1:6;
 if ~all(isnan(track.itrace(frame,:)))
     iframe = frame - 4;
     tipx = - track.Data(2:end-10,2);
@@ -89,7 +88,7 @@ if ~all(isnan(track.itrace(frame,:)))
     if ~isnan(minima(1))
         vline(x(minima), 'b:');
     end
-    data = fitFrame.getPlotData(track, dims);
+    data = fitFrame.getPlotData(track,1:8);
     data = squeeze(data(iframe,:,:));
     fdata = data(3:end,:);
     if ~isnan(data(1))
@@ -101,7 +100,7 @@ if ~all(isnan(track.itrace(frame,:)))
     
     text(fdata(5,4), 1, {['v_{erf} = ' num2str(data(2,1))], ['G = ' num2str(data(12,2))], ['s_{diff} = ' num2str(fdata(7,5))]});
     h5 = plot(x,fitFrame.fun2(x,fdata(:,5)));
-    h6 = plot(x,fitFrame.fun1(x,fdata(:,6)),'k.');
+    h6 = plot(x,fitFrame.fun1(x,fdata(:,7)),'k.');
 %     legend([h1 h2 h3 h4 h5 h6],...
 %     {['e=' num2str(data(10,1),3)],...
 %     ['A=' num2str(data(1,2),3) ' s=' num2str(data(2,2),3) 'e=' num2str(data(10,2),3)],...
