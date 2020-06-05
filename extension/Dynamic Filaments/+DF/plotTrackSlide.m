@@ -5,18 +5,18 @@ tracknum = str2num(get(hDFGui.eTrack, 'String'));
 Tracks = getappdata(hDFGui.fig,'Tracks');
 track = Tracks(tracknum);
 
-figure
+figure('Position', [100 100 1000 800])
 slmin = 1;
 slmax = size(track.itrace,1);
        
 bTag = uicontrol('Tag','lDim1','String','Tag','Position',[130 5 30 20],'Style','pushbutton');
 
-lTag = uicontrol('Tag','lTags','String',{'none', 'pos ok', 'GFP ok', 'trash','maybe'},'Position',[200 5 150 20],'Style','popupmenu', 'Value',4);
+lTag = uicontrol('Tag','lTags','String',{'none', '2much noise', 'pos ok', 'trash','maybe'},'Position',[200 5 150 20],'Style','popupmenu', 'Value',4);
 
 plotTrack(tracknum, 1, lTag);
 
 hsl = uicontrol('Style','slider','Min',slmin,'Max',slmax,...
-                'SliderStep',[1 1]./(slmax-slmin),'Value',1,...
+                'SliderStep',[1 1]./(slmax-slmin),'Value',4,...
                 'Position',[20 5 100 20]);
 set(hsl,'Callback',@(hObject,eventdata) plotTrack(tracknum, hObject, lTag));
 
@@ -96,9 +96,9 @@ if ~all(isnan(track.itrace(frame,:)))
     h2 = plot(x,fitFrame.fun2(x,fdata(:,2)));
     h3 = plot(x,fitFrame.fun2(x,fdata(:,3)));
     h4 = plot(x,fitFrame.fun2(x,fdata(:,4)));
-    vline(fdata(5,4),'k:');
-    
-    text(fdata(5,4), 1, {['v_{erf} = ' num2str(data(2,1))], ['G = ' num2str(data(12,2))], ['s_{diff} = ' num2str(fdata(7,5))]});
+    vline(fdata(5,7),'k:');
+    vline(fdata(5,7)+fdata(6,7),'y');
+    text(fdata(5,4), 1, {['v_{erf} = ' num2str(data(2,1))], ['G = ' num2str(data(12,2))], ['s_{exp} = ' num2str(fdata(7,7))], ['shift_{exp} = ' num2str(fdata(6,7))]});
     h5 = plot(x,fitFrame.fun2(x,fdata(:,5)));
     h6 = plot(x,fitFrame.fun1(x,fdata(:,7)),'k.');
 %     legend([h1 h2 h3 h4 h5 h6],...

@@ -113,6 +113,7 @@ for i=1:length(Tracks)
         d1 = fitFrame.getPlotData(Tracks(i), Options.lPlot_XVardim.val);
         d2 = fitFrame.getPlotData(Tracks(i), Options.lPlot_YVardim.val);
         select = d1(:,7)<-400;
+        select(Tracks(i).Data(:,2)<400) = 0;
         select(find(select==0,1):end) = 0;
         Tracks(i).X = d1(select,xcolumn);
         Tracks(i).Y = d2(select,ycolumn);

@@ -55,7 +55,7 @@ for i=1:length(tracks)
     d0=round(nanmean(dseg));
     t0=segtrack(round(size(segtrack,1)/2),1);
     if length(tracks(i).FitData)>1%(get(hDFGui.cshowTrackN,'Value') && tseg(end)-tseg(1) > 20 || (tracks(i).Event && dseg(end) > cutoff)) && tracks(i).Shrinks
-        text(double(t0),double(max(segtrack(:,2))),num2str(track_id(i)));
+        text(double(t0),double(max(dseg)),num2str(track_id(i)));
     end
     if tracks(i).Shrinks
         c='r';
