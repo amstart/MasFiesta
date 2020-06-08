@@ -179,7 +179,7 @@ hDFGui.lPlot_ZVarT = uicontrol('Parent',hDFGui.pOptions,'Units','normalized','Ca
 
                         
 tooltipstr=sprintf(['When you have different versions of the same parameter.']);
-dimstr = {'only erf','gauss erf same','sigma same','shift zero','gauss erf different','exp'};      
+dimstr = {'only erf','gauss erf same','sigma same','shift zero','gauss erf different','exp loose shift','exp','exp loose bounds'};  
 hDFGui.lPlot_XVardim = uicontrol('Parent',hDFGui.pOptions,'Units','normalized','Callback',@DF.updateOptions,'String',dimstr,...
                             'Position',[0.45 0.4 0.075 0.125],'BackgroundColor','white', 'TooltipString', tooltipstr,'Style','popupmenu','Tag','lPlot_XVardim','Enable','on');
 hDFGui.lPlot_YVardim = uicontrol('Parent',hDFGui.pOptions,'Units','normalized','Callback',@DF.updateOptions,'String',dimstr,...
