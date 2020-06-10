@@ -81,9 +81,11 @@ file = file(track_id);
 if ~Options.cSwitch.val
 xcolumn = Options.lPlot_XVar.val;
 ycolumn = Options.lPlot_YVar.val;
+zcolumn = Options.lPlot_ZVar.val;
 else
 xcolumn = Options.lPlot_XVarT.val;
 ycolumn = Options.lPlot_YVarT.val;
+zcolumn = Options.lPlot_ZVarT.val;
 end
 
 if Options.mXReference.val == 5
@@ -102,9 +104,11 @@ for i=1:length(Tracks)
     if length(d) > 1
         Tracks(i).Y = d(d(:,2)<-Options.eRescueCutoff.val,ycolumn);
         Tracks(i).X = d(d(:,2)<-Options.eRescueCutoff.val,xcolumn);
+        Tracks(i).Z = d(d(:,2)<-Options.eRescueCutoff.val,zcolumn);
     else
-        Tracks(i).Y = nan;
         Tracks(i).X = nan;
+        Tracks(i).Y = nan;
+        Tracks(i).Z = nan;
     end
 end
 else
@@ -112,14 +116,18 @@ for i=1:length(Tracks)
     if length(Tracks(i).FitData) > 1
         d1 = fitFrame.getPlotData(Tracks(i), Options.lPlot_XVardim.val);
         d2 = fitFrame.getPlotData(Tracks(i), Options.lPlot_YVardim.val);
-        select = d1(:,7)<-400;
+        d3 = fitFrame.getPlotData(Tracks(i), Options.lPlot_ZVardim.val);
+        select = d1(:,7)<-400 | isnan(d1(:,7));
+        select(end-9:end) = 0;
         select(Tracks(i).Data(:,2)<400) = 0;
         select(find(select==0,1):end) = 0;
         Tracks(i).X = d1(select,xcolumn);
         Tracks(i).Y = d2(select,ycolumn);
+        Tracks(i).Z = d3(select,zcolumn);
     else
         Tracks(i).Y = nan;
         Tracks(i).X = nan;
+        Tracks(i).Z = nan;
     end
 end
 end
@@ -128,18 +136,6 @@ if (xcolumn == 3 && Options.lMethod_TrackValue.val==7) || (ycolumn == 3 && Optio
     for i=1:length(Tracks)
         [tmp_fit] = polyfit(Tracks(i).Data(:,1,1),Tracks(i).Data(:,2),1,1);
         Tracks(i).Velocity = tmp_fit(1);
-    end
-end
-for i=1:length(Tracks)
-    if ~Options.cSwitch.val
-        Tracks(i).Z = Tracks(i).Data(:,Options.lPlot_ZVar.val);
-    else
-        if length(Tracks(i).FitData) > 1
-        d3 = [Tracks(i).Data2(:,1:3) squeeze(Tracks(i).FitData(:,Options.lPlot_ZVardim.val,:))];
-            Tracks(i).Z = d3(d3(:,2)<-Options.eRescueCutoff.val,ycolumn);
-        else
-            Tracks(i).Z = nan;
-        end
     end
 end
 if nargin > 1

@@ -9,11 +9,12 @@ for i = 1:length(dims)
     v = nan(size(t));
     v(~del) = [nan; diff(d(~del,5)+d(~del,6))./diff(t(~del))];
     d(del,:) = nan;
-    t(del) = nan;
     sigmagauss = d(:,7);
     tau = 1./d(:,8);
     g = nan(size(tau));
+    t = nan(size(tau));
     if dims(i) < 6
+%         dist = normpdf(x,MTend,sigmagauss)
         g = sqrt(d(:,1)*pi*2.*d(:,7).^2)./157;
     else
         x = (-100:100) * 157/4;
@@ -22,7 +23,15 @@ for i = 1:length(dims)
             expdist(expdist == inf) = nan;
             expdist = d(j,1) .* expdist/max(expdist);
             g(j) = nansum(expdist)/4;
+            if g(j) == 0
+                g(j) = nan;
+            end
+
+%             itrace = track.itrace(j,:);
+%             x = double((((0:length(itrace)-1)-40)*157/4) - track.Data(2,2));
+%             [~,idTip] = min(abs(x-track.GFPTip));
+%             t(j) = 
         end
     end
-    out = cat(3, out, [t v d g]);
+    out = cat(3, out, [t v d g t]);
 end

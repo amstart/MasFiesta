@@ -32,6 +32,9 @@ for m = xy
                 return
             end
         end
+        if length(data) < 2
+            continue
+        end
         switch selected_methods(m)
             case 1
                 vector{m}(n) = nanmedian(data);

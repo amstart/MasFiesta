@@ -107,10 +107,26 @@ for j=1:ntypes    %Loop through all groups to be plotted, each group gets its ow
         axes(f);drawnow;
     end
 %     set(gca,'ButtonDownFcn',@createnew_fig)
+    point_info=cell(sum(correct_type),1);
+    datatiplabel = {};
+    trackids = {PlotTracks.TrackIndex};
+    if Options.cGroupIntoMTs.val
+        [legend_items, ~, object_name_ids] = unique({PlotTracks.Name}, 'stable');                    
+        for k=1:sum(correct_type)
+            point_info{k}=repmat(object_name_ids(k),size(PlotTracks(k).X));
+            datatiplabel{k} = repmat(trackids(k),length(point_info{k}),1);
+        end
+    else
+        legend_items = {PlotTracks.Name};
+        for k=1:sum(correct_type)
+            point_info{k}=repmat(k,[size(PlotTracks(k).X),1]);
+            datatiplabel{k} = repmat(trackids(k),length(point_info{k}),1);
+        end
+    end
+%     isfrequencyplot = 2;
     switch isfrequencyplot
         case 0
             [plot_x, plot_y, ~] = Get_Vectors(PlotTracks, events(correct_type), Options, isfrequencyplot);
-            point_info=cell(sum(correct_type),1);
 %             if Options.ZOK
 %                 color_mode = 1;
 %                 for k=1:sum(correct_type)
@@ -119,22 +135,6 @@ for j=1:ntypes    %Loop through all groups to be plotted, each group gets its ow
 %                 point_info=vertcat(point_info{:});
 %             else
                 color_mode = 0;
-                datatiplabel = {};
-                trackids = {PlotTracks.TrackIndex};
-                if Options.cGroupIntoMTs.val
-                    [legend_items, ~, object_name_ids] = unique({PlotTracks.Name}, 'stable');                    
-                    for k=1:sum(correct_type)
-                        point_info{k}=repmat(object_name_ids(k),size(PlotTracks(k).X));
-                        datatiplabel{k} = repmat(trackids(k),length(point_info{k}),1);
-                    end
-                else
-                    legend_items = {PlotTracks.Name};
-                    for k=1:sum(correct_type)
-                        point_info{k}=repmat(k,[size(PlotTracks(k).X),1]);
-                        datatiplabel{k} = repmat(trackids(k),length(point_info{k}),1);
-                    end
-                    
-                end
 %             end
 %             if abs(min(plot_x))/2 > max(plot_x)
 %                 plot_x = - plot_x;
@@ -163,13 +163,16 @@ for j=1:ntypes    %Loop through all groups to be plotted, each group gets its ow
         case 1
             [plot_x, plot_y, ploteventends] = Get_Vectors(PlotTracks, events(correct_type), Options, isfrequencyplot);
             fJKfrequencyvsXplot(f, plot_x, plot_y, ploteventends, {Options.lPlot_XVar.str, Options.lPlot_YVar.str});
+        case 2
+            [~, ~, ~, cellx, celly] = Get_Vectors(PlotTracks, events(correct_type), Options, 0);
+            dplot.multitrack(f, cellx, celly, point_info, datatiplabel);
     end
     set(gca, 'FontSize', 24);
     title(uniquetype{j}, 'FontSize', 18);
 end
 
 
-function [plotx, ploty, ploteventends] = Get_Vectors(PlotTracks, plotevents, Options, isfrequencyplot)
+function [plotx, ploty, ploteventends, cellx, celly] = Get_Vectors(PlotTracks, plotevents, Options, isfrequencyplot)
 exclude = Options.cExclude.val;
 refmode = [Options.mXReference.val Options.mYReference.val Options.mZReference.val];
 %plotx and ploty are vectors with all datapoints of the group to be plotted
