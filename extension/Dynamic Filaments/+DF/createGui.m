@@ -161,7 +161,7 @@ tooltipstr=sprintf(['Set the Z variable.']);
 hDFGui.lPlot_ZVar = uicontrol('Parent',hDFGui.pOptions,'Units','normalized','Callback',@DF.updateOptions,...
                             'Position',[0.75 0.45 0.15 0.125],'BackgroundColor','white', 'TooltipString', tooltipstr,'Style','popupmenu','Tag','lPlot_ZVar','Enable','on');
 
-str = {'time','vel','amplitude gauss','sigma','lattice density','bg density','MT tip','shift gauss','sigma gauss','tau','sum square error', 'Ase1 in Gauss', 'Ase1 under Gauss'};
+str = {'time','vel','amplitude gauss','sigma','lattice density','bg density','MT tip','shift gauss','sigma gauss','tau','sum square error', 'Ase1 in Gauss', 'Ase1 in extension'};
 unit = {'s','nm/s','1','nm','1','1','nm','nm','nm','nm','1sq', '1', '1'};
 tooltipstr=sprintf(['Set the X variable.']); %lPlot_XVar and lPlot_YVar are set in DF.updateOptions()
                                
@@ -190,7 +190,7 @@ hDFGui.lPlot_ZVardim = uicontrol('Parent',hDFGui.pOptions,'Units','normalized','
                         
 hDFGui.lChoosePlot = uicontrol('Parent',hDFGui.pOptions,'Units','normalized','Callback','fJKDynamicFilamentsGui(''SetMenu'',getappdata(0,''hDFGui''));', 'Value', 1,...
                             'Position',[0.3 0.35 0.3 0.125],'BackgroundColor','white','TooltipString', tooltipstr,'Style','popupmenu','Tag','lChoosePlot','Enable','on', ...
-                            'String',{'X vs Y', 'Events along X during Y', 'Events', 'Box(X)', 'X vs Y (Tracks)', 'Dataset (rough)', 'Shape of Filament End', 'Plot X against Y of tracks of same MT', 'MAP vs distance weighted velocity'});
+                            'String',{'X vs Y', 'Events along X during Y', 'Events', 'Box(X)', 'X vs Y (Tracks)', 'Dataset (rough)', 'Multiple tracks', 'Plot X against Y of tracks of same MT', 'MAP vs distance weighted velocity'});
                         
 hDFGui.bDoPlot = uicontrol('Parent',hDFGui.pOptions,'Units','normalized','Callback',@DF.updateOptions,...
                                    'Position',[0.65 0.4 0.12 0.05],'String','Plot','Style','pushbutton', 'FontSize', 15);                               

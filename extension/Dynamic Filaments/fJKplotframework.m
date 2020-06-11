@@ -123,7 +123,6 @@ for j=1:ntypes    %Loop through all groups to be plotted, each group gets its ow
             datatiplabel{k} = repmat(trackids(k),length(point_info{k}),1);
         end
     end
-%     isfrequencyplot = 2;
     switch isfrequencyplot
         case 0
             [plot_x, plot_y, ~] = Get_Vectors(PlotTracks, events(correct_type), Options, isfrequencyplot);

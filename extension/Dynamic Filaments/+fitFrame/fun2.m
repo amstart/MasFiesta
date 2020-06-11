@@ -11,7 +11,10 @@ function [y] = fun2(x,pars)
     MTend = pars(5);
     
     shift = pars(6);
-    
+    if isnan(pars(7))
+        y = nan(size(x));
+        return
+    end
     if ~pars(7)
         sigmagauss=sigmaerf;
     else
