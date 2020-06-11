@@ -149,16 +149,6 @@ for j=1:ntypes    %Loop through all groups to be plotted, each group gets its ow
             else
                 legend('hide');
             end
-            if isfield(Options, 'FilamentEndPlot')
-                if Options.FilamentEndPlot.has_err_fun_format
-                    try
-                        [fitresult, gof] = FitErf(plot_x, plot_y);
-                        % Plot fit with data.
-                        plot( fitresult, 'k-');
-                    catch
-                    end
-                end
-            end
         case 1
             [plot_x, plot_y, ploteventends] = Get_Vectors(PlotTracks, events(correct_type), Options, isfrequencyplot);
             fJKfrequencyvsXplot(f, plot_x, plot_y, ploteventends, {Options.lPlot_XVar.str, Options.lPlot_YVar.str});
@@ -180,7 +170,7 @@ cellx=cell(pr,1);
 celly=cell(pr,1);
 cellz=cell(pr,1);
 ploteventends=nan(size(plotevents));
-if isfrequencyplot
+if isfrequencyplot == 1
     switch refmode(1)
         case {1,5}
         for k=1:pr
