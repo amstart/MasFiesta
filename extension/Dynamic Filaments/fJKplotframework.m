@@ -233,6 +233,8 @@ else
                     cellvar=var;
                 case {2}
                     cellvar=[0; diff(var)];
+                case {3}
+                    cellvar=[var(2:end); nan];
                 case {6}
                     cellvar=var-var(1);
                 case {7}
@@ -267,7 +269,7 @@ for i = 1:3
         case 2
             str='- previous frame';
         case 3
-            str='empty';
+            str='from previous frame';
         case 4
             str='- median';
         case 5

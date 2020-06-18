@@ -9,13 +9,13 @@ for i = 1:length(Tracks)
     track.GFPTip = nan(npoints,1);
     track.minima = nan(npoints,2);
     track.Data2 = nan(npoints,5);
-    track.GoodData = nan;
+    track.GoodData = nan(npoints,1);
     td = track.Data(2:end-10,:);
     td(isnan(td(:,1)),:) = [];
     tipx = interp1(td(:,end), td(:,2), td(1,end):td(end,end));
     tipx = [tipx(1); tipx'; tipx(end).*ones(10,1)];
 
-    if size(track.Data,1) < 20
+    if size(track.Data,1) < 20 && track.Data(end-10,2) < 400
         warning(num2str(size(track.itrace,1)));
         continue
     end
@@ -162,7 +162,7 @@ for i = 1:length(Tracks)
             end
             track.minima(iframe,:) = minima;
             track.GFPTip(iframe) = tip;
-            track.GoodData = goodsign * (1-yf(minima(1))/yf(tippt));
+            track.GoodData(iframe) = goodsign * (1-yf(minima(1))/yf(tippt));
 
             [~,idTip] = min(abs(x-tip));
             ym = [yf(1:idTip) yn(idTip+1:end)+yf(idTip+1)-yn(idTip+1)];
@@ -172,9 +172,9 @@ for i = 1:length(Tracks)
     
             xp = x(minima(1):minima(2));
             
-            if ~any(x>0)
-                error('itrace too short');
-            end
+%             if ~any(x>0)
+%                 error('itrace too short');
+%             end
             eval = min(length(ym),minima(2)+99);
             
             bg2 = max(min(ym(1:40)),0);
