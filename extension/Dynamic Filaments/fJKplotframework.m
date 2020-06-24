@@ -234,7 +234,9 @@ else
                 case {2}
                     cellvar=[0; diff(var)];
                 case {3}
-                    cellvar=[var(2:end); nan];
+                    cellvar=[nan; (var(1:end-1)+var(2:end))/2];
+%                     [mean(var(1:2)) mean(var(2:3))];
+%                     cellvar=[nan var(1:end-1)];
                 case {6}
                     cellvar=var-var(1);
                 case {7}

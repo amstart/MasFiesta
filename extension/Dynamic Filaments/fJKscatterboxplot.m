@@ -1,5 +1,5 @@
 function fJKscatterboxplot(f, plot_x, plot_y, point_info, names)
-[matrix, edgesmid, nelements] = histcounts2own(plot_x, plot_y);
+[matrix, edgesmid, weights] = histcounts2own(plot_x, plot_y, point_info);
 % if color_mode == 0
 % %     gscatter(plot_x, plot_y, point_info, [], 'o')
 % else
@@ -28,6 +28,7 @@ colormap(linspecer(numcol));
 % end
 hold on
 s = scatter(f, plot_x, plot_y, 50, point_info); drawnow;
+
 % iosr.statistics.boxPlot(edgesmid, matrix, 'sampleSize', true, 'scatterAlpha', 1, 'showScatter', true, 'medianColor','r', 'showMean', true)
 box = iosr.statistics.boxPlot(edgesmid, matrix, 'medianColor','r', 'showOutliers', false, 'showMean', true, 'sampleSize', true, 'sampleFontSize', 14)
 for h = [box.handles.box box.handles.medianLines box.handles.lowerWhiskers box.handles.upperWhiskers box.handles.lowerWhiskerTips box.handles.upperWhiskerTips box.handles.means]
@@ -38,7 +39,7 @@ xtickangle(45);
 catch
 end
 
-function [matrix, edgesmid, nelements] = histcounts2own(plotx, ploty)
+function [matrix, edgesmid, weights, nelements] = histcounts2own(plotx, ploty, point_info)
 % if ~isempty(weights)
 %     weights = weights{1};
 % else
@@ -51,9 +52,10 @@ if 1
 %         [~, edges, xid] = histcounts(plotx,7);
 %     end
 else
-    [~, edges, xid] = histcounts(plotx,[-0.001 0.001 0.05:0.05:0.3]);
+    [~, edges, xid] = histcounts(plotx,[-0.05:0.05:0.5]);
 end
 ploty(xid==0) = [];
+point_info(xid==0) = [];
 xid(xid==0) = [];
 idr = ones(size(xid));
 for i = 1:length(xid)
@@ -62,5 +64,7 @@ end
 edgesmid=edges(1:end-1)+diff(edges)/2;
 nelements = accumarray(xid, 1);
 matrix = nan(max(nelements), length(edgesmid));
+weights = nan(size(matrix));
 inds = sub2ind(size(matrix), idr, xid);
 matrix(inds) = ploty;
+weights(inds) = 1./point_info;

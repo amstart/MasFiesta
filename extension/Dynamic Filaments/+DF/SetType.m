@@ -10,7 +10,7 @@ if Options.cOnlySelected.val
     Objects = Objects(selected);
     selected_tracks = [];
     for m = 1:length(Objects)
-        selected_tracks = vertcat(selected_tracks, Objects(m).SegTagAuto(:,5));
+        selected_tracks = vertcat(selected_tracks, Objects(m).TrackIds');
     end
     selected_tracks = unique(selected_tracks);
     Tracks = Tracks(selected_tracks(logical(selected_tracks)));

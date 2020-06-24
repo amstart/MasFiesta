@@ -44,6 +44,7 @@ for m = xy
                 if selected_vars(m) == 3
                     vector{m}(n) = Tracks(n).Startendvel;
                 else
+                    data = data(~isnan(data));
                     vector{m}(n) = data(end) - data(1);
                 end
             case 4
