@@ -180,7 +180,7 @@ if isfrequencyplot == 1
             celly{k}=[diffy(1)/2; (diffy(1:end-1)+diffy(2:end))/2; diffy(end)/2];
             if plotevents(k)
 %                 if isnan(PlotTracks(k).X(end))
-                    ploteventends(k)=PlotTracks(k).X(max(2,end-2));
+                    ploteventends(k)=nanmean(PlotTracks(k).X(end-1:end));
 %                 else
 %                     ploteventends(k)=PlotTracks(k).X(end);
 %                 end
@@ -229,7 +229,7 @@ else
         for j = 1:length(vars)
             var = vars{j};
             switch refmode(j)
-                case {1,5}
+                case {1}
                     cellvar=var;
                 case {2}
                     cellvar=[0; diff(var)];
@@ -237,6 +237,15 @@ else
                     cellvar=[nan; (var(1:end-1)+var(2:end))/2];
 %                     [mean(var(1:2)) mean(var(2:3))];
 %                     cellvar=[nan var(1:end-1)];
+                case {5}
+                    x = 1:length(var);
+                    y = var';
+                    x = x(~isnan(var));
+                    y = y(~isnan(var));
+                    p = polyfit(x,y,1);
+                    f = polyval(p,x);
+                    var(~isnan(var)) = y-f;
+                    cellvar=var;
                 case {6}
                     cellvar=var-var(1);
                 case {7}

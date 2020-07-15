@@ -56,11 +56,16 @@ for m = xy
                     vector{m}(n) = (data(end) - data(1))/(Tracks(n).Z(end)-Tracks(n).Z(1));
                 end
             case 7
-                if selected_vars(m) == 3
-                    vector{m}(n) = Tracks(n).Velocity;
-                else
-                    vector{m}(n) = nansum(data);
-                end
+%                 if selected_vars(m) == 3
+                    x = 1:length(data);
+                    y = data';
+                    x = x(~isnan(data));
+                    y = y(~isnan(data));
+                    p = polyfit(x,y,1);
+                    vector{m}(n) = p(1);
+%                 else
+%                     vector{m}(n) = nansum(data);
+%                 end
         end
     end
 end

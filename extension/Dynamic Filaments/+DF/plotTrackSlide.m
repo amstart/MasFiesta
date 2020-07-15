@@ -48,6 +48,7 @@ if ~all(isnan(track.itrace(frame,:)))
     itrace = track.itrace(frame,:);
     x = double((((0:length(itrace)-1)-40)*157/4) + tipx(1));
     plot(x,itrace);
+%     return
 %     if isnan(track.Data(frame,2))
 %         if frame+1 > size(track.Data,1)
 %             xlim([x(1) track.Data(frame-1,2)+500]);
@@ -73,6 +74,7 @@ if ~all(isnan(track.itrace(frame,:)))
     GFPTip = track.GFPTip(iframe);
     [~,idGFPTip] = min(abs(x-GFPTip));
     plot(x,[itrace(1:idGFPTip) ym(idGFPTip+1:end)+itrace(idGFPTip+1)-ym(idGFPTip+1)]);
+%     return
     if iframe > 1
         if iframe < length(tipx)
             vline(mean(tipx(iframe-1:iframe)));
@@ -91,6 +93,7 @@ if ~all(isnan(track.itrace(frame,:)))
     data = fitFrame.getPlotData(track,1:8);
     data = squeeze(data(iframe,:,:));
     fdata = data(3:end,:);
+    
     if ~isnan(data(1))
     h1 = plot(x,fitFrame.fun2(x,fdata(:,1)));
     h2 = plot(x,fitFrame.fun2(x,fdata(:,2)));

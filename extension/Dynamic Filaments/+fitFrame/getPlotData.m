@@ -49,7 +49,7 @@ for i = 1:length(dims)
             [~,curr] = min(abs(x-pos(apf)));
             if prev < curr
                 ap(j) = nansum(static_itrace(prev:curr))/4;
-                ap(j) = ap(j)/diff(pos(apf-1:apf));
+%                 ap(j) = ap(j)/diff(pos(apf-1:apf));
             end
         end
     end

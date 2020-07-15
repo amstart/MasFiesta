@@ -26,7 +26,11 @@ for i=1:length(type)
         track_id(i)=0;
         continue
     end
-    if Tracks(i).Duration < Options.eMinDuration.val %&& Options.cPlotGrowingTracks.val == 1 
+    if Tracks(i).Duration < Options.eMinDuration.val && Options.cPlotGrowingTracks.val == 1 
+        track_id(i)=0;
+        continue
+    end
+    if length(Tracks(i).FitData) == 1 && Options.cSwitch.val
         track_id(i)=0;
         continue
     end
@@ -102,9 +106,9 @@ if ~Options.cSwitch.val
 for i=1:length(Tracks)
     d = Tracks(i).Data;
     if length(d) > 1
-        Tracks(i).Y = d(d(:,2)<-Options.eRescueCutoff.val,ycolumn);
-        Tracks(i).X = d(d(:,2)<-Options.eRescueCutoff.val,xcolumn);
-        Tracks(i).Z = d(d(:,2)<-Options.eRescueCutoff.val,zcolumn);
+        Tracks(i).Y = d(d(:,2)>Options.eRescueCutoff.val,ycolumn);
+        Tracks(i).X = d(d(:,2)>Options.eRescueCutoff.val,xcolumn);
+        Tracks(i).Z = d(d(:,2)>Options.eRescueCutoff.val,zcolumn);
     else
         Tracks(i).X = nan;
         Tracks(i).Y = nan;
@@ -129,6 +133,7 @@ for i=1:length(Tracks)
         Tracks(i).X = nan;
         Tracks(i).Z = nan;
     end
+%     Tracks(i).X(Tracks(i).Z < 5) = nan;
 end
 end
 

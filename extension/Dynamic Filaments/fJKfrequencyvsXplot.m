@@ -16,9 +16,9 @@ if sum(sumy) < 0
     sumy = -sumy;
 end
 plotynew=N./sumy;
-yemptybar = 0.05 * sign(mean(plotynew)) * max(abs(plotynew));
+yemptybar = 0.05 * sign(nanmean(plotynew)) * max(abs(plotynew));
 xemptybar = find(N==0);
-turnaround = 0;
+turnaround = 1;
 if turnaround
     edgesmid = - edgesmid;
 end
@@ -57,7 +57,7 @@ function [edgesmid, edges, sumy] = histcounts2(plotx, ploty)
 %HISTCOUNTS2D Summary of this function goes here
 %   Detailed explanation goes here
 plotx=plotx(~isnan(plotx));
-[~, edges, xid] = histcounts(plotx,[0:150:750]);
+[~, edges, xid] = histcounts(plotx,10);
 ploty(xid==0) = [];
 xid(xid==0) = [];
 binvec=cell(numel(edges)-1,1);

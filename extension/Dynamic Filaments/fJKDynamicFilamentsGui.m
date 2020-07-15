@@ -450,12 +450,12 @@ DF.updateOptions();
 
 function label = get_label(Options, isX)
 if isX
-    unit = Options.lPlot_XVar.str;
-    title = Options.lPlot_XVar.print;
+    unit = Options.xunit;
+    title = Options.xlabel;
     methodstrtmp = Options.lMethod_TrackValue.print;
 else
-    unit = Options.lPlot_YVar.str;
-    title = Options.lPlot_YVar.print;
+    unit = Options.yunit;
+    title = Options.ylabel;
     methodstrtmp = Options.lMethod_TrackValueY.print;
 end
 methodstr=methodstrtmp(1:strfind(methodstrtmp,'(')-2);
