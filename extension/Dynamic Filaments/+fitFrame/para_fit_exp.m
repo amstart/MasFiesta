@@ -9,9 +9,9 @@ tau = 1;
 
 a = 500;
 
-suggs = [amp,s_sug,bg1,bg2,tip,0,s_sug,tau];
-lb = [0,s_l,bg1,bg2,tip-a,-b,s_l,0];
-ub = [inf,s_h,bg1,bg2,tip+a,b,s_h,500];
+suggs = [amp,s_sug,bg1,bg2,tip,mean(b),s_sug,tau];
+lb = [0,s_l,bg1,bg2,tip-a,b(1),s_l,0];
+ub = [inf,s_h,bg1,bg2,tip+a,b(2),s_h,500];
 
 [fits,fvals] = fitFrame.fit_fun1(x,y,suggs,lb,ub);
 

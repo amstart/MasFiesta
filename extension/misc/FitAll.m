@@ -187,14 +187,14 @@ for i = 1:length(Tracks)
                 bg1 = mean([ymean yp(end)]) - bg2;
             end
             s = [170 450];
-            [fits0] = fitFrame.para_fit_erf(xp, yp, bg1, bg2, s);
-            [fits1] = fitFrame.para_fit_gauss1(xp, yp, bg1, bg2, s);
-            [fits2] = fitFrame.para_fit_gauss2(xp, yp, bg1, bg2, s);
-            [fits3] = fitFrame.para_fit_gauss3(xp, yp, bg1, bg2, s);
-            [fits4] = fitFrame.para_fit_gauss4(xp, yp, bg1, bg2, s);
-            [fits5] = fitFrame.para_fit_exp(xp, yp, bg1, bg2, s, 500);
-            [fits6] = fitFrame.para_fit_exp(xp, yp, bg1, bg2, s, 300);
-            [fits7] = fitFrame.para_fit_exp(xp, yp, bg1, bg2, [130 500], 500);
+            [fits0] = fitFrame.para_fit_exp(xp, yp, bg1, bg2, [170 170], [-300 300]);
+            [fits1] = fitFrame.para_fit_exp(xp, yp, bg1, bg2, [270 270], [-300 300]);
+            [fits2] = fitFrame.para_fit_exp(xp, yp, bg1, bg2, [370 370], [-300 300]);
+            [fits3] = fitFrame.para_fit_exp(xp, yp, bg1, bg2, [170 170], [0 0]);
+            [fits4] = fitFrame.para_fit_exp(xp, yp, bg1, bg2, s, [-300 -300]);
+            [fits5] = fitFrame.para_fit_exp(xp, yp, bg1, bg2, s, [0 0]);
+            [fits6] = fitFrame.para_fit_exp(xp, yp, bg1, bg2, s, [-300 300]);
+            [fits7] = fitFrame.para_fit_exp(xp, yp, bg1, bg2, s, [300 300]);
             fits = padcat(fits0, fits1, fits2, fits3, fits4, fits5, fits6, fits7);
             track.FitData(iframe,1:size(fits,1),1:size(fits,2)) = fits;
             if iframe > 1
