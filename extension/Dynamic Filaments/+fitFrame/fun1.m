@@ -25,6 +25,11 @@ function [y] = fun1(x,pars)
     
     tau = 1/pars(8);
     
+    if abs(sigmagauss-sigmaerf) > 150
+        y = x * inf;
+        return
+    end
+    
     % Calculation ------------------------------------
     
     xend = (x - MTend);

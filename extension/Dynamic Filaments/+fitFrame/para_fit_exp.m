@@ -2,7 +2,7 @@ function [out] = para_fit_exp(x, y, bg1, bg2, se, sg, b)
 [tip, maxy] = fitFrame.getTip(x,y);
 
 amp = maxy-(mean([bg1 bg2]));
-s_sug = 170;
+s_sug = 200;
 sg_l = sg(1);
 sg_h = sg(2);
 se_l = se(1);

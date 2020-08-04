@@ -20,6 +20,10 @@ function [y] = fun2(x,pars)
     else
         sigmagauss = pars(7);
     end
+    if abs(sigmagauss-sigmaerf) > 150
+        y = x * inf;
+        return
+    end
     % Calculation ------------------------------------
     
     gaussdist = normpdf(x,MTend,sigmagauss);
