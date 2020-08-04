@@ -15,6 +15,7 @@ for i = 1:length(dims)
     g = nan(size(tau));
     tg = nan(size(tau));
     ap = nan(size(tau));
+    apd = nan(size(tau));
     apf = 0;
     th = d(:,1)+d(:,3);
     static_itrace = nanmean(track.itrace(1:6,:));
@@ -49,9 +50,9 @@ for i = 1:length(dims)
             [~,curr] = min(abs(x-pos(apf)));
             if prev < curr
                 ap(j) = nansum(static_itrace(prev:curr))/4;
-%                 ap(j) = ap(j)/diff(pos(apf-1:apf));
+                apd(j) = ap(j)/diff(pos(apf-1:apf));
             end
         end
     end
-    out = cat(3, out, [t v d g tg th ap]);
+    out = cat(3, out, [t v d g tg th ap apd]);
 end
