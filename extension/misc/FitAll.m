@@ -198,10 +198,10 @@ for i = 1:length(Tracks)
             [fits1] = fitFrame.para_fit_exp(xp, yp, bg1, bg2, s, [300 300], [-150 150]);
             [fits2] = fitFrame.para_fit_exp(xp, yp, bg1, bg2, s, [250 350], [-150 150]);
             [fits3] = fitFrame.para_fit_exp(xp, yp, bg1, bg2, s, [250 350], [0 0]);
-            [fits4] = fitFrame.para_fit_exp(xp, yp, bg1, bg2, s, [300 300], [0 0]);
+            [fits4] = fitFrame.para_fit_exp(xp, yp, bg1, bg2, s, [300 300], nan);
             [fits5] = fitFrame.para_fit_exp(xp, yp, bg1, bg2, s, [400 400], [-150 150]);
             [fits6] = fitFrame.para_fit_exp(xp, yp, bg1, bg2, s, s, [-300 300]);
-            [fits7] = fitFrame.para_fit_exp(xp, yp, bg1, bg2, s, [0 0], [0 0]);
+            [fits7] = fitFrame.para_fit_exp(xp, yp, bg1, bg2, s, nan, nan);
             fits = padcat(fits0, fits1, fits2, fits3, fits4, fits5, fits6, fits7);
             track.FitData(iframe,1:size(fits,1),1:size(fits,2)) = fits;
             if iframe > 1

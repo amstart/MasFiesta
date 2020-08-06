@@ -1,4 +1,4 @@
-function [y] = fun1(x,pars)
+function [y] = fun1noshift(x,pars)
 %     if pars(8)<20
 %         if pars(8) < 5
 %             unit = 20000;
@@ -19,13 +19,11 @@ function [y] = fun1(x,pars)
     % MT end offset
     MTend = pars(5);
     %exp
-    
-    shift = pars(8);
+    shift = 0;
     
     tau = 1/pars(6);
     
     sigmagauss = pars(7);
-
     
     % Calculation ------------------------------------
     

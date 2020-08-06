@@ -104,7 +104,7 @@ if ~all(isnan(track.itrace(frame,:)))
     vline(fdata(5,7),'k:');
     vline(fdata(5,7)+fdata(6,7),'y');
     text(fdata(5,4), 1, {['v_{erf} = ' num2str(data(2,1))], ['G = ' num2str(data(12,7))], ['s_{exp} = ' num2str(fdata(7,7))],...
-        ['shift_{exp} = ' num2str(fdata(6,7))], ['s_{erf} = ' num2str(fdata(2,3))], ['s_{gauss} = ' num2str(fdata(7,3))]});
+        ['shift_{exp} = ' num2str(fdata(8,7))], ['s_{erf} = ' num2str(fdata(2,3))], ['s_{gauss} = ' num2str(fdata(7,3))]});
     h5 = plot(x,fitFrame.fun1(x,fdata(:,5)));
     h6 = plot(x,fitFrame.fun1(x,fdata(:,7)),'k.');
 %     legend([h1 h2 h3 h4 h5 h6],...
