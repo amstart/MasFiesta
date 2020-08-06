@@ -63,12 +63,14 @@ if ~all(isnan(track.itrace(frame,:)))
     plot(x,ym);
 %     plot(x,itrace./track.itrace(1,:) .* mean(itrace));
     datacursormode on
-
-    if ~isnan(track.tags(frame))
-        set(gca,'Color',[1 1 1] - 0.2 * track.tags(frame));
-    else
-        set(gca,'Color',[1 1 1]);
-    end
+% 
+%     if ~isnan(track.tags(frame))
+%         set(gca,'Color',[1 1 1] - 0.2 * track.tags(frame));
+%     elseif iframe > 0
+%         set(gca,'Color',[1 1 1-0.1*sum(track.protoFa(iframe,:))]);
+%     else
+%         set(gca,'Color',[1 1 1]);
+%     end
 
     if iframe > 0
     GFPTip = track.GFPTip(iframe);
@@ -95,15 +97,15 @@ if ~all(isnan(track.itrace(frame,:)))
     fdata = data(3:end,:);
     
     if ~isnan(data(1))
-    h1 = plot(x,fitFrame.fun2(x,fdata(:,1)));
-    h2 = plot(x,fitFrame.fun2(x,fdata(:,2)));
-    h3 = plot(x,fitFrame.fun2(x,fdata(:,3)));
-    h4 = plot(x,fitFrame.fun2(x,fdata(:,4)));
+    h1 = plot(x,fitFrame.fun1(x,fdata(:,1)));
+    h2 = plot(x,fitFrame.fun1(x,fdata(:,2)));
+    h3 = plot(x,fitFrame.fun1(x,fdata(:,3)));
+    h4 = plot(x,fitFrame.fun1(x,fdata(:,4)));
     vline(fdata(5,7),'k:');
     vline(fdata(5,7)+fdata(6,7),'y');
     text(fdata(5,4), 1, {['v_{erf} = ' num2str(data(2,1))], ['G = ' num2str(data(12,7))], ['s_{exp} = ' num2str(fdata(7,7))],...
-        ['shift_{exp} = ' num2str(fdata(6,7))], ['G_{extension} = ' num2str(data(13,7))], ['G_{passed} = ' num2str(data(15,7))]});
-    h5 = plot(x,fitFrame.fun2(x,fdata(:,5)));
+        ['shift_{exp} = ' num2str(fdata(6,7))], ['s_{erf} = ' num2str(fdata(2,3))], ['s_{gauss} = ' num2str(fdata(7,3))]});
+    h5 = plot(x,fitFrame.fun1(x,fdata(:,5)));
     h6 = plot(x,fitFrame.fun1(x,fdata(:,7)),'k.');
 %     legend([h1 h2 h3 h4 h5 h6],...
 %     {['e=' num2str(data(10,1),3)],...
@@ -115,7 +117,8 @@ if ~all(isnan(track.itrace(frame,:)))
 %     'Location', 'southeast');
     end
     title(['MT: ' num2str(track.MTIndex) ' track: ' num2str(track.TrackIndex)...
-        '   frame: ' num2str(iframe) '/' num2str(track.frames(iframe,:)) '   time: ' num2str(track.TimeInfo(track.frames(iframe,2)),3)]);
+        '   frame: ' num2str(iframe) '/' num2str(track.frames(iframe,:)) '   time: ' num2str(track.TimeInfo(track.frames(iframe,2)),3)...
+        '   # protoF: ' num2str(track.protoFn)]);
     else
     title(['MT: ' num2str(track.MTIndex) ' track: ' num2str(track.TrackIndex)...
         '   frame: ' num2str(iframe)]);

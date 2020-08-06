@@ -7,6 +7,7 @@ for i = 1:length(Tracks)
     npoints = size(track.itrace,1)-f1+1;
     track.FitData = nan(npoints,8,9);
     track.GFPTip = nan(npoints,1);
+    track.protoF = zeros(npoints,2);
     track.minima = nan(npoints,2);
     track.Data2 = nan(npoints,5);
     track.GoodData = nan(npoints,1);
@@ -148,7 +149,6 @@ for i = 1:length(Tracks)
             end
 %             minima(1) = max(tippt - 25, minima(1));
 
-
             tip = fitFrame.getTip(x(minima(1):minima(2)), yn(minima(1):minima(2)));
             if isnan(tip)
                 minima(2) = minlocright(rightmin+1);
@@ -166,6 +166,7 @@ for i = 1:length(Tracks)
 
             [~,idTip] = min(abs(x-tip));
             ym = [yf(1:idTip) yn(idTip+1:end)+yf(idTip+1)-yn(idTip+1)];
+           
             
 %             change = findchangepts(ym);
 %             change = x(change);
@@ -178,6 +179,12 @@ for i = 1:length(Tracks)
             eval = min(length(ym),minima(2)+99);
             
             bg2 = max(min(ym(1:40)),0);
+            
+            [~, protoF, ~, prominence] = findpeaks(yn(1:minima(1)),'NPeaks',1,'MinPeakProminence',1);
+            if ~isempty(protoF)
+                track.protoF(iframe,:) = [ym(protoF(end))-bg2 prominence(end)];
+            end
+            
             yp = ym(minima(1):minima(2));
             ymean = wmean(ym(minima(2):eval), 1-(0:eval-minima(2))/100);
 
