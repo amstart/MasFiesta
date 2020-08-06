@@ -15,8 +15,9 @@ end
 for i=1:length(tracks)
     itrace = track.itrace(5:end,:);
     GFPtip = track.GFPTip;
-    itrace = itrace(~isnan(GFPtip));
-    x = double((((0:length(itrace(1,:))-1)-40)*157/4) - GFPTip(iframe));
-    track.GFPTip(iframe)
-    plot(tracks(i).itrace)
+    itrace = itrace(~isnan(GFPtip),:);
+    GFPtip = GFPtip(~isnan(GFPtip));
+    x = repmat(double((((0:length(itrace(1,:))-1)-40)*157/4)),length(GFPtip),1);
+    x = x - repmat(GFPtip,1,size(x,2));
+    plot(x,itrace);
 end
