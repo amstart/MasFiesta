@@ -390,7 +390,7 @@ else
         case 8
             AgainstOtherMTTracksPlot(Options);
         case 9
-            IntensityVsDistWeightedVel(Options);
+            protoFplot(Options);
     end
 end
 set(gcf, 'Position', get(0,'Screensize')); 
@@ -653,6 +653,50 @@ else
     Options.FilamentEndPlot.has_err_fun_format = 0;
 end
 fJKplotframework(Tracks, type, 0, events, Options);
+
+function protoFplot(Options)
+hold on;
+[type, AnalyzedTracks, ~]=DF.SetType(Options.cPlotGrowingTracks.val);
+[uniquetype, ~, track_type_id] = unique(type, 'stable');
+for k=1:2
+    tracks = AnalyzedTracks(track_type_id==k);
+    figure
+    title(uniquetype{k});
+    hold on
+    for i=1:length(tracks)
+        track = tracks(i);
+        if length(track.GFPTip) == 1
+            continue
+        end
+        GFPtip = track.GFPTip;
+        select = GFPtip < -400;
+        select(isnan(GFPtip)) = 1;
+        select(end-9:end) = 0;
+        select(find(select==0,1):end) = 0;
+        select(isnan(GFPtip)) = 0;
+        select(~isnan(track.tags(5:end))) = 0;
+        bg = nanmean(track.itrace(1:6,:));  
+        itrace = track.itrace(5:end,:);
+        itrace = itrace(select,:);
+        GFPtip = GFPtip(select);
+        x = repmat(double((((0:length(itrace(1,:))-1)-40)*157/4)),length(GFPtip),1) - track.Data(2,2);
+        x = x - repmat(GFPtip,1,size(x,2));
+        x(abs(x) > 1000) = nan;
+
+        itracenorm = itrace;
+        for j = 1:size(itrace,1)
+            [~,idx] = min(abs(x(j,:)));
+            ym = itrace(j,:)-bg;   
+            itrace(j,:) = [itrace(j,1:idx) ym(idx+1:end)+itrace(j,idx+1)-ym(idx+1)];
+            itracenorm(j,:) = itrace(j,:)./itrace(j,idx);
+        end
+%         x = x + repmat(GFPtip,1,size(x,2));
+        for j = 1:size(x,1)
+            plot(x(j,:),itracenorm(j,:),'k');
+        end
+    end
+end
+
 
 function BoxPlot(Options)
 hold on;

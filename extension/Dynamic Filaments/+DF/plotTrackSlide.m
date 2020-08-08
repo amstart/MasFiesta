@@ -64,13 +64,13 @@ if ~all(isnan(track.itrace(frame,:)))
 %     plot(x,itrace./track.itrace(1,:) .* mean(itrace));
     datacursormode on
 % 
-%     if ~isnan(track.tags(frame))
-%         set(gca,'Color',[1 1 1] - 0.2 * track.tags(frame));
-%     elseif iframe > 0
-%         set(gca,'Color',[1 1 1-0.1*sum(track.protoFa(iframe,:))]);
-%     else
-%         set(gca,'Color',[1 1 1]);
-%     end
+    if ~isnan(track.tags(frame))
+        set(gca,'Color',[1 1 1] - 0.2 * track.tags(frame));
+    elseif frame > 0
+        set(gca,'Color',[1 1 1-0.1*sum(track.protoFa(frame,:))]);
+    else
+        set(gca,'Color',[1 1 1]);
+    end
 
     if iframe > 0
     GFPTip = track.GFPTip(iframe);
