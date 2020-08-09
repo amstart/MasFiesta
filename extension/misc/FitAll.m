@@ -194,14 +194,14 @@ for i = 1:length(Tracks)
                 bg1 = mean([ymean yp(end)]) - bg2;
             end
             s = [170 450];
-            [fits0] = fitFrame.para_fit_exp(xp, yp, bg1, bg2, s, [300 300], [-300 300]);
-            [fits1] = fitFrame.para_fit_exp(xp, yp, bg1, bg2, s, [300 300], [-150 150]);
-            [fits2] = fitFrame.para_fit_exp(xp, yp, bg1, bg2, s, [250 350], [-150 150]);
-            [fits3] = fitFrame.para_fit_exp(xp, yp, bg1, bg2, s, [250 350], [0 0]);
-            [fits4] = fitFrame.para_fit_exp(xp, yp, bg1, bg2, s, [300 300], nan);
-            [fits5] = fitFrame.para_fit_exp(xp, yp, bg1, bg2, s, [400 400], [-150 150]);
-            [fits6] = fitFrame.para_fit_exp(xp, yp, bg1, bg2, s, s, [-300 300]);
-            [fits7] = fitFrame.para_fit_exp(xp, yp, bg1, bg2, s, nan, nan);
+            [fits0] = fitFrame.para_fit_exp(xp, yp, bg1, bg2, s, nan, nan);
+            [fits1] = fitFrame.para_fit_exp(xp, yp, bg1, bg2, s, [170 170], nan);
+            [fits2] = fitFrame.para_fit_exp(xp, yp, bg1, bg2, s, [300 300], nan);
+            [fits3] = fitFrame.para_fit_exp(xp, yp, bg1, bg2, [170 350], [170 350], nan);
+            [fits4] = fitFrame.para_fit_exp(xp, yp, bg1, bg2, [170 350], [170 350], [-150 150]);
+            [fits5] = fitFrame.para_fit_exp(xp, yp, bg1, bg2, s, s, nan);
+            [fits6] = fitFrame.para_fit_exp(xp, yp, bg1, bg2, s, s, [-150 150]);
+            [fits7] = fitFrame.para_fit_exp(xp, yp, bg1, bg2, s, s, [-300 300]);
             fits = padcat(fits0, fits1, fits2, fits3, fits4, fits5, fits6, fits7);
             track.FitData(iframe,1:size(fits,1),1:size(fits,2)) = fits;
             if iframe > 1
