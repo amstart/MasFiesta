@@ -22,7 +22,7 @@ function [y] = fun1(x,pars)
     
     shift = pars(8);
     
-    tau = 1/pars(6);
+    lambda = 1/pars(6);
     
     sigmagauss = pars(7);
 
@@ -30,7 +30,7 @@ function [y] = fun1(x,pars)
     % Calculation ------------------------------------
     
     xend = (x - MTend);
-    expdist = exp((sigmagauss^2*tau^2)/2-tau*xend).*erfc((sigmagauss^2*tau-xend)/(sigmagauss*sqrt(2)));
+    expdist = exp((sigmagauss^2*lambda^2)/2-lambda*xend).*erfc((sigmagauss^2*lambda-xend)/(sigmagauss*sqrt(2)));
     expdist(expdist==inf) = nan;
     
     y = ones(size(x)) * bg2 + ...

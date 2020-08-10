@@ -66,8 +66,6 @@ if ~all(isnan(track.itrace(frame,:)))
 % 
     if ~isnan(track.tags(frame))
         set(gca,'Color',[1 1 1] - 0.2 * track.tags(frame));
-    elseif frame > 0
-        set(gca,'Color',[1 1 1-0.1*sum(track.protoFa(frame,:))]);
     else
         set(gca,'Color',[1 1 1]);
     end
@@ -94,19 +92,23 @@ if ~all(isnan(track.itrace(frame,:)))
     end
     data = fitFrame.getPlotData(track,1:8);
     data = squeeze(data(iframe,:,:));
-    fdata = data(3:end,:);
+    fdata = double(data(3:end,:));
     
     if ~isnan(data(1))
     h1 = plot(x,fitFrame.fun1(x,fdata(:,1)));
     h2 = plot(x,fitFrame.fun1(x,fdata(:,2)));
     h3 = plot(x,fitFrame.fun1(x,fdata(:,3)));
     h4 = plot(x,fitFrame.fun1(x,fdata(:,4)));
+    h5 = plot(x,fitFrame.fun1(x,fdata(:,5)));
+    h6 = plot(x,fitFrame.fun1(x,fdata(:,6)));
+    h7 = plot(x,fitFrame.fun1(x,fdata(:,7)));
+    h8 = plot(x,fitFrame.fun1(x,fdata(:,8)), 'k.');
+    
     vline(fdata(5,7),'k:');
     vline(fdata(5,7)+fdata(6,7),'y');
     text(fdata(5,4), 1, {['v_{erf} = ' num2str(data(2,1))], ['G = ' num2str(data(12,7))], ['s_{exp} = ' num2str(fdata(7,7))],...
         ['shift_{exp} = ' num2str(fdata(8,7))], ['s_{erf} = ' num2str(fdata(2,3))], ['s_{gauss} = ' num2str(fdata(7,3))]});
-    h5 = plot(x,fitFrame.fun1(x,fdata(:,5)));
-    h6 = plot(x,fitFrame.fun1(x,fdata(:,7)),'k.');
+
 %     legend([h1 h2 h3 h4 h5 h6],...
 %     {['e=' num2str(data(10,1),3)],...
 %     ['A=' num2str(data(1,2),3) ' s=' num2str(data(2,2),3) 'e=' num2str(data(10,2),3)],...

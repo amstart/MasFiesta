@@ -28,7 +28,7 @@ for n = 1:length(Objects)
         nCatAuto= sum(~shrinking & event);
         
         str{n}=[str{n} num2str(Objects(n).CatRes(1)) '|' num2str(nCatAuto) '    ' num2str(Objects(n).CatRes(2)) '|' num2str(nResAuto) ...
-            '    ' num2str(sum([tracks.protoFn])) '    ' num2str(sum([tracks.isPause]/2)) '    ' num2str(velocity(1), '%2.2f') '    ' num2str(velocity(2), '%2.1f') '    ' Objects(n).Custom.type_intensity];
+            '    ' num2str(sum([tracks.isPause]/2)) '    ' num2str(velocity(1), '%2.2f') '    ' num2str(velocity(2), '%2.1f') '    ' Objects(n).Custom.type_intensity];
         case 1
         str{n} = [str{n} '  ' num2str(Objects(n).Concentration, 4) 'nM ' num2str(Objects(n).KCl, 4) 'mM ' ...
             num2str(Objects(n).FirstFrame) num2str(Objects(n).LastFrame)];

@@ -18,6 +18,7 @@ for n = 1:length(Objects)
         includepoints = includepoints & Objects(n).Tags(:,2)==0;
     end
     itrace = [];
+    fit_frames = [];
     if isfield(Objects(n), 'CustomData') && ~isempty(Objects(n).CustomData)
         for customfield = fields(Objects(n).CustomData)'
             if ~isempty(Objects(n).CustomData.(customfield{1}).read_fun)
@@ -105,7 +106,6 @@ for n = 1:length(Objects)
         track.File=Objects(n).File;
         track.Type=Objects(n).Type;
         track.isPause = 0;
-        track.IntensityPerMAP = Objects(n).Custom.IntensityPerMAP;
         
         trackframes=(track_starts(m):(track_ends(m)))';
         
@@ -151,20 +151,26 @@ for n = 1:length(Objects)
         track.Data = [segt segd segvel intensity(trackframes) repmat(track_id,size(segt)) segf];
         track.FitData = nan(length(segt),6,12);
         track.itrace = cell(length(segf),1);
-        [la, ib] = ismember(segf,fit_frames);
-        if track.Shrinks
-            for i = 1:length(segf)
-                if la(i)
-                    track.itrace{i} = itrace{ib(i)};
-                    npoints = length(track.itrace{i});
+        if ~isempty(fit_frames)
+            track.IntensityPerMAP = Objects(n).Custom.IntensityPerMAP;
+            [la, ib] = ismember(segf,fit_frames);
+            if track.Shrinks
+                for i = 1:length(segf)
+                    if la(i)
+                        track.itrace{i} = itrace{ib(i)};
+                        npoints = length(track.itrace{i});
+                    end
                 end
-            end
-            for i = 1:length(segf)
-                if isempty(track.itrace{i})
-                    track.itrace{i} = nan(1,npoints);
+                for i = 1:length(segf)
+                    if isempty(track.itrace{i})
+                        track.itrace{i} = nan(1,npoints);
+                    end
                 end
+            track.itrace = cell2mat(track.itrace);
             end
-        track.itrace = cell2mat(track.itrace);
+        else
+            track.IntensityPerMAP = nan;
+            track.itrace = nan;
         end
 %         try
 %             track.Data(:,13) = track.Data(:,9)./track.Data(:,2);

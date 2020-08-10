@@ -16,8 +16,15 @@ for i = 1:length(Tracks)
     tipx = interp1(td(:,end), td(:,2), td(1,end):td(end,end));
     tipx = [tipx(1); tipx'; tipx(end).*ones(10,1)];
 
-    if size(track.Data,1) < 20 && track.Data(end-10,2) < 400
+    if size(track.Data,1) < 20% && track.Data(end-10,2) < 400
         warning(num2str(size(track.itrace,1)));
+        track.FitData = nan;
+        track.GFPTip = nan;
+        track.protoF = nan;
+        track.minima = nan;
+        track.Data2 = nan;
+        track.GoodData = nan;
+        Tracks(i) = track;
         continue
     end
     stackframes = track.frames(f1:end,2);
