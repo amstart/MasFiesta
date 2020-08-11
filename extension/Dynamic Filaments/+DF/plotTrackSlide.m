@@ -90,7 +90,7 @@ if ~all(isnan(track.itrace(frame,:)))
     if ~isnan(minima(1))
         vline(x(minima), 'b:');
     end
-    data = fitFrame.getPlotData(track,1:8);
+    data = fitFrame.getPlotData(track,1:9);
     data = squeeze(data(iframe,:,:));
     fdata = double(data(3:end,:));
     
@@ -102,7 +102,8 @@ if ~all(isnan(track.itrace(frame,:)))
     h5 = plot(x,fitFrame.fun1(x,fdata(:,5)));
     h6 = plot(x,fitFrame.fun1(x,fdata(:,6)));
     h7 = plot(x,fitFrame.fun1(x,fdata(:,7)));
-    h8 = plot(x,fitFrame.fun1(x,fdata(:,8)), 'k.');
+    h8 = plot(x,fitFrame.fun1(x,fdata(:,8)));
+    h9 = plot(x,fitFrame.fun1(x,fdata(:,9)));
     
     vline(fdata(5,7),'k:');
     vline(fdata(5,7)+fdata(6,7),'y');

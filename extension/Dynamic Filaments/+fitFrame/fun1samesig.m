@@ -1,4 +1,4 @@
-function [y] = fun1noshiftsamesig(x,pars)
+function [y] = fun1samesig(x,pars)
 %     if pars(8)<20
 %         if pars(8) < 5
 %             unit = 20000;
@@ -19,7 +19,7 @@ function [y] = fun1noshiftsamesig(x,pars)
     % MT end offset
     MTend = pars(5);
     %exp
-    shift = 0;
+    shift = pars(7);
     
     lambda = 1/pars(6);
     

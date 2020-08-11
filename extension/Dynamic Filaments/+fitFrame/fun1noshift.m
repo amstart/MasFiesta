@@ -21,19 +21,24 @@ function [y] = fun1noshift(x,pars)
     %exp
     shift = 0;
     
-    tau = 1/pars(6);
+    lambda = 1/pars(6);
     
     sigmagauss = pars(7);
     
     % Calculation ------------------------------------
     
     xend = (x - MTend);
-    expdist = exp((sigmagauss^2*tau^2)/2-tau*xend).*erfc((sigmagauss^2*tau-xend)/(sigmagauss*sqrt(2)));
-    expdist(expdist==inf) = nan;
+    
+    if pars(6) == 0
+        dist = normpdf(xend,0,sigmagauss);
+    else
+        dist = exp((sigmagauss^2*lambda^2)/2-lambda*xend).*erfc((sigmagauss^2*lambda-xend)/(sigmagauss*sqrt(2)));
+        dist(dist==inf) = nan;
+    end
     
     y = ones(size(x)) * bg2 + ...
         (erf((xend-shift)/(sigmaerf*sqrt(2)))+1)*bg1/2 + ...
-        Amp * expdist/max(expdist);
+        Amp * dist/max(dist);
     y(isnan(y)) = bg2;
 %     plot(y);drawnow;
 end
