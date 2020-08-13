@@ -1,4 +1,4 @@
-for i = 1:length(Tracks)
+for i = 365:length(Tracks)
     track = Tracks(i);
     if length(track.itrace) == 1
         continue
@@ -9,7 +9,7 @@ for i = 1:length(Tracks)
     track.GFPTip = nan(npoints,1);
     track.protoF = zeros(npoints,2);
     track.minima = nan(npoints,2);
-    track.Data2 = nan(npoints,5);
+    track.Data2 = nan(npoints,2);
     track.GoodData = nan(npoints,1);
     td = track.Data(2:end-10,:);
     td(isnan(td(:,1)),:) = [];
@@ -39,7 +39,7 @@ for i = 1:length(Tracks)
         if ~isnan(itrace(frame,1))
             yf = itrace(frame,:);
             [~, seed] = min(abs(x));
-            yn = yf-nanmean(itrace(1:6,:));
+            yn = yf-nanmean(itrace(1:5,:));
             [~, tippt1] = min(abs(-x-tipx(iframe)));
             [~, maxid] = max(yn(20:tippt1+30));
             maxid = maxid + 19;
@@ -102,6 +102,9 @@ for i = 1:length(Tracks)
             
             ys = max(yn)-yn;
             [~, minloc] = findpeaks(ys/max(ys),'MinPeakProminence',0.025);
+            if minloc(1)>11
+                minloc = [1 minloc];
+            end
             leftmin = find((minloc - tippt)<0,1,'last');
             if isempty(leftmin)
                 leftmin = 1;
@@ -200,7 +203,7 @@ for i = 1:length(Tracks)
             else
                 bg1 = mean([ymean yp(end)]) - bg2;
             end
-            s = [170 450];
+            s = [170 500];
             [fits0] = fitFrame.para_fit_exp(xp, yp, bg1, bg2, s, nan, nan, 0, 1);
             [fits1] = fitFrame.para_fit_exp(xp, yp, bg1, bg2, s, nan, nan, 0, 0);
             [fits2] = fitFrame.para_fit_exp(xp, yp, bg1, bg2, s, nan, nan, 1, 0);
@@ -212,18 +215,8 @@ for i = 1:length(Tracks)
             [fits8] = fitFrame.para_fit_exp(xp, yp, bg1, bg2, s, s, [-150 150], 1, 0);
             fits = padcat(fits0, fits1, fits2, fits3, fits4, fits5, fits6, fits7, fits8);
             track.FitData(iframe,1:size(fits,1),1:size(fits,2)) = fits;
-            if iframe > 1
-                pframe = find(~isnan(track.Data2(1:iframe - 1,2)),1,'last');
-                if ~isempty(pframe)
-                    dt = diff(track.TimeInfo([pframe iframe]));
-                    vel = ([fits0(5) fits1(5)]-track.Data2(pframe,2:3))./dt;
-                else
-                    vel = [nan nan];
-                end
-            else
-                vel = [nan nan];
-            end
-            track.Data2(iframe,:) = [time(iframe) fits0(5) fits1(5) vel];
+            SST = sum((yp-mean(yp)).^2);
+            track.Data2(iframe,:) = [time(iframe) SST];
         end
     end
     Tracks(i) = track;

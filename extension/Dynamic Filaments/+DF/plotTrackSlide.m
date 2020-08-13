@@ -59,8 +59,8 @@ if ~all(isnan(track.itrace(frame,:)))
 %         xlim([x(1) track.Data(frame,2)+500]);
 %     end
     hold on
-    ym = itrace-nanmean(track.itrace(1:6,:));   
-    plot(x,ym);
+    yn = itrace-nanmean(track.itrace(1:5,:));   
+    plot(x,yn);
 %     plot(x,itrace./track.itrace(1,:) .* mean(itrace));
     datacursormode on
 % 
@@ -73,7 +73,7 @@ if ~all(isnan(track.itrace(frame,:)))
     if iframe > 0
     GFPTip = track.GFPTip(iframe);
     [~,idGFPTip] = min(abs(x-GFPTip));
-    plot(x,[itrace(1:idGFPTip) ym(idGFPTip+1:end)+itrace(idGFPTip+1)-ym(idGFPTip+1)]);
+    plot(x,[itrace(1:idGFPTip) yn(idGFPTip+1:end)+itrace(idGFPTip+1)-yn(idGFPTip+1)]);
 %     return
     if iframe > 1
         if iframe < length(tipx)

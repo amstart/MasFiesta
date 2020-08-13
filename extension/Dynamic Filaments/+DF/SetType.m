@@ -121,9 +121,9 @@ for i=1:length(Tracks)
         d1 = fitFrame.getPlotData(Tracks(i), Options.lPlot_XVardim.val);
         d2 = fitFrame.getPlotData(Tracks(i), Options.lPlot_YVardim.val);
         d3 = fitFrame.getPlotData(Tracks(i), Options.lPlot_ZVardim.val);
-        select = d1(:,7)<-400 | isnan(d1(:,7));% | d1(:,3) < 1;
+        select = d1(:,7)<-500 | isnan(d1(:,7)) | d1(:,3) < 2;
         select(end-9:end) = 0;
-        select(Tracks(i).Data(:,2)<400) = 0;
+        select(Tracks(i).Data(:,2)<500) = 0;
         select(find(select==0,1):end) = 0;
         Tracks(i).X = d1(select,xcolumn);
         Tracks(i).Y = d2(select,ycolumn);
