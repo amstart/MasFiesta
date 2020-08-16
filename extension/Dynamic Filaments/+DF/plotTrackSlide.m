@@ -66,6 +66,8 @@ if ~all(isnan(track.itrace(frame,:)))
 % 
     if ~isnan(track.tags(frame))
         set(gca,'Color',[1 1 1] - 0.2 * track.tags(frame));
+    elseif iframe > 0
+        set(gca,'Color',[1 1 1-0.1*sum(track.protoFa(iframe,:))]);
     else
         set(gca,'Color',[1 1 1]);
     end

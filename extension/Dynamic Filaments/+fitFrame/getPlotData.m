@@ -5,11 +5,13 @@ out = [];
 for i = 1:length(dims)
     d = squeeze(track.FitData(:,dims(i),:));
     t = track.Data2(:,1);
+    minheight = track.GoodData;
     del = isnan(t) | isnan(d(:,1)) | ~isnan(track.tags(5:end));
     v = nan(size(t));
     pos = d(~del,5)+d(~del,8);
     v(~del) = [nan; diff(pos)./diff(t(~del))];
     d(del,:) = nan;
+    minheight(del,:) = nan;
     sigmagauss = d(:,7);
     tau = 1./d(:,6);
     g = nan(size(tau));
@@ -54,5 +56,5 @@ for i = 1:length(dims)
             end
         end
     end
-    out = cat(3, out, [t v d g tg th ap apd]);
+    out = cat(3, out, [t v d g tg th ap apd minheight]);
 end
