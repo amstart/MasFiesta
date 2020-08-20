@@ -1,4 +1,4 @@
-sTracks = tracksall([tracksall.Shrinks]);
+sTracks = Tracks([Tracks.Shrinks]);
 density = zeros(length(sTracks),1);
 startendvel = zeros(length(sTracks),1);
 type = zeros(length(sTracks),1);
@@ -22,8 +22,8 @@ for i = 1:length(sTracks)
     if length(track.itrace)>1
         bg = nanmean(track.itrace(1:6,:));
         bg = bg - min(bg);
-        shrinkuntilid = round(40 + shrinkuntil / (157/4));
-        density(i) = sum(bg(40:shrinkuntilid))/(4*shrinkuntil);
+        shrinkuntilid = round(29 + shrinkuntil / (157/4));
+        density(i) = sum(bg(29:shrinkuntilid))/(4*shrinkuntil);
     end
     startendvel(i) = -(d(end)-d(1))/(t(end)-t(1));
     duration(i) = t(end)-t(1);

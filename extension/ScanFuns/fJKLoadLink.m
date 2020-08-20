@@ -1,4 +1,4 @@
-function [ ] = fJKLoadLink(LinkFileName, LinkPathName, fun)
+function [tracks ] = fJKLoadLink(LinkFileName, LinkPathName, fun)
 %FJKLOADLINK This function takes the path of a file with a list of 
 %file locations. It also takes a function which is applied to each of those
 %files. Parameters are not directly passed nor is anything returned (-> use global variables or appdata)
@@ -32,8 +32,13 @@ for i = 1:numfiles
         end
     end
     [PathName, FileName]
-    fun(FileName, PathName);
-%     tracks = [tracks newtracks];
+    str1 = func2str(fun);
+    if ~strcmp(str1, 'DF.Load')
+        newtracks = fun(FileName, PathName);
+        tracks = [tracks newtracks];
+    else
+        fun(FileName, PathName);
+    end
     suppress_progressdlg = 0;
     progressdlg(i);
 end

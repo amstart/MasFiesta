@@ -37,8 +37,8 @@ end
 for i = 1:length(t)
     d = k{i};
     for j = 1
-        t(i).itracetub = s{i};%/t(i).IntensityPerMAP;
-        t(i).framestub = f{i};
+        t(i).itrace = s{i}/t(i).IntensityPerMAP;
+        t(i).frames = f{i};
     end
 end
 

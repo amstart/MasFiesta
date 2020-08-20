@@ -1,4 +1,4 @@
-for i = 365:length(Tracks)
+for i = 1:length(Tracks)
     track = Tracks(i);
     if length(track.itrace) == 1
         continue
@@ -7,7 +7,7 @@ for i = 365:length(Tracks)
     npoints = size(track.itrace,1)-f1+1;
     track.FitData = nan(npoints,8,9);
     track.GFPTip = nan(npoints,1);
-    track.protoF = zeros(npoints,2);
+    track.protoF = zeros(npoints,1);
     track.minima = nan(npoints,2);
     track.Data2 = nan(npoints,2);
     track.GoodData = nan(npoints,1);
@@ -35,7 +35,7 @@ for i = 365:length(Tracks)
         [num2str(i) ' ' num2str([frame iframe])]
 
         itrace = track.itrace;
-        x = double((((0:length(itrace)-1)-40)*(157/4)) - tipx(1));
+        x = double((((0:length(itrace)-1)-28)*(157/4)) - tipx(1));
         if ~isnan(itrace(frame,1))
             yf = itrace(frame,:);
             [~, seed] = min(abs(x));
@@ -190,9 +190,9 @@ for i = 365:length(Tracks)
             
             bg2 = max(min(ym(1:40)),0);
             
-            [~, protoF, ~, prominence] = findpeaks(ym(max(minima(1)-20,1):minima(1)),'NPeaks',1,'MinPeakProminence',1);
-            if ~isempty(protoF)
-                track.protoF(iframe,:) = [ym(protoF(end))-bg2 prominence(end)];
+            peakvals = findpeaks(ym(max(minima(1)-20,1):minima(1)),'NPeaks',1,'MinPeakProminence',0.5);
+            if ~isempty(peakvals)
+                track.protoF(iframe) = max(peakvals);
             end
             
             yp = ym(minima(1):minima(2));

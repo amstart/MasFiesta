@@ -46,7 +46,7 @@ if ~all(isnan(track.itrace(frame,:)))
     iframe = frame - 4;
     tipx = - track.Data(2:end-10,2);
     itrace = track.itrace(frame,:);
-    x = double((((0:length(itrace)-1)-40)*157/4) + tipx(1));
+    x = double((((0:length(itrace)-1)-28)*157/4) + tipx(1));
     plot(x,itrace);
 %     return
 %     if isnan(track.Data(frame,2))

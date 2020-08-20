@@ -16,7 +16,7 @@ ScanOptions.help_CorrectObject.RemoveColorCorrection = 0;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 ScanOptions.help_get_tip_points.max_points = 500;
 ScanOptions.help_get_tip_points.GFP_frame_where = 0.4759;
-ScanOptions.filename = 'pixelkymo_fine_long_TUB';
+ScanOptions.filename = 'pixelkymo_fine_long_2';
 if ~isfield(ScanOptions, 'ObjectChannel')
     input = inputdlg('Analyze objects in which channel?','Object Channel',1,{'1'});
     ScanOptions.ObjectChannel = str2double(input);
