@@ -56,7 +56,11 @@ figure
 % % set(box.handles.box, 'EdgeColor', 'blue')
 
 plotvar = x;
-box = iosr.statistics.boxPlot((1:size(plotvar,2))-0.15, plotvar(type==1,:), 'medianColor','r', 'showOutliers', true, 'showMean', true)
+boxsingle = iosr.statistics.boxPlot((1:size(plotvar,2))-0.15, plotvar(type==1,:), 'medianColor','r', 'showOutliers', true, 'showMean', true)
 hold on
-box = iosr.statistics.boxPlot(1:size(plotvar,2)+0.15, plotvar(type==0,:), 'medianColor','g', 'showOutliers', true, 'showMean', true)
-set(box.handles.box, 'EdgeColor', 'blue')
+boxOL = iosr.statistics.boxPlot(1:size(plotvar,2)+0.15, plotvar(type==0,:), 'medianColor','g', 'showOutliers', true, 'showMean', true)
+set(boxOL.handles.box, 'EdgeColor', 'blue')
+legend([boxsingle.handles.medianLines(1) boxOL.handles.medianLines(1)], {'single MTs', 'crosslinked MTs'});
+pbaspect([1 1 1]);
+ylabel('R squared value');
+xticklabels({'Error function', 'Error function + Gaussian'} );

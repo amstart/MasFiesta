@@ -47,7 +47,7 @@ if ~all(isnan(track.itrace(frame,:)))
     tipx = - track.Data(2:end-10,2);
     itrace = track.itrace(frame,:);
     x = double((((0:length(itrace)-1)-28)*157/4) + tipx(1));
-    plot(x,itrace);
+    plot(-x,itrace,'g--');
 %     return
 %     if isnan(track.Data(frame,2))
 %         if frame+1 > size(track.Data,1)
@@ -59,8 +59,10 @@ if ~all(isnan(track.itrace(frame,:)))
 %         xlim([x(1) track.Data(frame,2)+500]);
 %     end
     hold on
-    yn = itrace-nanmean(track.itrace(1:5,:));   
-    plot(x,yn);
+    bg = nanmean(track.itrace(1:5,:));
+    yn = itrace-bg;   
+    plot(-x,yn,'r--');
+    plot(-x,bg,'k--');
 %     plot(x,itrace./track.itrace(1,:) .* mean(itrace));
     datacursormode on
 % 
@@ -75,28 +77,28 @@ if ~all(isnan(track.itrace(frame,:)))
     if iframe > 0
     GFPTip = track.GFPTip(iframe);
     [~,idGFPTip] = min(abs(x-GFPTip));
-    plot(x,[itrace(1:idGFPTip) yn(idGFPTip+1:end)+itrace(idGFPTip+1)-yn(idGFPTip+1)]);
+    plot(-x,[itrace(1:idGFPTip) yn(idGFPTip+1:end)+itrace(idGFPTip+1)-yn(idGFPTip+1)]);
 %     return
     if iframe > 1
         if iframe < length(tipx)
-            vline(mean(tipx(iframe-1:iframe)));
+            vline(-mean(tipx(iframe-1:iframe)));
         else
-            vline(tipx(end));
+            vline(-tipx(end));
         end
     else
-        vline(tipx(iframe));
+        vline(-tipx(iframe));
     end
     
     minima = track.minima(iframe,:);
-    vline(GFPTip,'g:');
+    vline(-GFPTip,'g:');
     if ~isnan(minima(1))
-        vline(x(minima), 'b:');
+        vline(-x(minima), 'b:');
     end
     data = fitFrame.getPlotData(track,1:9);
     data = squeeze(data(iframe,:,:));
     fdata = double(data(3:end,:));
     
-    if ~isnan(data(1))
+    if 0%~isnan(data(1))
     h1 = plot(x,fitFrame.fun1(x,fdata(:,1)));
     h2 = plot(x,fitFrame.fun1(x,fdata(:,2)));
     h3 = plot(x,fitFrame.fun1(x,fdata(:,3)));
@@ -134,12 +136,14 @@ if ~all(isnan(track.itrace(frame,:)))
 %     catch
 %     end
 %     plot(track.x_sel{frame}([1 end]),[mean(ylim) mean(ylim)]);
-try
-    tubframedat = find(track.framestub(:,2)==track.frames(iframe,1));
-    itracetub = (itrace(idGFPTip).*track.itracetub(tubframedat,:))./max(track.itracetub(tubframedat,:));
-    plot(x,itracetub,'k');
-catch
-end
+% try
+%     tubframedat = find(track.framestub(:,2)==track.frames(iframe,1));
+%     itracetub = (itrace(idGFPTip).*track.itracetub(tubframedat,:))./max(track.itracetub(tubframedat,:));
+%     plot(x,itracetub,'k');
+% catch
+% end
+    ylabel('Ase1 count [1]');
+    xlabel('Distance from seed [nm]');
     drawnow;
     hold off
 end
