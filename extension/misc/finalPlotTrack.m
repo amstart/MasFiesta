@@ -1,4 +1,4 @@
-trackN = 17;
+trackN = 135;
 track = Tracks(trackN);
 
 tipx = - track.Data(1:end-10,2);
@@ -30,8 +30,11 @@ for iframe = find(select)'
     minima = track.minima(iframe,:);
     [~,idGFPTip] = min(abs(-x-GFPTip));
     nofitline = plot(x(1:minima(1)),itrace(1:minima(1)), 'Color', colors(iframe,:), 'LineStyle', ':');
-    fitline =  plot(x(minima(1):minima(2)),[itrace(minima(1):idGFPTip) yn(idGFPTip+1:minima(2))+itrace(idGFPTip+1)-yn(idGFPTip+1)], ...
+    fitline =  plot(x(minima(1):minima(2)),itrace(minima(1):minima(2)), ...
         'Color', colors(iframe,:));
+%     nofitline = plot(x(1:minima(1)),itrace(1:minima(1)), 'Color', colors(iframe,:), 'LineStyle', ':');
+%     fitline =  plot(x(minima(1):minima(2)),[itrace(minima(1):idGFPTip) yn(idGFPTip+1:minima(2))+itrace(idGFPTip+1)-yn(idGFPTip+1)], ...
+%         'Color', colors(iframe,:));
 end
 colormap('cool');
 time = track.Data2(find(select, 1, 'last'),1) - track.Data2(1,1);
@@ -41,4 +44,4 @@ ylabel('Ase1 count [1]')
 xlabel('Distance from seed [nm]')
 pbaspect([2 1 1]);
 legend([bgline fitline nofitline], {'Ase1 profile before catastrophe', 'Ase1 profile at MT tip (used for fitting)', 'Ase1 profile beyond MT tip (not used for fitting)'});
-xlim([-1000 0])
+% xlim([-1000 0])

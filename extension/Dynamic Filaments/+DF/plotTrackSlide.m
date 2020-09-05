@@ -136,12 +136,12 @@ if ~all(isnan(track.itrace(frame,:)))
 %     catch
 %     end
 %     plot(track.x_sel{frame}([1 end]),[mean(ylim) mean(ylim)]);
-% try
-%     tubframedat = find(track.framestub(:,2)==track.frames(iframe,1));
-%     itracetub = (itrace(idGFPTip).*track.itracetub(tubframedat,:))./max(track.itracetub(tubframedat,:));
-%     plot(x,itracetub,'k');
-% catch
-% end
+try
+    tubframedat = find(track.framestub(:,2)==track.frames(iframe,1));
+    itracetub = (itrace(idGFPTip).*track.itracetub(tubframedat,:))./max(track.itracetub(tubframedat,:));
+    plot(-x,itracetub,'k');
+catch
+end
     ylabel('Ase1 count [1]');
     xlabel('Distance from seed [nm]');
     drawnow;
