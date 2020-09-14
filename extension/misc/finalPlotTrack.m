@@ -1,13 +1,11 @@
-trackN = 135;
+trackN = 82;
 track = Tracks(trackN);
 
 tipx = - track.Data(1:end-10,2);
-bg = mean(track.itrace(1:5,:));
+bg = nanmean(track.itrace(1:5,:));
 x = -double((((0:length(bg)-1)-28)*157/4) + tipx(2));
 
-bg = bg(x>-1000);
-itracemat = track.itrace(5:end-10, x>-1000);
-x = x(x>-1000);
+itracemat = track.itrace(5:end-10, :);
 
 figure
 title(num2str(trackN));

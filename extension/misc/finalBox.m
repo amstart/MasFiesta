@@ -7,13 +7,13 @@ for i=1:length(Tracks)
     track = Tracks(i);
     if length(track.FitData) > 1
         d = fitFrame.getPlotData(track, 2);
-        a = squeeze(d(:,4));
-        lattd = squeeze(d(:,5));
-%         d = a;
+        a =  squeeze(d(:,3));
+        lattd = squeeze(d(:,18));
+        d = a./lattd;
         
-        aing = squeeze(d(:,12));
-        t = squeeze(d(:,1));
-        
+%         aing = squeeze(d(:,12));
+%         t = squeeze(d(:,1));
+%         
         
         select = true(size(d(:,1)));% | d1(:,3) < 1;
         select(end-9:end) = 0;
@@ -22,13 +22,13 @@ for i=1:length(Tracks)
         select(find(select==0,1):end) = 0;
         select(~isnan(track.tags)) = 0;
 
-        p = polyfit(t(select),aing(select),1);
+%         p = polyfit(t(select),aing(select),1);
         
-        type = [type; isempty(strfind(track.Type,'OL'))];
-        x = [x; p(1)];
+%         type = [type; isempty(strfind(track.Type,'OL'))];
+%         x = [x; p(1)];
         
-%         type = [type; ones(sum(select),1) .* isempty(strfind(track.Type,'OL'))];
-%         x = [x; d(select,:)];
+        type = [type; ones(sum(select),1) .* isempty(strfind(track.Type,'OL'))];
+        x = [x; d(select,:)];
         weights = [weights; ones(sum(select),9)./sum(select)];
     end
 end
@@ -59,7 +59,7 @@ figure
 % % set(box.handles.box, 'EdgeColor', 'blue')
 
 plotvar = x;
-boxsingle = iosr.statistics.boxPlot(padcat(plotvar(type==1,:), plotvar(type==0,:)), 'medianColor','r', 'showOutliers', true, 'showMean', true, 'sampleSize',true)
+boxsingle = iosr.statistics.boxPlot(padcat(plotvar(type==1,:), plotvar(type==0,:)), 'medianColor','r', 'showOutliers', true, 'showScatter', true, 'sampleSize',true)
 hold on
 pbaspect([1 1 1]);
 ylabel('Sigma [nm]');

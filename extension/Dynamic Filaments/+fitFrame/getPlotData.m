@@ -19,8 +19,9 @@ for i = 1:length(dims)
     ap = nan(size(tau));
     apd = nan(size(tau));
     apf = 0;
+    si = nan(size(tau));
     th = d(:,1)+d(:,3);
-    static_itrace = nanmean(track.itrace(1:6,:));
+    static_itrace = nanmean(track.itrace(1:5,:));
     x = double((((0:length(track.itrace(1,:))-1)-40)*157/4) - track.Data(2,2));
     for j = 1:length(tau)
         [~,idTip] = min(abs(x-track.GFPTip(j)));
@@ -45,16 +46,19 @@ for i = 1:length(dims)
         if ~del(j)
             if ~apf
                 apf = 1;
+                [~,curr] = min(abs(x-pos(apf)));
+                si(j) = static_itrace(curr);
                 continue
             end
             [~,prev] = min(abs(x-pos(apf)));
             apf = apf + 1;
             [~,curr] = min(abs(x-pos(apf)));
+            si(j) = static_itrace(curr);
             if prev < curr
                 ap(j) = nansum(static_itrace(prev:curr))/4;
                 apd(j) = ap(j)/diff(pos(apf-1:apf));
             end
         end
     end
-    out = cat(3, out, [t v d g tg th ap apd minheight]);
+    out = cat(3, out, [t v d g tg th ap apd minheight si]);
 end
