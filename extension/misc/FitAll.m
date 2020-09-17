@@ -181,7 +181,7 @@ for i = 1:length(Tracks)
 %             change = findchangepts(ym);
 %             change = x(change);
     
-            xp = x(minima(1):minima(2));
+            xp = x(idTip-5:minima(2));
             
 %             if ~any(x>0)
 %                 error('itrace too short');
@@ -195,7 +195,7 @@ for i = 1:length(Tracks)
                 track.protoF(iframe) = max(peakvals);
             end
             
-            yp = ym(minima(1):minima(2));
+            yp = yn(idTip-5:minima(2));
             ymean = wmean(ym(minima(2):eval), 1-(0:eval-minima(2))/100);
 
             if ymean < yp(end)
@@ -203,6 +203,9 @@ for i = 1:length(Tracks)
             else
                 bg1 = mean([ymean yp(end)]) - bg2;
             end
+            
+            bg1 = 0;
+            
             s = [170 500];
             [fits0] = fitFrame.para_fit_exp(xp, yp, bg1, bg2, s, nan, nan, 0, 1);
             [fits1] = fitFrame.para_fit_exp(xp, yp, bg1, bg2, s, nan, nan, 0, 0);

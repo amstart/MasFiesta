@@ -7,9 +7,9 @@ for i=1:length(Tracks)
     track = Tracks(i);
     if length(track.FitData) > 1
         d = fitFrame.getPlotData(track, 2);
-        a =  squeeze(d(:,3));
+        a =  squeeze(d(:,4));
         lattd = squeeze(d(:,18));
-        d = a./lattd;
+        d = a;%./lattd;
         
 %         aing = squeeze(d(:,12));
 %         t = squeeze(d(:,1));
