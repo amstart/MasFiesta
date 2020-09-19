@@ -7,7 +7,7 @@ for i=1:length(Tracks)
     track = Tracks(i);
     if length(track.FitData) > 1
         d = fitFrame.getPlotData(track, 2);
-        a =  squeeze(d(:,4));
+        a =  squeeze(d(:,12));
         lattd = squeeze(d(:,18));
         d = a;%./lattd;
         

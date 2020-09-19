@@ -163,12 +163,12 @@ for i = 1:length(Tracks)
             if isnan(tip)
                 minima(2) = minlocright(rightmin+1);
                 tip = fitFrame.getTip(x(minima(1):minima(2)), yn(minima(1):minima(2))); %track61
-                if isnan(tip)
-                    tip = fitFrame.getTip(x(minima(1):minima(2)), yf(minima(1):minima(2))+yn(minima(1):minima(2)));
+%                 if isnan(tip)
+%                     tip = fitFrame.getTip(x(minima(1):minima(2)), yf(minima(1):minima(2))+yn(minima(1):minima(2)));
                     if isnan(tip)
                         error('max not captured');
                     end
-                end
+%                 end
             end
             track.minima(iframe,:) = minima;
             track.GFPTip(iframe) = tip;
