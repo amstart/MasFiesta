@@ -7,28 +7,34 @@ for i=1:length(Tracks)
     track = Tracks(i);
     if length(track.FitData) > 1
         d = fitFrame.getPlotData(track, 2);
-        a =  squeeze(d(:,12));
-        lattd = squeeze(d(:,18));
-        d = a;%./lattd;
+        a =  squeeze(d(:,21));
+        steady_d = squeeze(d(:,18));
+        norm_d = squeeze(d(:,19));
         
 %         aing = squeeze(d(:,12));
 %         t = squeeze(d(:,1));
 %         
         
-        select = true(size(d(:,1)));% | d1(:,3) < 1;
+        select = true(size(a));% | d1(:,3) < 1;
         select(end-9:end) = 0;
         select(track.Data(:,2)<500) = 0;
         select(track.GFPTip>-500 &isnan(track.tags(5:end)))= 0;
         select(find(select==0,1):end) = 0;
         select(~isnan(track.tags)) = 0;
+        
+        a = a(select);
 
 %         p = polyfit(t(select),aing(select),1);
         
-%         type = [type; isempty(strfind(track.Type,'OL'))];
+        if isempty(find(~isnan(a), 1, 'last'))
+            continue
+        end
+        type = [type; isempty(strfind(track.Type,'OL'))];
+        x = [x; a(find(~isnan(a), 1, 'last'))/a(1)];
 %         x = [x; p(1)];
         
-        type = [type; ones(sum(select),1) .* isempty(strfind(track.Type,'OL'))];
-        x = [x; d(select,:)];
+%         type = [type; ones(sum(select),1) .* isempty(strfind(track.Type,'OL'))];
+%         x = [x; ];
         weights = [weights; ones(sum(select),9)./sum(select)];
     end
 end
@@ -64,3 +70,6 @@ hold on
 pbaspect([1 1 1]);
 ylabel('Sigma [nm]');
 xticklabels({'Single MTs', 'Crosslinked MTs'} );
+
+[h,p]=ttest2(plotvar(type==1,:), plotvar(type==0,:))
+% sigstar({[1 2], [2,4]}, [0.0122, nan]);

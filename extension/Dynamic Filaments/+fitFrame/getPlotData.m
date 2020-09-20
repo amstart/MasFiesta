@@ -18,14 +18,21 @@ for i = 1:length(dims)
     tg = nan(size(tau));
     ap = nan(size(tau));
     apd = nan(size(tau));
+    GFPatSeed = nan(size(tau));
     apf = 0;
-    si = nan(size(tau));
+    distTosteady = nan(size(tau));
+    steady_d = nan(size(tau));
+    measured_d = nan(size(tau));
     th = d(:,1)+d(:,3);
-    static_itrace = nanmean(track.itrace(1:5,:));
-    x = double((((0:length(track.itrace(1,:))-1)-40)*157/4) - track.Data(2,2));
+    steady_itrace = nanmean(track.itrace(1:5,:));
+    x = double((((0:length(track.itrace(1,:))-1)-28)*157/4) - track.Data(2,2));
     for j = 1:length(tau)
         [~,idTip] = min(abs(x-track.GFPTip(j)));
         itrace = track.itrace(j+4,:);
+        if track.GFPTip(j) + 2000 < 0
+            [~,idSeed] = min(abs(x+250));
+            GFPatSeed(j) = itrace(idSeed);
+        end
         MTend = d(j,5);
         if dims(i) < 6
             dist = normpdf(x,MTend,sigmagauss(j));
@@ -43,22 +50,27 @@ for i = 1:length(dims)
         if tg(j) == 0
             tg(j) = nan;
         end
+        steady_d(j) = steady_itrace(idTip);
+        measured_d(j) = itrace(idTip);
+        yn = itrace-steady_itrace;
+        ptTosteady = find(yn(idTip:end)<yn(idTip)*0.1,1);
+        if ~isempty(ptTosteady)
+            distTosteady(j) = (ptTosteady - 1)*157/4;
+        end
         if ~del(j)
             if ~apf
                 apf = 1;
                 [~,curr] = min(abs(x-pos(apf)));
-                si(j) = static_itrace(curr);
-                continue
+            else
+                [~,prev] = min(abs(x-pos(apf)));
+                apf = apf + 1;
+                [~,curr] = min(abs(x-pos(apf)));
             end
-            [~,prev] = min(abs(x-pos(apf)));
-            apf = apf + 1;
-            [~,curr] = min(abs(x-pos(apf)));
-            si(j) = static_itrace(curr);
-            if prev < curr
-                ap(j) = nansum(static_itrace(prev:curr))/4;
+            if apf > 1 && prev < curr
+                ap(j) = nansum(steady_itrace(prev:curr))/4;
                 apd(j) = ap(j)/diff(pos(apf-1:apf));
             end
         end
     end
-    out = cat(3, out, [t v d g tg th ap apd minheight si]);
+    out = cat(3, out, [t v d g tg th ap apd minheight steady_d measured_d distTosteady GFPatSeed]);
 end

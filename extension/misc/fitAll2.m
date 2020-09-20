@@ -29,12 +29,21 @@ for i = 1:length(Tracks)
             [~, seed] = min(abs(x));
             yn = yf-nanmean(itrace(1:5,:));
             [~, tippt1] = min(abs(-x-tipx(iframe)));
+
             [~, maxid] = max(yn(20:tippt1+30));
             maxid = maxid + 19;
+            
+            if yn(maxid) < 0
+                maxidold = maxid;
+                [~, maxid] = max(yn(maxidold:maxidold+20));
+                maxid = maxidold + maxid - 1;
+            end
 
             [~,idTip] = min(abs(x-track.GFPTip(iframe)));
             if abs(maxid-idTip) > 1
-                figure; hold on; plot(yf); plot(yn);vline(maxid,'b:');vline(idTip,'g:');vline(tippt1)
+                if ~ismember([i frame], notfit1(:,1:2), 'rows')
+                    figure; hold on; plot(yf); plot(yn);vline(maxid,'b:');vline(idTip,'g:');vline(tippt1)
+                end
                 notfit = [notfit; i frame maxid-idTip];
             end
 

@@ -1,5 +1,4 @@
 sTracks = Tracks([Tracks.Shrinks]);
-hasfitdata = zeros(length(sTracks),1);
 density = zeros(length(sTracks),1);
 startendvel = zeros(length(sTracks),1);
 type = zeros(length(sTracks),1);
@@ -8,7 +7,6 @@ events = zeros(length(sTracks),1);
 for i = 1:length(sTracks)
     track = sTracks(i);
     type(i) = isempty(strfind(track.Type,'OL'));
-    hasfitdata(i) = length(track.Data2) > 1;
     events(i) = ~track.isPause & track.DistanceEventEnd > 500 & track.Event;
     data = track.Data(:,1:2);
     data(data(:,2)<500,:) = [];
