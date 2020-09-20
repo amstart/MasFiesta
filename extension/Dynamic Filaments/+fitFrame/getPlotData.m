@@ -31,7 +31,7 @@ for i = 1:length(dims)
         itrace = track.itrace(j+4,:);
         if track.GFPTip(j) + 2000 < 0
             [~,idSeed] = min(abs(x+250));
-            GFPatSeed(j) = itrace(idSeed);
+            GFPatSeed(j) = mean(itrace(idSeed-9:idSeed));
         end
         MTend = d(j,5);
         if dims(i) < 6
@@ -53,7 +53,7 @@ for i = 1:length(dims)
         steady_d(j) = steady_itrace(idTip);
         measured_d(j) = itrace(idTip);
         yn = itrace-steady_itrace;
-        ptTosteady = find(yn(idTip:end)<yn(idTip)*0.1,1);
+        ptTosteady = find(yn(idTip:end)<yn(idTip)*0.5,1);
         if ~isempty(ptTosteady)
             distTosteady(j) = (ptTosteady - 1)*157/4;
         end

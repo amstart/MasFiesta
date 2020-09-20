@@ -12,7 +12,7 @@ for i=1:length(Tracks)
         norm_d = squeeze(d(:,19));
         
 %         aing = squeeze(d(:,12));
-%         t = squeeze(d(:,1));
+
 %         
         
         select = true(size(a));% | d1(:,3) < 1;
@@ -20,21 +20,23 @@ for i=1:length(Tracks)
         select(track.Data(:,2)<500) = 0;
         select(track.GFPTip>-500 &isnan(track.tags(5:end)))= 0;
         select(find(select==0,1):end) = 0;
-        select(~isnan(track.tags)) = 0;
+        select(~isnan(track.tags(5:end))) = 0;
         
+        select = select & ~isnan(a);
         a = a(select);
-
+        t = squeeze(d(select,1));
 %         p = polyfit(t(select),aing(select),1);
         
-        if isempty(find(~isnan(a), 1, 'last'))
+        if isempty(a)
             continue
         end
         type = [type; isempty(strfind(track.Type,'OL'))];
-        x = [x; a(find(~isnan(a), 1, 'last'))/a(1)];
-%         x = [x; p(1)];
+        p = polyfit(t,a,1);
+%         x = [x; a(find(~isnan(a), 1, 'last'))/a(1)];
+        x = [x; p(1)/a(1)*diff(t([1 end]))];
         
 %         type = [type; ones(sum(select),1) .* isempty(strfind(track.Type,'OL'))];
-%         x = [x; ];
+%         x = [x; a];
         weights = [weights; ones(sum(select),9)./sum(select)];
     end
 end
