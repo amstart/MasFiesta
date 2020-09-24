@@ -73,4 +73,6 @@ sigstar({[1 3], [2,4]}, [0.0122, nan]);
 set(gca, 'FontSize', 13);
 pbaspect([1 1 1]);
 figure
-bar([nansum(dmatrix)' [0; 0; 0; sum(events)]])
+bar([0; 0; 0; sum(events)]'./nansum(dmatrix)*60)
+ax = gca(); 
+ax.XTickLabel = tickLabels; 

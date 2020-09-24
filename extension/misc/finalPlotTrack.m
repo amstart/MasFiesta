@@ -9,7 +9,7 @@ itracemat = track.itrace(5:end-10, :);
 
 figure
 title(num2str(trackN));
-bgline = plot(x,bg, 'k--');
+% bgline = plot(x,bg, 'k--');
 hold on
 
 select = track.GFPTip<-500 | isnan(track.GFPTip);
@@ -28,7 +28,7 @@ for iframe = find(select)'
     minima = track.minima(iframe,:);
     [~,idGFPTip] = min(abs(-x-GFPTip));
     nofitline = plot(x(1:minima(1)),itrace(1:minima(1)), 'Color', colors(iframe,:), 'LineStyle', ':');
-    fitline =  plot(x(minima(1):minima(2)),itrace(minima(1):minima(2)), ...
+    fitline =  plot(x(minima(1):minima(2)),yn(minima(1):minima(2)), ...
         'Color', colors(iframe,:));
 %     nofitline = plot(x(1:minima(1)),itrace(1:minima(1)), 'Color', colors(iframe,:), 'LineStyle', ':');
 %     fitline =  plot(x(minima(1):minima(2)),[itrace(minima(1):idGFPTip) yn(idGFPTip+1:minima(2))+itrace(idGFPTip+1)-yn(idGFPTip+1)], ...

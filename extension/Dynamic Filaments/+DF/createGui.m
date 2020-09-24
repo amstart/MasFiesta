@@ -161,8 +161,9 @@ tooltipstr=sprintf(['Set the Z variable.']);
 hDFGui.lPlot_ZVar = uicontrol('Parent',hDFGui.pOptions,'Units','normalized','Callback',@DF.updateOptions,...
                             'Position',[0.75 0.45 0.15 0.125],'BackgroundColor','white', 'TooltipString', tooltipstr,'Style','popupmenu','Tag','lPlot_ZVar','Enable','on');
 
-str = {'time','vel','amplitude gauss','sigma','lattice density','bg density','MT tip','tau','sigma gauss','shift gauss','sum square error', 'Ase1 in Gauss', 'Ase1 in extension', 'amplitude + lattice density', 'Ase1 passed', 'Ase1 passed/distance', 'min height'};
-unit = {'s','nm/s','1','nm','1','1','nm','nm','nm','nm','1sq', '1', '1', '1', '1', '1/nm', '1'};
+str = {'time','vel','amplitude gauss','sigma','lattice density','bg density','MT tip','tau','sigma gauss','shift gauss','sum square error', 'Ase1 in Gauss', 'Ase1 in extension', ...
+    'amplitude + lattice density', 'Ase1 passed', 'Ase1 passed/distance', 'min height', 'steady_d', 'measured_d', 'distTosteady', 'GFPatSeed'};
+unit = {'s','nm/s','1','nm','1','1','nm','nm','nm','nm','1sq', '1', '1', '1', '1', '1/nm', '1', '1', '1', 'nm', '1'};
 tooltipstr=sprintf(['Set the X variable.']); %lPlot_XVar and lPlot_YVar are set in DF.updateOptions()
                                
 hDFGui.lPlot_XVarT = uicontrol('Parent',hDFGui.pOptions,'Units','normalized','Callback',@DF.updateOptions,'String',str,...

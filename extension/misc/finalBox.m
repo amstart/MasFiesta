@@ -7,7 +7,8 @@ for i=1:length(Tracks)
     track = Tracks(i);
     if length(track.FitData) > 1
         d = fitFrame.getPlotData(track, 2);
-        a =  squeeze(d(:,21));
+        a =  squeeze(d(:,4));
+        amplitude = squeeze(d(:,3));
         steady_d = squeeze(d(:,18));
         norm_d = squeeze(d(:,19));
         
@@ -23,20 +24,21 @@ for i=1:length(Tracks)
         select(~isnan(track.tags(5:end))) = 0;
         
         select = select & ~isnan(a);
+        select = select & amplitude > 1;
         a = a(select);
-        t = squeeze(d(select,1));
+%         t = squeeze(d(select,1));
 %         p = polyfit(t(select),aing(select),1);
         
         if isempty(a)
             continue
         end
-        type = [type; isempty(strfind(track.Type,'OL'))];
-        p = polyfit(t,a,1);
+%         type = [type; isempty(strfind(track.Type,'OL'))];
+%         p = polyfit(t,a,1);
 %         x = [x; a(find(~isnan(a), 1, 'last'))/a(1)];
-        x = [x; p(1)/a(1)*diff(t([1 end]))];
+%         x = [x; p(1)/a(1)];
         
-%         type = [type; ones(sum(select),1) .* isempty(strfind(track.Type,'OL'))];
-%         x = [x; a];
+        type = [type; ones(sum(select),1) .* isempty(strfind(track.Type,'OL'))];
+        x = [x; a];
         weights = [weights; ones(sum(select),9)./sum(select)];
     end
 end
