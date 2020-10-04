@@ -181,33 +181,32 @@ for i = 1:length(Tracks)
 %             change = findchangepts(ym);
 %             change = x(change);
     
-            xp = x(idTip-4:end);
+            xp = x(idTip-4:minima(2));
             
 %             if ~any(x>0)
 %                 error('itrace too short');
 %             end
-            eval = min(length(ym),minima(2)+99);
+            eval = min(length(yn),minima(2)+99);
             
-            bg2 = max(min(ym(1:40)),0);
+            bg2 = 0;
             
             peakvals = findpeaks(ym(max(minima(1)-20,1):minima(1)),'NPeaks',1,'MinPeakProminence',0.5);
             if ~isempty(peakvals)
                 track.protoF(iframe) = max(peakvals);
             end
             
-            yp = yn(idTip-4:end);
+            yp = yn(idTip-4:minima(2));
             weights = ones(size(yp));
 %             weights(10:end) = 1 - (1:(length(weights)-9))*0.01;
 %             weights(weights < 0) = 0;
-%             ymean = wmean(ym(minima(2):eval), 1-(0:eval-minima(2))/100);
+            ymean = wmean(yn(minima(2):eval), 1-(0:eval-minima(2))/100);
 % 
 %             if ymean < yp(end)
 %                 bg1 = ymean - bg2;
 %             else
-%                 bg1 = mean([ymean yp(end)]) - bg2;
+            bg1 = mean([ymean yp(end)]) - bg2;
 %             end
             
-            bg1 = 0;
             
             s = [0 500];
             [fits0] = fitFrame.para_fit_exp(xp, yp, bg1, bg2, s, nan, nan, 0, 1, weights);

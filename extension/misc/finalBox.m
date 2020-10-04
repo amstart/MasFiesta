@@ -16,7 +16,7 @@ for i=1:length(Tracks)
 
 %         
         
-        select = true(size(a));% | d1(:,3) < 1;
+        select = true(size(a));% | amplitude < 1;
         select(end-9:end) = 0;
         select(track.Data(:,2)<500) = 0;
         select(track.GFPTip>-500 &isnan(track.tags(5:end)))= 0;

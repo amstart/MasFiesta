@@ -10,6 +10,7 @@ for i = 1:length(dims)
     v = nan(size(t));
     pos = d(~del,5)+d(~del,8);
     v(~del) = [nan; diff(pos)./diff(t(~del))];
+    v(v<0) = nan;
     d(del,:) = nan;
     minheight(del,:) = nan;
     sigmagauss = d(:,7);
@@ -53,6 +54,7 @@ for i = 1:length(dims)
         steady_d(j) = steady_itrace(idTip);
         measured_d(j) = itrace(idTip);
         yn = itrace-steady_itrace;
+        g(j) = sum(yn(idTip:idTip+13)-mean(yn(idTip+14:idTip+20)))/2;
         ptTosteady = find(yn(idTip:end)<yn(idTip)*0.5,1);
         if ~isempty(ptTosteady)
             distTosteady(j) = (ptTosteady - 1)*157/4;

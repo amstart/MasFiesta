@@ -21,8 +21,8 @@ end
 a = 500;
 
 suggs = [amp,300,bg1,bg2,tip,tau];
-lb = [0,se(1),0,bg2,tip-a,0];
-ub = [amp_h,se(2),0,bg2,tip+a,tau_h];
+lb = [0,se(1),bg1,bg2,tip-a,0];
+ub = [amp_h,se(2),bg1,bg2,tip+a,tau_h];
 
 p = [suggs;lb;ub];
 
