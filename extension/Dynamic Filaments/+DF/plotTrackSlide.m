@@ -11,7 +11,7 @@ slmax = size(track.itrace,1);
        
 bTag = uicontrol('Tag','lDim1','String','Tag','Position',[130 5 30 20],'Style','pushbutton');
 
-lTag = uicontrol('Tag','lTags','String',{'none', '2much noise', 'pos ok', 'trash','maybe'},'Position',[200 5 150 20],'Style','popupmenu', 'Value',4);
+lTag = uicontrol('Tag','lTags','String',{'none', '2much noise', 'pos ok', 'trash','maybe','rescue'},'Position',[200 5 150 20],'Style','popupmenu', 'Value',4);
 
 plotTrack(tracknum, 1, lTag);
 
@@ -67,7 +67,7 @@ if ~all(isnan(track.itrace(frame,:)))
     datacursormode on
 % 
     if ~isnan(track.tags(frame))
-        set(gca,'Color',[1 1 1] - 0.2 * track.tags(frame));
+        set(gca,'Color',[1 1 1] - 0.15 * track.tags(frame));
     elseif iframe > 0
         set(gca,'Color',[1 1 1-0.1*sum(track.protoFa(iframe,:))]);
     else
@@ -94,25 +94,18 @@ if ~all(isnan(track.itrace(frame,:)))
     if ~isnan(minima(1))
         vline(-x(minima), 'b:');
     end
-    data = fitFrame.getPlotData(track,1:9);
+    data = fitFrame.getPlotData(track,[2 6]);
     data = squeeze(data(iframe,:,:));
     fdata = double(data(3:end,:));
     
-    if 0%~isnan(data(1))
-    h1 = plot(x,fitFrame.fun1(x,fdata(:,1)));
-    h2 = plot(x,fitFrame.fun1(x,fdata(:,2)));
-    h3 = plot(x,fitFrame.fun1(x,fdata(:,3)));
-    h4 = plot(x,fitFrame.fun1(x,fdata(:,4)));
-    h5 = plot(x,fitFrame.fun1(x,fdata(:,5)));
-    h6 = plot(x,fitFrame.fun1(x,fdata(:,6)));
-    h7 = plot(x,fitFrame.fun1(x,fdata(:,7)));
-    h8 = plot(x,fitFrame.fun1(x,fdata(:,8)));
-    h9 = plot(x,fitFrame.fun1(x,fdata(:,9)));
+
+    h1 = plot(-x,fitFrame.fun1(x,fdata(:,1)));
+
+    h6 = plot(-x,fitFrame.fun1(x,fdata(:,2)));
     
-    vline(fdata(5,7),'k:');
-    vline(fdata(5,7)+fdata(6,7),'y');
-    text(fdata(5,4), 1, {['v_{erf} = ' num2str(data(2,1))], ['G = ' num2str(data(12,7))], ['s_{exp} = ' num2str(fdata(7,7))],...
-        ['shift_{exp} = ' num2str(fdata(8,7))], ['s_{erf} = ' num2str(fdata(2,3))], ['s_{gauss} = ' num2str(fdata(7,3))]});
+%     vline(fdata(5,7),'k:');
+%     vline(fdata(5,7)+fdata(6,7),'y');
+    text(-GFPTip, 1, {['v = ' num2str(data(2,2))]});
 
 %     legend([h1 h2 h3 h4 h5 h6],...
 %     {['e=' num2str(data(10,1),3)],...
@@ -122,7 +115,7 @@ if ~all(isnan(track.itrace(frame,:)))
 %     ['sigdiff=' num2str(diff(data([2 7],5)),3) ' e=' num2str(data(10,5),3)],...
 %     [' s=' num2str(data(2,6),3) ' t=' num2str(data(8,6),3) ' e=' num2str(data(10,6),3)]},...
 %     'Location', 'southeast');
-    end
+
     title(['MT: ' num2str(track.MTIndex) ' track: ' num2str(track.TrackIndex)...
         '   frame: ' num2str(iframe) '/' num2str(track.frames(iframe,:)) '   time: ' num2str(track.TimeInfo(track.frames(iframe,2)),3)...
         '   # protoF: ' num2str(track.protoFn)]);
