@@ -11,7 +11,12 @@ end
 
 for i=1:length(k)
 for j = 1:length(k{i})
-I = k{i}{j}{2}; k{i}{j}{2} = (nansum(I, 1)-sum(~isnan(I),1).*min(min(double(I), [], 1)));
+% I = k{i}{j}{2}; k{i}{j}{2} = (nansum(I, 1)-sum(~isnan(I),1).*min(min(double(I), [], 1)));
+x = double((((0:size(t(i).itrace,2)-1)-28)*(157/4)) - t(i).Data(2,2));
+[~, id] = min(abs(x));
+if length(k{i}{j}{2}) > 1 && length(t(i).FitData) > 1
+I = k{i}{j}{2}(:,id-1:id+1); k{i}{j}{2} = (nansum(I, 2)-sum(~isnan(I),2).*min(min(double(I), [], 1)))';
+end
 end
 end
 
@@ -35,10 +40,14 @@ for i=1:length(k)
 end
 
 for i = 1:length(t)
-    d = k{i};
     for j = 1
-        t(i).itrace = s{i}/t(i).IntensityPerMAP;
-        t(i).frames = f{i};
+%         t(i).itrace = s{i}/t(i).IntensityPerMAP;
+%         t(i).frames = f{i};
+        if size(s{i},2) == 9
+            t(i).PSFsample = s{i}/t(i).IntensityPerMAP;
+        else
+            t(i).PSFsample = nan;
+        end
     end
 end
 

@@ -75,5 +75,5 @@ for i = 1:length(dims)
             end
         end
     end
-    out = cat(3, out, [t v d g tg th ap apd minheight steady_d measured_d distTosteady GFPatSeed]);
+    out = cat(3, out, [t v d g tg th ap apd minheight steady_d measured_d distTosteady GFPatSeed track.PSF(5:end)']);
 end

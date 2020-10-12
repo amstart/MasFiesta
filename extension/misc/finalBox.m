@@ -6,28 +6,29 @@ type = [];
 for i=1:length(Tracks)
     track = Tracks(i);
     if length(track.FitData) > 1
-        d = fitFrame.getPlotData(track, 6);
-        a =  squeeze(d(:,4));
-        amplitude = squeeze(d(:,3));
-        steady_d = squeeze(d(:,18));
-        norm_d = squeeze(d(:,19));
+        d = squeeze(fitFrame.getPlotData(track, 6));
+        select = true(size(d(:,3)));% | amplitude < 1;
+        select(end-9:end) = 0;
+        select(track.Data(:,2)<500) = 0;
+        select(track.GFPTip>-500)= 0;
+        select(find(select==0,1):end) = 0;
+        select = select & ~isnan(d(:,3));
+        d = d(select,:);
         
+        t = d(:,1);
+        amplitude = d(:,3);
+        ase1ingauss = d(:,12);
+        ase1passed = d(:,15);
+        steady_d = d(:,18);
+        norm_d = d(:,19);
+        
+        a =  d(:,end);%[nan; diff(ase1ingauss)]./ase1passed;
 %         aing = squeeze(d(:,12));
 
 %         
         
-        select = true(size(a));% | amplitude < 1;
-        select(end-9:end) = 0;
-        select(track.Data(:,2)<500) = 0;
-        select(track.GFPTip>-500 &isnan(track.tags(5:end)))= 0;
-        select(find(select==0,1):end) = 0;
-        select(~isnan(track.tags(5:end))) = 0;
-        
-        select = select & ~isnan(a);
-        select = select & amplitude > 1;
-        a = a(select);
-%         t = squeeze(d(select,1));
-%         p = polyfit(t(select),aing(select),1);
+%         select = select & amplitude > 1;
+
         
         if isempty(a)
             continue
@@ -36,6 +37,7 @@ for i=1:length(Tracks)
 %         p = polyfit(t,a,1);
 %         x = [x; a(find(~isnan(a), 1, 'last'))/a(1)];
 %         x = [x; p(1)/a(1)];
+%         x = [x; p(1)];
         
         type = [type; ones(sum(select),1) .* isempty(strfind(track.Type,'OL'))];
         x = [x; a];
@@ -72,8 +74,8 @@ plotvar = x;
 boxsingle = iosr.statistics.boxPlot(padcat(plotvar(type==1,:), plotvar(type==0,:)), 'medianColor','r', 'showOutliers', true, 'showScatter', true, 'sampleSize',true)
 hold on
 pbaspect([1 1 1]);
-ylabel('Sigma [nm]');
 xticklabels({'Single MTs', 'Crosslinked MTs'} );
+set(gca, 'FontSize', 14)
 
 [h,p]=ttest2(plotvar(type==1,:), plotvar(type==0,:))
 % sigstar({[1 2], [2,4]}, [0.0122, nan]);

@@ -34,7 +34,13 @@ for m = find(FilSelect==1)
             currentframe = frame-missedframes;
             if currentframe > 0 && currentframe < size(Stack,3)
                 I = Stack(:,:,frame-missedframes);
-                out{m}{n}{j} = {[frame, currentframe], get_pixelkymo(I, Data)};
+                PixelSize = 157;
+%                 hMainGui = getappdata(0,'hMainGui');
+%                 nX=hMainGui.Scan.X';
+%                 nY=hMainGui.Scan.Y';
+                nX=double(Data(:,1)/PixelSize);
+                nY=double(Data(:,2)/PixelSize);
+                out{m}{n}{j} = {[frame, currentframe], get_pixelkymo(I, nX, nY)};
             else
                 out{m}{n}{j} = {[frame, currentframe], nan};
             end
@@ -49,15 +55,11 @@ for m = find(FilSelect==1)
 end
 
 
-function [intensity_vec] = get_pixelkymo(I, Data)
-ScanSize = 3;
+function [intensity_vec] = get_pixelkymo(I, nX, nY)
+ScanSize = 4;
 ExtensionLength = 7;
 %extension length is the distance in pixels before the filament end
 res = 4;
-PixelSize = 157;
-nX=double(Data(:,1)/PixelSize);
-nY=double(Data(:,2)/PixelSize);
-d=cumsum(sqrt((nX(2:end)-nX(1:end-1)).^2 + (nY(2:end)-nY(1:end-1)).^2));
 delta = [nX(1)-nX(2) nX(end)-nX(end-1); nY(1)-nY(2) nY(end)-nY(end-1)];
 slope=[abs(delta(2,1)/delta(1,1)) abs(delta(2,2)/delta(1,2))];
 slope(slope == inf) = 0;

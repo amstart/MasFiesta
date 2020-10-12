@@ -94,7 +94,7 @@ if ~all(isnan(track.itrace(frame,:)))
     if ~isnan(minima(1))
         vline(-x(minima), 'b:');
     end
-    data = fitFrame.getPlotData(track,[2 6]);
+    data = fitFrame.getPlotData(track,[6 7]);
     data = squeeze(data(iframe,:,:));
     fdata = double(data(3:end,:));
     
@@ -102,6 +102,7 @@ if ~all(isnan(track.itrace(frame,:)))
     h1 = plot(-x,fitFrame.fun1(x,fdata(:,1)));
 
     h6 = plot(-x,fitFrame.fun1(x,fdata(:,2)));
+    legend([h1 h6], {'Gauss', 'Exp'});
     
 %     vline(fdata(5,7),'k:');
 %     vline(fdata(5,7)+fdata(6,7),'y');

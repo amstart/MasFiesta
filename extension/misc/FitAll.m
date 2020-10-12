@@ -207,7 +207,7 @@ for i = 1:length(Tracks)
             bg1m = wmean(ym(minima(2):eval), (1-(0:eval-minima(2))/100).^2) - bg2m;
             
             
-            s = [0 500];
+            s = [180 180];
             [fits0] = fitFrame.para_fit_exp(xp, yp, bg1, bg2, s, nan, nan, 0, 1, weights);
             [fits1] = fitFrame.para_fit_exp(xp, yp, bg1, bg2, s, nan, nan, 0, 0, weights);
             [fits2] = fitFrame.para_fit_exp(xp, yp, bg1, bg2, s, nan, nan, 1, 0, weights);

@@ -10,6 +10,7 @@ for i = 1:length(sTracks)
     events(i) = ~track.isPause & track.DistanceEventEnd > 500 & track.Event;
     data = track.Data(:,1:2);
     data(data(:,2)<500,:) = [];
+    error('data(find(track.tags(5:end)==6,1):end) = 1;')
     data(isnan(data(:,1)),:) = [];
     t = data(:,1);
     d = data(:,2);
