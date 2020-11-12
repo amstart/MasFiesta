@@ -11,7 +11,7 @@ end
 
 if isexp
     tau = 1;
-    tau_h = 500;
+    tau_h = 1000;
 else
     tau = 0;
     tau_h = 0;
