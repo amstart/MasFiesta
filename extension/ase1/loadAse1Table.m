@@ -19,5 +19,5 @@ l = {{'Single' 'Single', 'Antiparallel' 'Parallel' 'Single' 'Antiparallel' 'Para
     {'0' '42nM' '42nM' '42nM' '420nM' '420nM' '420nM'}};
 boxplotP(v,c+o,dt,f,l);
 
-f = g;
+f = ~g;
 ase1events(e,dx,o,c,f);
