@@ -3,14 +3,15 @@ density = zeros(length(sTracks),1);
 startendvel = zeros(length(sTracks),1);
 type = zeros(length(sTracks),1);
 duration = zeros(length(sTracks),1);
+distance = zeros(length(sTracks),1);
 events = zeros(length(sTracks),1);
 for i = 1:length(sTracks)
     track = sTracks(i);
     type(i) = isempty(strfind(track.Type,'OL'));
     events(i) = ~track.isPause & track.DistanceEventEnd > 500 & track.Event;
     data = track.Data(:,1:2);
-    data(data(:,2)<500,:) = [];
-    error('data(find(track.tags(5:end)==6,1):end) = 1;')
+    track.tags(data(:,2)<500,:) = 6;
+    data(find(track.tags(5:end)==6,1):end,:) = [];
     data(isnan(data(:,1)),:) = [];
     t = data(:,1);
     d = data(:,2);
@@ -26,6 +27,7 @@ for i = 1:length(sTracks)
         shrinkuntilid = round(29 + shrinkuntil / (157/4));
         density(i) = sum(bg(29:shrinkuntilid))/(4*shrinkuntil);
     end
+    distance(i) = -(d(end)-d(1));
     startendvel(i) = -(d(end)-d(1))/(t(end)-t(1));
     duration(i) = t(end)-t(1);
     if shrinkuntil < 500
@@ -54,9 +56,11 @@ g = g - 2*type;
 idx = unique(g);
 matrix = [];
 dmatrix = [];
+distmatrix = [];
 for i = idx'
     matrix = [matrix,[startendvel(g==i); nan(max(0,size(matrix,1)-sum(g==i)),1)]];
     dmatrix = [dmatrix,[duration(g==i); nan(max(0,size(matrix,1)-sum(g==i)),1)]];
+    distmatrix = [distmatrix,[distance(g==i); nan(max(0,size(matrix,1)-sum(g==i)),1)]];
 end
 figure;iosr.statistics.boxPlot(matrix, 'medianColor','r', 'showScatter', true, 'sampleFontSize', 13, 'sampleSize',true)
 hold on
@@ -74,6 +78,6 @@ sigstar({[1 3], [2,4]}, [0.0122, nan]);
 set(gca, 'FontSize', 13);
 pbaspect([1 1 1]);
 figure
-bar([0; 0; 0; sum(events)]'./nansum(dmatrix)*60)
+bar([0; 0; 0; 1000*sum(events)]'./nansum(distmatrix))
 ax = gca(); 
 ax.XTickLabel = tickLabels; 

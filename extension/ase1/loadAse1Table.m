@@ -10,20 +10,24 @@ dt = m(:,11);
 dx = m(:,10);
 
 %compare growth vel
-f = g;
-boxplotP(v,c,dt,f,[]);
+f = g & c>0;
+l = {{'Single' 'Single', 'Antiparallel' 'Parallel' 'Single' 'Antiparallel' 'Parallel'},...
+    {'0' '42nM' '42nM' '42nM' '420nM' '420nM' '420nM'}};
+boxplotP(v,o+c,dt,f,l);
+ylabel('Growth velocity [nm/s]');
 
 %compare shrinking vel
-f = ~g %& o~=2;
+f = ~g; %& o~=2;
 l = {{'Single' 'Single', 'Antiparallel' 'Parallel' 'Single' 'Antiparallel' 'Parallel'},...
     {'0' '42nM' '42nM' '42nM' '420nM' '420nM' '420nM'}};
 boxplotP(v,c+o,dt,f,l);
-ylabel('Shrinking velocity');
+ylabel('Shrinking velocity [nm/s]');
 
 f = ~g;
 ase1events(e,dx./1000,o,c,f,mov);
 ylabel('Rescue frequency [1/um]');
-xticklabels({'Single' 'Antiparallel', 'Parallel'})
+legend('42nM','420nM');
+
 
 figure
 f = ~g & c == 42 & o == 0;

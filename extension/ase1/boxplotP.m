@@ -3,7 +3,9 @@ function boxplotP(d,g,w,f,l)
 %   Detailed explanation goes here
 d = d(f);
 g = g(f);
-w = w(f);
+if ~isempty(w)
+    w = w(f);
+end
 idx = unique(g);
 out = histc(g,idx);
 matrix = nan(max(out),length(idx));
@@ -16,9 +18,9 @@ for i = 1:length(idx)
 end
 figure
 if ~isempty(w)
-    iosr.statistics.boxPlot(matrix,'weights',wmatrix, 'sampleSize', true);
+    iosr.statistics.boxPlot(matrix,'weights',wmatrix, 'sampleSize', true, 'notch', true);
 else
-    iosr.statistics.boxPlot(matrix, 'sampleSize', true);
+    iosr.statistics.boxPlot(matrix, 'sampleSize', true, 'notch', true);
 end
 if ~isempty(l)
     if iscell(l{1})
@@ -34,7 +36,7 @@ else
     xticklabels(idx);
 end
 hold on
-[p,tbl,stats]  = anova1(d,g,'off');
-table = multcompare(stats,'Display','off');
-sigstar(mat2cell(table(:,1:2),ones(size(table(:,1)))), table(:,end));
+% [p,tbl,stats]  = anova1(d,g,'off');
+% table = multcompare(stats,'Display','off');
+% sigstar(mat2cell(table(:,1:2),ones(size(table(:,1)))), table(:,end));
 set(gca, 'FontSize', 13);
