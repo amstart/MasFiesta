@@ -23,21 +23,21 @@ l = {{'Single' 'Single', 'Antiparallel' 'Parallel' 'Single' 'Antiparallel' 'Para
 boxplotP(v,c+o,dt,f,l);
 ylabel('Shrinking velocity [nm/s]');
 
-f = ~g;
-ase1events(e,dx./1000,o,c,f,mov);
+f = ~g & c>0;
+ase1events(e,dx./1000,o,c,f,mov,{'Single', 'Antiparallel', 'Parallel'});
 ylabel('Rescue frequency [1/um]');
 legend('42nM','420nM');
 
-
-figure
-f = ~g & c == 42 & o == 0;
-ecdf(dx(f), 'Censoring', ~e(f), 'Function', 'survivor', 'Bounds','on');
-hold on
-f = ~g & c == 42 & o == 1;
-ecdf(dx(f), 'Censoring', ~e(f), 'Function', 'survivor', 'Bounds','on');
-f = ~g & c == 420 & o == 0;
-ecdf(dx(f), 'Censoring', ~e(f), 'Function', 'survivor', 'Bounds','on');
-f = ~g & c == 420 & o == 1;
-ecdf(dx(f), 'Censoring', ~e(f), 'Function', 'survivor', 'Bounds','on');
-h = get(gca, 'Children');
-legend([h(12) h(6) h(9) h(3)], {'42nM Single MT', '420nM Single MT', '42nM Crosslinked MT', '420nM Crosslinked MT'})
+% 
+% figure
+% f = ~g & c == 42 & o == 0;
+% ecdf(dx(f), 'Censoring', ~e(f), 'Function', 'survivor', 'Bounds','on');
+% hold on
+% f = ~g & c == 42 & o == 1;
+% ecdf(dx(f), 'Censoring', ~e(f), 'Function', 'survivor', 'Bounds','on');
+% f = ~g & c == 420 & o == 0;
+% ecdf(dx(f), 'Censoring', ~e(f), 'Function', 'survivor', 'Bounds','on');
+% f = ~g & c == 420 & o == 1;
+% ecdf(dx(f), 'Censoring', ~e(f), 'Function', 'survivor', 'Bounds','on');
+% h = get(gca, 'Children');
+% legend([h(12) h(6) h(9) h(3)], {'42nM Single MT', '420nM Single MT', '42nM Crosslinked MT', '420nM Crosslinked MT'})

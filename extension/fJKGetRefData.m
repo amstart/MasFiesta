@@ -64,8 +64,8 @@ if ~isempty(refcommentstart)
 else
     if isempty(reftags)
         [~, refpoint] = min(Object.Results(:,6));
-    elseif reftags(1)
-        refpoint = reftags(1);
+    elseif max(reftags)
+        [~, refpoint] = max(reftags);
     else
         refdata=nan;
         return

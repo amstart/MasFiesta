@@ -1,10 +1,11 @@
-sTracks = Tracks([Tracks.Shrinks]);
+% sTracks = Tracks([Tracks.Shrinks]);
 density = zeros(length(sTracks),1);
 startendvel = zeros(length(sTracks),1);
 type = zeros(length(sTracks),1);
 duration = zeros(length(sTracks),1);
 distance = zeros(length(sTracks),1);
 events = zeros(length(sTracks),1);
+[~,~,mov] = unique({sTracks.File});
 for i = 1:length(sTracks)
     track = sTracks(i);
     type(i) = isempty(strfind(track.Type,'OL'));
@@ -52,35 +53,14 @@ ylim([0 800]);
 xlabel('Ase1 density [1/nm]');
 ylabel('Shrinking velocity [nm/s]');
 g = density > 0.03;
-g = g - 2*type;
-idx = unique(g);
-matrix = [];
-dmatrix = [];
-distmatrix = [];
-for i = idx'
-    matrix = [matrix,[startendvel(g==i); nan(max(0,size(matrix,1)-sum(g==i)),1)]];
-    dmatrix = [dmatrix,[duration(g==i); nan(max(0,size(matrix,1)-sum(g==i)),1)]];
-    distmatrix = [distmatrix,[distance(g==i); nan(max(0,size(matrix,1)-sum(g==i)),1)]];
-end
-figure;iosr.statistics.boxPlot(matrix, 'medianColor','r', 'showScatter', true, 'sampleFontSize', 13, 'sampleSize',true)
-hold on
-row1 = {'Single' 'Single' 'Antiparallel' 'Antiparallel'};
-row2 = {'-Ase1' '~0.075 Ase1/nm (4uM)' '~0 Ase1/nm' '~0.075 Ase1/nm (1uM)'};
-labelArray = [row1; row2];
-clear tickLabels;
-tickLabels = strtrim(sprintf('%s\\newline%s\n', labelArray{:}));
-ax = gca(); 
-ax.XTickLabel = tickLabels; 
+
+%compare shrinking vel
+f = true(size(g));
+l = {{'Single' 'Single' 'Antiparallel' 'Antiparallel'},...
+    {'-Ase1' '~0.075 Ase1/nm (4uM)' '~0 Ase1/nm' '~0.075 Ase1/nm (1uM)'}};
+boxplotP(startendvel,g - 2*type,duration,f,l);
 ylabel('Shrinking velocity [nm/s]');
-[p,tbl,stats]  = anova1(startendvel,g,'off');
-table = multcompare(stats,'Display','off');
-sigstar({[1 3], [2,4]}, [0.0122, nan]);
-set(gca, 'FontSize', 13);
-pbaspect([1 1 1]);
-figure
-bar([0; 0; 0; 1000*sum(events)]'./nansum(distmatrix))
-ax = gca(); 
-ax.XTickLabel = tickLabels; 
-text(1:4, ones(1,4).* 0.05, strsplit(num2str(nansum(distmatrix)./1000,3)));
-set(gca, 'FontSize', 14); 
+
+ase1events(events,distance./1000,type,g,f,mov,{'Single' 'Antiparallel'});
 ylabel('Rescue frequency [1/um]');
+% legend('42nM','420nM');

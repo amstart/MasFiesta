@@ -84,10 +84,10 @@ for i=1:length(NewObjects)
     else
         RefPos=fJKGetRefData(NewObjects(i), ref, tags==11, RefObjects);
     end
+    deleted_rows = [];
     if isnan(RefPos)
         DynResults = [nan nan nan 1];
     else
-        deleted_rows = [];
         DynResults = [NewObjects(i).Results(:,1:2) RefPos (1:size(RefPos,1))'];
         for m=length(tags):-1:1
             if tags(m)==9||isnan(RefPos(m))

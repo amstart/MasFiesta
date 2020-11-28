@@ -1,4 +1,4 @@
-function [outputArg1,outputArg2] = ase1events(e,dx,t,grouping,f,mov)
+function [outputArg1,outputArg2] = ase1events(e,dx,t,grouping,f,mov,l)
 %ASE1EVENTS Summary of this function goes here
 %   Detailed explanation goes here
 grouping = grouping(f);
@@ -16,7 +16,7 @@ alldat = [];
 datx = [];
 alldatx = [];
 
-for i = 2:length(gu)
+for i = 1:length(gu)
     for j = 1:length(mu)
         ids = guid==i & mid==j;
         [name,~,id] = unique(t(ids));
@@ -30,10 +30,11 @@ for i = 2:length(gu)
     dat = [];
     datx = [];
 end
-medval = squeeze(mean(alldat,2));
+medval = squeeze(median(alldat,2));
 sumdx = squeeze(sum(alldatx,2));
-err = squeeze(std(alldat,[],2));
-hbar = bar(1:3, medval);
+low = medval-squeeze(min(alldat,[],2));
+high = squeeze(max(alldat,[],2))-medval;
+hbar = bar(1:length(medval), medval);
 ngroups = size(medval, 1);
 nbars = size(medval, 2);
 % Calculate the width for each bar group
@@ -41,9 +42,9 @@ groupwidth = min(0.8, nbars/(nbars + 1.5));
 for i = 1:nbars
     % Calculate center of each bar
     x = (1:ngroups) - groupwidth/2 + (2*i-1) * groupwidth / (2*nbars);
-    errorbar(x, medval(:,i), err(:,i), 'r', 'LineStyle', 'None');
+    errorbar(x, medval(:,i), low(:,i), high(:,i), 'r', 'LineStyle', 'None');
     text(x - groupwidth/6, medval(:,i)./2, num2str(sumdx(:,i),3));
 end
-xticks(1:3);
-xticklabels({'Single', 'Antiparallel', 'Parallel'});
+xticks(1:length(l));
+xticklabels(l);
 set(gca, 'FontSize', 14);
