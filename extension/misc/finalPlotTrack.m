@@ -1,4 +1,4 @@
-trackN = 6;
+trackN = 269;
 track = Tracks(trackN);
 
 tipx = - track.Data(1:end-10,2);
@@ -21,7 +21,7 @@ select(tipx>-500) = 0;
 
 colors = cool(sum(select));
 for iframe = find(select)'
-    itrace = itracemat(iframe,:)./ (4*157);
+    itrace = itracemat(iframe,:)./ 157;
 %     if ~isnan(track.tags(iframe+4)) || isnan(track.GFPTip(iframe))
 %         continue
 %     end

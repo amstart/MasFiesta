@@ -1,4 +1,4 @@
-% sTracks = Tracks([Tracks.Shrinks]);
+sTracks = Tracks([Tracks.Shrinks]);
 density = zeros(length(sTracks),1);
 startendvel = zeros(length(sTracks),1);
 type = zeros(length(sTracks),1);
@@ -8,7 +8,13 @@ events = zeros(length(sTracks),1);
 [~,~,mov] = unique({sTracks.File});
 for i = 1:length(sTracks)
     track = sTracks(i);
-    type(i) = isempty(strfind(track.Type,'OL'));
+    if ~isempty(strfind(track.Type,'Single'))
+        type(i) = 0;
+    elseif ~isempty(strfind(track.Type,'OLP'))
+        type(i) = 2;
+    else
+        type(i) = 1;
+    end
     events(i) = ~track.isPause & track.DistanceEventEnd > 500 & track.Event;
     data = track.Data(:,1:2);
     track.tags(data(:,2)<500,:) = 6;
@@ -52,14 +58,19 @@ xlim([0 0.18]);
 ylim([0 800]);
 xlabel('Ase1 density [1/nm]');
 ylabel('Shrinking velocity [nm/s]');
-g = density > 0.03;
+g = density > 0.005;
 
 %compare shrinking vel
 f = true(size(g));
-l = {{'Single' 'Single' 'Antiparallel' 'Antiparallel'},...
-    {'-Ase1' '~0.075 Ase1/nm (4uM)' '~0 Ase1/nm' '~0.075 Ase1/nm (1uM)'}};
-boxplotP(startendvel,g - 2*type,duration,f,l);
-ylabel('Shrinking velocity [nm/s]');
+l = {{'Single' 'Single' 'Antiparallel' 'Antiparallel', 'Parallel', 'Parallel'},...
+    {'-Ase1' '~0.075 Ase1/nm (4uM)' '~0 Ase1/nm' '~0.075 Ase1/nm (1uM)' '~0 Ase1/nm' '~0.075 Ase1/nm (1uM)'}};
+labelArray = [l{1}; l{2}];
+clear tickLabels;
+tickLabels = strtrim(sprintf('%s\\newline%s\n', labelArray{:}));
+ax = gca(); 
+ax.XTickLabel = tickLabels; 
+% boxplotP(startendvel,g - 10*type,duration,f,l);
+% ylabel('Shrinking velocity [nm/s]');
 
 ase1events(events,distance./1000,type,g,f,mov,{'Single' 'Antiparallel'});
 ylabel('Rescue frequency [1/um]');

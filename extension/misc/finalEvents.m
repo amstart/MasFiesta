@@ -7,7 +7,13 @@ distance = zeros(length(sTracks),1);
 events = zeros(length(sTracks),1);
 for i = 1:length(sTracks)
     track = sTracks(i);
-    type(i) = isempty(strfind(track.Type,'OL'));
+    if ~isempty(strfind(track.Type,'Single'))
+        type(i) = 0;
+    elseif ~isempty(strfind(track.Type,'OLP'))
+        type(i) = 2;
+    else
+        type(i) = 1;
+    end
     events(i) = ~track.isPause & track.DistanceEventEnd > 500 & track.Event;
     data = track.Data(:,1:2);
     track.tags(data(:,2)<500,:) = 6;
@@ -52,7 +58,7 @@ ylim([0 800]);
 xlabel('Ase1 density [1/nm]');
 ylabel('Shrinking velocity [nm/s]');
 g = density > 0.03;
-g = g - 2*type;
+g = g - 10*type;
 idx = unique(g);
 matrix = [];
 dmatrix = [];

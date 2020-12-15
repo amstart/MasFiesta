@@ -22,7 +22,7 @@ for i=1:length(Tracks)
         steady_d = d(:,18);
         norm_d = d(:,19);
         
-        a =  d(:,end);%[nan; diff(ase1ingauss)]./ase1passed;
+        a =  d(:,end-1)./157;%[nan; diff(ase1ingauss)]./ase1passed;
 %         aing = squeeze(d(:,12));
 
 %         
@@ -39,7 +39,14 @@ for i=1:length(Tracks)
 %         x = [x; p(1)/a(1)];
 %         x = [x; p(1)];
         
-        type = [type; ones(sum(select),1) .* isempty(strfind(track.Type,'OL'))];
+        if ~isempty(strfind(track.Type,'Single'))
+            tmp = 0;
+        elseif ~isempty(strfind(track.Type,'OLP'))
+            tmp = 2;
+        else
+            tmp = 1;
+        end
+        type = [type; ones(sum(select),1) .* tmp];
         x = [x; a];
         weights = [weights; ones(sum(select),9)./sum(select)];
     end
@@ -71,10 +78,10 @@ figure
 % % set(box.handles.box, 'EdgeColor', 'blue')
 
 plotvar = x;
-boxsingle = iosr.statistics.boxPlot(padcat(plotvar(type==1,:), plotvar(type==0,:)), 'medianColor','r', 'showOutliers', true, 'showScatter', true, 'sampleSize',true)
+boxsingle = iosr.statistics.boxPlot(padcat(plotvar(type==0,:), plotvar(type==1,:), plotvar(type==2,:)), 'medianColor','r', 'showOutliers', true, 'showScatter', true, 'sampleSize',true)
 hold on
 pbaspect([1 1 1]);
-xticklabels({'Single MTs', 'Crosslinked MTs'} );
+xticklabels({'Single MTs [4nM]', 'Antiparallel [1nM]', 'Parallel [1nM]'} );
 set(gca, 'FontSize', 14)
 
 [h,p]=ttest2(plotvar(type==1,:), plotvar(type==0,:))

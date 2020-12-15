@@ -1,5 +1,6 @@
 m = csvread('D:\Jochen\201103 ase1 rescue\data.csv');
 
+m(m(:,15)==3,:) = [];
 v = m(:,12);
 g = logical(m(:,1));
 e = m(:,2);
@@ -10,7 +11,7 @@ dt = m(:,11);
 dx = m(:,10);
 
 %compare growth vel
-f = g & c>0;
+f = g;
 l = {{'Single' 'Single', 'Antiparallel' 'Parallel' 'Single' 'Antiparallel' 'Parallel'},...
     {'0' '42nM' '42nM' '42nM' '420nM' '420nM' '420nM'}};
 boxplotP(v,o+c,dt,f,l);
@@ -26,6 +27,11 @@ ylabel('Shrinking velocity [nm/s]');
 f = ~g & c>0;
 ase1events(e,dx./1000,o,c,f,mov,{'Single', 'Antiparallel', 'Parallel'});
 ylabel('Rescue frequency [1/um]');
+legend('42nM','420nM');
+
+f = g & c>0;
+ase1events(e,dx./1000,o,c,f,mov,{'Single', 'Antiparallel', 'Parallel'});
+ylabel('Catastrophe frequency [1/um]');
 legend('42nM','420nM');
 
 % 

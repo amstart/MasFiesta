@@ -31,10 +31,11 @@ for i = 1:length(gu)
     datx = [];
 end
 medval = squeeze(median(alldat,2));
+meanval = squeeze(wmean(alldat,alldatx,2));
 sumdx = squeeze(sum(alldatx,2));
-low = medval-squeeze(min(alldat,[],2));
-high = squeeze(max(alldat,[],2))-medval;
-hbar = bar(1:length(medval), medval);
+low = meanval-squeeze(min(alldat,[],2));
+high = squeeze(max(alldat,[],2))-meanval;
+hbar = bar(1:length(medval), meanval);
 ngroups = size(medval, 1);
 nbars = size(medval, 2);
 % Calculate the width for each bar group
@@ -42,8 +43,8 @@ groupwidth = min(0.8, nbars/(nbars + 1.5));
 for i = 1:nbars
     % Calculate center of each bar
     x = (1:ngroups) - groupwidth/2 + (2*i-1) * groupwidth / (2*nbars);
-    errorbar(x, medval(:,i), low(:,i), high(:,i), 'r', 'LineStyle', 'None');
-    text(x - groupwidth/6, medval(:,i)./2, num2str(sumdx(:,i),3));
+    errorbar(x, meanval(:,i), low(:,i), high(:,i), 'r', 'LineStyle', 'None');
+    text(x - groupwidth/6, meanval(:,i)./2, num2str(sumdx(:,i),3));
 end
 xticks(1:length(l));
 xticklabels(l);
