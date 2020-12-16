@@ -11,27 +11,25 @@ dt = m(:,11);
 dx = m(:,10);
 
 %compare growth vel
-f = g;
-l = {{'Single' 'Single', 'Antiparallel' 'Parallel' 'Single' 'Antiparallel' 'Parallel'},...
-    {'0' '42nM' '42nM' '42nM' '420nM' '420nM' '420nM'}};
-boxplotP(v,o+c,dt,f,l);
-ylabel('Growth velocity [nm/s]');
+f = g & c>0;
+l = {'Single', 'Antiparallel' 'Parallel'};
+boxplotP(v,o,c,dt,f,l);
+ylabel('Growth velocity (nm/s)');
+set(gca, 'FontSize', 14);
 
 %compare shrinking vel
-f = ~g; %& o~=2;
-l = {{'Single' 'Single', 'Antiparallel' 'Parallel' 'Single' 'Antiparallel' 'Parallel'},...
-    {'0' '42nM' '42nM' '42nM' '420nM' '420nM' '420nM'}};
-boxplotP(v,c+o,dt,f,l);
-ylabel('Shrinking velocity [nm/s]');
+f = ~g & c>0 & m(:,8) > 3;
+boxplotP(v,o,c,dt,f,l);
+ylabel('Shrinking velocity (nm/s)');
 
-f = ~g & c>0;
-ase1events(e,dx./1000,o,c,f,mov,{'Single', 'Antiparallel', 'Parallel'});
-ylabel('Rescue frequency [1/um]');
+f = ~g & c>0 & m(:,8) > 3;
+ase1events(e,dx./1000,o,c,f,mov,{'Single', 'Antiparallel' 'Parallel'});
+ylabel('Rescue frequency (1/um)');
 legend('42nM','420nM');
 
 f = g & c>0;
-ase1events(e,dx./1000,o,c,f,mov,{'Single', 'Antiparallel', 'Parallel'});
-ylabel('Catastrophe frequency [1/um]');
+ase1events(e,dx./1000,o,c,f,mov,{'Single', 'Antiparallel' 'Parallel'});
+ylabel('Catastrophe frequency (1/um)');
 legend('42nM','420nM');
 
 % 

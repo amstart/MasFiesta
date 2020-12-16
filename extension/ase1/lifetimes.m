@@ -33,7 +33,7 @@ h = get(gca, 'Children');
 for ah = h
     set(ah, 'LineWidth', 2);
 end
-legend([h(12) h(9) h(6) h(3)], {'42nM Antiparallel', '420nM Antiparallel', '42nM Parallel', '420nM Parallel'})
+legend([h(12) h(9) h(6) h(3)], {'42nM AP', '420nM AP', '42nM P', '420nM P'})
 xlabel('time (s)');
 ylabel('survival (1)')
 figure
