@@ -16,5 +16,5 @@ end
 cids(end+1) = length(files)+1;
 for i = 1:length(savefiles)
     Data = data(cids(i):cids(i+1)-1,:);
-    save([savefiles{i} 'shrinkingframes2'], 'Data')
+    save([savefiles{i} 'shrinkingframes3'], 'Data')
 end

@@ -94,7 +94,7 @@ if ~all(isnan(track.itrace(frame,:)))
     if ~isnan(minima(1))
         vline(-x(minima), 'b:');
     end
-    data = fitFrame.getPlotData(track,[6 7]);
+    data = fitFrame.getPlotData(track,[6 7 9]);
     data = squeeze(data(iframe,:,:));
     fdata = double(data(3:end,:));
     
@@ -106,7 +106,7 @@ if ~all(isnan(track.itrace(frame,:)))
     
 %     vline(fdata(5,7),'k:');
 %     vline(fdata(5,7)+fdata(6,7),'y');
-    text(-GFPTip, 1, {['v = ' num2str(data(2,2))]});
+    text(-GFPTip, 1, {['diff = ' num2str(diff(data(7,[1 3])))]});
 
 %     legend([h1 h2 h3 h4 h5 h6],...
 %     {['e=' num2str(data(10,1),3)],...
@@ -131,9 +131,12 @@ if ~all(isnan(track.itrace(frame,:)))
 %     end
 %     plot(track.x_sel{frame}([1 end]),[mean(ylim) mean(ylim)]);
 try
-    tubframedat = find(track.framestub(:,2)==track.frames(iframe,1));
-    itracetub = (itrace(idGFPTip).*track.itracetub(tubframedat,:))./max(track.itracetub(tubframedat,:));
+%     tubframedat = track.framestub(:,2)==track.frames(frame,1); %might be -1
+    tubfun = fitFrame.fun1noshiftsamesig(x,fdata(:,3));
+    normval = itrace(idGFPTip)./max(tubfun);
+    itracetub = normval.*track.itracetub(frame,:);
     plot(-x,itracetub,'k');
+    plot(-x,normval.*tubfun);
 catch
 end
     ylabel('Ase1 count [1]');

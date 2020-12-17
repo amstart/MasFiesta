@@ -6,7 +6,8 @@ type = [];
 for i=1:length(Tracks)
     track = Tracks(i);
     if length(track.FitData) > 1
-        d = squeeze(fitFrame.getPlotData(track, 6));
+        d = squeeze(fitFrame.getPlotData(track, 7));
+        d2 = squeeze(fitFrame.getPlotData(track, 9));
         select = true(size(d(:,3)));% | amplitude < 1;
         select(end-9:end) = 0;
         select(track.Data(:,2)<500) = 0;
@@ -14,6 +15,10 @@ for i=1:length(Tracks)
         select(find(select==0,1):end) = 0;
         select = select & ~isnan(d(:,3));
         d = d(select,:);
+        d2 = d2(select,:);
+        
+        tip1 = d(:,7);
+        tip2 = d2(:,7);
         
         t = d(:,1);
         amplitude = d(:,3);
@@ -22,7 +27,8 @@ for i=1:length(Tracks)
         steady_d = d(:,18);
         norm_d = d(:,19);
         
-        a =  d(:,end-1)./157;%[nan; diff(ase1ingauss)]./ase1passed;
+        a = (tip2+[tip2(2:end); nan])/2-tip1;
+%         a =  d(:,end-1)./157;%[nan; diff(ase1ingauss)]./ase1passed;
 %         aing = squeeze(d(:,12));
 
 %         
@@ -78,7 +84,7 @@ figure
 % % set(box.handles.box, 'EdgeColor', 'blue')
 
 plotvar = x;
-boxsingle = iosr.statistics.boxPlot(padcat(plotvar(type==0,:), plotvar(type==1,:), plotvar(type==2,:)), 'medianColor','r', 'showOutliers', true, 'showScatter', true, 'sampleSize',true)
+boxsingle = boxPlot(plotvar, type, [], 'medianColor','r', 'showOutliers', true, 'showScatter', true, 'sampleSize',true)
 hold on
 pbaspect([1 1 1]);
 xticklabels({'Single MTs [4nM]', 'Antiparallel [1nM]', 'Parallel [1nM]'} );

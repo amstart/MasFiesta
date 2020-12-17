@@ -6,7 +6,7 @@ global ScanOptions
 %rmappdata(0, 'hMainGui');
 ScanOptions.PixSize = 157; %is used as default if nothing else available
 %%%%%%%%%%%%%%%%%%%parameters for helper functions%%%%%%%%%%%%%%
-ScanOptions.help_get_tip_kymo.framesuntilmissingframe = 40; %set to number higher than number of frames if you have the same number of frames for the channels
+ScanOptions.help_get_tip_kymo.framesuntilmissingframe = 1000; %set to number higher than number of frames if you have the same number of frames for the channels
 ScanOptions.help_get_tip_intensities.method = 'get_pixelkymo';
 ScanOptions.help_get_tip_intensities.AllFilaments = 1;
 ScanOptions.help_get_tip_kymo.AllFilaments = 1;
@@ -16,7 +16,7 @@ ScanOptions.help_CorrectObject.RemoveColorCorrection = 0;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 ScanOptions.help_get_tip_points.max_points = 500;
 ScanOptions.help_get_tip_points.GFP_frame_where = 0.4759;
-ScanOptions.filename = 'parallel';
+ScanOptions.filename = 'pixelkymo_fine_long_TUB_parallel';
 if ~isfield(ScanOptions, 'ObjectChannel')
     input = inputdlg('Analyze objects in which channel?','Object Channel',1,{'1'});
     ScanOptions.ObjectChannel = str2double(input);

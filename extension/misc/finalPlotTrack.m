@@ -1,16 +1,17 @@
-trackN = 269;
+trackN = 262;
 track = Tracks(trackN);
 
 tipx = - track.Data(1:end-10,2);
 
 alltrace = track.itrace;
+% alltrace = alltrace./max(max(alltrace));
 bg = nanmean(alltrace(1:5,:));
 x = -double((((0:length(bg)-1)-28)*157/4) + tipx(2));
 
 itracemat = alltrace(5:end-10, :);
 
 figure
-title(num2str(trackN));
+% title(num2str(trackN));
 % bgline = plot(x,bg, 'k--');
 hold on
 

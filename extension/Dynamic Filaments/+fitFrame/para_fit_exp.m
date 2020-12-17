@@ -1,6 +1,7 @@
 function [out] = para_fit_exp(x, y, bg1, bg2, se, sg, b, isexp, iserf, weights)
 [tip, maxy] = fitFrame.getTip(x,y);
 
+
 if iserf
     amp = 0;
     amp_h = 0;
@@ -20,9 +21,18 @@ end
 
 a = 500;
 
+if iserf > 1
+    tip = x(iserf);
+    a = 1000;
+end
+
 suggs = [amp,300,bg1,bg2,tip,tau];
 lb = [0,se(1),bg1,bg2,tip-a,0];
 ub = [amp_h,se(2),bg1,bg2,tip+a,tau_h];
+
+if iserf > 1
+    ub([3 4]) = 3.*ub([3 4]);
+end
 
 p = [suggs;lb;ub];
 

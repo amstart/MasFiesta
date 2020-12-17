@@ -1,4 +1,4 @@
-for i = 1:length(Tracks)
+for i = 264:length(Tracks)
     track = Tracks(i);
     if length(track.itrace) == 1
         continue
@@ -30,7 +30,7 @@ for i = 1:length(Tracks)
     stackframes = track.frames(f1:end,2);
     stackframes(stackframes>length(track.TimeInfo)) = length(track.TimeInfo);
     time = track.TimeInfo(stackframes); 
-    for frame = f1:size(track.itrace,1)
+    for frame = f1:size(track.itrace,1)-1
         iframe = frame-f1+1;
         [num2str(i) ' ' num2str([frame iframe])]
 
@@ -187,25 +187,32 @@ for i = 1:length(Tracks)
 %                 error('itrace too short');
 %             end
             eval = min(length(yn),minima(2)+50);
-           
             
+            ytall = track.itracetub(frame,1:end);
+            evalt = find((ytall(idTip:end)./(prctile(ytall,90)-prctile(ytall(1:idTip),10)))>0.5,1);
+            evalt = min([length(yn)-20,idTip+evalt+20]);
+
             peakvals = findpeaks(ym(max(minima(1)-20,1):minima(1)),'NPeaks',1,'MinPeakProminence',0.5);
             if ~isempty(peakvals)
                 track.protoF(iframe) = max(peakvals);
             end
             begin = max(minima(1), idTip-12);
             xp = x(begin:minima(2));
+            xt = x(1:evalt);
             yp = yn(begin:minima(2));
             ypm = ym(begin:minima(2));
+            yt = ytall(1:evalt);
             weights = ones(size(yp));
+            weightst = ones(size(yt));
 %             weights(10:end) = 1 - (1:(length(weights)-9))*0.01;
 %             weights(weights < 0) = 0;
 
             bg2 = 0;
             bg2m = min(ym);
+            bg2t = min(yt);
             bg1 = wmean(yn(minima(2):eval), (1-(0:eval-minima(2))/100).^2) - bg2;
             bg1m = wmean(ym(minima(2):eval), (1-(0:eval-minima(2))/100).^2) - bg2m;
-            
+            bg1t = wmean(ytall(idTip:evalt), (1-(0:evalt-idTip)/100).^2) - bg2t;
             
             s = [180 190];
             [fits0] = fitFrame.para_fit_exp(xp, yp, bg1, bg2, s, nan, nan, 0, 1, weights);
@@ -216,7 +223,8 @@ for i = 1:length(Tracks)
             [fits5] = fitFrame.para_fit_exp(xp, ypm, bg1m, bg2m, s, nan, nan, 0, 0, weights);
             [fits6] = fitFrame.para_fit_exp(xp, ypm, bg1m, bg2m, s, nan, nan, 1, 0, weights);
             [fits7] = fitFrame.para_fit_exp(xp, ypm, bg1m, bg2m, s, s, nan, 0, 0, weights);
-            [fits8] = fitFrame.para_fit_exp(xp, yp, bg1, bg2, s, s, [-150 150], 1, 0, weights);
+            [fits8] = fitFrame.para_fit_exp(xt, yt, bg1t, bg2t, s, nan, nan, 0, idTip, weightst);
+            
             fits = padcat(fits0, fits1, fits2, fits3, fits4, fits5, fits6, fits7, fits8);
             track.FitData(iframe,1:size(fits,1),1:size(fits,2)) = fits;
             SST = sum((yp-mean(yp)).^2);

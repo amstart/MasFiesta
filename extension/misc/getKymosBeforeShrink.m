@@ -41,8 +41,8 @@ end
 
 for i = 1:length(t)
     for j = 1
-        t(i).itrace = s{i}/t(i).IntensityPerMAP;
-        t(i).frames = f{i};
+        t(i).itracetub = s{i};%/t(i).IntensityPerMAP;
+        t(i).framestub = f{i};
 %         if size(s{i},2) == 9
 %             t(i).PSFsample = s{i}/t(i).IntensityPerMAP;
 %         else
