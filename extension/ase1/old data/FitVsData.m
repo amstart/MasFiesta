@@ -4,7 +4,7 @@ all = [];
 
 for i=1:length(Tracks)
     track = Tracks(i);
-    if ~(length(track.FitData) > 1) || ~strcmp(track.Type,'OL +Ase1') %{'Single/OL +Ase1'}
+    if ~(length(track.FitData) > 1) || ~strcmp(track.Type,'Single +Ase1') %{'Single/OL +Ase1'}
         continue
     end
     GFPtip = track.GFPTip;
@@ -16,10 +16,10 @@ for i=1:length(Tracks)
     select(~isnan(track.tags(5:end))) = 0;
     select(find(track.tags(5:end)==6,1):end) = 0;
     bg = nanmean(track.itrace(1:5,:));  
-    itrace = track.itrace(5:end,:);
+    itrace = track.itracetub(5:end,:);
     itrace = itrace(select,:);
     GFPtip = GFPtip(select);
-    fitdata = fitFrame.getPlotData(track,10);
+    fitdata = fitFrame.getPlotData(track,9);
     fitdata = double(fitdata(select,:));
 
     for j = 1:length(GFPtip)
@@ -28,8 +28,9 @@ for i=1:length(Tracks)
         
         x = double((((0:length(itrace(1,:))-1)-28)*157/4) - track.Data(2,2)) - GFPtip(j);
         [~,idGFPTip] = min(abs(x));
-        yn = itrace(j,:)-bg;
-        ym = [itrace(j,1:idGFPTip) yn(idGFPTip+1:end)+itrace(j,idGFPTip+1)-yn(idGFPTip+1)];
+%         yn = itrace(j,:)-bg;
+%         ym = [itrace(j,1:idGFPTip) yn(idGFPTip+1:end)+itrace(j,idGFPTip+1)-yn(idGFPTip+1)];
+        ym = itrace(j,:);
 
         yf = fitFrame.fun1(x+fdata(5),fdata);
         ymf = ym - yf;
