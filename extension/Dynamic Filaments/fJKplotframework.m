@@ -247,11 +247,12 @@ else
                     var(~isnan(var)) = y-f;
                     cellvar=var;
                 case {6}
-                    cellvar=var-var(1);
+                    cellvar=var-var(find(~isnan(var),1));
                 case {7}
                     cellvar=var-var(end);
                 case 4
-                    cellvar=var-nanmedian(var);
+                    cellvar=[(var(2:end)+var(1:end-1))/2; nan];
+%                     cellvar=var-nanmedian(var);
             end
             switch j
                 case 1                
@@ -263,7 +264,7 @@ else
             end
         end
         if exclude
-            celly{k}=celly{k}./cellz{k};
+            cellx{k}=cellx{k}-cellz{k};
         end
     end
 end

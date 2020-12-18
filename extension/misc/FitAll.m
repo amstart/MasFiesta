@@ -1,4 +1,4 @@
-for i = 264:length(Tracks)
+for i = 1:length(Tracks)
     track = Tracks(i);
     if length(track.itrace) == 1
         continue
@@ -215,17 +215,18 @@ for i = 264:length(Tracks)
             bg1t = wmean(ytall(idTip:evalt), (1-(0:evalt-idTip)/100).^2) - bg2t;
             
             s = [180 190];
-            [fits0] = fitFrame.para_fit_exp(xp, yp, bg1, bg2, s, nan, nan, 0, 1, weights);
-            [fits1] = fitFrame.para_fit_exp(xp, yp, bg1, bg2, s, nan, nan, 0, 0, weights);
-            [fits2] = fitFrame.para_fit_exp(xp, yp, bg1, bg2, s, nan, nan, 1, 0, weights);
-            [fits3] = fitFrame.para_fit_exp(xp, yp, bg1, bg2, s, s, nan, 0, 0, weights);
-            [fits4] = fitFrame.para_fit_exp(xp, ypm, bg1m, bg2m, s, nan, nan, 0, 1, weights);
-            [fits5] = fitFrame.para_fit_exp(xp, ypm, bg1m, bg2m, s, nan, nan, 0, 0, weights);
-            [fits6] = fitFrame.para_fit_exp(xp, ypm, bg1m, bg2m, s, nan, nan, 1, 0, weights);
-            [fits7] = fitFrame.para_fit_exp(xp, ypm, bg1m, bg2m, s, s, nan, 0, 0, weights);
-            [fits8] = fitFrame.para_fit_exp(xt, yt, bg1t, bg2t, s, nan, nan, 0, idTip, weightst);
+            [fits1] = fitFrame.para_fit_exp(xp, yp, bg1, bg2, s, nan, nan, 0, 1, weights);
+            [fits2] = fitFrame.para_fit_exp(xp, yp, bg1, bg2, s, nan, nan, 0, 0, weights);
+            [fits3] = fitFrame.para_fit_exp(xp, yp, bg1, bg2, s, nan, nan, 1, 0, weights);
+            [fits4] = fitFrame.para_fit_exp(xp, yp, bg1, bg2, s, s, nan, 0, 0, weights);
+            [fits5] = fitFrame.para_fit_exp(xp, ypm, bg1m, bg2m, s, nan, nan, 0, 1, weights);
+            [fits6] = fitFrame.para_fit_exp(xp, ypm, bg1m, bg2m, s, nan, nan, 0, 0, weights);
+            [fits7] = fitFrame.para_fit_exp(xp, ypm, bg1m, bg2m, s, nan, nan, 1, 0, weights);
+            [fits8] = fitFrame.para_fit_exp(xp, ypm, bg1m, bg2m, s, s, nan, 0, 0, weights);
+            [fits9] = fitFrame.para_fit_exp(xt, yt, bg1t, bg2t, s, nan, nan, 0, idTip, weightst);
+            [fits10] = fitFrame.para_fit_exp(xp, ypm, bg1m, bg2m, [180 450], nan, nan, 0, 0, weights);
             
-            fits = padcat(fits0, fits1, fits2, fits3, fits4, fits5, fits6, fits7, fits8);
+            fits = padcat(fits1, fits2, fits3, fits4, fits5, fits6, fits7, fits8, fits9, fits10);
             track.FitData(iframe,1:size(fits,1),1:size(fits,2)) = fits;
             SST = sum((yp-mean(yp)).^2);
             track.Data2(iframe,:) = [time(iframe) SST];

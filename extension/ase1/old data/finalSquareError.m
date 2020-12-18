@@ -3,10 +3,10 @@ x = [];
 weights = [];
 type = [];
 
-for i=1:length(Tracks)
+for i=1:249
     track = Tracks(i);
     if length(track.FitData) > 1
-        d = fitFrame.getPlotData(track, 1:9);
+        d = fitFrame.getPlotData(track, [1:8 10]);
         d = squeeze(d(:,col,:));
         SST = track.Data2(:,2);
         rsquared = 1-d./SST;

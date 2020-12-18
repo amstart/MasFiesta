@@ -3,10 +3,10 @@ x = [];
 weights = [];
 type = [];
 
-for i=1:length(Tracks)
+for i=1:249
     track = Tracks(i);
     if length(track.FitData) > 1
-        d = squeeze(fitFrame.getPlotData(track, 7));
+        d = squeeze(fitFrame.getPlotData(track, 10));
         d2 = squeeze(fitFrame.getPlotData(track, 9));
         select = true(size(d(:,3)));% | amplitude < 1;
         select(end-9:end) = 0;
