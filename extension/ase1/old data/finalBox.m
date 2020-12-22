@@ -6,8 +6,8 @@ type = [];
 for i=1:249
     track = Tracks(i);
     if length(track.FitData) > 1
-        d = squeeze(fitFrame.getPlotData(track, 10));
-        d2 = squeeze(fitFrame.getPlotData(track, 9));
+        d = squeeze(fitFrame.getPlotData(track, 9));
+        d2 = squeeze(fitFrame.getPlotData(track, 11));
         select = true(size(d(:,3)));% | amplitude < 1;
         select(end-9:end) = 0;
         select(track.Data(:,2)<500) = 0;
@@ -22,12 +22,13 @@ for i=1:249
         
         t = d(:,1);
         amplitude = d(:,3);
+        sigma = d(:,4);
         ase1ingauss = d(:,12);
         ase1passed = d(:,15);
         steady_d = d(:,18);
         norm_d = d(:,19);
         
-        a = (tip2+[tip2(2:end); nan])/2-tip1;
+        a = sigma;% (tip2+[tip2(2:end); nan])/2-tip1;
 %         a =  d(:,end-1)./157;%[nan; diff(ase1ingauss)]./ase1passed;
 %         aing = squeeze(d(:,12));
 

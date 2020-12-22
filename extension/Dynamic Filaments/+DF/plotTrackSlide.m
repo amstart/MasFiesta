@@ -94,7 +94,8 @@ if ~all(isnan(track.itrace(frame,:)))
     if ~isnan(minima(1))
         vline(-x(minima), 'b:');
     end
-    data = fitFrame.getPlotData(track,[6 7 9]);
+    try
+    data = fitFrame.getPlotData(track,[6 7 11]);
     data = squeeze(data(iframe,:,:));
     fdata = double(data(3:end,:));
     
@@ -107,7 +108,8 @@ if ~all(isnan(track.itrace(frame,:)))
 %     vline(fdata(5,7),'k:');
 %     vline(fdata(5,7)+fdata(6,7),'y');
     text(-GFPTip, 1, {['diff = ' num2str(diff(data(7,[1 3])))]});
-
+    catch
+    end
 %     legend([h1 h2 h3 h4 h5 h6],...
 %     {['e=' num2str(data(10,1),3)],...
 %     ['A=' num2str(data(1,2),3) ' s=' num2str(data(2,2),3) 'e=' num2str(data(10,2),3)],...

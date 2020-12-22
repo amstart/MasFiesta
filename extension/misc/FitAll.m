@@ -215,15 +215,15 @@ for i = 1:length(Tracks)
             bg1t = wmean(ytall(idTip:evalt), (1-(0:evalt-idTip)/100).^2) - bg2t;
             
             s = [180 190];
-            [fits1] = fitFrame.para_fit_exp(xp, yp, bg1, bg2, s, nan, nan, 0, 1, weights);
-            [fits2] = fitFrame.para_fit_exp(xp, yp, bg1, bg2, s, nan, nan, 0, 0, weights);
-            [fits3] = fitFrame.para_fit_exp(xp, yp, bg1, bg2, s, nan, nan, 1, 0, weights);
+            [fits1] = fitFrame.para_fit_exp(xt, yf(1:evalt), bg1m, bg2m, [180 450], nan, nan, 0, idTip, weightst);
+            [fits2] = fitFrame.para_fit_exp(xt, yf(1:evalt), bg1m, bg2m, [180 1000], nan, nan, 0, idTip, weightst);
+            [fits3] = fitFrame.para_fit_exp(xt, yt, bg1t, bg2t, [180 1000], nan, nan, 0, idTip, weightst);
             [fits4] = fitFrame.para_fit_exp(xp, yp, bg1, bg2, s, s, nan, 0, 0, weights);
             [fits5] = fitFrame.para_fit_exp(xp, ypm, bg1m, bg2m, s, nan, nan, 0, 1, weights);
             [fits6] = fitFrame.para_fit_exp(xp, ypm, bg1m, bg2m, s, nan, nan, 0, 0, weights);
             [fits7] = fitFrame.para_fit_exp(xp, ypm, bg1m, bg2m, s, nan, nan, 1, 0, weights);
             [fits8] = fitFrame.para_fit_exp(xp, ypm, bg1m, bg2m, s, s, nan, 0, 0, weights);
-            [fits9] = fitFrame.para_fit_exp(xp, ypm, bg1m, bg2m, [180 450], nan, nan, 0, 0, weights);
+            [fits9] = fitFrame.para_fit_exp(x(1:minima(2)), ym(1:minima(2)), bg1m, bg2m, [180 1000], nan, nan, 0, 0, ones(1,minima(2)));
             [fits10] = fitFrame.para_fit_exp(xt, yt, bg1t, bg2t, s, nan, nan, 0, idTip, weightst);
             [fits11] = fitFrame.para_fit_exp(xt, yt, bg1t, bg2t, [180 450], nan, nan, 0, idTip, weightst);
             

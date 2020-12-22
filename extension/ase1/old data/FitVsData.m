@@ -4,7 +4,7 @@ all = [];
 
 for i=1:length(Tracks)
     track = Tracks(i);
-    if ~(length(track.FitData) > 1) || ~strcmp(track.Type,'Single +Ase1') %{'Single/OL +Ase1'}
+    if ~(length(track.FitData) > 1) || ~strcmp(track.Type,'OL +Ase1') %{'Single/OL +Ase1'}
         continue
     end
     GFPtip = track.GFPTip;
@@ -15,6 +15,9 @@ for i=1:length(Tracks)
     select(isnan(GFPtip)) = 0;
     select(~isnan(track.tags(5:end))) = 0;
     select(find(track.tags(5:end)==6,1):end) = 0;
+    
+    select(1:2) = 0;
+    
     bg = nanmean(track.itrace(1:5,:));  
     itrace = track.itracetub(5:end,:);
     itrace = itrace(select,:);
@@ -30,13 +33,15 @@ for i=1:length(Tracks)
         [~,idGFPTip] = min(abs(x));
 %         yn = itrace(j,:)-bg;
 %         ym = [itrace(j,1:idGFPTip) yn(idGFPTip+1:end)+itrace(j,idGFPTip+1)-yn(idGFPTip+1)];
-        ym = itrace(j,:);
+        yn = itrace(j,:)-min(itrace(j,1:idGFPTip));
+        ym = yn/max(yn(idGFPTip-10:idGFPTip+10));
+        ymf = ym;%./max(ym(idGFPTip-15:idGFPTip+15));
 
-        yf = fitFrame.fun1(x+fdata(5),fdata);
-        ymf = ym - yf;
-        ymf = ymf ./ 157;
-%         yn = yn./max(yn);
-%         ymf = ymf(x>-1000 & x<1500);
+%         yf = fitFrame.fun1(x+fdata(5),fdata);
+%         ymf = ym - yf;
+%         ymf = ymf ./ 157;
+
+%         ymf = ymf(x<-1000 & x>1500);
         to_add(501-idGFPTip:500-idGFPTip+length(ymf)) = ymf;
         all = [all;to_add];
     end
@@ -65,7 +70,7 @@ h = plot(xnew,mline,'r');
 
 legend(h,'Median');
 set(gca, 'FontSize', 14)
-xlim([-1000 1150]);
+xlim([-1500 1500]);
 pbaspect([1 1 1]);
 xlabel('Distance from MT tip [nm]');
 ylabel('Ase1 density - fit [molecules/nm]');
