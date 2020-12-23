@@ -6,16 +6,20 @@ type = [];
 for i=1:249
     track = Tracks(i);
     if length(track.FitData) > 1
-        d = squeeze(fitFrame.getPlotData(track, 9));
-        d2 = squeeze(fitFrame.getPlotData(track, 11));
+        d = squeeze(fitFrame.getPlotData(track, 12));
+        d2 = squeeze(fitFrame.getPlotData(track, 12));
         select = true(size(d(:,3)));% | amplitude < 1;
         select(end-9:end) = 0;
         select(track.Data(:,2)<500) = 0;
         select(track.GFPTip>-500)= 0;
         select(find(select==0,1):end) = 0;
         select = select & ~isnan(d(:,3));
-        d = d(select,:);
+        
+
         d2 = d2(select,:);
+        
+        select(1:5) = 0;
+        d = d(select,:);
         
         tip1 = d(:,7);
         tip2 = d2(:,7);
@@ -24,11 +28,12 @@ for i=1:249
         amplitude = d(:,3);
         sigma = d(:,4);
         ase1ingauss = d(:,12);
+%         ase1ingauss(1:2) = nan;
         ase1passed = d(:,15);
-        steady_d = d(:,18);
+        steady_d = d2(:,18);
         norm_d = d(:,19);
         
-        a = sigma;% (tip2+[tip2(2:end); nan])/2-tip1;
+        a = ase1ingauss;%(tip2+[tip2(2:end); nan])/2-tip1;
 %         a =  d(:,end-1)./157;%[nan; diff(ase1ingauss)]./ase1passed;
 %         aing = squeeze(d(:,12));
 
@@ -53,8 +58,10 @@ for i=1:249
         else
             tmp = 1;
         end
-        type = [type; ones(sum(select),1) .* tmp];
-        x = [x; a];
+        type = [type; tmp];
+        x = [x; nanmean(a)/nanmean(steady_d)];
+%         type = [type; ones(sum(select),1) .* tmp];
+%         x = [x; a];
         weights = [weights; ones(sum(select),9)./sum(select)];
     end
 end

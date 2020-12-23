@@ -226,8 +226,10 @@ for i = 1:length(Tracks)
             [fits9] = fitFrame.para_fit_exp(x(1:minima(2)), ym(1:minima(2)), bg1m, bg2m, [180 1000], nan, nan, 0, 0, ones(1,minima(2)));
             [fits10] = fitFrame.para_fit_exp(xt, yt, bg1t, bg2t, s, nan, nan, 0, idTip, weightst);
             [fits11] = fitFrame.para_fit_exp(xt, yt, bg1t, bg2t, [180 450], nan, nan, 0, idTip, weightst);
+            [fits12] = fitFrame.para_fit_exp(xp, ypm, bg1m, bg2m, [180 450], nan, nan, 0, 0, weights);
+            [fits13] = fitFrame.para_fit_exp(xp, ypm, bg1m, bg2m, [180 700], nan, nan, 0, 0, weights);
             
-            fits = padcat(fits1, fits2, fits3, fits4, fits5, fits6, fits7, fits8, fits9, fits10, fits11);
+            fits = padcat(fits1, fits2, fits3, fits4, fits5, fits6, fits7, fits8, fits9, fits10, fits11, fits12, fits13);
             track.FitData(iframe,1:size(fits,1),1:size(fits,2)) = fits;
             SST = sum((yp-mean(yp)).^2);
             track.Data2(iframe,:) = [time(iframe) SST];

@@ -52,7 +52,7 @@ for i = 1:length(dims)
         if tg(j) == 0
             tg(j) = nan;
         end
-        steady_d(j) = steady_itrace(idTip);
+        steady_d(j) = steady_itrace(idTip) ./ 157;
         measured_d(j) = itrace(idTip);
         yn = itrace-steady_itrace;
 %         g(j) = sum(yn(idTip:idTip+13)-mean(yn(idTip+14:idTip+20)))/2;
