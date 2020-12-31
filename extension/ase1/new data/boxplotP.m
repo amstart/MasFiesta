@@ -1,11 +1,17 @@
-function boxplotP(d,g,g2,w,f,l)
+function box=boxplotP(d,g,g2,w,f,l)
 %BOXPLOTP Summary of this function goes here
 %   Detailed explanation goes here
+if isempty(f)
+    f = true(size(d));
+end
 d = d(f);
 g = g(f);
 g2 = g2(f);
 if ~isempty(w)
     w = w(f);
+end
+if isempty(g2)
+    g2 = ones(size(g));
 end
 idx = unique(g);
 idy = unique(g2);
@@ -24,9 +30,9 @@ for i = 1:length(idx)
 end
 figure
 if ~isempty(w)
-    iosr.statistics.boxPlot(matrix,'weights',wmatrix, 'sampleSize', true, 'notch', true, 'boxColor', 'auto', 'medianColor','k');
+    box =iosr.statistics.boxPlot(matrix,'weights',wmatrix, 'sampleSize', true, 'notch', false, 'boxColor', 'auto', 'medianColor','k');
 else
-    iosr.statistics.boxPlot(matrix, 'sampleSize', true, 'notch', true, 'boxColor', 'auto', 'medianColor','k');
+    box = iosr.statistics.boxPlot(matrix, 'sampleSize', true, 'notch', false, 'boxColor', 'auto', 'medianColor','k');
 end
 if ~isempty(l)
     if iscell(l{1})
@@ -45,4 +51,4 @@ hold on
 % [p,tbl,stats]  = anova1(d,g,'off');
 % table = multcompare(stats,'Display','off');
 % sigstar(mat2cell(table(:,1:2),ones(size(table(:,1)))), table(:,end));
-set(gca, 'FontSize', 13);
+set(gca, 'FontSize', 14);

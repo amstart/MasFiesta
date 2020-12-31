@@ -18,7 +18,6 @@ for i=1:249
 
         d2 = d2(select,:);
         
-        select(1:5) = 0;
         d = d(select,:);
         
         tip1 = d(:,7);
@@ -28,7 +27,6 @@ for i=1:249
         amplitude = d(:,3);
         sigma = d(:,4);
         ase1ingauss = d(:,12);
-%         ase1ingauss(1:2) = nan;
         ase1passed = d(:,15);
         steady_d = d2(:,18);
         norm_d = d(:,19);

@@ -13,6 +13,7 @@ figure
 hold on
 dat = [];
 alldat = [];
+alldate = [];
 datx = [];
 alldatx = [];
 
@@ -22,17 +23,19 @@ for i = 1:length(gu)
         [name,~,id] = unique(t(ids));
         ae = accumarray(id,e(ids));
         adx = accumarray(id,dx(ids));
-        dat = [dat ae./adx];
+        dat = [dat ae];
         datx = [datx adx];
     end
-    alldat = cat(3,alldat,dat);
+    alldate = cat(3,alldate,dat);
     alldatx = cat(3,alldatx,datx);
     dat = [];
     datx = [];
 end
+alldat = alldate./alldatx;
 medval = squeeze(median(alldat,2));
 meanval = squeeze(wmean(alldat,alldatx,2));
 sumdx = squeeze(sum(alldatx,2));
+sume = squeeze(sum(alldate,2));
 low = meanval-squeeze(min(alldat,[],2));
 high = squeeze(max(alldat,[],2))-meanval;
 hbar = bar(1:length(medval), meanval);
@@ -43,8 +46,8 @@ groupwidth = min(0.8, nbars/(nbars + 1.5));
 for i = 1:nbars
     % Calculate center of each bar
     x = (1:ngroups) - groupwidth/2 + (2*i-1) * groupwidth / (2*nbars);
-    errorbar(x, meanval(:,i), low(:,i), high(:,i), 'r', 'LineStyle', 'None');
-    text(x - groupwidth/6, meanval(:,i)./2, num2str(sumdx(:,i),3));
+    errorbar(x, meanval(:,i), low(:,i), high(:,i), 'k', 'LineStyle', 'None');
+    text(x - groupwidth/6, meanval(:,i)./2, num2str(sume(:,i),3));
 end
 xticks(1:length(l));
 xticklabels(l);

@@ -15,15 +15,19 @@ for i=1:length(Tracks)
     select(isnan(GFPtip)) = 0;
     select(~isnan(track.tags(5:end))) = 0;
     select(find(track.tags(5:end)==6,1):end) = 0;
-    
-    select(1:2) = 0;
+   
     
     bg = nanmean(track.itrace(1:5,:));  
-    itrace = track.itracetub(5:end,:);
-    itrace = itrace(select,:);
-    GFPtip = GFPtip(select);
-    fitdata = fitFrame.getPlotData(track,9);
+    itrace = track.itrace(5:end,:);
+
+    fitdata = fitFrame.getPlotData(track,12);
+    steady_d = double(fitdata(select,18));
+    steady_d_m = nanmean(steady_d);
+    
+    select(1:2) = 0;
     fitdata = double(fitdata(select,:));
+    GFPtip = GFPtip(select);
+    itrace = itrace(select,:);
 
     for j = 1:length(GFPtip)
         to_add = nan(1,2000);
@@ -33,9 +37,9 @@ for i=1:length(Tracks)
         [~,idGFPTip] = min(abs(x));
 %         yn = itrace(j,:)-bg;
 %         ym = [itrace(j,1:idGFPTip) yn(idGFPTip+1:end)+itrace(j,idGFPTip+1)-yn(idGFPTip+1)];
-        yn = itrace(j,:)-min(itrace(j,1:idGFPTip));
-        ym = yn/max(yn(idGFPTip-10:idGFPTip+10));
-        ymf = ym;%./max(ym(idGFPTip-15:idGFPTip+15));
+%         yn = itrace(j,:)-min(itrace(j,1:idGFPTip));
+%         ym = yn/max(yn(idGFPTip-10:idGFPTip+10));
+        ymf = itrace(j,:)./(157*steady_d_m);%./max(ym(idGFPTip-15:idGFPTip+15));
 
 %         yf = fitFrame.fun1(x+fdata(5),fdata);
 %         ymf = ym - yf;
@@ -51,13 +55,18 @@ c = linspecer(7,'sequential');
 tmp = c(1,:);
 c(1,:) = c(4,:);
 c(4,:) = tmp;
-cstep = abs(max(all(:))-min(all(:)))./7;
-call = all - min(all(:))+1e-5;
 xnew = (-499:1500)*157/4;
+cstep = max(all(:,500))./7;
 for j = 1:size(all,1)
-        lh = plot(xnew,all(j,:),'Color',c(ceil(call(j,490)/cstep),:));
+        lh = plot(xnew,all(j,:),'Color',c(min(ceil(all(j,500)/cstep),7),:));
         lh.Color = [lh.Color 0.5];
 end
+% cstep = abs(max(all(:))-min(all(:)))./7;
+% call = all - min(all(:))+1e-5;
+% for j = 1:size(all,1)
+%         lh = plot(xnew,all(j,:),'Color',c(ceil(call(j,490)/cstep),:));
+%         lh.Color = [lh.Color 0.5];
+% end
 % rightHW = nan(size(all,1),1); %THIS IS THE SAME AS THE HW OF THE MEDIAN LINE
 % for i = 1:length(rightHW)
 %     l = all(i,:)-all(i,end);
@@ -72,5 +81,5 @@ legend(h,'Median');
 set(gca, 'FontSize', 14)
 xlim([-1500 1500]);
 pbaspect([1 1 1]);
-xlabel('Distance from MT tip [nm]');
-ylabel('Ase1 density - fit [molecules/nm]');
+xlabel('Distance from local maximum (near MT tip) (nm)');
+ylabel('Ase1 density (molecules/nm)');

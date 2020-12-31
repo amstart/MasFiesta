@@ -20,15 +20,15 @@ hold on
 %     end
 numcol = length(unique(point_info));
 colormap(linspecer(numcol));
-for i=1:numcol
-    now = point_info==i;
-    lh = plot(plot_x(now), plot_y(now), 'Marker', 'o'); drawnow;
-    lh.Color = [lh.Color 0.5];
-%     row = dataTipTextRow('TrackId',names(now));
-%     s.DataTipTemplate.DataTipRows(end+1) = row;
-end
+% for i=1:numcol
+%     now = point_info==i;
+%     lh = plot(plot_x(now), plot_y(now), 'Marker', 'o'); drawnow;
+%     lh.Color = [lh.Color 0.5];
+% %     row = dataTipTextRow('TrackId',names(now));
+% %     s.DataTipTemplate.DataTipRows(end+1) = row;
+% end
 
-% s = scatter(f, plot_x, plot_y, 50, point_info); drawnow;
+s = scatter(f, plot_x, plot_y, 50, point_info); drawnow;
 
 % iosr.statistics.boxPlot(edgesmid, matrix, 'sampleSize', true, 'scatterAlpha', 1, 'showScatter', true, 'medianColor','r', 'showMean', true)
 box = iosr.statistics.boxPlot(edgesmid, matrix, 'weights',weights,'medianColor','r', 'showOutliers', false, 'showMean', true, 'sampleSize', true, 'sampleFontSize', 14)
@@ -48,7 +48,7 @@ function [matrix, edgesmid, weights, nelements] = histcounts2own(plotx, ploty, p
 % end https://stackoverflow.com/questions/41644022/using-accumarray-for-a-weighted-average
 % plotx=plotx(~isnan(plotx));
 if 1
-    [~, edges, xid] = histcounts(plotx, 0:5:80);
+    [~, edges, xid] = histcounts(plotx, 10);
 %     if length(edges)>7
 %         [~, edges, xid] = histcounts(plotx,7);
 %     end

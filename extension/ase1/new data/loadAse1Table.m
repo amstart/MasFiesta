@@ -19,8 +19,9 @@ set(gca, 'FontSize', 14);
 
 %compare shrinking vel
 f = ~g & c>0 & m(:,8) > 3;
-boxplotP(v,o,c,dt,f,l);
+box = boxplotP(v,o,c,dt,f,l);
 ylabel('Shrinking velocity (nm/s)');
+
 
 f = ~g & c>0 & m(:,8) > 3;
 ase1events(e,dx./1000,o,c,f,mov,{'Single', 'Antiparallel' 'Parallel'});
