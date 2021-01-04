@@ -264,7 +264,7 @@ else
             end
         end
         if exclude
-            cellx{k}=cellx{k}./nanmean(cellz{k});
+            cellx{k}=cellx{k}./cellz{k};
         end
     end
 end

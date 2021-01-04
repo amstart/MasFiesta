@@ -1,4 +1,4 @@
-trackN = 262;
+trackN = 88;
 track = Tracks(trackN);
 
 tipx = - track.Data(1:end-10,2);

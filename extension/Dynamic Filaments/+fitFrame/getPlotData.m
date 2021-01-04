@@ -26,7 +26,7 @@ for i = 1:length(dims)
     steady_d = nan(size(tau));
     measured_d = nan(size(tau));
     th = d(:,1)+d(:,3);
-    steady_itrace = nanmean(track.itrace(1:5,:));
+    steady_itrace = nanmean(track.itrace(1:5,:))-min(nanmean(track.itrace(1:5,:)));
     x = double((((0:length(track.itrace(1,:))-1)-28)*157/4) - track.Data(2,2));
     for j = 1:length(tau)
         [~,idTip] = min(abs(x-track.GFPTip(j)));
@@ -53,7 +53,7 @@ for i = 1:length(dims)
             tg(j) = nan;
         end
         steady_d(j) = steady_itrace(idTip) ./ 157;
-        measured_d(j) = itrace(idTip);
+        measured_d(j) = itrace(idTip) ./ 157;
         yn = itrace-steady_itrace;
 %         g(j) = sum(yn(idTip:idTip+13)-mean(yn(idTip+14:idTip+20)))/2;
         ptTosteady = find(yn(idTip:end)<yn(idTip)*0.5,1);

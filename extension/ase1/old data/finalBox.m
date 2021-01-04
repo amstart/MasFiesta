@@ -28,7 +28,7 @@ for i=1:249
         sigma = d(:,4);
         ase1ingauss = d(:,12);
         ase1passed = d(:,15);
-        steady_d = d2(:,18);
+        steady_d = track.SteadyStateDensity;
         norm_d = d(:,19);
         
         a = ase1ingauss;%(tip2+[tip2(2:end); nan])/2-tip1;

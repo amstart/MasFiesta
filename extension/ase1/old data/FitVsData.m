@@ -4,7 +4,7 @@ all = [];
 
 for i=1:length(Tracks)
     track = Tracks(i);
-    if ~(length(track.FitData) > 1) || ~strcmp(track.Type,'OL +Ase1') %{'Single/OL +Ase1'}
+    if ~(length(track.FitData) > 1) || ~strcmp(track.Type,'Single +Ase1') %{'Single/OL +Ase1'}
         continue
     end
     GFPtip = track.GFPTip;
@@ -19,12 +19,11 @@ for i=1:length(Tracks)
     
     bg = nanmean(track.itrace(1:5,:));  
     itrace = track.itrace(5:end,:);
-
     fitdata = fitFrame.getPlotData(track,12);
-    steady_d = double(fitdata(select,18));
-    steady_d_m = nanmean(steady_d);
     
     select(1:2) = 0;
+    
+    steady_d = double(fitdata(select,18));
     fitdata = double(fitdata(select,:));
     GFPtip = GFPtip(select);
     itrace = itrace(select,:);
@@ -39,7 +38,7 @@ for i=1:length(Tracks)
 %         ym = [itrace(j,1:idGFPTip) yn(idGFPTip+1:end)+itrace(j,idGFPTip+1)-yn(idGFPTip+1)];
 %         yn = itrace(j,:)-min(itrace(j,1:idGFPTip));
 %         ym = yn/max(yn(idGFPTip-10:idGFPTip+10));
-        ymf = itrace(j,:)./(157*steady_d_m);%./max(ym(idGFPTip-15:idGFPTip+15));
+        ymf = (itrace(j,:)./157)./steady_d(j);%./max(ym(idGFPTip-15:idGFPTip+15));
 
 %         yf = fitFrame.fun1(x+fdata(5),fdata);
 %         ymf = ym - yf;
@@ -56,9 +55,10 @@ tmp = c(1,:);
 c(1,:) = c(4,:);
 c(4,:) = tmp;
 xnew = (-499:1500)*157/4;
-cstep = max(all(:,500))./7;
+allsub = all - min(all(:,500))+1e-5;
+cstep = max(allsub(:,500))./7;
 for j = 1:size(all,1)
-        lh = plot(xnew,all(j,:),'Color',c(min(ceil(all(j,500)/cstep),7),:));
+        lh = plot(xnew,all(j,:),'Color',c(min(ceil(allsub(j,500)/cstep),7),:));
         lh.Color = [lh.Color 0.5];
 end
 % cstep = abs(max(all(:))-min(all(:)))./7;
@@ -82,4 +82,7 @@ set(gca, 'FontSize', 14)
 xlim([-1500 1500]);
 pbaspect([1 1 1]);
 xlabel('Distance from local maximum (near MT tip) (nm)');
-ylabel('Ase1 density (molecules/nm)');
+ylabel({['Ase1 density divided by']; ['steady-state Ase1 density (1)']});
+% ylim([0 4]);
+
+

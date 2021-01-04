@@ -20,16 +20,17 @@ hold on
 %     end
 numcol = length(unique(point_info));
 colormap(linspecer(numcol));
-% for i=1:numcol
-%     now = point_info==i;
-%     lh = plot(plot_x(now), plot_y(now), 'Marker', 'o'); drawnow;
-%     lh.Color = [lh.Color 0.5];
-% %     row = dataTipTextRow('TrackId',names(now));
-% %     s.DataTipTemplate.DataTipRows(end+1) = row;
-% end
+for i=1:numcol
+    now = point_info==i;
+    mat = sortrows([plot_x(now) plot_y(now)]);
+    lh = plot(mat(:,1), mat(:,2), 'Marker', 'o'); drawnow;
+    lh.Color = [lh.Color 0.5];
+%     row = dataTipTextRow('TrackId',names(now));
+%     s.DataTipTemplate.DataTipRows(end+1) = row;
+end
 
-s = scatter(f, plot_x, plot_y, 50, point_info); drawnow;
-
+% s = scatter(f, plot_x, plot_y, 50, point_info); drawnow;
+% 
 % iosr.statistics.boxPlot(edgesmid, matrix, 'sampleSize', true, 'scatterAlpha', 1, 'showScatter', true, 'medianColor','r', 'showMean', true)
 box = iosr.statistics.boxPlot(edgesmid, matrix, 'weights',weights,'medianColor','r', 'showOutliers', false, 'showMean', true, 'sampleSize', true, 'sampleFontSize', 14)
 for h = [box.handles.box box.handles.medianLines box.handles.lowerWhiskers box.handles.upperWhiskers box.handles.lowerWhiskerTips box.handles.upperWhiskerTips box.handles.means]

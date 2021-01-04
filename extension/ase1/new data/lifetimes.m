@@ -46,5 +46,5 @@ f = o == -1;
 ecdf(dt(f), 'Censoring', cens(f), 'Function', 'survivor', 'Bounds','on');
 h = get(gca, 'Children');
 legend([h(9) h(6) h(3)], {'Antiparallel midzone', 'Antiparallel bundle', 'Antiparallel plus meets lattice'})
-xlabel('time (s)');
-ylabel('survival (1)')
+xlabel('Time (s)');
+ylabel('Survival (1)')

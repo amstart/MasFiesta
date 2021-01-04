@@ -103,7 +103,7 @@ for i = 1:2
     errorbar(x, freq([0 2 4]+i), low([0 2 4]+i), high([0 2 4]+i), 'k', 'LineStyle', 'None');
     text(x - groupwidth/6, freq([0 2 4]+i)./2, num2str(dist([0 2 4]+i),3));
 end
-xticks(1:length(l));
+xticks(1:3);
 xticklabels({'Single', 'Antiparallel', 'Parallel'});
 set(gca, 'FontSize', 14);
 ylabel('Rescue frequency (1/\mum)');
