@@ -107,8 +107,11 @@ if FileName~=0
     FileName = strrep(FileName, '.tif', '');
     file = [PathName FileName];
     Image=hMainGui.KymoImage;
+    measuredLines = hMainGui.Measure;
     if FilterIndex==1
-        save(file,'Image');
+        save(file,'Image','measuredLines');
+        FilterIndex = 2;
+        file = file(1:end-4);
     end
     if FilterIndex==2||FilterIndex==3
         imwrite(uint16(Image(:,:,1)),[file '.tif'],'Compression','none');  
@@ -776,7 +779,7 @@ set(hMainGui.fig,'CurrentAxes',hMainGui.MidPanel.aView);
 nX=hMainGui.Scan.X';
 nY=hMainGui.Scan.Y';
 ScanSize=hMainGui.Values.ScanSize;
-res = 4;
+res = 2;
 d=[0; cumsum(sqrt((nX(2:end)-nX(1:end-1)).^2 + (nY(2:end)-nY(1:end-1)).^2))];
 dt=max(d)/(round(max(d))*res);
 id=(0:round(max(d))*res)'*dt;
@@ -872,6 +875,11 @@ if nargin>1
 else
     DeleteCompletely=1;
 end
+hMainGui.Values.CursorDownPos(:)=0; 
+delete(hMainGui.Plots.Measure(:));    
+hMainGui.Measure(:)=[];
+hMainGui.Plots.Measure(:)=[];
+fRightPanel('UpdateMeasure',hMainGui);
 plotScan=findobj('Tag','plotScan');
 hMainGui.KymoGraph=[];
 hMainGui.KymoImage=[];

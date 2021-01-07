@@ -385,8 +385,27 @@ if ~strcmp(get(hMainGui.fig,'Pointer'),'watch')
         dy=((xy{2}(2)-xy{2}(1))/50);
         hMainGui.CurrentAxesHandle=hMainGui.MidPanel.aKymoGraph;
         set(hMainGui.fig,'CurrentAxes',hMainGui.MidPanel.aKymoGraph);
-        if strcmp(hMainGui.CursorMode,'Normal')==1
-            if any(hMainGui.Values.CursorDownPos~=0)
+        if strcmp(hMainGui.CursorMode,'Pan')==0&&strcmp(hMainGui.CursorMode,'Zoom')==0
+            set(hMainGui.fig,'pointer','crosshair');
+            if all(hMainGui.Values.CursorDownPos>0)
+                nMeasure=length(hMainGui.Measure);
+                if strcmp(hMainGui.CursorMode,'Line')==1||strcmp(hMainGui.CursorMode,'SegLine')==1
+                    bx=[hMainGui.Measure(nMeasure).X cp(1)];
+                    by=[hMainGui.Measure(nMeasure).Y cp(2)];
+                end
+                if strcmp(hMainGui.CursorMode,'LineScan')==1||strcmp(hMainGui.CursorMode,'SegLineScan')==1
+                    bx=[hMainGui.Scan.X cp(1)];
+                    by=[hMainGui.Scan.Y cp(2)];
+                end
+                if ~isempty(strfind(hMainGui.CursorMode,'Scan'))
+                    set(hMainGui.Plots.Scan,'XData',bx,'YData',by);
+                else
+                    set(hMainGui.Plots.Measure(nMeasure),'XData',bx,'YData',by);
+                end
+            end
+        end
+        if 1%strcmp(hMainGui.CursorMode,'Normal')==1
+            if any(hMainGui.Values.CursorDownPos~=0) && ~strcmp(hMainGui.CursorMode, 'Line')
                 %if user is holding button create selection region
                  hMainGui.SelectRegion.X=[hMainGui.SelectRegion.X cp(1)];
                  hMainGui.SelectRegion.Y=[hMainGui.SelectRegion.Y cp(2)];
@@ -645,6 +664,7 @@ if ~strcmp(get(hMainGui.fig,'Pointer'),'watch')
     cpView=get(hMainGui.MidPanel.aView,'currentpoint');
     cpView=cpView(1,[1 2]);
     xyView=get(hMainGui.MidPanel.aView,{'xlim','ylim'});
+    xyKymo=get(hMainGui.MidPanel.aKymoGraph,{'xlim','ylim'});
     TrackInfo = get(hMainGui.Plots.TrackInfo,'UserData');
     if isempty(Stack)
         color='black';
@@ -699,6 +719,19 @@ if ~strcmp(get(hMainGui.fig,'Pointer'),'watch')
                hMainGui.SelectRegion.Y=cp(2);
                hMainGui.Plots.SelectRegion=line(cp(1),cp(2),'Color',color,'LineStyle',':','Tag','pSelectRegion');                   
                hMainGui.Values.CursorDownPos=cp;                   
+            end
+            [y,x] = size(hMainGui.KymoImage);
+            xyKymo{1}=[max([1 xyKymo{1}(1)]) min([x xyKymo{1}(2)])];
+            xyKymo{2}=[max([1 xyKymo{2}(1)]) min([y xyKymo{2}(2)])];              
+            if all(hMainGui.Values.CursorDownPos==0) && all(cpKymo>=[xyKymo{1}(1) xyKymo{2}(1)]) && all(cpKymo<=[xyKymo{1}(2) xyKymo{2}(2)])
+                if strcmp(hMainGui.CursorMode,'Normal')==0
+                    nMeasure=length(hMainGui.Measure);
+                    hMainGui.Measure(nMeasure+1).X=cp(1);
+                    hMainGui.Measure(nMeasure+1).Y=cp(2);                
+                    hMainGui.Measure(nMeasure+1).Dim=0;                                    
+                    hMainGui.Plots.Measure(nMeasure+1)=line(cp(1),cp(2),'Color','white','LineStyle',':');
+                    hMainGui.Values.CursorDownPos=cp;
+                end
             end
         end
     elseif strcmp(get(hMainGui.fig,'SelectionType'),'extend')&&~isempty(Stack)&&~strcmp(hMainGui.CurrentAxes,'none')&&(strcmp(hMainGui.CursorMode,'Normal')||strcmp(hMainGui.CursorMode,'Pan')||(strcmp(hMainGui.CursorMode,'Region')&&all(hMainGui.Values.CursorDownPos==0))||(strcmp(hMainGui.CursorMode,'RectRegion')&&all(hMainGui.Values.CursorDownPos==0)))
@@ -1131,6 +1164,29 @@ if ~strcmp(get(hMainGui.fig,'Pointer'),'watch')
             end
         end
         %check if view window is active axis 
+        if strcmp(hMainGui.CurrentAxes,'Kymo')
+            cp=get(hMainGui.MidPanel.aKymoGraph,'currentpoint');
+            cp=cp(1,[1 2]);
+            if strcmp(hMainGui.CursorMode,'Line')==1 && max(round(cp/10)~=round(hMainGui.Values.CursorDownPos/10))            
+                if max((hMainGui.Measure(nMeasure).X==cp(1))+(hMainGui.Measure(nMeasure).Y==cp(2)))<2
+                    hMainGui.Measure(nMeasure).X=[hMainGui.Measure(nMeasure).X cp(1)];
+                    hMainGui.Measure(nMeasure).Y=[hMainGui.Measure(nMeasure).Y cp(2)];
+                end
+                color=hMainGui.RegionColor(mod(nMeasure-1,24)+1,:);
+                set(hMainGui.Plots.Measure(nMeasure),'Color',color,'UserData',nMeasure,'UIContextMenu',hMainGui.Menu.ctMeasure);
+                hMainGui.Values.CursorDownPos(:)=0;
+                hMainGui.Measure(nMeasure).LenArea=hMainGui.Values.PixSize/1000*norm([hMainGui.Measure(nMeasure).X(2)-hMainGui.Measure(nMeasure).X(1) hMainGui.Measure(nMeasure).Y(2)-hMainGui.Measure(nMeasure).Y(1)]);
+                XI=linspace(hMainGui.Measure(nMeasure).X(1),hMainGui.Measure(nMeasure).X(2),ceil(hMainGui.Measure(nMeasure).LenArea*1000/hMainGui.Values.PixSize));
+                YI=linspace(hMainGui.Measure(nMeasure).Y(1),hMainGui.Measure(nMeasure).Y(2),ceil(hMainGui.Measure(nMeasure).LenArea*1000/hMainGui.Values.PixSize));
+                ZI = interp2(double(Stack{idx(1)}(:,:,idx(2))),XI,YI);
+                hMainGui.Measure(nMeasure).Mean=mean(ZI);
+                hMainGui.Measure(nMeasure).STD=std(ZI);
+                hMainGui.Measure(nMeasure).Integral=sum(ZI);
+                hMainGui.Measure(nMeasure).Dim=1;
+                fRightPanel('UpdateMeasure',hMainGui);
+            end
+        end
+        
         if strcmp(hMainGui.CurrentAxes,'View')
             cp=get(hMainGui.MidPanel.aView,'currentpoint');
             cp=cp(1,[1 2]);

@@ -1,20 +1,20 @@
-trackN = 88;
-track = Tracks(trackN);
-
-tipx = - track.Data(1:end-10,2);
-
-alltrace = track.itrace;
+% trackN = 88;
+% track = Tracks(trackN);
+% 
+% tipx = - track.Data(1:end-10,2);
+% 
+% alltrace = track.itrace;
 % alltrace = alltrace./max(max(alltrace));
-bg = nanmean(alltrace(1:5,:));
-x = -double((((0:length(bg)-1)-28)*157/4) + tipx(2));
-
-itracemat = alltrace(5:end-10, :);
-% iperm = 1200;
+% bg = nanmean(alltrace(1:5,:));
+% x = -double((((0:length(bg)-1)-28)*157/4) + tipx(2));
+% 
+% itracemat = alltrace(5:end-10, :);
+iperm = 172;
 % for i = 1:length(signals)
-%     signal = signals{i};
-% itracemat = double(signal(5:end,:))./iperm;
-% bg = mean(signal(1:5,:))./iperm;
-% x = 0:157/4:(size(itracemat,2)*157/4)-1;
+signal = Image(110:126,:);
+itracemat = double(signal(5:end,:))./iperm;
+bg = mean(signal(1:5,:))./iperm;
+x = 0:157/4:(size(itracemat,2)*157/4)-1;
 
 figure
 % title(num2str(i));
@@ -29,7 +29,7 @@ select = ones(size(itracemat,1),1);%track.GFPTip<-500 | isnan(track.GFPTip);
 
 colors = cool(sum(select));
 for iframe = find(select)'
-    itrace = itracemat(iframe,:)./ 157;
+    itrace = itracemat(iframe,:)./ 64.54;%157
 %     if ~isnan(track.tags(iframe+4)) || isnan(track.GFPTip(iframe))
 %         continue
 %     end
