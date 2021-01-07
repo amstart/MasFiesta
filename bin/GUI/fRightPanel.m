@@ -100,14 +100,17 @@ if isfield(hMainGui, 'KymoName') %JochenK
 else
    KymoName=fShared('GetSaveDir');
 end
-[FileName, PathName, FilterIndex] = uiputfile({'*.*','Screenshot and tif';'*.tif','TIFF-File (*.tif)';'*.png','Screenshot (*.png)'},'Save FIESTA Kymograph',KymoName); 
+[FileName, PathName, FilterIndex] = uiputfile({'*.mat','Matlab file';'*.*','Screenshot and tif';'*.tif','TIFF-File (*.tif)';'*.png','Screenshot (*.png)'},'Save FIESTA Kymograph',KymoName); 
 if FileName~=0
     fShared('SetSaveDir',PathName);
     FileName = strrep(FileName, '.png', '');
     FileName = strrep(FileName, '.tif', '');
     file = [PathName FileName];
     Image=hMainGui.KymoImage;
-    if FilterIndex==1||FilterIndex==2
+    if FilterIndex==1
+        save(file,'Image');
+    end
+    if FilterIndex==2||FilterIndex==3
         imwrite(uint16(Image(:,:,1)),[file '.tif'],'Compression','none');  
         if size(Image,3)>1
             for c=2:size(Image,3)
@@ -115,7 +118,7 @@ if FileName~=0
             end
         end
     end
-    if FilterIndex==1||FilterIndex==3
+    if FilterIndex==2||FilterIndex==4
         imageData = screencapture(hMainGui.fig);
         imwrite(imageData,[file '.png']);
     end
@@ -546,6 +549,8 @@ e=str2double(get(hMainGui.RightPanel.pTools.eKymoEnd,'String'));
 if ~isnan(s)&&~isnan(e)&&~isempty(Stack)
     if hMainGui.Extensions.JochenK.Kymo&&strcmp(get(hMainGui.ToolBar.ToolChannels(5),'State'),'on')
         [KymoGraph,KymoPixSize]=fJKNewKymo(hMainGui.Scan, Stack);
+    elseif hMainGui.Extensions.JochenK.Kymo
+        [KymoGraph,KymoPixSize]=NewHighResKymo(hMainGui.Scan);
     else
         [KymoGraph,KymoPixSize]=NewKymo(hMainGui.Scan);
     end
@@ -610,6 +615,37 @@ if ~isnan(s)&&~isnan(e)&&~isempty(Stack)
     fToolBar('KymoGraph',hMainGui)
 %     end
 end
+
+function [KymoGraph,KymoPix] = NewHighResKymo(Scan)
+global Stack;
+iX=Scan.InterpX;
+iY=Scan.InterpY;
+d = Scan.InterpD;
+KymoPix = mean(d(2:end)-d(1:end-1));
+hMainGui=getappdata(0,'hMainGui'); 
+if strcmp(get(hMainGui.ToolBar.ToolChannels(5),'State'),'off')
+    stidx=hMainGui.Values.FrameIdx(1);
+    if stidx>length(hMainGui.Values.MaxIdx)-1
+        N = hMainGui.Values.MaxIdx(2);
+    else
+        N = hMainGui.Values.MaxIdx(stidx+1);
+    end
+else
+    stidx=1:numel(Stack);
+    N = max(hMainGui.Values.MaxIdx(2:end));
+end
+progressdlg('String','Creating KymoGraph','Min',0,'Max',N,'Parent',hMainGui.fig);
+KymoGraph = zeros(N,length(d),length(stidx)); 
+
+for n = 1:N
+    for k = stidx
+            Z = interp2(double(Stack{k}(:,:,n)),iX,iY,'linear');
+            KymoGraph(n,:,k) = (nansum(Z, 1)-sum(~isnan(Z),1).*min(min(double(Z), [], 1)));
+    end
+    progressdlg(n);
+end 
+KymoGraph = KymoGraph(:,:,stidx);
+
 
 function [KymoGraph,KymoPix] = NewKymo(Scan)
 global Stack;
@@ -740,9 +776,10 @@ set(hMainGui.fig,'CurrentAxes',hMainGui.MidPanel.aView);
 nX=hMainGui.Scan.X';
 nY=hMainGui.Scan.Y';
 ScanSize=hMainGui.Values.ScanSize;
+res = 4;
 d=[0; cumsum(sqrt((nX(2:end)-nX(1:end-1)).^2 + (nY(2:end)-nY(1:end-1)).^2))];
-dt=max(d)/round(max(d));
-id=(0:round(max(d)))'*dt;
+dt=max(d)/(round(max(d))*res);
+id=(0:round(max(d))*res)'*dt;
 scan_length=length(id);
 idx = nearestpoint(id,d);
 X=zeros(scan_length,1);
